@@ -1,0 +1,179 @@
+'use client';
+
+import Link from 'next/link';
+import { useState } from 'react';
+
+import { cn } from '@/lib/utils';
+
+// Placeholder icons (replace with Heroicons or similar in real app)
+const BriefcaseIcon = () => (
+  <svg
+    width='32'
+    height='32'
+    fill='none'
+    viewBox='0 0 24 24'
+    stroke='currentColor'
+    className='text-blue-600'
+  >
+    <rect x='3' y='7' width='18' height='13' rx='2' strokeWidth='2' />
+    <path d='M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2' strokeWidth='2' />
+  </svg>
+);
+const SearchIcon = () => (
+  <svg
+    width='20'
+    height='20'
+    fill='none'
+    viewBox='0 0 24 24'
+    stroke='currentColor'
+  >
+    <circle cx='11' cy='11' r='7' strokeWidth='2' />
+    <path d='M21 21l-4.35-4.35' strokeWidth='2' />
+  </svg>
+);
+const BellIcon = () => (
+  <svg
+    width='24'
+    height='24'
+    fill='none'
+    viewBox='0 0 24 24'
+    stroke='currentColor'
+  >
+    <path
+      d='M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11a6.002 6.002 0 0 0-4-5.659V5a2 2 0 1 0-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 1 1-6 0v-1m6 0H9'
+      strokeWidth='2'
+    />
+  </svg>
+);
+const FlagETH = () => <span className='text-xl'>🇪🇹</span>;
+
+const FlagUS = () => <span className='text-xl'>🇺🇸</span>;
+
+interface NavbarProps {
+  isLoggedIn?: boolean;
+  page?: string;
+}
+
+export function Navbar({ isLoggedIn = false, page = 'home' }: NavbarProps) {
+  const [country, setCountry] = useState('India');
+  const [language, setLanguage] = useState('English');
+
+  // Home page, not logged in
+  const showAuthButtons = !isLoggedIn && page === 'home';
+
+  // Links for home page (not logged in)
+  const navLinks = [
+    { href: '/', label: 'Home' },
+    { href: '/find-job', label: 'Find Job' },
+    { href: '/employers', label: 'Employers' },
+    { href: '/candidates', label: 'Candidates' },
+    { href: '/pricing', label: 'Pricing Plans' },
+    { href: '/customer-supports', label: 'Customer Supports' },
+  ];
+
+  return (
+    <header className='w-full border-b bg-white sticky top-0 z-50'>
+      <div className='flex items-center justify-between px-8 py-4 text-sm text-gray-800 bg-gray-100'>
+        <nav className='flex gap-6'>
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                page === 'home' &&
+                  link.label === 'Home' &&
+                  'text-blue-600 border-b-2 border-blue-600 pb-1',
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+        <div className='flex items-center gap-4'>
+          <span className='flex items-center gap-1'>
+            <svg
+              width='18'
+              height='18'
+              fill='none'
+              viewBox='0 0 24 24'
+              stroke='currentColor'
+            >
+              <path
+                d='M22 16.92V19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-2.08a6 6 0 0 1 2.09-4.58l5.91-5.33a2 2 0 0 1 2.58 0l5.91 5.33A6 6 0 0 1 22 16.92z'
+                strokeWidth='2'
+              />
+            </svg>{' '}
+            +1-202-555-0178
+          </span>
+          <div className='flex items-center gap-1 cursor-pointer'>
+            <FlagUS />
+            <span>{language}</span>
+            <svg
+              width='12'
+              height='12'
+              fill='none'
+              viewBox='0 0 20 20'
+              stroke='currentColor'
+            >
+              <path d='M6 8l4 4 4-4' strokeWidth='2' />
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div className='flex items-center justify-between px-8 py-4 bg-white'>
+        <div className='flex items-center gap-2'>
+          <BriefcaseIcon />
+          <span className='text-2xl font-bold ml-2'>MyJob</span>
+        </div>
+        <div className='flex items-center w-1/2 max-w-xl'>
+          <div className='flex items-center border rounded-l-md px-3 py-2 bg-gray-50'>
+            <FlagETH />
+            <span className='ml-2'>Ethiopia</span>
+            <svg
+              width='12'
+              height='12'
+              fill='none'
+              viewBox='0 0 20 20'
+              stroke='currentColor'
+              className='ml-1'
+            >
+              <path d='M6 8l4 4 4-4' strokeWidth='2' />
+            </svg>
+          </div>
+          <input
+            className='flex-1 border-t border-b border-r rounded-r-md px-4 py-2 focus:outline-none'
+            placeholder='Job tittle, keyword, company'
+          />
+          <button className='-ml-8 z-10'>
+            <SearchIcon />
+          </button>
+        </div>
+        <div className='flex items-center gap-4'>
+          {showAuthButtons ? (
+            <>
+              <Link href='/signin'>
+                <button className='px-6 py-2 border border-blue-600 text-blue-600 rounded-md font-medium bg-white hover:bg-blue-50'>
+                  Sign In
+                </button>
+              </Link>
+              <Link href='/post-job'>
+                <button className='px-6 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700'>
+                  Post A Job
+                </button>
+              </Link>
+            </>
+          ) : (
+            isLoggedIn && (
+              <div className='relative'>
+                <button className='relative'>
+                  <BellIcon />
+                  <span className='absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white'></span>
+                </button>
+              </div>
+            )
+          )}
+        </div>
+      </div>
+    </header>
+  );
+}
