@@ -17,7 +17,7 @@ export default function RegisterCards() {
               the next step in your career today!
             </p>
             <Link
-              href='#'
+              href='/signup'
               className='inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg shadow hover:bg-blue-50 transition w-max'
             >
               Register Now
@@ -44,7 +44,7 @@ export default function RegisterCards() {
               and grow your team with ease.
             </p>
             <Link
-              href='#'
+              href='/signup'
               className='inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg shadow hover:bg-blue-50 transition w-max'
             >
               Register Now

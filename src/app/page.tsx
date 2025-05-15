@@ -10,6 +10,7 @@ import PopularCategory from '@/components/home/PopularCategory';
 import PopularVacancies from '@/components/home/PopularVacancies';
 import RegisterCards from '@/components/home/RegisterCards';
 import Testimonials from '@/components/home/Testimonials';
+import TopCompanies from '@/components/home/TopCompanies';
 
 export default function HomePage() {
   return (
@@ -19,6 +20,7 @@ export default function HomePage() {
       <HowItWorks />
       <PopularCategory />
       <FeaturedJobs />
+      <TopCompanies />
       <Testimonials />
       <RegisterCards />
     </main>

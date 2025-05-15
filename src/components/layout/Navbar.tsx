@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
 import { cn } from '@/lib/utils';
@@ -57,6 +58,7 @@ interface NavbarProps {
 export function Navbar({ isLoggedIn = false, page = 'home' }: NavbarProps) {
   const [country, setCountry] = useState('India');
   const [language, setLanguage] = useState('English');
+  const pathname = usePathname();
 
   // Home page, not logged in
   const showAuthButtons = !isLoggedIn && page === 'home';
@@ -80,9 +82,9 @@ export function Navbar({ isLoggedIn = false, page = 'home' }: NavbarProps) {
               key={link.href}
               href={link.href}
               className={cn(
-                page === 'home' &&
-                  link.label === 'Home' &&
-                  'text-blue-600 border-b-2 border-blue-600 pb-1',
+                'hover:text-blue-600 transition-colors',
+                pathname === link.href &&
+                  'text-blue-600 border-b-2 border-blue-600 pb-2',
               )}
             >
               {link.label}
@@ -123,7 +125,7 @@ export function Navbar({ isLoggedIn = false, page = 'home' }: NavbarProps) {
       <div className='flex items-center justify-between px-8 py-4 bg-white'>
         <div className='flex items-center gap-2'>
           <BriefcaseIcon />
-          <span className='text-2xl font-bold ml-2'>MyJob</span>
+          <span className='text-2xl font-bold ml-2'>TalentHub</span>
         </div>
         <div className='flex items-center w-1/2 max-w-xl'>
           <div className='flex items-center border rounded-l-md px-3 py-2 bg-gray-50'>
@@ -151,7 +153,7 @@ export function Navbar({ isLoggedIn = false, page = 'home' }: NavbarProps) {
         <div className='flex items-center gap-4'>
           {showAuthButtons ? (
             <>
-              <Link href='/signin'>
+              <Link href='/login'>
                 <button className='px-6 py-2 border border-blue-600 text-blue-600 rounded-md font-medium bg-white hover:bg-blue-50'>
                   Sign In
                 </button>

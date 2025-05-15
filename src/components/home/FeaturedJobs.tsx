@@ -103,38 +103,14 @@ export default function FeaturedJobs() {
           {jobs.map((job, i) => (
             <div
               key={job.title}
-              className={
-                job.featured
-                  ? 'flex flex-col md:flex-row items-center justify-between bg-white border-2 border-blue-300 rounded-2xl shadow-lg p-6 scale-105'
-                  : 'flex flex-col md:flex-row items-center justify-between bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition'
-              }
+              className='flex flex-col md:flex-row items-center justify-between bg-white rounded-2xl p-6 border border-gray-100 hover:border-blue-300 hover:shadow-lg hover:scale-105 transition'
             >
               <div className='flex items-center gap-4 w-full md:w-auto mb-4 md:mb-0'>
                 {job.logo}
                 <div>
                   <div className='flex items-center gap-2'>
-                    <span
-                      className={
-                        job.featured
-                          ? 'text-blue-600 font-semibold text-lg'
-                          : 'font-semibold text-lg'
-                      }
-                    >
-                      {job.title}
-                    </span>
-                    <span
-                      className={
-                        job.featured
-                          ? 'bg-blue-100 text-blue-600'
-                          : 'bg-blue-50 text-blue-600'
-                      }
-                      px-3
-                      py-1
-                      rounded-lg
-                      text-xs
-                      font-semibold
-                      ml-2
-                    >
+                    <span className='font-semibold text-lg'>{job.title}</span>
+                    <span className='bg-blue-50 text-blue-600 px-3 py-1 rounded-lg text-xs font-semibold ml-2'>
                       {job.tag}
                     </span>
                   </div>
@@ -175,22 +151,10 @@ export default function FeaturedJobs() {
                 </div>
               </div>
               <div className='flex items-center gap-4'>
-                <button
-                  className={
-                    job.featured
-                      ? 'bg-blue-50 p-2 rounded-lg'
-                      : 'bg-blue-50 p-2 rounded-lg'
-                  }
-                >
+                <button className='bg-blue-50 p-2 rounded-lg'>
                   <BookmarkIcon />
                 </button>
-                <button
-                  className={
-                    job.featured
-                      ? 'px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold flex items-center gap-2 hover:bg-blue-700 transition'
-                      : 'px-6 py-3 bg-blue-50 text-blue-600 rounded-lg font-semibold flex items-center gap-2 hover:bg-blue-100 transition'
-                  }
-                >
+                <button className='px-6 py-3 bg-blue-50 text-blue-600 rounded-lg font-semibold flex items-center gap-2 hover:bg-blue-100 transition'>
                   Appley Now
                   <svg
                     width='20'

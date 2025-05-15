@@ -37,7 +37,9 @@ export function Footer() {
         <div className='col-span-1 flex flex-col gap-4'>
           <div className='flex items-center gap-2 mb-2'>
             <BriefcaseIcon />
-            <span className='text-2xl font-bold text-white ml-2'>MyJob</span>
+            <span className='text-2xl font-bold text-white ml-2'>
+              TalentHub
+            </span>
           </div>
           <div>
             <span className='text-gray-400'>Call now:</span>{' '}

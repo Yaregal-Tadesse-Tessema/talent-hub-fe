@@ -5,10 +5,8 @@ import '@/styles/globals.css';
 // !STARTERCONF This is for demo purposes, remove @/styles/colors.css import immediately
 import '@/styles/colors.css';
 
-import { Footer } from '@/components/layout/Footer';
-import { Navbar } from '@/components/layout/Navbar';
-
 import { siteConfig } from '@/constant/config';
+import ClientLayout from './ClientLayout';
 
 // !STARTERCONF Change these default meta
 // !STARTERCONF Look at @/constant/config to change them
@@ -57,13 +55,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const isLoggedIn = false; // Set this dynamically in a real app
   return (
     <html>
       <body>
-        <Navbar isLoggedIn={isLoggedIn} page='home' />
-        {children}
-        {!isLoggedIn && <Footer />}
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
