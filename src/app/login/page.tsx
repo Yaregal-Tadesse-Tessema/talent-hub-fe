@@ -3,17 +3,40 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/contexts/AuthContext';
+import Toast from '@/components/ui/Toast';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
+  const [toast, setToast] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
+  const { login } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await login(email, password);
+    setToast({
+      type: result.success ? 'success' : 'error',
+      message: result.message,
+    });
+  };
 
   return (
     <div className='min-h-screen flex'>
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
       {/* Left: Login Form */}
-      <div className='w-1/2 flex flex-col justify-center px-4 py-12 bg-white'>
+      <div className='w-1/2 flex flex-col justify-center px-12 py-12 bg-white'>
         <div className='mb-8 flex items-center gap-2'>
           <span className='inline-block bg-blue-100 p-2 rounded-full'>
             <svg width='24' height='24' fill='none' viewBox='0 0 24 24'>
@@ -50,13 +73,14 @@ export default function LoginPage() {
             Create Account
           </Link>
         </p>
-        <form className='space-y-4'>
+        <form onSubmit={handleSubmit} className='space-y-4'>
           <input
             type='email'
             placeholder='Email address'
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className='w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200'
+            required
           />
           <div className='relative'>
             <input
@@ -65,6 +89,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className='w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200'
+              required
             />
             <button
               type='button'
