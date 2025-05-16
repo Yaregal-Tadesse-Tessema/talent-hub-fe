@@ -21,7 +21,7 @@ const Toast: React.FC<ToastProps> = ({ type, message, onClose }) => {
   return (
     <div
       className={`fixed top-4 right-4 z-50 flex items-center p-4 rounded-lg shadow-lg ${
-        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        type === 'success' ? 'bg-blue-500' : 'bg-red-500'
       } text-white min-w-[300px] max-w-md`}
     >
       <div className='flex-1'>{message}</div>

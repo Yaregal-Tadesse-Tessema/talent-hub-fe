@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_BASE_URL } from '@/config/api';
+import { useToast } from '@/contexts/ToastContext';
 
 interface User {
   id: string;
@@ -27,6 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { showToast } = useToast();
 
   useEffect(() => {
     // Only run on client side
@@ -52,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username: email, password }),
       });
 
       const employerData = await employerResponse.json();
@@ -63,7 +65,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (typeof window !== 'undefined') {
           localStorage.setItem('user', JSON.stringify(user));
         }
-        router.push('/dashboard');
+        showToast({
+          type: 'success',
+          message: 'Login successful! Redirecting...',
+        });
+        router.push('/');
         return { success: true, message: 'Login successful! Redirecting...' };
       }
 
@@ -75,7 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ username: email, password }),
         },
       );
 
@@ -87,26 +93,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (typeof window !== 'undefined') {
           localStorage.setItem('user', JSON.stringify(user));
         }
-        router.push('/dashboard');
-        return { success: true, message: 'Login successful! Redirecting...' };
+        showToast({
+          type: 'success',
+          message: 'Login successful!',
+        });
+        router.push('/');
+        return { success: true, message: 'Login successful!' };
       }
 
       // If both logins fail, return the error message from the last attempt
+      const errorMsg =
+        employeeData.message ||
+        employerData.message ||
+        'Invalid email or password. Please try again.';
+      showToast({ type: 'error', message: errorMsg });
       return {
         success: false,
-        message:
-          employeeData.message ||
-          employerData.message ||
-          'Invalid email or password. Please try again.',
+        message: errorMsg,
       };
     } catch (error) {
       console.error('Login error:', error);
+      const errorMsg =
+        error instanceof Error
+          ? error.message
+          : 'An unexpected error occurred. Please try again.';
+      showToast({ type: 'error', message: errorMsg });
       return {
         success: false,
-        message:
-          error instanceof Error
-            ? error.message
-            : 'An unexpected error occurred. Please try again.',
+        message: errorMsg,
       };
     }
   };

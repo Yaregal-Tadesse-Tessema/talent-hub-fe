@@ -5,6 +5,7 @@ import '@/styles/globals.css';
 import { siteConfig } from '@/constant/config';
 import ClientLayout from './ClientLayout';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { ToastProvider } from '@/contexts/ToastContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -35,9 +36,11 @@ export default function RootLayout({
   return (
     <html>
       <body>
-        <AuthProvider>
-          <ClientLayout>{children}</ClientLayout>
-        </AuthProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <ClientLayout>{children}</ClientLayout>
+          </AuthProvider>
+        </ToastProvider>
       </body>
     </html>
   );

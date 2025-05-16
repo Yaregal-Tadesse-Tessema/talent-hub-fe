@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -51,17 +51,44 @@ const FlagETH = () => <span className='text-xl'>🇪🇹</span>;
 const FlagUS = () => <span className='text-xl'>🇺🇸</span>;
 
 interface NavbarProps {
-  isLoggedIn?: boolean;
   page?: string;
 }
 
-export function Navbar({ isLoggedIn = false, page = 'home' }: NavbarProps) {
+export function Navbar({ page = 'home' }: NavbarProps) {
   const [country, setCountry] = useState('India');
   const [language, setLanguage] = useState('English');
+  const [user, setUser] = useState<{
+    role: 'employer' | 'employee';
+    name?: string;
+    avatar?: string;
+  } | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
-  // Home page, not logged in
-  const showAuthButtons = !isLoggedIn && page === 'home';
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+    }
+  }, []);
+
+  const showAuthButtons = !user && page === 'home';
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    setDropdownOpen(false);
+    router.push('/login');
+  };
 
   // Links for home page (not logged in)
   const navLinks = [
@@ -75,7 +102,7 @@ export function Navbar({ isLoggedIn = false, page = 'home' }: NavbarProps) {
 
   return (
     <header className='w-full border-b bg-white sticky top-0 z-50'>
-      <div className='flex items-center justify-between px-8 py-4 text-sm text-gray-800 bg-gray-100'>
+      <div className='flex items-center justify-between px-16 py-4 text-sm text-gray-800 bg-gray-100'>
         <nav className='flex gap-6'>
           {navLinks.map((link) => (
             <Link
@@ -122,7 +149,7 @@ export function Navbar({ isLoggedIn = false, page = 'home' }: NavbarProps) {
           </div>
         </div>
       </div>
-      <div className='flex items-center justify-between px-8 py-4 bg-white'>
+      <div className='flex items-center justify-between px-16 py-4 bg-white'>
         <div className='flex items-center gap-2'>
           <BriefcaseIcon />
           <span className='text-2xl font-bold ml-2'>TalentHub</span>
@@ -164,16 +191,44 @@ export function Navbar({ isLoggedIn = false, page = 'home' }: NavbarProps) {
                 </button>
               </Link>
             </>
-          ) : (
-            isLoggedIn && (
+          ) : user ? (
+            <>
               <div className='relative'>
                 <button className='relative'>
                   <BellIcon />
                   <span className='absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white'></span>
                 </button>
               </div>
-            )
-          )}
+              <div className='relative'>
+                <button
+                  onClick={() => setDropdownOpen((v) => !v)}
+                  className='focus:outline-none'
+                >
+                  {user.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt='avatar'
+                      className='w-10 h-10 rounded-full object-cover'
+                    />
+                  ) : (
+                    <div className='w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-lg font-bold text-gray-600'>
+                      {user.name ? user.name[0] : 'U'}
+                    </div>
+                  )}
+                </button>
+                {dropdownOpen && (
+                  <div className='absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-50'>
+                    <button
+                      onClick={handleLogout}
+                      className='block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600'
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : null}
         </div>
       </div>
     </header>
