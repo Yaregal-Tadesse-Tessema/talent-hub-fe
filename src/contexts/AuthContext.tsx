@@ -58,12 +58,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       const employerData = await employerResponse.json();
-
       if (employerResponse.ok) {
-        const user = { ...employerData, role: 'employer' as const };
+        const user = {
+          ...employerData?.organization,
+          role: 'employer' as const,
+        };
         setUser(user);
         if (typeof window !== 'undefined') {
-          localStorage.setItem('user', JSON.stringify(user));
+          localStorage.setItem(
+            'user',
+            JSON.stringify({
+              ...employerData?.organization,
+              role: 'employer' as const,
+            }),
+          );
         }
         showToast({
           type: 'success',
