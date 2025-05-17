@@ -1,0 +1,633 @@
+'use client';
+import React, { useState } from 'react';
+import CandidateDetailModal from './CandidateDetailModal';
+
+const candidateLevels = ['Entry Level', 'Mid Level', 'Expert Level'];
+const experiences = [
+  'Freshers',
+  '1 - 2 Years',
+  '2 - 4 Years',
+  '4 - 6 Years',
+  '6 - 8 Years',
+  '8 - 10 Years',
+  '10 - 15 Years',
+  '15+ Years',
+];
+const educations = [
+  'All',
+  'High School',
+  'Intermediate',
+  'Graduation',
+  'Master Degree',
+  'Bachelor Degree',
+];
+const genders = ['Male', 'Female', 'Others'];
+
+const mockCandidates = [
+  {
+    name: 'Cody Fisher',
+    title: 'Marketing Officer',
+    location: 'New York',
+    experience: '3 Years experience',
+    gender: 'Male',
+    education: 'Graduation',
+    level: 'Mid Level',
+  },
+  {
+    name: 'Darrell Steward',
+    title: 'Interaction Designer',
+    location: 'New York',
+    experience: '3 Years experience',
+    gender: 'Male',
+    education: 'Graduation',
+    level: 'Mid Level',
+  },
+  {
+    name: 'Guy Hawkins',
+    title: 'Junior Graphic Designer',
+    location: 'New York',
+    experience: '3 Years experience',
+    gender: 'Male',
+    education: 'Graduation',
+    level: 'Mid Level',
+  },
+  {
+    name: 'Jane Cooper',
+    title: 'Senior UX Designer',
+    location: 'New York',
+    experience: '3 Years experience',
+    gender: 'Female',
+    education: 'Graduation',
+    level: 'Mid Level',
+    selected: true,
+  },
+  {
+    name: 'Theresa Webb',
+    title: 'Front End Developer',
+    location: 'New York',
+    experience: '3 Years experience',
+    gender: 'Female',
+    education: 'Graduation',
+    level: 'Mid Level',
+  },
+  {
+    name: 'Kathryn Murphy',
+    title: 'Technical Support Specialist',
+    location: 'New York',
+    experience: '3 Years experience',
+    gender: 'Female',
+    education: 'Graduation',
+    level: 'Mid Level',
+  },
+  {
+    name: 'Marvin McKinney',
+    title: 'UI/UX Designer',
+    location: 'New York',
+    experience: '3 Years experience',
+    gender: 'Male',
+    education: 'Graduation',
+    level: 'Mid Level',
+  },
+  {
+    name: 'Jenny Wilson',
+    title: 'Marketing Manager',
+    location: 'New York',
+    experience: '3 Years experience',
+    gender: 'Female',
+    education: 'Graduation',
+    level: 'Mid Level',
+  },
+];
+
+export default function FindCandidatesPage() {
+  const [radius, setRadius] = useState(32);
+  const [selectedLevel, setSelectedLevel] = useState('Mid Level');
+  const [selectedExperience, setSelectedExperience] = useState('4 - 6 Years');
+  const [selectedEducations, setSelectedEducations] = useState(['Graduation']);
+  const [selectedGender, setSelectedGender] = useState('Male');
+  const [expandedSections, setExpandedSections] = useState({
+    location: true,
+    level: true,
+    experience: true,
+    education: true,
+    gender: true,
+  });
+  const [showModal, setShowModal] = useState(false);
+  const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
+  const handleCandidateClick = (candidate: any) => {
+    setSelectedCandidate(candidate);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedCandidate(null);
+  };
+
+  return (
+    <div className='min-h-screen'>
+      {/* Page title and breadcrumb */}
+      <div className='flex justify-between bg-gray-100 items-center px-16 py-4'>
+        <h2 className='text-md text-gray-500'>Find Candidates</h2>
+        <nav className='text-gray-400 text-sm flex items-center gap-1'>
+          <span className='hover:text-gray-600 cursor-pointer'>Home</span>
+          <span className='mx-1'>/</span>
+          <span className='text-gray-700 font-medium'>Find Candidates</span>
+        </nav>
+      </div>
+
+      {/* Top search/filter bar */}
+      <div className='bg-gray-100 px-16 py-4 pb-8 border-b'>
+        <div className='flex gap-4 items-center shadow rounded-xl px-6 py-2 bg-white'>
+          {/* Job title search */}
+          <div className='flex items-center gap-2 flex-1 border-r pr-4'>
+            <svg
+              width='22'
+              height='22'
+              fill='none'
+              viewBox='0 0 24 24'
+              stroke='#2563eb'
+            >
+              <circle cx='11' cy='11' r='7' strokeWidth='2' />
+              <path d='M21 21l-4.35-4.35' strokeWidth='2' />
+            </svg>
+            <input
+              className='flex-1 bg-transparent border-none outline-none text-gray-700 placeholder-gray-400'
+              placeholder='Job tittle, Keyword...'
+            />
+          </div>
+          {/* Location */}
+          <div className='flex items-center gap-2 border-r px-4 min-w-[200px]'>
+            <svg
+              width='22'
+              height='22'
+              fill='none'
+              viewBox='0 0 24 24'
+              stroke='#2563eb'
+            >
+              <path
+                d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z'
+                strokeWidth='2'
+              />
+              <circle cx='12' cy='9' r='2.5' strokeWidth='2' />
+            </svg>
+            <input
+              className='bg-transparent border-none outline-none text-gray-700 placeholder-gray-400 w-full'
+              placeholder='Location'
+            />
+          </div>
+          {/* Category */}
+          <div className='flex items-center gap-2 border-r px-4 min-w-[200px]'>
+            <svg
+              width='22'
+              height='22'
+              fill='none'
+              viewBox='0 0 24 24'
+              stroke='#2563eb'
+            >
+              <g strokeWidth='2'>
+                <rect x='3' y='3' width='18' height='6' rx='2' />
+                <rect x='3' y='9' width='18' height='6' rx='2' />
+                <rect x='3' y='15' width='18' height='6' rx='2' />
+              </g>
+            </svg>
+            <select className='bg-transparent border-none outline-none text-gray-700 w-full'>
+              <option>Select Category</option>
+            </select>
+          </div>
+          {/* Chevron and Find Job button */}
+          <div className='flex items-center gap-2 pl-2'>
+            <button className='bg-blue-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-blue-700 transition'>
+              Find Job
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Sidebar Filter */}
+      <div className='bg-gray-50 flex gap-8 px-16 py-8'>
+        <div className='w-80 bg-white rounded-lg border border-gray-200 p-6 shadow-sm h-fit flex flex-col gap-6'>
+          <button className='w-full bg-blue-600 text-white py-2 rounded mb-2 font-semibold flex items-center justify-center gap-2'>
+            <svg width='16' height='16' viewBox='0 0 24 24' fill='none'>
+              <path
+                d='M20 21V16'
+                stroke='#ffffff'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+              />
+              <path
+                d='M17 16H23'
+                stroke='#ffffff'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+              />
+              <path
+                d='M4 21V14'
+                stroke='#ffffff'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+              />
+              <path
+                d='M1 14H7'
+                stroke='#ffffff'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+              />
+              <path
+                d='M12 21V12'
+                stroke='#ffffff'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+              />
+              <path
+                d='M9 8H15'
+                stroke='#ffffff'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+              />
+              <path
+                d='M20 12V3'
+                stroke='#ffffff'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+              />
+              <path
+                d='M12 8V3'
+                stroke='#ffffff'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+              />
+              <path
+                d='M4 10V3'
+                stroke='#ffffff'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+              />
+            </svg>
+            Filter
+          </button>
+          {/* Location Radius */}
+          <div>
+            <div
+              className='flex justify-between items-center mb-2 cursor-pointer select-none'
+              onClick={() => toggleSection('location')}
+            >
+              <span className='font-medium'>
+                Location Radius:{' '}
+                <span className='text-blue-600 font-semibold'>
+                  {radius} miles
+                </span>
+              </span>
+              <svg
+                width='20'
+                height='20'
+                fill='none'
+                viewBox='0 0 24 24'
+                stroke='currentColor'
+                className={`transform transition-transform ${expandedSections.location ? 'rotate-180' : ''}`}
+              >
+                <path
+                  d='M19 9l-7 7-7-7'
+                  strokeWidth='2'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                />
+              </svg>
+            </div>
+            {expandedSections.location && (
+              <input
+                type='range'
+                min={0}
+                max={100}
+                value={radius}
+                onChange={(e) => setRadius(Number(e.target.value))}
+                className='w-full accent-blue-600 mt-4'
+              />
+            )}
+          </div>
+          {/* Candidate Level */}
+          <div>
+            <div
+              className='flex justify-between items-center mb-2 cursor-pointer select-none'
+              onClick={() => toggleSection('level')}
+            >
+              <div className='font-medium'>Candidate Level</div>
+              <svg
+                width='20'
+                height='20'
+                fill='none'
+                viewBox='0 0 24 24'
+                stroke='currentColor'
+                className={`transform transition-transform ${expandedSections.level ? 'rotate-180' : ''}`}
+              >
+                <path
+                  d='M19 9l-7 7-7-7'
+                  strokeWidth='2'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                />
+              </svg>
+            </div>
+            {expandedSections.level && (
+              <>
+                {candidateLevels.map((level) => (
+                  <div key={level} className='flex items-center mb-2'>
+                    <input
+                      type='radio'
+                      id={level}
+                      name='level'
+                      value={level}
+                      checked={selectedLevel === level}
+                      onChange={() => setSelectedLevel(level)}
+                      className='mr-2 accent-blue-600'
+                    />
+                    <label htmlFor={level}>{level}</label>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+          {/* Experiences */}
+          <div>
+            <div
+              className='flex justify-between items-center mb-2 cursor-pointer select-none'
+              onClick={() => toggleSection('experience')}
+            >
+              <div className='font-medium'>Experiences</div>
+              <svg
+                width='20'
+                height='20'
+                fill='none'
+                viewBox='0 0 24 24'
+                stroke='currentColor'
+                className={`transform transition-transform ${expandedSections.experience ? 'rotate-180' : ''}`}
+              >
+                <path
+                  d='M19 9l-7 7-7-7'
+                  strokeWidth='2'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                />
+              </svg>
+            </div>
+            {expandedSections.experience && (
+              <>
+                {experiences.map((exp) => (
+                  <div key={exp} className='flex items-center mb-2'>
+                    <input
+                      type='radio'
+                      id={exp}
+                      name='experience'
+                      value={exp}
+                      checked={selectedExperience === exp}
+                      onChange={() => setSelectedExperience(exp)}
+                      className='mr-2 accent-blue-600'
+                    />
+                    <label htmlFor={exp}>{exp}</label>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+          {/* Education */}
+          <div>
+            <div
+              className='flex justify-between items-center mb-2 cursor-pointer select-none'
+              onClick={() => toggleSection('education')}
+            >
+              <div className='font-medium'>Education</div>
+              <svg
+                width='20'
+                height='20'
+                fill='none'
+                viewBox='0 0 24 24'
+                stroke='currentColor'
+                className={`transform transition-transform ${expandedSections.education ? 'rotate-180' : ''}`}
+              >
+                <path
+                  d='M19 9l-7 7-7-7'
+                  strokeWidth='2'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                />
+              </svg>
+            </div>
+            {expandedSections.education && (
+              <>
+                {educations.map((edu) => (
+                  <div key={edu} className='flex items-center mb-2'>
+                    <input
+                      type='checkbox'
+                      id={edu}
+                      name='education'
+                      value={edu}
+                      checked={selectedEducations.includes(edu)}
+                      onChange={() =>
+                        setSelectedEducations((prev) =>
+                          prev.includes(edu)
+                            ? prev.filter((e) => e !== edu)
+                            : [...prev, edu],
+                        )
+                      }
+                      className='mr-2 accent-blue-600'
+                    />
+                    <label htmlFor={edu}>{edu}</label>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+          {/* Gender */}
+          <div>
+            <div
+              className='flex justify-between items-center mb-2 cursor-pointer select-none'
+              onClick={() => toggleSection('gender')}
+            >
+              <div className='font-medium'>Gender</div>
+              <svg
+                width='20'
+                height='20'
+                fill='none'
+                viewBox='0 0 24 24'
+                stroke='currentColor'
+                className={`transform transition-transform ${expandedSections.gender ? 'rotate-180' : ''}`}
+              >
+                <path
+                  d='M19 9l-7 7-7-7'
+                  strokeWidth='2'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                />
+              </svg>
+            </div>
+            {expandedSections.gender && (
+              <>
+                {genders.map((gender) => (
+                  <div key={gender} className='flex items-center mb-2'>
+                    <input
+                      type='radio'
+                      id={gender}
+                      name='gender'
+                      value={gender}
+                      checked={selectedGender === gender}
+                      onChange={() => setSelectedGender(gender)}
+                      className='mr-2 accent-blue-600'
+                    />
+                    <label htmlFor={gender}>{gender}</label>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        </div>
+        {/* Main Content */}
+        <div className='flex-1'>
+          <div className='flex justify-between items-center mb-6'>
+            <div className='flex gap-2'>
+              <select className='w-24 border rounded-md px-3 py-2'>
+                <option>Latest</option>
+                <option>Oldest</option>
+              </select>
+              <select className='w-36 border rounded-md px-3 py-2'>
+                <option>12 per page</option>
+                <option>24 per page</option>
+                <option>48 per page</option>
+              </select>
+            </div>
+            <div className='flex gap-2'>
+              <button className='border rounded p-2 bg-blue-50 text-blue-600'>
+                <svg
+                  width='20'
+                  height='20'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                >
+                  <rect x='3' y='3' width='7' height='7' strokeWidth='2' />
+                  <rect x='14' y='3' width='7' height='7' strokeWidth='2' />
+                  <rect x='14' y='14' width='7' height='7' strokeWidth='2' />
+                  <rect x='3' y='14' width='7' height='7' strokeWidth='2' />
+                </svg>
+              </button>
+              <button className='border rounded p-2'>
+                <svg
+                  width='20'
+                  height='20'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                >
+                  <rect x='3' y='3' width='18' height='7' strokeWidth='2' />
+                  <rect x='3' y='14' width='18' height='7' strokeWidth='2' />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div className='flex flex-col gap-4'>
+            {mockCandidates.map((candidate, idx) => (
+              <div
+                key={candidate.name}
+                className='flex items-center bg-white rounded-lg border border-gray-200 shadow-sm px-6 py-4 justify-between hover:ring-2 hover:ring-blue-500'
+              >
+                <div className='flex items-center gap-4'>
+                  <div className='w-16 h-16 rounded-lg bg-gray-200 flex items-center justify-center'>
+                    {/* Profile image placeholder */}
+                    <svg width='32' height='32' fill='none' viewBox='0 0 32 32'>
+                      <rect width='32' height='32' rx='8' fill='#E5E7EB' />
+                      <path
+                        d='M16 18c-3.314 0-6 2.239-6 5v1h12v-1c0-2.761-2.686-5-6-5z'
+                        fill='#D1D5DB'
+                      />
+                      <circle cx='16' cy='12' r='5' fill='#D1D5DB' />
+                    </svg>
+                  </div>
+                  <div>
+                    <div
+                      className='font-semibold text-base text-gray-800 hover:text-blue-600 hover:cursor-pointer'
+                      onClick={() => handleCandidateClick(candidate)}
+                    >
+                      {candidate.name}
+                    </div>
+                    <div className='text-gray-500 text-sm'>
+                      {candidate.title}
+                    </div>
+                    <div className='flex items-center gap-2 text-gray-400 text-xs mt-1'>
+                      <svg
+                        width='16'
+                        height='16'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                      >
+                        <path
+                          d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z'
+                          strokeWidth='2'
+                        />
+                      </svg>
+                      {candidate.location}
+                      <span>•</span>
+                      {candidate.experience}
+                    </div>
+                  </div>
+                </div>
+                <div className='flex items-center gap-2'>
+                  <button className='border rounded p-2 hover:bg-blue-600 hover:text-white bg-blue-50 text-blue-600'>
+                    <svg
+                      width='18'
+                      height='18'
+                      fill='none'
+                      viewBox='0 0 24 24'
+                      stroke='currentColor'
+                    >
+                      <path
+                        d='M5 5v14l7-7 7 7V5a2 2 0 00-2-2H7a2 2 0 00-2 2z'
+                        strokeWidth='2'
+                      />
+                    </svg>
+                  </button>
+                  <button className='px-6 py-2 rounded-md font-semibold flex items-center gap-2 transition hover:bg-blue-600 hover:text-white bg-blue-100 text-blue-700'>
+                    View Profile
+                    <svg
+                      width='18'
+                      height='18'
+                      fill='none'
+                      viewBox='0 0 24 24'
+                      stroke='currentColor'
+                    >
+                      <path d='M9 5l7 7-7 7' strokeWidth='2' />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Modal for candidate detail */}
+      {showModal && (
+        <CandidateDetailModal
+          candidate={selectedCandidate}
+          onClose={handleCloseModal}
+        />
+      )}
+    </div>
+  );
+}

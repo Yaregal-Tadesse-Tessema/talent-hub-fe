@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import Link from 'next/link';
 
 const mockEmployers = [
   {
@@ -127,7 +128,7 @@ export default function FindEmployersPage() {
     <div className='min-h-screen'>
       {/* Page title and breadcrumb */}
       <div className='flex justify-between bg-gray-100 items-center px-16 pt-8'>
-        <h2 className='text-xl font-semibold'>Find Employers</h2>
+        <h2 className='text-md text-gray-500'>Find Employers</h2>
         <nav className='text-gray-400 text-sm flex items-center gap-1'>
           <span className='hover:text-gray-600 cursor-pointer'>Home</span>
           <span className='mx-1'>/</span>
@@ -150,7 +151,7 @@ export default function FindEmployersPage() {
               <path d='M21 21l-4.35-4.35' strokeWidth='2' />
             </svg>
             <input
-              className='flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400'
+              className='flex-1 bg-transparent border-none outline-none text-gray-700 placeholder-gray-400'
               placeholder='Job tittle, Keyword...'
             />
           </div>
@@ -170,7 +171,7 @@ export default function FindEmployersPage() {
               <circle cx='12' cy='9' r='2.5' strokeWidth='2' />
             </svg>
             <input
-              className='bg-transparent outline-none text-gray-700 placeholder-gray-400 w-full'
+              className='bg-transparent border-none outline-none text-gray-700 placeholder-gray-400 w-full'
               placeholder='Location'
             />
           </div>
@@ -189,7 +190,7 @@ export default function FindEmployersPage() {
                 <rect x='3' y='15' width='18' height='6' rx='2' />
               </g>
             </svg>
-            <select className='bg-transparent outline-none text-gray-700 w-full'>
+            <select className='bg-transparent border-none outline-none text-gray-700 w-full'>
               <option>Select Category</option>
             </select>
           </div>
@@ -216,65 +217,65 @@ export default function FindEmployersPage() {
               <path
                 d='M20 21V16'
                 stroke='#ffffff'
-                stroke-width='1.5'
-                stroke-linecap='round'
-                stroke-linejoin='round'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'
               />
               <path
                 d='M17 16H23'
                 stroke='#ffffff'
-                stroke-width='1.5'
-                stroke-linecap='round'
-                stroke-linejoin='round'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'
               />
               <path
                 d='M4 21V14'
                 stroke='#ffffff'
-                stroke-width='1.5'
-                stroke-linecap='round'
-                stroke-linejoin='round'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'
               />
               <path
                 d='M1 14H7'
                 stroke='#ffffff'
-                stroke-width='1.5'
-                stroke-linecap='round'
-                stroke-linejoin='round'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'
               />
               <path
                 d='M12 21V12'
                 stroke='#ffffff'
-                stroke-width='1.5'
-                stroke-linecap='round'
-                stroke-linejoin='round'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'
               />
               <path
                 d='M9 8H15'
                 stroke='#ffffff'
-                stroke-width='1.5'
-                stroke-linecap='round'
-                stroke-linejoin='round'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'
               />
               <path
                 d='M20 12V3'
                 stroke='#ffffff'
-                stroke-width='1.5'
-                stroke-linecap='round'
-                stroke-linejoin='round'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'
               />
               <path
                 d='M12 8V3'
                 stroke='#ffffff'
-                stroke-width='1.5'
-                stroke-linecap='round'
-                stroke-linejoin='round'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'
               />
               <path
                 d='M4 10V3'
                 stroke='#ffffff'
-                stroke-width='1.5'
-                stroke-linecap='round'
-                stroke-linejoin='round'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'
               />
             </svg>
             Filter
@@ -349,14 +350,14 @@ export default function FindEmployersPage() {
           </div>
         </div>
         {/* Main content */}
-        <div className='flex-1 border border-gray-200 rounded-lg p-6'>
+        <div className='flex-1 rounded-lg'>
           <div className='flex justify-between items-center mb-6'>
             <div className='flex gap-2'>
               <select className='w-24 border rounded-md px-3 py-2'>
                 <option>Latest</option>
                 <option>Oldest</option>
               </select>
-              <select className='w-32 border rounded-md px-3 py-2'>
+              <select className='w-36 border rounded-md px-3 py-2'>
                 <option>12 per page</option>
                 <option>24 per page</option>
                 <option>48 per page</option>
@@ -395,7 +396,7 @@ export default function FindEmployersPage() {
             {paginatedEmployers.map((employer, idx) => (
               <div
                 key={employer.name}
-                className='flex items-center bg-white rounded-lg shadow-sm p-6 justify-between'
+                className='flex items-center bg-white rounded-lg border border-gray-200 shadow-sm p-6 justify-between'
               >
                 <div className='flex items-center gap-4'>
                   <img
@@ -404,7 +405,14 @@ export default function FindEmployersPage() {
                     className='w-16 h-16 rounded-lg object-contain bg-gray-100'
                   />
                   <div>
-                    <div className='font-semibold text-lg'>{employer.name}</div>
+                    <div className='font-semibold text-lg'>
+                      <Link
+                        href={`/find-employers/${encodeURIComponent(employer.name.toLowerCase().replace(/\s+/g, '-'))}`}
+                        className='hover:underline text-blue-700'
+                      >
+                        {employer.name}
+                      </Link>
+                    </div>
                     <div className='flex items-center gap-2 text-gray-500 text-sm'>
                       <svg
                         width='16'

@@ -142,68 +142,79 @@ export default function FindJobPage() {
 
   return (
     <main className='min-h-screen pb-16'>
-      <div className='max-w-7xl mx-auto px-6 pt-8'>
-        {/* Filter Panel */}
-        <div className='bg-gray-50 rounded-xl shadow-sm p-4 mb-6 flex flex-col md:flex-row gap-3 items-center'>
-          <div className='flex flex-1 flex-col md:flex-row gap-3 w-full'>
-            {/* Job Title/Keyword */}
-            <div className='flex items-center bg-gray-100 rounded px-3 py-2 w-full md:w-auto'>
-              <svg
-                className='w-5 h-5 text-blue-500 mr-2'
-                fill='none'
-                stroke='currentColor'
+      {/* Page title and breadcrumb */}
+      <div className='flex justify-between bg-gray-100 items-center px-16 pt-8'>
+        <h2 className='text-md text-gray-500'>Find Job</h2>
+        <nav className='text-gray-400 text-sm flex items-center gap-1'>
+          <span className='hover:text-gray-600 cursor-pointer'>Home</span>
+          <span className='mx-1'>/</span>
+          <span className='text-gray-700 font-medium'>Find Job</span>
+        </nav>
+      </div>
+      {/* Top search/filter bar */}
+      <div className='bg-gray-100 px-16 py-4 pb-8 border-b'>
+        <div className='flex gap-4 items-center shadow rounded-xl px-6 py-2 bg-white'>
+          {/* Job title search */}
+          <div className='flex items-center gap-2 flex-1 border-r pr-4'>
+            <svg
+              width='22'
+              height='22'
+              fill='none'
+              viewBox='0 0 24 24'
+              stroke='#2563eb'
+            >
+              <circle cx='11' cy='11' r='7' strokeWidth='2' />
+              <path d='M21 21l-4.35-4.35' strokeWidth='2' />
+            </svg>
+            <input
+              className='flex-1 bg-transparent border-none outline-none text-gray-700 placeholder-gray-400'
+              placeholder='Job title, Keyword...'
+            />
+          </div>
+          {/* Location */}
+          <div className='flex items-center gap-2 border-r px-4 min-w-[200px]'>
+            <svg
+              width='22'
+              height='22'
+              fill='none'
+              viewBox='0 0 24 24'
+              stroke='#2563eb'
+            >
+              <path
+                d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z'
                 strokeWidth='2'
-                viewBox='0 0 24 24'
-              >
-                <circle cx='11' cy='11' r='8' />
-                <path d='M21 21l-4.35-4.35' />
-              </svg>
-              <Input
-                type='text'
-                placeholder='Job title, Keyword...'
-                className='bg-transparent outline-none w-full border-none focus:border-none focus:ring-0 shadow-none'
               />
-            </div>
-            {/* Location */}
-            <div className='flex items-center bg-gray-100 rounded px-3 py-2 w-full md:w-auto'>
-              <svg
-                className='w-5 h-5 text-blue-500 mr-2'
-                fill='none'
-                stroke='currentColor'
-                strokeWidth='2'
-                viewBox='0 0 24 24'
-              >
-                <path d='M12 21c-4.97-6.16-8-10.16-8-13A8 8 0 1 1 20 8c0 2.84-3.03 6.84-8 13z' />
-                <circle cx='12' cy='8' r='3' />
-              </svg>
-              <Input
-                type='text'
-                placeholder='Location'
-                className='bg-transparent outline-none w-full border-none focus:border-none focus:ring-0 shadow-none'
-              />
-            </div>
-            {/* Category */}
-            <div className='flex items-center bg-gray-100 rounded px-3 py-2 w-1/4'>
-              <svg
-                className='w-5 h-5 text-blue-500 mr-2'
-                fill='none'
-                stroke='currentColor'
-                strokeWidth='2'
-                viewBox='0 0 24 24'
-              >
-                <rect x='3' y='3' width='18' height='18' rx='2' />
-                <path d='M3 9h18M9 21V9' />
-              </svg>
-              <Select className='bg-transparent outline-none w-full border-none focus:border-none focus:ring-0 shadow-none'>
-                <option>Select Category</option>
-                <option>Design</option>
-                <option>Development</option>
-                <option>Marketing</option>
-              </Select>
-            </div>
-            {/* Advance Filter */}
+              <circle cx='12' cy='9' r='2.5' strokeWidth='2' />
+            </svg>
+            <input
+              className='bg-transparent border-none outline-none text-gray-700 placeholder-gray-400 w-full'
+              placeholder='Location'
+            />
+          </div>
+          {/* Category */}
+          <div className='flex items-center gap-2 border-r px-4 min-w-[200px]'>
+            <svg
+              width='22'
+              height='22'
+              fill='none'
+              viewBox='0 0 24 24'
+              stroke='#2563eb'
+            >
+              <g strokeWidth='2'>
+                <rect x='3' y='3' width='18' height='6' rx='2' />
+                <rect x='3' y='9' width='18' height='6' rx='2' />
+                <rect x='3' y='15' width='18' height='6' rx='2' />
+              </g>
+            </svg>
+            <select className='bg-transparent border-none outline-none text-gray-700 w-full'>
+              <option>Select Category</option>
+            </select>
+          </div>
+
+          {/* Advanced filter */}
+          <div className='flex items-center gap-2 border-r px-4 min-w-[200px]'>
             <div
-              className='flex items-center bg-gray-100 rounded px-3 py-2 w-full md:w-auto cursor-pointer'
+              className='flex items-center cursor-pointer'
               onClick={() => setIsFilterOpen(true)}
             >
               <span className='text-gray-500 mr-2'>Advance Filter</span>
@@ -218,77 +229,16 @@ export default function FindJobPage() {
               </svg>
             </div>
           </div>
-          {/* Find Job Button */}
-          <button className='bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition'>
-            Find Job
-          </button>
-        </div>
-        {/* Search & Filter Bar */}
-        <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8'>
-          <div className='flex flex-wrap gap-2 items-center'>
-            {filters.map((filter) => (
-              <span
-                key={filter.label}
-                className='bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1'
-              >
-                {filter.label}
-                <button className='ml-1 text-gray-400 hover:text-gray-600'>
-                  &times;
-                </button>
-              </span>
-            ))}
-          </div>
-          <div className='flex gap-2 items-center'>
-            <select className='border rounded px-3 py-2 text-sm'>
-              <option>Latest</option>
-              <option>Oldest</option>
-            </select>
-            <select className='border rounded px-3 py-2 text-sm'>
-              <option>12 per page</option>
-              <option>24 per page</option>
-            </select>
-            {/* Card/List View Toggler */}
-            <div className='flex justify-end'>
-              <button
-                className={`border rounded px-2 py-2 text-gray-500 hover:bg-gray-100 mr-2 ${viewMode === 'card' ? 'bg-blue-50 border-blue-500 text-blue-600' : ''}`}
-                onClick={() => setViewMode('card')}
-                aria-label='Card view'
-              >
-                {/* Card icon */}
-                <svg
-                  width='18'
-                  height='18'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                  stroke='currentColor'
-                >
-                  <rect x='3' y='3' width='7' height='7' strokeWidth='2' />
-                  <rect x='14' y='3' width='7' height='7' strokeWidth='2' />
-                  <rect x='14' y='14' width='7' height='7' strokeWidth='2' />
-                  <rect x='3' y='14' width='7' height='7' strokeWidth='2' />
-                </svg>
-              </button>
-              <button
-                className={`border rounded px-2 py-2 text-gray-500 hover:bg-gray-100 ${viewMode === 'list' ? 'bg-blue-50 border-blue-500 text-blue-600' : ''}`}
-                onClick={() => setViewMode('list')}
-                aria-label='List view'
-              >
-                {/* List icon */}
-                <svg
-                  width='18'
-                  height='18'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                  stroke='currentColor'
-                >
-                  <rect x='3' y='3' width='18' height='7' strokeWidth='2' />
-                  <rect x='3' y='14' width='18' height='7' strokeWidth='2' />
-                </svg>
-              </button>
-            </div>
+          {/* Chevron and Find Job button */}
+          <div className='flex items-center gap-2 pl-2'>
+            <button className='bg-blue-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-blue-700 transition'>
+              Find Job
+            </button>
           </div>
         </div>
+      </div>
 
+      <div className='max-w-7xl mx-auto px-6 pt-8'>
         {/* Card View */}
         {viewMode === 'card' && (
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>

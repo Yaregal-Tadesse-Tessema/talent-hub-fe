@@ -95,6 +95,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
     { href: '/', label: 'Home' },
     { href: '/find-job', label: 'Find Job' },
     { href: '/employers', label: 'Employers' },
+    { href: '/find-candidates', label: 'Find Candidates' },
     { href: '/candidates', label: 'Candidates' },
     { href: '/pricing', label: 'Pricing Plans' },
     { href: '/customer-supports', label: 'Customer Supports' },
@@ -103,7 +104,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
   // Links for employer
   const employerNavLinks = [
     { href: '/', label: 'Home' },
-    { href: '/find-candidate', label: 'Find Candidate' },
+    { href: '/find-candidates', label: 'Find Candidates' },
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/my-jobs', label: 'My Jobs' },
     { href: '/applications', label: 'Applications' },
@@ -115,6 +116,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
     { href: '/', label: 'Home' },
     { href: '/find-job', label: 'Find Job' },
     { href: '/find-employers', label: 'Find Employers' },
+    { href: '/find-candidates', label: 'Find Candidates' },
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/job-alerts', label: 'Job Alerts' },
     { href: '/customer-supports', label: 'Customer Supports' },
