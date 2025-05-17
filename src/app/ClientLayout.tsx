@@ -17,20 +17,16 @@ export default function ClientLayout({
   const isLoginPage = pathname === '/login';
   const isVerifyEmailPage = pathname === '/verify-email';
   const isResetPasswordPage = pathname === '/reset-password';
+  const isHomePage = pathname === '/';
   return (
     <>
       {!isSignupPage &&
         !isForgotPasswordPage &&
         !isLoginPage &&
         !isVerifyEmailPage &&
-        !isResetPasswordPage && <Navbar isLoggedIn={isLoggedIn} page='home' />}
+        !isResetPasswordPage && <Navbar page='home' />}
       {children}
-      {!isLoggedIn &&
-        !isSignupPage &&
-        !isForgotPasswordPage &&
-        !isLoginPage &&
-        !isVerifyEmailPage &&
-        !isResetPasswordPage && <Footer />}
+      {isHomePage && <Footer />}
     </>
   );
 }
