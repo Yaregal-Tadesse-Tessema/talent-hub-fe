@@ -1,144 +1,40 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Bookmark, ArrowRight } from 'lucide-react';
 import FilterModal from '@/components/ui/FilterModal';
-
-// Mock job data
-const jobs = [
-  {
-    id: 1,
-    company: 'Reddit',
-    logo: '🟧',
-    featured: true,
-    location: 'United Kingdom of Great Britain',
-    title: 'Marketing Officer',
-    type: 'Full Time',
-    salary: '$30K-$35K',
-  },
-  {
-    id: 2,
-    company: 'Dribbble',
-    logo: '🟣',
-    featured: true,
-    location: 'California',
-    title: 'Senior UX Designer',
-    type: 'Full-Time',
-    salary: '$50K-80K/month',
-  },
-  {
-    id: 3,
-    company: 'Freepik',
-    logo: '🟦',
-    featured: true,
-    location: 'China',
-    title: 'Visual Designer',
-    type: 'Full Time',
-    salary: '$10K-$15K',
-  },
-  {
-    id: 4,
-    company: 'Figma',
-    logo: '⬛',
-    featured: true,
-    location: 'Canada',
-    title: 'UI/UX Designer',
-    type: 'Full Time',
-    salary: '$50K-$70K',
-  },
-  {
-    id: 5,
-    company: 'Dribbble',
-    logo: '🟣',
-    featured: false,
-    location: 'United States',
-    title: 'Junior Graphic Designer',
-    type: 'Temporary',
-    salary: '$35K-$40K',
-  },
-  {
-    id: 6,
-    company: 'Twitter',
-    logo: '🟦',
-    featured: false,
-    location: 'Canada',
-    title: 'Senior UX Designer',
-    type: 'Internship',
-    salary: '$50K-$60K',
-  },
-  {
-    id: 7,
-    company: 'Microsoft',
-    logo: '🟩',
-    featured: false,
-    location: 'Australia',
-    title: 'Product Designer',
-    type: 'Full Time',
-    salary: '$40K-$50K',
-  },
-  {
-    id: 8,
-    company: 'Upwork',
-    logo: '🟩',
-    featured: false,
-    location: 'France',
-    title: 'Technical Support Specialist',
-    type: 'Full Time',
-    salary: '$35K-$40K',
-  },
-  {
-    id: 9,
-    company: 'Slack',
-    logo: '🟨',
-    featured: false,
-    location: 'Germany',
-    title: 'Networking Engineer',
-    type: 'Remote',
-    salary: '$50K-$90K',
-  },
-  {
-    id: 10,
-    company: 'Instagram',
-    logo: '🟪',
-    featured: false,
-    location: 'Australia',
-    title: 'Front End Developer',
-    type: 'Contract Base',
-    salary: '$50K-$80K',
-  },
-  {
-    id: 11,
-    company: 'Facebook',
-    logo: '🟦',
-    featured: false,
-    location: 'United Kingdom of Great Britain',
-    title: 'Software Engineer',
-    type: 'Part Time',
-    salary: '$15K-$20K',
-  },
-  {
-    id: 12,
-    company: 'Youtube',
-    logo: '🟥',
-    featured: false,
-    location: 'Germany',
-    title: 'Interaction Designer',
-    type: 'Full Time',
-    salary: '$20K-$25K',
-  },
-];
-
-const filters = [{ label: 'Design' }, { label: 'New York' }];
+import { jobService } from '@/services/jobService';
+import { Job } from '@/types/job';
 
 export default function FindJobPage() {
   const [selectedPage, setSelectedPage] = useState(1);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('list');
-  const [hoveredJobId, setHoveredJobId] = useState<number | null>(null);
+  const [hoveredJobId, setHoveredJobId] = useState<string | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const jobsPerPage = 12;
   const totalPages = 5;
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        setLoading(true);
+        const response = await jobService.getJobs();
+        setJobs(response.items);
+      } catch (err) {
+        console.error('Error fetching jobs:', err);
+        setError('Failed to fetch jobs. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, []);
 
   return (
     <main className='min-h-screen pb-16'>
@@ -151,6 +47,16 @@ export default function FindJobPage() {
           <span className='text-gray-700 font-medium'>Find Job</span>
         </nav>
       </div>
+
+      {/* Loading and error states */}
+      {loading && (
+        <div className='flex justify-center items-center min-h-[200px]'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+        </div>
+      )}
+
+      {error && <div className='text-red-500 text-center py-4'>{error}</div>}
+
       {/* Top search/filter bar */}
       <div className='bg-gray-100 px-16 py-4 pb-8 border-b'>
         <div className='flex gap-4 items-center shadow rounded-xl px-6 py-2 bg-white'>
@@ -248,13 +154,19 @@ export default function FindJobPage() {
                 className='rounded-xl border bg-white p-6 shadow-sm transition hover:shadow-md relative hover:border-blue-600'
               >
                 <div className='flex items-center gap-3 mb-2'>
-                  <span className='text-2xl'>{job.logo}</span>
+                  {job.companyLogo && (
+                    <img
+                      src={job.companyLogo.path}
+                      alt={job.companyName}
+                      className='w-10 h-10 object-contain'
+                    />
+                  )}
                   <span className='font-semibold text-gray-800'>
-                    {job.company}
+                    {job.companyName}
                   </span>
-                  {job.featured && (
+                  {job.isSaved && (
                     <span className='ml-2 bg-pink-100 text-pink-600 text-xs px-2 py-0.5 rounded-full font-medium'>
-                      Featured
+                      Saved
                     </span>
                   )}
                 </div>
@@ -266,9 +178,21 @@ export default function FindJobPage() {
                   {job.title}
                 </Link>
                 <div className='flex items-center text-xs text-gray-500 gap-2'>
-                  <span>{job.type}</span>
+                  <span>{job.employmentType}</span>
                   <span>•</span>
-                  <span>{job.salary}</span>
+                  <span>
+                    {job.salaryRange?.min || 'N/A'} -{' '}
+                    {job.salaryRange?.max || 'N/A'}
+                  </span>
+                </div>
+                <div className='mt-2 text-xs text-gray-500'>
+                  <span>
+                    Posted: {new Date(job.postedDate).toLocaleDateString()}
+                  </span>
+                  <span className='mx-2'>•</span>
+                  <span>
+                    Deadline: {new Date(job.deadline).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
             ))}
@@ -278,8 +202,6 @@ export default function FindJobPage() {
         {viewMode === 'list' && (
           <div className='flex flex-col gap-4'>
             {jobs.map((job) => {
-              const isJuniorGraphicDesigner =
-                job.title === 'Junior Graphic Designer';
               const isHovered = hoveredJobId === job.id;
               return (
                 <div
@@ -293,7 +215,13 @@ export default function FindJobPage() {
                 >
                   {/* Logo */}
                   <div className='flex items-center gap-4 min-w-[56px]'>
-                    <span className='text-3xl'>{job.logo}</span>
+                    {job.companyLogo && (
+                      <img
+                        src={job.companyLogo.path}
+                        alt={job.companyName}
+                        className='w-12 h-12 object-contain'
+                      />
+                    )}
                   </div>
                   {/* Main Info */}
                   <div className='flex-1 min-w-0 ml-4'>
@@ -304,14 +232,14 @@ export default function FindJobPage() {
                       >
                         {job.title}
                       </Link>
-                      {job.featured && (
+                      {job.isSaved && (
                         <span className='ml-2 bg-pink-100 text-pink-600 text-xs px-2 py-0.5 rounded-full font-medium'>
-                          Featured
+                          Saved
                         </span>
                       )}
-                      {job.type && (
+                      {job.employmentType && (
                         <span className='ml-2 bg-blue-100 text-blue-600 text-xs px-2 py-0.5 rounded-full font-medium'>
-                          {job.type}
+                          {job.employmentType}
                         </span>
                       )}
                     </div>
@@ -340,7 +268,8 @@ export default function FindJobPage() {
                           <path d='M12 21c-4.97-6.16-8-10.16-8-13A8 8 0 1 1 20 8c0 2.84-3.03 6.84-8 13z' />
                           <circle cx='12' cy='8' r='3' />
                         </svg>
-                        {job.salary}
+                        {job.salaryRange?.min || 'N/A'} -{' '}
+                        {job.salaryRange?.max || 'N/A'}
                       </span>
                       <span className='flex items-center gap-1'>
                         <svg
@@ -365,22 +294,39 @@ export default function FindJobPage() {
                             strokeWidth='2'
                           />
                         </svg>
-                        4 Days Remaining
+                        Posted: {new Date(job.postedDate).toLocaleDateString()}
+                      </span>
+                      <span className='flex items-center gap-1'>
+                        <svg
+                          width='16'
+                          height='16'
+                          fill='none'
+                          viewBox='0 0 24 24'
+                          stroke='currentColor'
+                        >
+                          <rect
+                            x='3'
+                            y='3'
+                            width='18'
+                            height='7'
+                            strokeWidth='2'
+                          />
+                          <rect
+                            x='3'
+                            y='14'
+                            width='18'
+                            height='7'
+                            strokeWidth='2'
+                          />
+                        </svg>
+                        Deadline: {new Date(job.deadline).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
                   {/* Bookmark and Apply */}
                   <div className='flex items-center gap-4 ml-4'>
                     <button className='text-gray-400 hover:text-blue-600'>
-                      <svg
-                        width='22'
-                        height='22'
-                        fill='none'
-                        viewBox='0 0 24 24'
-                        stroke='currentColor'
-                      >
-                        <path d='M6 4a2 2 0 0 0-2 2v14l8-5.333L20 20V6a2 2 0 0 0-2-2H6z' />
-                      </svg>
+                      <Bookmark className='w-5 h-5' />
                     </button>
                     <button className='bg-blue-50 text-blue-700 font-semibold px-5 py-2 rounded-lg hover:bg-blue-600 hover:text-white flex items-center gap-2 transition'>
                       Apply Now

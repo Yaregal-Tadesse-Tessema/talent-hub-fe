@@ -40,6 +40,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch (error) {
           console.error('Error parsing stored user:', error);
           localStorage.removeItem('user');
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
         }
       }
       setLoading(false);
@@ -72,6 +74,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               role: 'employer' as const,
             }),
           );
+          // Store both tokens
+          localStorage.setItem('accessToken', employerData.data.accessToken);
+          localStorage.setItem('refreshToken', employerData.data.refreshToken);
         }
         showToast({
           type: 'success',
@@ -94,12 +99,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       );
 
       const employeeData = await employeeResponse.json();
+      console.log(employeeData);
 
       if (employeeResponse.ok) {
-        const user = { ...employeeData, role: 'employee' as const };
+        const user = {
+          ...employeeData?.organization,
+          role: 'employee' as const,
+        };
         setUser(user);
         if (typeof window !== 'undefined') {
           localStorage.setItem('user', JSON.stringify(user));
+          // Store both tokens
+          localStorage.setItem('accessToken', employeeData.accessToken);
+          localStorage.setItem('refreshToken', employeeData.refreshToken);
         }
         showToast({
           type: 'success',
@@ -137,6 +149,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     if (typeof window !== 'undefined') {
       localStorage.removeItem('user');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
     }
     router.push('/login');
   };

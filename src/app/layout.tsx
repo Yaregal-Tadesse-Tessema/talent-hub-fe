@@ -35,7 +35,7 @@ export default function RootLayout({
 }) {
   return (
     <html>
-      <body>
+      <body suppressHydrationWarning>
         <ToastProvider>
           <AuthProvider>
             <ClientLayout>{children}</ClientLayout>
