@@ -51,59 +51,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       // First try employer login
-      const employerResponse = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username: email, password }),
-      });
-
-      const employerData = await employerResponse.json();
-      if (employerResponse.ok) {
-        const user = {
-          ...employerData?.organization,
-          role: 'employer' as const,
-        };
-        setUser(user);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem(
-            'user',
-            JSON.stringify({
-              ...employerData?.organization,
-              role: 'employer' as const,
-            }),
-          );
-          // Store both tokens
-          localStorage.setItem('accessToken', employerData.data.accessToken);
-          localStorage.setItem('refreshToken', employerData.data.refreshToken);
-        }
-        showToast({
-          type: 'success',
-          message: 'Login successful! Redirecting...',
-        });
-        router.push('/');
-        return { success: true, message: 'Login successful! Redirecting...' };
-      }
-
-      // If employer login fails, try employee login
-      const employeeResponse = await fetch(
-        `${API_BASE_URL}/auth/employee-login`,
+      const employerResponse = await fetch(
+        `${API_BASE_URL}/auth/backOffice-login`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ username: email, password }),
+          body: JSON.stringify({ userName: email, password }),
+        },
+      );
+
+      const employerData = await employerResponse.json();
+      if (employerResponse.ok) {
+        const user = {
+          ...employerData?.profile,
+          role: 'employer' as const,
+        };
+        console.log(employerData);
+        setUser(user);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(
+            'user',
+            JSON.stringify({
+              ...employerData?.profile,
+              role: 'employer' as const,
+            }),
+          );
+          // Store both tokens
+          localStorage.setItem('accessToken', employerData.accessToken);
+          localStorage.setItem('refreshToken', employerData.refreshToken);
+        }
+        showToast({
+          type: 'success',
+          message: 'Login successful! Redirecting...',
+        });
+        router.push('/dashboard');
+        return { success: true, message: 'Login successful! Redirecting...' };
+      }
+
+      // If employer login fails, try employee login
+      const employeeResponse = await fetch(
+        `${API_BASE_URL}/auth/portal-login`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userName: email, password }),
         },
       );
 
       const employeeData = await employeeResponse.json();
-      console.log(employeeData);
 
       if (employeeResponse.ok) {
         const user = {
-          ...employeeData?.organization,
+          ...employeeData?.profile,
           role: 'employee' as const,
         };
         setUser(user);
@@ -117,7 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           type: 'success',
           message: 'Login successful!',
         });
-        router.push('/');
+        router.push('/dashboard');
         return { success: true, message: 'Login successful!' };
       }
 

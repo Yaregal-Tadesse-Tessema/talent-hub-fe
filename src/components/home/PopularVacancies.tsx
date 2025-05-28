@@ -26,29 +26,29 @@ const vacancies = [
 
 export default function PopularVacancies() {
   return (
-    <section className='py-20 bg-white'>
-      <div className='max-w-5xl mx-auto px-4'>
-        <h2 className='text-4xl font-bold text-center mb-14'>
+    <section className='py-12 sm:py-16 lg:py-20 bg-white'>
+      <div className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8'>
+        <h2 className='text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-14'>
           Most Popular Vacancies
         </h2>
-        <div className='grid grid-cols-1 md:grid-cols-4 gap-10'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10'>
           {vacancies.map((col, i) => (
-            <div key={i} className='space-y-10'>
+            <div key={i} className='space-y-6 sm:space-y-10'>
               {col.map((job, j) => (
-                <div key={j}>
+                <div key={j} className='flex flex-col gap-1'>
                   {job.link ? (
                     <Link
                       href='#'
-                      className='text-lg font-semibold text-blue-600 hover:underline'
+                      className='text-base sm:text-lg font-semibold text-blue-600 hover:underline'
                     >
                       {job.title}
                     </Link>
                   ) : (
-                    <div className='text-lg font-semibold text-gray-900'>
+                    <div className='text-base sm:text-lg font-semibold text-gray-900'>
                       {job.title}
                     </div>
                   )}
-                  <div className='text-gray-400 text-base'>
+                  <div className='text-gray-400 text-sm sm:text-base'>
                     {job.count} Open Positions
                   </div>
                 </div>

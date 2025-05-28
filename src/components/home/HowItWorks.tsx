@@ -81,7 +81,7 @@ const Arrow = () => (
     viewBox='0 0 100 32'
     fill='none'
     xmlns='http://www.w3.org/2000/svg'
-    className='hidden md:block absolute left-full top-1/2 -translate-y-1/2 ml-2'
+    className='hidden lg:block absolute left-full top-1/2 -translate-y-1/2 ml-2'
   >
     <path
       d='M2 16c30-16 66-16 96 0'
@@ -95,22 +95,22 @@ const Arrow = () => (
 
 export default function HowItWorks() {
   return (
-    <section className='bg-[#F6F8FA] py-20'>
-      <div className='max-w-6xl mx-auto px-4'>
-        <h2 className='text-4xl font-bold text-center mb-16'>
+    <section className='bg-[#F6F8FA] py-12 sm:py-16 lg:py-20'>
+      <div className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8'>
+        <h2 className='text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 lg:mb-16'>
           How jobpilot work
         </h2>
-        <div className='flex flex-col md:flex-row items-center justify-between relative'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4 relative'>
           {steps.map((step, i) => (
             <div
               key={i}
-              className='flex-1 flex flex-col items-center text-center relative z-10 px-2'
+              className='flex flex-col items-center text-center relative z-10 px-2'
             >
               <div
                 className={
                   step.highlight
-                    ? 'bg-white shadow-lg rounded-2xl px-10 py-8 mb-4 border-2 border-blue-100'
-                    : 'bg-white rounded-full w-24 h-24 flex items-center justify-center mb-4 shadow'
+                    ? 'bg-white shadow-lg rounded-2xl px-6 sm:px-8 lg:px-10 py-6 sm:py-8 mb-4 border-2 border-blue-100 w-full max-w-[280px]'
+                    : 'bg-white rounded-full w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center mb-4 shadow'
                 }
               >
                 {step.icon}
@@ -118,17 +118,17 @@ export default function HowItWorks() {
               <div
                 className={
                   step.highlight
-                    ? 'font-semibold text-xl mb-2'
-                    : 'font-semibold text-lg mb-2'
+                    ? 'font-semibold text-lg sm:text-xl mb-2'
+                    : 'font-semibold text-base sm:text-lg mb-2'
                 }
               >
                 {step.title}
               </div>
-              <div className='text-gray-400 max-w-xs mx-auto text-base mb-2'>
+              <div className='text-gray-400 max-w-xs mx-auto text-sm sm:text-base mb-2'>
                 {step.desc}
               </div>
               {i < steps.length - 1 && (
-                <span className='absolute right-12 top-1/3 -translate-y-1/2'>
+                <span className='absolute right-0 lg:right-12 top-1/3 -translate-y-1/2'>
                   <Arrow />
                 </span>
               )}

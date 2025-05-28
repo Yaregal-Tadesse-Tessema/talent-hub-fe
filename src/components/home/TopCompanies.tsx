@@ -120,37 +120,40 @@ const Arrow = ({ left = false }: { left?: boolean }) => (
 
 export default function TopCompanies() {
   return (
-    <section className='py-20 bg-white'>
-      <div className='max-w-7xl mx-auto px-4'>
-        <div className='flex items-center justify-between mb-10'>
-          <h2 className='text-4xl font-bold'>Top companies</h2>
-          <div className='flex gap-2'>
+    <section className='py-12 sm:py-16 lg:py-20 bg-white'>
+      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+        <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 sm:mb-10'>
+          <h2 className='text-3xl sm:text-4xl font-bold'>Top companies</h2>
+          <div className='flex gap-2 w-full sm:w-auto justify-end'>
             <Arrow left />
             <Arrow />
           </div>
         </div>
-        <div className='grid grid-cols-4 gap-8'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8'>
           {companies.map((company, i) => (
             <div
               key={i}
-              className='bg-white rounded-2xl p-6 border border-gray-100 flex flex-col items-center transition hover:shadow-lg hover:scale-105 hover:ring-2 hover:ring-blue-200'
+              className='bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 flex flex-col items-center transition hover:shadow-lg hover:scale-[1.02] hover:ring-2 hover:ring-blue-200'
             >
               {company.logo}
               <div className='flex items-center gap-2 mt-4 mb-1'>
-                <span className='font-semibold text-lg'>{company.name}</span>
+                <span className='font-semibold text-base sm:text-lg'>
+                  {company.name}
+                </span>
                 {company.featured && (
-                  <span className='bg-red-50 text-red-400 px-3 py-1 rounded-lg text-xs font-semibold'>
+                  <span className='bg-red-50 text-red-400 px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold'>
                     Featured
                   </span>
                 )}
               </div>
-              <div className='flex items-center gap-1 text-gray-400 text-sm mb-6'>
+              <div className='flex items-center gap-1 text-gray-400 text-sm mb-4 sm:mb-6'>
                 <svg
                   width='16'
                   height='16'
                   fill='none'
                   viewBox='0 0 24 24'
                   stroke='currentColor'
+                  className='flex-shrink-0'
                 >
                   <path
                     d='M12 21c-4.418 0-8-3.582-8-8 0-4.418 3.582-8 8-8s8 3.582 8 8c0 4.418-3.582 8-8 8z'
@@ -160,7 +163,7 @@ export default function TopCompanies() {
                 </svg>
                 {company.location}
               </div>
-              <button className='w-full py-3 rounded-lg font-semibold transition bg-blue-50 text-blue-600 hover:bg-blue-100'>
+              <button className='w-full py-2 sm:py-3 rounded-lg font-semibold transition bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm sm:text-base'>
                 Open Position
               </button>
             </div>

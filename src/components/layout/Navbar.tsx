@@ -63,6 +63,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
     avatar?: string;
   } | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -103,7 +104,6 @@ export function Navbar({ page = 'home' }: NavbarProps) {
 
   // Links for employer
   const employerNavLinks = [
-    { href: '/', label: 'Home' },
     { href: '/find-candidates', label: 'Find Candidates' },
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/my-jobs', label: 'My Jobs' },
@@ -113,7 +113,6 @@ export function Navbar({ page = 'home' }: NavbarProps) {
 
   // Links for employee
   const employeeNavLinks = [
-    { href: '/', label: 'Home' },
     { href: '/find-job', label: 'Find Job' },
     { href: '/find-employers', label: 'Find Employers' },
     { href: '/dashboard', label: 'Dashboard' },
@@ -123,8 +122,23 @@ export function Navbar({ page = 'home' }: NavbarProps) {
 
   return (
     <header className='w-full border-b bg-white sticky top-0 z-50'>
-      <div className='flex items-center justify-between px-16 py-4 text-sm text-gray-800 bg-gray-100'>
-        <nav className='flex gap-6'>
+      <div className='flex items-center justify-between px-4 md:px-16 py-4 text-sm text-gray-800 bg-gray-100'>
+        <button
+          className='md:hidden flex items-center mr-2'
+          aria-label='Open menu'
+          onClick={() => setMobileMenuOpen(true)}
+        >
+          <svg
+            width='28'
+            height='28'
+            fill='none'
+            viewBox='0 0 24 24'
+            stroke='currentColor'
+          >
+            <path d='M4 6h16M4 12h16M4 18h16' strokeWidth='2' />
+          </svg>
+        </button>
+        <nav className='gap-6 hidden md:flex'>
           {(user && user.role === 'employer'
             ? employerNavLinks
             : user && user.role === 'employee'
@@ -147,7 +161,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
         <div className='flex items-center gap-4'>
           {!(user && user.role === 'employer') && (
             <>
-              <span className='flex items-center gap-1'>
+              <span className='hidden md:flex items-center gap-1'>
                 <svg
                   width='18'
                   height='18'
@@ -162,7 +176,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                 </svg>{' '}
                 +1-202-555-0178
               </span>
-              <div className='flex items-center gap-1 cursor-pointer'>
+              <div className='hidden md:flex items-center gap-1 cursor-pointer'>
                 <FlagUS />
                 <span>{language}</span>
                 <svg
@@ -179,13 +193,13 @@ export function Navbar({ page = 'home' }: NavbarProps) {
           )}
         </div>
       </div>
-      <div className='flex items-center justify-between px-16 py-4 bg-white'>
+      <div className='flex items-center justify-between px-4 md:px-16 py-4 bg-white'>
         <div className='flex items-center gap-2'>
           <BriefcaseIcon />
           <span className='text-2xl font-bold ml-2'>TalentHub</span>
         </div>
         {!(user && user.role === 'employer') && (
-          <div className='flex items-center w-1/2 max-w-xl'>
+          <div className='hidden md:flex items-center w-1/2 max-w-xl'>
             <div className='flex items-center border rounded-l-md px-3 py-2 bg-gray-50'>
               <FlagETH />
               <span className='ml-2'>Ethiopia</span>
@@ -226,7 +240,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                   <span className='absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white'></span>
                 </button>
                 {user.role === 'employer' && (
-                  <Link href='/post-job'>
+                  <Link href='/dashboard?tab=post-job'>
                     <button className='px-6 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700'>
                       Post A Job
                     </button>
@@ -252,6 +266,16 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                 </button>
                 {dropdownOpen && (
                   <div className='absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-50'>
+                    {user.role === 'employee' && (
+                      <Link href='/profile'>
+                        <button
+                          className='block w-full text-left px-4 py-2 hover:bg-gray-100 text-sky-600'
+                          onClick={() => setDropdownOpen(false)}
+                        >
+                          Profile
+                        </button>
+                      </Link>
+                    )}
                     <button
                       onClick={handleLogout}
                       className='block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600'
@@ -265,6 +289,80 @@ export function Navbar({ page = 'home' }: NavbarProps) {
           ) : null}
         </div>
       </div>
+      {mobileMenuOpen && (
+        <div className='fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-end md:hidden'>
+          <div className='w-80 max-w-full bg-white h-full shadow-lg flex flex-col'>
+            <div className='flex items-center justify-between px-4 py-4 border-b'>
+              <div className='flex items-center gap-2'>
+                <BriefcaseIcon />
+                <span className='text-2xl font-bold ml-2'>TalentHub</span>
+              </div>
+              <button
+                aria-label='Close menu'
+                onClick={() => setMobileMenuOpen(false)}
+                className='p-2 rounded hover:bg-gray-100'
+              >
+                <svg
+                  width='24'
+                  height='24'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                >
+                  <path d='M6 18L18 6M6 6l12 12' strokeWidth='2' />
+                </svg>
+              </button>
+            </div>
+            <nav className='flex flex-col gap-2 px-4 py-2'>
+              {(user && user.role === 'employer'
+                ? employerNavLinks
+                : user && user.role === 'employee'
+                  ? employeeNavLinks
+                  : navLinks
+              ).map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    'py-2 px-2 rounded hover:bg-blue-50',
+                    pathname === link.href && 'text-blue-600 font-semibold',
+                  )}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+            <div className='flex flex-col gap-2 px-4 mt-4'>
+              {showAuthButtons ? (
+                <>
+                  <Link href='/register'>
+                    <button className='w-full px-4 py-2 bg-blue-600 text-white rounded-md font-medium'>
+                      Create Account
+                    </button>
+                  </Link>
+                  <Link href='/login'>
+                    <button className='w-full px-4 py-2 border border-blue-600 text-blue-600 rounded-md font-medium bg-white'>
+                      Sign In
+                    </button>
+                  </Link>
+                </>
+              ) : user ? (
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className='w-full px-4 py-2 border border-red-600 text-red-600 rounded-md font-medium bg-white mt-2'
+                >
+                  Logout
+                </button>
+              ) : null}
+            </div>
+          </div>
+          <div className='flex-1' onClick={() => setMobileMenuOpen(false)} />
+        </div>
+      )}
     </header>
   );
 }

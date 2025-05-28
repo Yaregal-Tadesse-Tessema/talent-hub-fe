@@ -16,10 +16,10 @@ export default function SignupPage() {
   const [showConfirm, setShowConfirm] = useState(false);
 
   return (
-    <div className='min-h-screen flex'>
+    <div className='min-h-screen flex flex-col md:flex-row'>
       {/* Left: Signup Form */}
-      <div className='w-1/2'>
-        <div className='flex flex-col justify-center px-32 py-12 bg-white'>
+      <div className='w-full md:w-1/2'>
+        <div className='flex flex-col justify-center px-4 sm:px-8 md:px-16 lg:px-32 py-8 md:py-12 bg-white'>
           <div className='mb-8 flex items-center gap-2'>
             <Link href='/' className='flex items-center gap-2'>
               <span className='inline-block bg-blue-100 p-2 rounded-full'>
@@ -161,7 +161,7 @@ export default function SignupPage() {
           <div className='flex gap-2'>
             <Button
               variant='outline'
-              className='w-1/2 flex items-center justify-center gap-2'
+              className='w-1/2 h-20 flex items-center justify-center gap-2'
             >
               <svg width='20' height='20' viewBox='0 0 20 20' fill='none'>
                 <g clipPath='url(#clip0_88_102)'>
@@ -192,7 +192,7 @@ export default function SignupPage() {
             </Button>
             <Button
               variant='outline'
-              className='w-1/2 flex items-center justify-center gap-2'
+              className='w-1/2 h-20 flex items-center justify-center gap-2'
             >
               <svg width='20' height='20' viewBox='0 0 20 20' fill='none'>
                 <path
@@ -210,7 +210,7 @@ export default function SignupPage() {
         </div>
       </div>
       {/* Right: Stats & BG */}
-      <div className='w-1/2 flex flex-col justify-center items-center bg-gradient-to-br from-gray-900 to-gray-700 relative clip-path-diagonal'>
+      <div className='hidden md:flex w-1/2 flex-col justify-center items-center bg-gradient-to-br from-gray-900 to-gray-700 relative clip-path-diagonal'>
         <style jsx>{`
           .clip-path-diagonal {
             clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 15% 50%);

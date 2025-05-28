@@ -1,10 +1,13 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import OverviewTab from './components/candidate/OverviewTab';
 import AppliedJobsTab from './components/candidate/AppliedJobsTab';
 import FavoriteJobsTab from './components/candidate/FavoriteJobsTab';
 import JobAlertsTab from './components/candidate/JobAlertsTab';
 import SettingsTab from './components/candidate/SettingsTab';
+import EmployerDashboard from './components/EmployerDashboard';
+
+// Job-specific routes (e.g., /dashboard/jobs/[jobId]/applications) are handled in the jobs directory.
 
 const TABS = [
   { key: 'overview', label: 'Overview' },
@@ -14,8 +17,25 @@ const TABS = [
   { key: 'settings', label: 'Settings' },
 ];
 
-export default function CandidateDashboard() {
+export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('overview');
+  const [userType, setUserType] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Get user type from localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        setUserType(JSON.parse(storedUser)?.role);
+      } catch {
+        setUserType(null);
+      }
+    } else {
+      setUserType(null);
+    }
+    // const type = localStorage.getItem('user');
+    // setUserType(type);
+  }, []);
 
   function renderTabContent() {
     switch (activeTab) {
@@ -34,6 +54,15 @@ export default function CandidateDashboard() {
     }
   }
 
+  // Show nothing until userType is loaded
+  if (userType === null) return null;
+
+  // Render EmployerDashboard if userType is 'employer'
+  if (userType === 'employer') {
+    return <EmployerDashboard />;
+  }
+
+  // Otherwise, render CandidateDashboard
   return (
     <div className='flex min-h-screen bg-gray-50 px-16'>
       {/* Sidebar Navigation (Candidate) */}

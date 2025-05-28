@@ -20,6 +20,10 @@ const nextConfig = {
   //   ]
   // },
 
+  images: {
+    domains: ['138.197.105.31'],
+  },
+
   webpack(config) {
     // Grab the existing rule that handles SVG imports
     const fileLoaderRule = config.module.rules.find((rule) =>

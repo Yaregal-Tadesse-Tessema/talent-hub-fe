@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { profileService } from '@/services/profileService';
 
 // Mock data for stats and jobs
 const stats = [
@@ -52,6 +53,27 @@ const jobs = [
 ];
 
 export default function OverviewTab() {
+  const [profileCompleteness, setProfileCompleteness] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchProfileCompleteness = async () => {
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          const completenessData = await profileService.getProfileCompleteness(
+            userData.id,
+          );
+          setProfileCompleteness(completenessData.percentage);
+        }
+      } catch (error) {
+        console.error('Error fetching profile completeness:', error);
+      }
+    };
+
+    fetchProfileCompleteness();
+  }, []);
+
   return (
     <div className='flex-1 p-10'>
       <h1 className='text-xl font-semibold mb-1'>Hello, Esther Howard</h1>
@@ -73,19 +95,23 @@ export default function OverviewTab() {
       </div>
 
       {/* Profile Alert */}
-      <div className='bg-red-400 text-white rounded-lg p-6 flex items-center justify-between mb-8'>
-        <div>
-          <div className='font-medium text-lg mb-1'>
-            Your profile editing is not completed.
+      {profileCompleteness < 100 && (
+        <div className='bg-red-400 text-white rounded-lg p-6 flex items-center justify-between mb-8'>
+          <div>
+            <div className='font-medium text-lg mb-1'>
+              Your profile is {profileCompleteness}% complete
+            </div>
+            <div className='text-white/80'>
+              Complete your profile editing & build your custom Resume
+            </div>
           </div>
-          <div className='text-white/80'>
-            Complete your profile editing & build your custom Resume
-          </div>
+          <Link href='/profile'>
+            <button className='bg-white text-red-500 px-6 py-2 rounded font-semibold hover:bg-gray-100'>
+              Edit Profile →
+            </button>
+          </Link>
         </div>
-        <button className='bg-white text-red-500 px-6 py-2 rounded font-semibold hover:bg-gray-100'>
-          Edit Profile →
-        </button>
-      </div>
+      )}
 
       {/* Recently Applied Jobs */}
       <div className='bg-white rounded-lg shadow p-6'>

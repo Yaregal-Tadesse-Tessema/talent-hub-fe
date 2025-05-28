@@ -20,8 +20,8 @@ export default function LoginPage() {
   return (
     <div className='min-h-screen flex'>
       {/* Left: Login Form */}
-      <div className='w-1/2'>
-        <div className='flex flex-col justify-center px-32 py-12 bg-white'>
+      <div className='w-full lg:w-1/2'>
+        <div className='flex flex-col justify-center px-4 sm:px-8 md:px-16 lg:px-32 py-12 bg-white'>
           <div className='mb-8 flex items-center gap-2'>
             <span className='inline-block bg-blue-100 p-2 rounded-full'>
               <svg width='24' height='24' fill='none' viewBox='0 0 24 24'>
@@ -124,7 +124,7 @@ export default function LoginPage() {
           <div className='flex gap-2'>
             <Button
               variant='outline'
-              className='w-1/2 flex items-center justify-center gap-2'
+              className='w-1/2 h-20 flex items-center justify-center gap-2'
             >
               <svg width='20' height='20' viewBox='0 0 20 20' fill='none'>
                 <g clipPath='url(#clip0_88_102)'>
@@ -155,7 +155,7 @@ export default function LoginPage() {
             </Button>
             <Button
               variant='outline'
-              className='w-1/2 flex items-center justify-center gap-2'
+              className='w-1/2 h-20 flex items-center justify-center gap-2'
             >
               <svg width='20' height='20' viewBox='0 0 20 20' fill='none'>
                 <path
@@ -173,7 +173,7 @@ export default function LoginPage() {
         </div>
       </div>
       {/* Right: Stats & BG */}
-      <div className='w-1/2 flex flex-col justify-center items-center bg-gradient-to-br from-gray-900 to-gray-700 relative clip-path-diagonal'>
+      <div className='hidden lg:block w-1/2 flex flex-col justify-center items-center bg-gradient-to-br from-gray-900 to-gray-700 relative clip-path-diagonal'>
         <style jsx>{`
           .clip-path-diagonal {
             clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 15% 50%);

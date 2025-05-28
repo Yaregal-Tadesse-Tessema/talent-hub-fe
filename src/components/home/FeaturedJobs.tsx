@@ -79,13 +79,13 @@ const BookmarkIcon = ({ filled = false }: { filled?: boolean }) => (
 
 export default function FeaturedJobs() {
   return (
-    <section className='py-20 bg-[#F8F9FB]'>
-      <div className='max-w-7xl mx-auto px-4'>
-        <div className='flex items-center justify-between mb-10'>
-          <h2 className='text-4xl font-bold'>Featured job</h2>
+    <section className='py-12 sm:py-16 lg:py-20 bg-[#F8F9FB]'>
+      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+        <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 sm:mb-10'>
+          <h2 className='text-3xl sm:text-4xl font-bold'>Featured job</h2>
           <Link
             href='#'
-            className='inline-flex items-center gap-2 px-6 py-3 border border-gray-200 rounded-lg text-blue-600 font-semibold bg-white hover:bg-blue-50 transition'
+            className='inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 border border-gray-200 rounded-lg text-blue-600 font-semibold bg-white hover:bg-blue-50 transition w-full sm:w-auto justify-center'
           >
             View All
             <svg
@@ -99,23 +99,24 @@ export default function FeaturedJobs() {
             </svg>
           </Link>
         </div>
-        <div className='space-y-6'>
+        <div className='space-y-4 sm:space-y-6'>
           {jobs.map((job, i) => (
             <div
               key={job.title}
-              className='flex flex-col md:flex-row items-center justify-between bg-white rounded-2xl p-6 border border-gray-100 hover:border-blue-300 hover:shadow-lg hover:scale-105 transition'
+              className='flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 hover:border-blue-300 hover:shadow-lg hover:scale-[1.02] transition'
             >
-              <div className='flex items-center gap-4 w-full md:w-auto mb-4 md:mb-0'>
+              <div className='flex items-start sm:items-center gap-4 w-full sm:w-auto mb-4 sm:mb-0'>
                 {job.logo}
-                <div>
-                  <div className='flex items-center gap-2'>
-                    <span className='font-semibold text-lg'>{job.title}</span>
-                    <span className='bg-blue-50 text-blue-600 px-3 py-1 rounded-lg text-xs font-semibold ml-2'>
+                <div className='flex-1'>
+                  <div className='flex flex-wrap items-center gap-2'>
+                    <span className='font-semibold text-base sm:text-lg'>
+                      {job.title}
+                    </span>
+                    <span className='bg-blue-50 text-blue-600 px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold'>
                       {job.tag}
                     </span>
                   </div>
-                  <div className='flex flex-wrap items-center gap-4 text-gray-400 text-sm mt-2'>
-                    <span>{job.location}</span>
+                  <div className='flex flex-wrap items-center gap-3 sm:gap-4 text-gray-400 text-sm mt-2'>
                     <span className='flex items-center gap-1'>
                       <svg
                         width='16'
@@ -123,13 +124,34 @@ export default function FeaturedJobs() {
                         fill='none'
                         viewBox='0 0 24 24'
                         stroke='currentColor'
+                        className='flex-shrink-0'
+                      >
+                        <path
+                          d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z'
+                          strokeWidth='2'
+                        />
+                        <path
+                          d='M15 11a3 3 0 11-6 0 3 3 0 016 0z'
+                          strokeWidth='2'
+                        />
+                      </svg>
+                      {job.location}
+                    </span>
+                    <span className='flex items-center gap-1'>
+                      <svg
+                        width='16'
+                        height='16'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                        className='flex-shrink-0'
                       >
                         <path
                           d='M12 21c-4.418 0-8-3.582-8-8 0-4.418 3.582-8 8-8s8 3.582 8 8c0 4.418-3.582 8-8 8z'
                           strokeWidth='2'
                         />
                         <circle cx='12' cy='13' r='4' strokeWidth='2' />
-                      </svg>{' '}
+                      </svg>
                       {job.salary}
                     </span>
                     <span className='flex items-center gap-1'>
@@ -139,29 +161,31 @@ export default function FeaturedJobs() {
                         fill='none'
                         viewBox='0 0 24 24'
                         stroke='currentColor'
+                        className='flex-shrink-0'
                       >
                         <path
                           d='M8 7V3m8 4V3M3 11h18M5 19h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2z'
                           strokeWidth='2'
                         />
-                      </svg>{' '}
+                      </svg>
                       {job.days}
                     </span>
                   </div>
                 </div>
               </div>
-              <div className='flex items-center gap-4'>
-                <button className='bg-blue-50 p-2 rounded-lg'>
+              <div className='flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-end'>
+                <button className='bg-blue-50 p-2 rounded-lg hover:bg-blue-100 transition'>
                   <BookmarkIcon />
                 </button>
-                <button className='px-6 py-3 bg-blue-50 text-blue-600 rounded-lg font-semibold flex items-center gap-2 hover:bg-blue-100 transition'>
-                  Appley Now
+                <button className='flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-3 bg-blue-50 text-blue-600 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-blue-100 transition'>
+                  Apply Now
                   <svg
                     width='20'
                     height='20'
                     fill='none'
                     viewBox='0 0 24 24'
                     stroke='currentColor'
+                    className='flex-shrink-0'
                   >
                     <path d='M9 5l7 7-7 7' strokeWidth='2' />
                   </svg>
