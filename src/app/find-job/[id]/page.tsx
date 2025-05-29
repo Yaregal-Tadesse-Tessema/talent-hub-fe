@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { notFound } from 'next/navigation';
+import { notFound, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import {
@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/Badge';
 import { jobService } from '@/services/jobService';
 import { Job } from '@/types/job';
 import { sanitizeHtml } from '@/utils/sanitize';
+import { useToast } from '@/contexts/ToastContext';
 
 interface UserData {
   id: string;
@@ -36,11 +37,20 @@ export default function JobDetailsPage({
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = React.use(params);
+  const searchParams = useSearchParams();
+  const { showToast } = useToast();
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isApplyOpen, setIsApplyOpen] = useState(false);
   const [userData, setUserData] = useState<UserData | undefined>(undefined);
+
+  useEffect(() => {
+    // Check if apply parameter is present
+    if (searchParams.get('apply') === 'true') {
+      setIsApplyOpen(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -75,6 +85,38 @@ export default function JobDetailsPage({
       }
     }
   }, []);
+
+  const handleSaveJob = async () => {
+    if (!userData?.id) {
+      showToast({ type: 'error', message: 'Please login to save jobs' });
+      return;
+    }
+
+    try {
+      await jobService.saveJob(job!.id, userData.id);
+      setJob((prev) => (prev ? { ...prev, isSaved: true } : null));
+      showToast({ type: 'success', message: 'Job saved successfully' });
+    } catch (error) {
+      console.error('Error saving job:', error);
+      showToast({ type: 'error', message: 'Failed to save job' });
+    }
+  };
+
+  const handleUnsaveJob = async () => {
+    if (!userData?.id) {
+      showToast({ type: 'error', message: 'Please login to unsave jobs' });
+      return;
+    }
+
+    try {
+      await jobService.unsaveJob(job!.id, userData.id);
+      setJob((prev) => (prev ? { ...prev, isSaved: false } : null));
+      showToast({ type: 'success', message: 'Job unsaved successfully' });
+    } catch (error) {
+      console.error('Error unsaving job:', error);
+      showToast({ type: 'error', message: 'Failed to unsave job' });
+    }
+  };
 
   if (loading) {
     return (
@@ -147,7 +189,10 @@ export default function JobDetailsPage({
                   <Button
                     variant='outline'
                     size='sm'
-                    className='border-gray-200'
+                    className={`border-gray-200 ${job.isSaved ? 'text-blue-600' : 'text-gray-400 hover:text-blue-600'}`}
+                    onClick={() =>
+                      job.isSaved ? handleUnsaveJob() : handleSaveJob()
+                    }
                   >
                     <Bookmark className='w-5 h-5' />
                   </Button>
@@ -179,21 +224,19 @@ export default function JobDetailsPage({
                 Responsibilities
               </div>
               <ul className='list-disc pl-6 text-gray-600 space-y-1 mb-6'>
-                {job.responsibilities.map((item, idx) => (
+                {job.responsibilities?.map((item, idx) => (
                   <li key={idx}>{item}</li>
                 ))}
               </ul>
               <div className='font-semibold text-lg mb-2'>Requirements</div>
               <ul className='list-disc pl-6 text-gray-600 space-y-1 mb-6'>
-                {job.jobPostRequirement.map((item, idx) => (
+                {job.jobPostRequirement?.map((item, idx) => (
                   <li key={idx}>{item}</li>
                 ))}
               </ul>
               <div className='font-semibold text-lg mb-2'>Benefits</div>
               <ul className='list-disc pl-6 text-gray-600 space-y-1 mb-6'>
-                {job.benefits.map((item, idx) => (
-                  <li key={idx}>{item}</li>
-                ))}
+                {job.benefits?.map((item, idx) => <li key={idx}>{item}</li>)}
               </ul>
               <div className='flex gap-2 items-center mt-4'>
                 <span>Share this job:</span>

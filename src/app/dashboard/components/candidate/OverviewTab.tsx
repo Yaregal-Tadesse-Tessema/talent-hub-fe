@@ -1,97 +1,88 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { profileService } from '@/services/profileService';
+import { applicationService } from '@/services/applicationService';
+import type { Application } from '@/services/applicationService';
 
-// Mock data for stats and jobs
-const stats = [
-  { label: 'Applied jobs', value: 589 },
-  { label: 'Favorite jobs', value: 238 },
-  { label: 'Job Alerts', value: 574 },
-];
-
-const jobs = [
-  {
-    id: 1,
-    title: 'Networking Engineer',
-    company: 'Upwork',
-    location: 'Washington',
-    salary: '$50k-80k/month',
-    type: 'Remote',
-    date: 'Feb 2, 2019 19:28',
-    status: 'Active',
-  },
-  {
-    id: 2,
-    title: 'Product Designer',
-    company: 'Dribbble',
-    location: 'Dhaka',
-    salary: '$50k-80k/month',
-    type: 'Full Time',
-    date: 'Dec 7, 2019 23:26',
-    status: 'Active',
-  },
-  {
-    id: 3,
-    title: 'Junior Graphic Designer',
-    company: 'Apple',
-    location: 'Brazil',
-    salary: '$50k-80k/month',
-    type: 'Temporary',
-    date: 'Feb 2, 2019 19:28',
-    status: 'Active',
-  },
-  {
-    id: 4,
-    title: 'Visual Designer',
-    company: 'Microsoft',
-    location: 'Wisconsin',
-    salary: '$50k-80k/month',
-    type: 'Contract Base',
-    date: 'Dec 7, 2019 23:26',
-    status: 'Active',
-  },
-];
+// Mock data for stats
 
 export default function OverviewTab() {
+  const router = useRouter();
   const [profileCompleteness, setProfileCompleteness] = useState<number>(0);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [applicationsCount, setApplicationsCount] = useState<number>(0);
+  const [userName, setUserName] = useState<string>('');
+  const [stats, setStats] = useState<{
+    appliedJobs: number;
+    favoriteJobs: number;
+    jobAlerts: number;
+  }>({
+    appliedJobs: 0,
+    favoriteJobs: 0,
+    jobAlerts: 0,
+  });
 
   useEffect(() => {
-    const fetchProfileCompleteness = async () => {
+    const fetchData = async () => {
       try {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
           const userData = JSON.parse(storedUser);
+
+          // Set user name
+          setUserName(`${userData.firstName} ${userData.lastName}`);
+
+          // Fetch profile completeness
           const completenessData = await profileService.getProfileCompleteness(
             userData.id,
           );
           setProfileCompleteness(completenessData.percentage);
+
+          // Fetch applications
+          const applicationsData =
+            await applicationService.getApplicationsByUserId(userData.id, 5);
+          setApplications(applicationsData.items);
+          setApplicationsCount(applicationsData.total);
+          setStats({
+            appliedJobs: applicationsData.total,
+            favoriteJobs: 0,
+            jobAlerts: 0,
+          });
         }
       } catch (error) {
-        console.error('Error fetching profile completeness:', error);
+        console.error('Error fetching data:', error);
       }
     };
 
-    fetchProfileCompleteness();
+    fetchData();
   }, []);
+
+  const handleViewAll = () => {
+    router.push('/dashboard?tab=applied');
+  };
 
   return (
     <div className='flex-1 p-10'>
-      <h1 className='text-xl font-semibold mb-1'>Hello, Esther Howard</h1>
+      <h1 className='text-xl font-semibold mb-1'>Hello, {userName}</h1>
       <p className='text-gray-500 mb-6'>
         Here is your daily activities and job alerts
       </p>
 
       {/* Stats Cards */}
       <div className='grid grid-cols-3 gap-6 mb-8'>
-        {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className='bg-white rounded-lg shadow p-6 flex flex-col items-start'
-          >
-            <div className='text-2xl font-bold mb-2'>{stat.value}</div>
-            <div className='text-gray-500'>{stat.label}</div>
-          </div>
-        ))}
+        <div className='bg-white rounded-lg shadow p-6 flex flex-col items-start'>
+          <div className='text-2xl font-bold mb-2'>{stats.appliedJobs}</div>
+          <div className='text-gray-500'>Applied Jobs</div>
+        </div>
+        <div className='bg-white rounded-lg shadow p-6 flex flex-col items-start'>
+          <div className='text-2xl font-bold mb-2'>{stats.favoriteJobs}</div>
+          <div className='text-gray-500'>Favorite Jobs</div>
+        </div>
+        <div className='bg-white rounded-lg shadow p-6 flex flex-col items-start'>
+          <div className='text-2xl font-bold mb-2'>{stats.jobAlerts}</div>
+          <div className='text-gray-500'>Job Alerts</div>
+        </div>
       </div>
 
       {/* Profile Alert */}
@@ -117,9 +108,12 @@ export default function OverviewTab() {
       <div className='bg-white rounded-lg shadow p-6'>
         <div className='flex items-center justify-between mb-4'>
           <div className='font-semibold text-lg'>Recently Applied</div>
-          <Link href='#' className='text-blue-600 hover:underline text-sm'>
+          <button
+            onClick={handleViewAll}
+            className='text-blue-600 hover:underline text-sm'
+          >
             View all →
-          </Link>
+          </button>
         </div>
         <div className='overflow-x-auto'>
           <table className='min-w-full text-sm'>
@@ -132,32 +126,32 @@ export default function OverviewTab() {
               </tr>
             </thead>
             <tbody>
-              {jobs.map((job) => (
-                <tr key={job.id} className='border-t'>
+              {applications.map((application) => (
+                <tr key={application.id} className='border-t'>
                   <td className='py-3 px-4 flex items-center gap-3'>
-                    <span className='w-10 h-10 rounded bg-gray-100 flex items-center justify-center font-bold text-lg'>
-                      {job.company[0]}
-                    </span>
                     <div>
-                      <div className='font-medium'>{job.title}</div>
-                      <div className='text-gray-400 text-xs flex gap-2 items-center'>
-                        <span>{job.location}</span>
-                        <span>•</span>
-                        <span>{job.salary}</span>
+                      <div className='font-medium'>
+                        {application.jobPost?.title}
                       </div>
-                      <span className='inline-block bg-blue-50 text-blue-600 text-xs px-2 py-0.5 rounded mt-1'>
-                        {job.type}
-                      </span>
+                      <div className='text-gray-400 text-xs flex gap-2 items-center'>
+                        <span>{application.jobPost?.industry}</span>
+                        <span>•</span>
+                        <span>{application.jobPost?.position}</span>
+                      </div>
                     </div>
                   </td>
-                  <td className='py-3 px-4'>{job.date}</td>
+                  <td className='py-3 px-4'>
+                    {new Date(
+                      application.jobPost?.createdAt,
+                    ).toLocaleDateString()}
+                  </td>
                   <td className='py-3 px-4'>
                     <span className='text-green-600 font-medium'>
-                      {job.status}
+                      {application.status}
                     </span>
                   </td>
                   <td className='py-3 px-4'>
-                    <Link href='#'>
+                    <Link href={`/jobs/${application.JobPostId}`}>
                       <button className='px-4 py-2 bg-blue-50 text-blue-600 rounded font-medium hover:bg-blue-100'>
                         View Details
                       </button>

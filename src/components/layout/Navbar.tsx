@@ -234,15 +234,29 @@ export function Navbar({ page = 'home' }: NavbarProps) {
             </>
           ) : user ? (
             <>
-              <div className='relative flex items-center gap-2'>
+              <div className='relative flex items-center gap-3'>
                 <button className='relative'>
                   <BellIcon />
                   <span className='absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white'></span>
                 </button>
                 {user.role === 'employer' && (
                   <Link href='/dashboard?tab=post-job'>
-                    <button className='px-6 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700'>
-                      Post A Job
+                    <button className='flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700'>
+                      <svg
+                        width='24'
+                        height='24'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                      >
+                        <path
+                          d='M12 4v16m8-8H4'
+                          strokeWidth='2'
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                        />
+                      </svg>
+                      Create Job
                     </button>
                   </Link>
                 )}

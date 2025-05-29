@@ -52,9 +52,7 @@ export default function PostJobTab() {
       min: '50000',
       max: '80000',
     },
-    deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split('.')[0], // 30 days from now, format: YYYY-MM-DDTHH:mm:ss
+    deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
     requirementId: 'req123',
     skill: ['React', 'TypeScript', 'Node.js', 'AWS'],
     benefits: [
@@ -72,7 +70,7 @@ export default function PostJobTab() {
     status: 'active',
     gender: 'Any',
     minimumGPA: '3.0',
-    postedDate: new Date().toISOString().split('.')[0], // Current date, format: YYYY-MM-DDTHH:mm:ss
+    postedDate: new Date().toISOString(),
     applicationURL: 'https://company.com/careers',
     experienceLevel: 'Senior',
     fieldOfStudy: 'Computer Science',
@@ -116,7 +114,7 @@ export default function PostJobTab() {
       if (!isNaN(date.getTime())) {
         setFormData((prev) => ({
           ...prev,
-          [name]: date.toISOString().split('.')[0],
+          [name]: date.toISOString(),
         }));
       }
     } else {
@@ -160,13 +158,18 @@ export default function PostJobTab() {
     setIsSubmitting(true);
 
     try {
-      // Filter out empty array items
+      // Filter out empty array items and ensure proper date formatting
       const cleanedData = {
         ...formData,
         skill: formData.skill.filter(Boolean),
         benefits: formData.benefits.filter(Boolean),
         responsibilities: formData.responsibilities.filter(Boolean),
         jobPostRequirement: formData.jobPostRequirement.filter(Boolean),
+        postedDate: new Date(formData.postedDate).toISOString(),
+        deadline: new Date(formData.deadline).toISOString(),
+        onHoldDate: formData.onHoldDate
+          ? new Date(formData.onHoldDate).toISOString()
+          : null,
       };
 
       await jobService.createJobPosting(cleanedData as JobPosting);

@@ -15,6 +15,7 @@ interface JobPost {
   description: string;
   position: string;
   industry: string;
+  createdAt: string;
 }
 
 interface UserInfo {
@@ -140,6 +141,26 @@ class ApplicationService {
       return new File([blob], 'profile-cv.pdf', { type: blob.type });
     } catch (error) {
       console.error('Error fetching profile CV:', error);
+      throw error;
+    }
+  }
+
+  async getApplicationsByUserId(
+    userId: string,
+    limit?: number,
+  ): Promise<ApplicationsResponse> {
+    try {
+      const response = await api.get(
+        `/applications?q=i=JobPost%26%26w=userId:=:${userId}${limit ? `&limit=${limit}` : ''}`,
+      );
+
+      if (!response.data) {
+        throw new Error('Failed to fetch applications');
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching applications by user:', error);
       throw error;
     }
   }

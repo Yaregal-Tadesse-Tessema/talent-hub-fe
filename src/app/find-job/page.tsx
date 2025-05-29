@@ -7,8 +7,12 @@ import { Bookmark, ArrowRight } from 'lucide-react';
 import FilterModal from '@/components/ui/FilterModal';
 import { jobService } from '@/services/jobService';
 import { Job } from '@/types/job';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function FindJobPage() {
+  const router = useRouter();
+  const { showToast } = useToast();
   const [selectedPage, setSelectedPage] = useState(1);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('list');
   const [hoveredJobId, setHoveredJobId] = useState<string | null>(null);
@@ -16,14 +20,82 @@ export default function FindJobPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userData, setUserData] = useState<{ id: string } | null>(null);
+  const [searchFilters, setSearchFilters] = useState({
+    keyword: '',
+    location: '',
+    category: '',
+  });
   const jobsPerPage = 12;
   const totalPages = 5;
+
+  const handleSearch = async () => {
+    try {
+      setLoading(true);
+      const queryParams = new URLSearchParams();
+
+      if (searchFilters.keyword) {
+        // Use search parameter for keyword search
+        queryParams.append('search', searchFilters.keyword.trim());
+      }
+      if (searchFilters.location) {
+        queryParams.append('location', searchFilters.location.trim());
+      }
+      if (searchFilters.category) {
+        queryParams.append('type', searchFilters.category);
+      }
+
+      const queryString = queryParams.toString();
+      console.log('Search Query Parameters:', {
+        keyword: searchFilters.keyword,
+        location: searchFilters.location,
+        category: searchFilters.category,
+      });
+      console.log('Final Query String:', queryString);
+
+      const response = await jobService.getJobs(queryString);
+
+      if (response && response.items) {
+        console.log('Number of results:', response.items.length);
+        setJobs(response.items);
+        if (response.items.length === 0) {
+          showToast({
+            type: 'error',
+            message: 'No jobs found matching your criteria',
+          });
+        }
+      } else {
+        setJobs([]);
+        showToast({
+          type: 'error',
+          message: 'No jobs found matching your criteria',
+        });
+      }
+    } catch (err) {
+      console.error('Error searching jobs:', err);
+      setError('Failed to search jobs. Please try again later.');
+      showToast({
+        type: 'error',
+        message: 'Failed to search jobs. Please try again later.',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Add keyboard event handler for search
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   useEffect(() => {
     const fetchJobs = async () => {
       try {
         setLoading(true);
         const response = await jobService.getJobs();
+        console.log(response);
         setJobs(response.items);
       } catch (err) {
         console.error('Error fetching jobs:', err);
@@ -36,10 +108,61 @@ export default function FindJobPage() {
     fetchJobs();
   }, []);
 
+  useEffect(() => {
+    // Get user data from localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUserData({ id: parsedUser.id });
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+      }
+    }
+  }, []);
+
+  const handleSaveJob = async (jobId: string) => {
+    if (!userData) {
+      showToast({ type: 'error', message: 'Please login to save jobs' });
+      return;
+    }
+
+    try {
+      await jobService.saveJob(jobId, userData.id);
+      setJobs(
+        jobs.map((job) => (job.id === jobId ? { ...job, isSaved: true } : job)),
+      );
+      showToast({ type: 'success', message: 'Job saved successfully' });
+    } catch (error) {
+      console.error('Error saving job:', error);
+      showToast({ type: 'error', message: 'Failed to save job' });
+    }
+  };
+
+  const handleUnsaveJob = async (jobId: string) => {
+    if (!userData) {
+      showToast({ type: 'error', message: 'Please login to unsave jobs' });
+      return;
+    }
+
+    try {
+      await jobService.unsaveJob(jobId, userData.id);
+      setJobs(
+        jobs.map((job) =>
+          job.id === jobId ? { ...job, isSaved: false } : job,
+        ),
+      );
+      showToast({ type: 'success', message: 'Job unsaved successfully' });
+    } catch (error) {
+      console.error('Error unsaving job:', error);
+      showToast({ type: 'error', message: 'Failed to unsave job' });
+    }
+  };
+
   return (
     <main className='min-h-screen pb-16'>
       {/* Page title and breadcrumb */}
-      <div className='flex justify-between bg-gray-100 items-center px-16 pt-8'>
+      <div className='flex flex-col sm:flex-row justify-between bg-gray-100 items-center px-4 sm:px-16 pt-8 gap-2'>
         <h2 className='text-md text-gray-500'>Find Job</h2>
         <nav className='text-gray-400 text-sm flex items-center gap-1'>
           <span className='hover:text-gray-600 cursor-pointer'>Home</span>
@@ -58,10 +181,10 @@ export default function FindJobPage() {
       {error && <div className='text-red-500 text-center py-4'>{error}</div>}
 
       {/* Top search/filter bar */}
-      <div className='bg-gray-100 px-16 py-4 pb-8 border-b'>
-        <div className='flex gap-4 items-center shadow rounded-xl px-6 py-2 bg-white'>
+      <div className='bg-gray-100 px-4 sm:px-16 py-4 pb-8 border-b'>
+        <div className='flex flex-col lg:flex-row gap-4 items-center shadow rounded-xl px-4 sm:px-6 py-4 bg-white'>
           {/* Job title search */}
-          <div className='flex items-center gap-2 flex-1 border-r pr-4'>
+          <div className='flex items-center gap-2 flex-1 border-b lg:border-b-0 lg:border-r pb-4 lg:pb-0 pr-0 lg:pr-4 w-full'>
             <svg
               width='22'
               height='22'
@@ -75,10 +198,18 @@ export default function FindJobPage() {
             <input
               className='flex-1 bg-transparent border-none outline-none text-gray-700 placeholder-gray-400'
               placeholder='Job title, Keyword...'
+              value={searchFilters.keyword}
+              onChange={(e) =>
+                setSearchFilters((prev) => ({
+                  ...prev,
+                  keyword: e.target.value,
+                }))
+              }
+              onKeyPress={handleKeyPress}
             />
           </div>
           {/* Location */}
-          <div className='flex items-center gap-2 border-r px-4 min-w-[200px]'>
+          <div className='flex items-center gap-2 border-b lg:border-b-0 lg:border-r px-0 lg:px-4 pb-4 lg:pb-0 w-full lg:w-auto'>
             <svg
               width='22'
               height='22'
@@ -95,10 +226,18 @@ export default function FindJobPage() {
             <input
               className='bg-transparent border-none outline-none text-gray-700 placeholder-gray-400 w-full'
               placeholder='Location'
+              value={searchFilters.location}
+              onChange={(e) =>
+                setSearchFilters((prev) => ({
+                  ...prev,
+                  location: e.target.value,
+                }))
+              }
+              onKeyPress={handleKeyPress}
             />
           </div>
           {/* Category */}
-          <div className='flex items-center gap-2 border-r px-4 min-w-[200px]'>
+          <div className='flex items-center gap-2 border-b lg:border-b-0 lg:border-r px-0 lg:px-4 pb-4 lg:pb-0 w-full lg:w-auto'>
             <svg
               width='22'
               height='22'
@@ -112,13 +251,28 @@ export default function FindJobPage() {
                 <rect x='3' y='15' width='18' height='6' rx='2' />
               </g>
             </svg>
-            <select className='bg-transparent border-none outline-none text-gray-700 w-full'>
-              <option>Select Category</option>
+            <select
+              className='bg-transparent border-none outline-none text-gray-700 w-full'
+              value={searchFilters.category}
+              onChange={(e) =>
+                setSearchFilters((prev) => ({
+                  ...prev,
+                  category: e.target.value,
+                }))
+              }
+            >
+              <option value=''>Select Category</option>
+              <option value='FULL_TIME'>Full Time</option>
+              <option value='PART_TIME'>Part Time</option>
+              <option value='CONTRACT'>Contract</option>
+              <option value='INTERNSHIP'>Internship</option>
+              <option value='TEMPORARY'>Temporary</option>
+              <option value='FREELANCE'>Freelance</option>
             </select>
           </div>
 
           {/* Advanced filter */}
-          <div className='flex items-center gap-2 border-r px-4 min-w-[200px]'>
+          <div className='flex items-center gap-2 border-b lg:border-b-0 lg:border-r px-0 lg:px-4 pb-4 lg:pb-0 w-full lg:w-auto'>
             <div
               className='flex items-center cursor-pointer'
               onClick={() => setIsFilterOpen(true)}
@@ -135,9 +289,12 @@ export default function FindJobPage() {
               </svg>
             </div>
           </div>
-          {/* Chevron and Find Job button */}
-          <div className='flex items-center gap-2 pl-2'>
-            <button className='bg-blue-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-blue-700 transition'>
+          {/* Find Job button */}
+          <div className='flex items-center gap-2 pl-0 lg:pl-2 w-full lg:w-auto'>
+            <button
+              className='bg-blue-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-blue-700 transition w-full lg:w-auto'
+              onClick={handleSearch}
+            >
               Find Job
             </button>
           </div>
@@ -194,6 +351,18 @@ export default function FindJobPage() {
                     Deadline: {new Date(job.deadline).toLocaleDateString()}
                   </span>
                 </div>
+                <button
+                  className={`${job.isSaved ? 'text-blue-600' : 'text-gray-400 hover:text-blue-600'}`}
+                  onClick={() =>
+                    job.isSaved
+                      ? handleUnsaveJob(job.id)
+                      : handleSaveJob(job.id)
+                  }
+                >
+                  <Bookmark
+                    className={`w-5 h-5 ${job.isSaved ? 'fill-current' : ''}`}
+                  />
+                </button>
               </div>
             ))}
           </div>
@@ -325,10 +494,24 @@ export default function FindJobPage() {
                   </div>
                   {/* Bookmark and Apply */}
                   <div className='flex items-center gap-4 ml-4'>
-                    <button className='text-gray-400 hover:text-blue-600'>
-                      <Bookmark className='w-5 h-5' />
+                    <button
+                      className={`${job.isSaved ? 'text-blue-600' : 'text-gray-400 hover:text-blue-600'}`}
+                      onClick={() =>
+                        job.isSaved
+                          ? handleUnsaveJob(job.id)
+                          : handleSaveJob(job.id)
+                      }
+                    >
+                      <Bookmark
+                        className={`w-5 h-5 ${job.isSaved ? 'fill-current' : ''}`}
+                      />
                     </button>
-                    <button className='bg-blue-50 text-blue-700 font-semibold px-5 py-2 rounded-lg hover:bg-blue-600 hover:text-white flex items-center gap-2 transition'>
+                    <button
+                      className='bg-blue-50 text-blue-700 font-semibold px-5 py-2 rounded-lg hover:bg-blue-600 hover:text-white flex items-center gap-2 transition'
+                      onClick={() =>
+                        router.push(`/find-job/${job.id}?apply=true`)
+                      }
+                    >
                       Apply Now
                       <ArrowRight className='w-4 h-4' />
                     </button>

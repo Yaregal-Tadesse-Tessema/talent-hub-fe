@@ -114,6 +114,7 @@ export default function FindCandidatesPage() {
   });
   const [showModal, setShowModal] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
+  const [showMobileFilter, setShowMobileFilter] = useState(false);
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({
@@ -132,10 +133,14 @@ export default function FindCandidatesPage() {
     setSelectedCandidate(null);
   };
 
+  const toggleMobileFilter = () => {
+    setShowMobileFilter(!showMobileFilter);
+  };
+
   return (
     <div className='min-h-screen'>
       {/* Page title and breadcrumb */}
-      <div className='flex justify-between bg-gray-100 items-center px-16 py-4'>
+      <div className='flex justify-between bg-gray-100 items-center px-4 sm:px-8 md:px-16 py-4'>
         <h2 className='text-md text-gray-500'>Find Candidates</h2>
         <nav className='text-gray-400 text-sm flex items-center gap-1'>
           <span className='hover:text-gray-600 cursor-pointer'>Home</span>
@@ -144,34 +149,138 @@ export default function FindCandidatesPage() {
         </nav>
       </div>
 
+      {/* Mobile Filter Button */}
+      <button
+        onClick={toggleMobileFilter}
+        className='lg:hidden fixed bottom-6 right-6 z-[100] bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition flex items-center justify-center'
+      >
+        <svg
+          width='24'
+          height='24'
+          fill='none'
+          viewBox='0 0 24 24'
+          stroke='currentColor'
+          className='w-6 h-6'
+        >
+          <path
+            d='M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z'
+            strokeWidth='2'
+            strokeLinecap='round'
+            strokeLinejoin='round'
+          />
+        </svg>
+      </button>
+
+      {/* Mobile Filter Overlay */}
+      {showMobileFilter && (
+        <div
+          className='lg:hidden fixed inset-0 bg-black bg-opacity-50 z-[90]'
+          onClick={toggleMobileFilter}
+        >
+          <div
+            className='absolute right-0 top-0 h-full w-[280px] bg-white shadow-lg overflow-y-auto transform transition-transform duration-300 ease-in-out'
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className='p-4 border-b flex justify-between items-center'>
+              <h3 className='font-semibold text-lg'>Filters</h3>
+              <button
+                onClick={toggleMobileFilter}
+                className='p-2 hover:bg-gray-100 rounded-full'
+              >
+                <svg
+                  width='24'
+                  height='24'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                >
+                  <path
+                    d='M6 18L18 6M6 6l12 12'
+                    strokeWidth='2'
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className='p-4'>
+              {/* Filter content will be rendered here */}
+              {/* Location Radius */}
+              <div>
+                <div
+                  className='flex justify-between items-center mb-2 cursor-pointer select-none'
+                  onClick={() => toggleSection('location')}
+                >
+                  <span className='font-medium text-sm sm:text-base'>
+                    Location Radius:{' '}
+                    <span className='text-blue-600 font-semibold'>
+                      {radius} miles
+                    </span>
+                  </span>
+                  <svg
+                    width='20'
+                    height='20'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                    stroke='currentColor'
+                    className={`transform transition-transform ${expandedSections.location ? 'rotate-180' : ''}`}
+                  >
+                    <path
+                      d='M19 9l-7 7-7-7'
+                      strokeWidth='2'
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                    />
+                  </svg>
+                </div>
+                {expandedSections.location && (
+                  <input
+                    type='range'
+                    min={0}
+                    max={100}
+                    value={radius}
+                    onChange={(e) => setRadius(Number(e.target.value))}
+                    className='w-full accent-blue-600 mt-4'
+                  />
+                )}
+              </div>
+              {/* Rest of the filter sections */}
+              {/* ... Copy the rest of the filter sections here ... */}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Top search/filter bar */}
-      <div className='bg-gray-100 px-16 py-4 pb-8 border-b'>
-        <div className='flex gap-4 items-center shadow rounded-xl px-6 py-2 bg-white'>
+      <div className='bg-gray-100 px-4 sm:px-8 md:px-16 py-4 pb-8 border-b'>
+        <div className='flex flex-col sm:flex-row gap-4 items-stretch sm:items-center shadow rounded-xl px-4 sm:px-6 py-2 bg-white'>
           {/* Job title search */}
-          <div className='flex items-center gap-2 flex-1 border-r pr-4'>
+          <div className='flex items-center gap-2 flex-1 border-b sm:border-b-0 sm:border-r pb-2 sm:pb-0 pr-0 sm:pr-4'>
             <svg
               width='22'
               height='22'
               fill='none'
               viewBox='0 0 24 24'
               stroke='#2563eb'
+              className='flex-shrink-0'
             >
               <circle cx='11' cy='11' r='7' strokeWidth='2' />
               <path d='M21 21l-4.35-4.35' strokeWidth='2' />
             </svg>
             <input
               className='flex-1 bg-transparent border-none outline-none text-gray-700 placeholder-gray-400'
-              placeholder='Job tittle, Keyword...'
+              placeholder='Job title, Keyword...'
             />
           </div>
           {/* Location */}
-          <div className='flex items-center gap-2 border-r px-4 min-w-[200px]'>
+          <div className='flex items-center gap-2 border-b sm:border-b-0 sm:border-r px-0 sm:px-4 pb-2 sm:pb-0 min-w-[200px]'>
             <svg
               width='22'
               height='22'
               fill='none'
               viewBox='0 0 24 24'
               stroke='#2563eb'
+              className='flex-shrink-0'
             >
               <path
                 d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z'
@@ -185,13 +294,14 @@ export default function FindCandidatesPage() {
             />
           </div>
           {/* Category */}
-          <div className='flex items-center gap-2 border-r px-4 min-w-[200px]'>
+          <div className='flex items-center gap-2 border-b sm:border-b-0 sm:border-r px-0 sm:px-4 pb-2 sm:pb-0 min-w-[200px]'>
             <svg
               width='22'
               height='22'
               fill='none'
               viewBox='0 0 24 24'
               stroke='#2563eb'
+              className='flex-shrink-0'
             >
               <g strokeWidth='2'>
                 <rect x='3' y='3' width='18' height='6' rx='2' />
@@ -203,9 +313,9 @@ export default function FindCandidatesPage() {
               <option>Select Category</option>
             </select>
           </div>
-          {/* Chevron and Find Job button */}
-          <div className='flex items-center gap-2 pl-2'>
-            <button className='bg-blue-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-blue-700 transition'>
+          {/* Find Job button */}
+          <div className='flex items-center gap-2 pl-0 sm:pl-2 pt-2 sm:pt-0'>
+            <button className='w-full sm:w-auto bg-blue-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-blue-700 transition'>
               Find Job
             </button>
           </div>
@@ -213,8 +323,8 @@ export default function FindCandidatesPage() {
       </div>
 
       {/* Sidebar Filter */}
-      <div className='bg-gray-50 flex gap-8 px-16 py-8'>
-        <div className='w-80 bg-white rounded-lg border border-gray-200 p-6 shadow-sm h-fit flex flex-col gap-6'>
+      <div className='bg-gray-50 flex flex-col lg:flex-row gap-4 lg:gap-8 px-4 sm:px-8 md:px-16 py-8'>
+        <div className='hidden lg:block w-full lg:w-80 bg-white rounded-lg border border-gray-200 p-4 sm:p-6 shadow-sm h-fit flex flex-col gap-4 sm:gap-6'>
           <button className='w-full bg-blue-600 text-white py-2 rounded mb-2 font-semibold flex items-center justify-center gap-2'>
             <svg width='16' height='16' viewBox='0 0 24 24' fill='none'>
               <path
@@ -289,7 +399,7 @@ export default function FindCandidatesPage() {
               className='flex justify-between items-center mb-2 cursor-pointer select-none'
               onClick={() => toggleSection('location')}
             >
-              <span className='font-medium'>
+              <span className='font-medium text-sm sm:text-base'>
                 Location Radius:{' '}
                 <span className='text-blue-600 font-semibold'>
                   {radius} miles
@@ -328,7 +438,9 @@ export default function FindCandidatesPage() {
               className='flex justify-between items-center mb-2 cursor-pointer select-none'
               onClick={() => toggleSection('level')}
             >
-              <div className='font-medium'>Candidate Level</div>
+              <div className='font-medium text-sm sm:text-base'>
+                Candidate Level
+              </div>
               <svg
                 width='20'
                 height='20'
@@ -346,9 +458,9 @@ export default function FindCandidatesPage() {
               </svg>
             </div>
             {expandedSections.level && (
-              <>
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2'>
                 {candidateLevels.map((level) => (
-                  <div key={level} className='flex items-center mb-2'>
+                  <div key={level} className='flex items-center'>
                     <input
                       type='radio'
                       id={level}
@@ -358,10 +470,12 @@ export default function FindCandidatesPage() {
                       onChange={() => setSelectedLevel(level)}
                       className='mr-2 accent-blue-600'
                     />
-                    <label htmlFor={level}>{level}</label>
+                    <label htmlFor={level} className='text-sm sm:text-base'>
+                      {level}
+                    </label>
                   </div>
                 ))}
-              </>
+              </div>
             )}
           </div>
           {/* Experiences */}
@@ -370,7 +484,9 @@ export default function FindCandidatesPage() {
               className='flex justify-between items-center mb-2 cursor-pointer select-none'
               onClick={() => toggleSection('experience')}
             >
-              <div className='font-medium'>Experiences</div>
+              <div className='font-medium text-sm sm:text-base'>
+                Experiences
+              </div>
               <svg
                 width='20'
                 height='20'
@@ -388,9 +504,9 @@ export default function FindCandidatesPage() {
               </svg>
             </div>
             {expandedSections.experience && (
-              <>
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2'>
                 {experiences.map((exp) => (
-                  <div key={exp} className='flex items-center mb-2'>
+                  <div key={exp} className='flex items-center'>
                     <input
                       type='radio'
                       id={exp}
@@ -400,10 +516,12 @@ export default function FindCandidatesPage() {
                       onChange={() => setSelectedExperience(exp)}
                       className='mr-2 accent-blue-600'
                     />
-                    <label htmlFor={exp}>{exp}</label>
+                    <label htmlFor={exp} className='text-sm sm:text-base'>
+                      {exp}
+                    </label>
                   </div>
                 ))}
-              </>
+              </div>
             )}
           </div>
           {/* Education */}
@@ -412,7 +530,7 @@ export default function FindCandidatesPage() {
               className='flex justify-between items-center mb-2 cursor-pointer select-none'
               onClick={() => toggleSection('education')}
             >
-              <div className='font-medium'>Education</div>
+              <div className='font-medium text-sm sm:text-base'>Education</div>
               <svg
                 width='20'
                 height='20'
@@ -430,9 +548,9 @@ export default function FindCandidatesPage() {
               </svg>
             </div>
             {expandedSections.education && (
-              <>
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2'>
                 {educations.map((edu) => (
-                  <div key={edu} className='flex items-center mb-2'>
+                  <div key={edu} className='flex items-center'>
                     <input
                       type='checkbox'
                       id={edu}
@@ -448,10 +566,12 @@ export default function FindCandidatesPage() {
                       }
                       className='mr-2 accent-blue-600'
                     />
-                    <label htmlFor={edu}>{edu}</label>
+                    <label htmlFor={edu} className='text-sm sm:text-base'>
+                      {edu}
+                    </label>
                   </div>
                 ))}
-              </>
+              </div>
             )}
           </div>
           {/* Gender */}
@@ -460,7 +580,7 @@ export default function FindCandidatesPage() {
               className='flex justify-between items-center mb-2 cursor-pointer select-none'
               onClick={() => toggleSection('gender')}
             >
-              <div className='font-medium'>Gender</div>
+              <div className='font-medium text-sm sm:text-base'>Gender</div>
               <svg
                 width='20'
                 height='20'
@@ -478,9 +598,9 @@ export default function FindCandidatesPage() {
               </svg>
             </div>
             {expandedSections.gender && (
-              <>
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2'>
                 {genders.map((gender) => (
-                  <div key={gender} className='flex items-center mb-2'>
+                  <div key={gender} className='flex items-center'>
                     <input
                       type='radio'
                       id={gender}
@@ -490,10 +610,12 @@ export default function FindCandidatesPage() {
                       onChange={() => setSelectedGender(gender)}
                       className='mr-2 accent-blue-600'
                     />
-                    <label htmlFor={gender}>{gender}</label>
+                    <label htmlFor={gender} className='text-sm sm:text-base'>
+                      {gender}
+                    </label>
                   </div>
                 ))}
-              </>
+              </div>
             )}
           </div>
         </div>

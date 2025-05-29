@@ -1,4 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { jobService } from '@/services/jobService';
+import { Job } from '@/types/job';
+import { useToast } from '@/contexts/ToastContext';
+import JobDetailModal from './JobDetailModal';
 
 // Mock data for stats and jobs
 const stats = [
@@ -50,8 +54,36 @@ const jobs = [
 ];
 
 export default function OverviewTab() {
-  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
-  const menuRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const menuRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        setLoading(true);
+        const response = await jobService.getJobs();
+        setJobs(
+          response.items.sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+          ),
+        );
+      } catch (err) {
+        console.error('Error fetching jobs:', err);
+        setError('Failed to fetch jobs. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -73,8 +105,44 @@ export default function OverviewTab() {
     };
   }, [openMenuId]);
 
+  const handleViewDetail = (job: Job) => {
+    setSelectedJob(job);
+    setIsDetailModalOpen(true);
+    setOpenMenuId(null);
+  };
+
+  if (loading) {
+    return (
+      <div className='flex-1 p-6'>
+        <div className='flex justify-center items-center h-64'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='flex-1 p-6'>
+        <div className='flex justify-center items-center h-64'>
+          <div className='text-red-500'>{error}</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className='flex-1 p-6'>
+      {selectedJob && (
+        <JobDetailModal
+          job={selectedJob}
+          isOpen={isDetailModalOpen}
+          onClose={() => {
+            setIsDetailModalOpen(false);
+            setSelectedJob(null);
+          }}
+        />
+      )}
       {/* Header */}
       <h1 className='text-2xl font-bold mb-1'>Hello, Instagram</h1>
       <p className='text-gray-500 mb-8'>
@@ -83,18 +151,22 @@ export default function OverviewTab() {
 
       {/* Stats Cards */}
       <div className='grid grid-cols-2 gap-6 mb-10'>
-        {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className='bg-white rounded-lg shadow p-6 flex items-center gap-4'
-          >
-            <span className='text-3xl'>{stat.icon}</span>
-            <div>
-              <div className='text-2xl font-bold'>{stat.value}</div>
-              <div className='text-gray-500'>{stat.label}</div>
-            </div>
+        <div className='bg-white rounded-lg shadow p-6 flex items-center gap-4'>
+          <span className='text-3xl'>📁</span>
+          <div>
+            <div className='text-2xl font-bold'>{jobs.length}</div>
+            <div className='text-gray-500'>Open Jobs</div>
           </div>
-        ))}
+        </div>
+        <div className='bg-white rounded-lg shadow p-6 flex items-center gap-4'>
+          <span className='text-3xl'>🗂️</span>
+          <div>
+            <div className='text-2xl font-bold'>
+              {jobs.reduce((acc, job) => acc + (job.applicationCount || 0), 0)}
+            </div>
+            <div className='text-gray-500'>Total Applications</div>
+          </div>
+        </div>
       </div>
 
       {/* Recently Posted Jobs Table */}
@@ -116,69 +188,83 @@ export default function OverviewTab() {
               </tr>
             </thead>
             <tbody>
-              {jobs.map((job, idx) => (
-                <tr key={job.id} className='border-t'>
-                  <td className='py-3 px-4'>
-                    <div className='font-medium'>{job.title}</div>
-                    <div className='text-gray-400 text-xs flex gap-2 items-center'>
-                      <span>{job.type}</span>
-                      {job.daysRemaining > 0 && (
-                        <>
-                          <span>•</span>
-                          <span>{job.daysRemaining} days remaining</span>
-                        </>
+              {jobs.slice(0, 5).map((job) => {
+                const daysRemaining = Math.ceil(
+                  (new Date(job.deadline).getTime() - new Date().getTime()) /
+                    (1000 * 60 * 60 * 24),
+                );
+                const isExpired = daysRemaining <= 0;
+
+                return (
+                  <tr key={job.id} className='border-t'>
+                    <td className='py-3 px-4'>
+                      <div className='font-medium'>{job.title}</div>
+                      <div className='text-gray-400 text-xs flex gap-2 items-center'>
+                        <span>{job.employmentType}</span>
+                        {!isExpired && (
+                          <>
+                            <span>•</span>
+                            <span>{daysRemaining} days remaining</span>
+                          </>
+                        )}
+                        {isExpired && (
+                          <>
+                            <span>•</span>
+                            <span className='text-red-500'>Expired</span>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                    <td className='py-3 px-4'>
+                      {!isExpired ? (
+                        <span className='text-green-600 font-medium'>
+                          Active
+                        </span>
+                      ) : (
+                        <span className='text-red-500 font-medium'>Expire</span>
                       )}
-                      {job.daysRemaining === 0 && (
-                        <>
-                          <span>•</span>
-                          <span className='text-red-500'>Expired</span>
-                        </>
-                      )}
-                    </div>
-                  </td>
-                  <td className='py-3 px-4'>
-                    {job.status === 'Active' ? (
-                      <span className='text-green-600 font-medium'>Active</span>
-                    ) : (
-                      <span className='text-red-500 font-medium'>Expire</span>
-                    )}
-                  </td>
-                  <td className='py-3 px-4'>{job.applications} Applications</td>
-                  <td className='py-3 px-4'>
-                    <button className='px-4 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 mr-2'>
-                      View Applications
-                    </button>
-                    <div
-                      className='inline-block relative'
-                      ref={(el) => (menuRefs.current[job.id] = el)}
-                    >
+                    </td>
+                    <td className='py-3 px-4'>
+                      {job.applicationCount || 0} Applications
+                    </td>
+                    <td className='py-3 px-4'>
                       <button
-                        className='w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 border border-gray-200'
-                        onClick={() =>
-                          setOpenMenuId(openMenuId === job.id ? null : job.id)
-                        }
-                        aria-label='Open actions menu'
-                        type='button'
+                        className='px-4 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 mr-2'
+                        onClick={() => handleViewDetail(job)}
                       >
-                        <span className='text-xl'>⋮</span>
+                        View Detail
                       </button>
-                      {openMenuId === job.id && (
-                        <div className='absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-10'>
-                          <button className='block w-full text-left px-4 py-2 hover:bg-gray-100'>
-                            Promote Job
-                          </button>
-                          <button className='block w-full text-left px-4 py-2 hover:bg-gray-100'>
-                            View Detail
-                          </button>
-                          <button className='block w-full text-left px-4 py-2 hover:bg-gray-100'>
-                            Mark as expired
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                      <div
+                        className='inline-block relative'
+                        ref={(el) => {
+                          menuRefs.current[job.id] = el;
+                        }}
+                      >
+                        <button
+                          className='w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 border border-gray-200'
+                          onClick={() =>
+                            setOpenMenuId(openMenuId === job.id ? null : job.id)
+                          }
+                          aria-label='Open actions menu'
+                          type='button'
+                        >
+                          <span className='text-xl'>⋮</span>
+                        </button>
+                        {openMenuId === job.id && (
+                          <div className='absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-10'>
+                            <button
+                              className='block w-full text-left px-4 py-2 hover:bg-gray-100'
+                              onClick={() => handleViewDetail(job)}
+                            >
+                              View Detail
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
