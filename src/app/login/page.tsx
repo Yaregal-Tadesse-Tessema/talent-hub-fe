@@ -4,17 +4,131 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import EmployerSelection from '@/components/EmployerSelection';
+import { EmployerData } from '@/types/employer';
+import { API_BASE_URL } from '@/config/api';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
-  const { login } = useAuth();
+  const [showEmployerSelection, setShowEmployerSelection] = useState(false);
+  const { login, user } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(email, password);
+    try {
+      // First try employer login
+      const employerResponse = await fetch(
+        `${API_BASE_URL}/auth/backOffice-login`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userName: email, password }),
+        },
+      );
+
+      const employerData = await employerResponse.json();
+      if (employerResponse.ok) {
+        // Store employers data
+        localStorage.setItem('employers', JSON.stringify(employerData || []));
+        // Show employer selection popup
+        setShowEmployerSelection(true);
+        return;
+      }
+
+      // If employer login fails, try employee login
+      const employeeResponse = await fetch(
+        `${API_BASE_URL}/auth/portal-login`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userName: email, password }),
+        },
+      );
+
+      const employeeData = await employeeResponse.json();
+
+      if (employeeResponse.ok) {
+        const user = {
+          ...employeeData?.profile,
+          role: 'employee' as const,
+        };
+        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('accessToken', employeeData.accessToken);
+        localStorage.setItem('refreshToken', employeeData.refreshToken);
+
+        // Check if there's a return URL stored
+        const returnToJob = localStorage.getItem('returnToJob');
+        if (returnToJob) {
+          localStorage.removeItem('returnToJob'); // Clean up
+          router.push(`/find-job/${returnToJob}?apply=true`);
+        } else {
+          router.push('/dashboard');
+        }
+      } else {
+        // Show error message
+        console.error(
+          'Login failed:',
+          employeeData.message || 'Invalid credentials',
+        );
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+    }
+  };
+
+  const handleEmployerSelect = async (employer: EmployerData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/backOffice-login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userName: email,
+          password: password,
+          orgId: employer.tenant.id,
+        }),
+      });
+
+      const data = await response.json();
+      console.log('Selected employer:', employer);
+      console.log('API Response:', data);
+
+      if (response.ok) {
+        // Store user data with role as employer and selected employer
+        const userData = {
+          ...data.profile,
+          role: 'employer',
+          selectedEmployer: employer,
+        };
+        localStorage.setItem('user', JSON.stringify(userData));
+        // Store tokens
+        localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
+        // Close the popup and redirect to dashboard
+        setShowEmployerSelection(false);
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const handleCloseEmployerSelection = () => {
+    setShowEmployerSelection(false);
+    // Clear all auth-related data from localStorage
+    localStorage.removeItem('user');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
   };
 
   return (
@@ -60,7 +174,7 @@ export default function LoginPage() {
           </p>
           <form onSubmit={handleSubmit} className='space-y-4'>
             <input
-              type='test'
+              type='text'
               placeholder='Email address or Phone number'
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -209,6 +323,16 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+
+      {/* Employer Selection Modal */}
+      {showEmployerSelection && (
+        <EmployerSelection
+          employers={JSON.parse(localStorage.getItem('employers') || '[]')}
+          onSelect={handleEmployerSelect}
+          isOpen={showEmployerSelection}
+          onClose={handleCloseEmployerSelection}
+        />
+      )}
     </div>
   );
 }

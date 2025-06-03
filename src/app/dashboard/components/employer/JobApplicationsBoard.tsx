@@ -28,7 +28,9 @@ import {
   applicationService,
   Application,
   Column,
+  ApplicationStatus,
 } from '@/services/applicationService';
+import { useToast } from '@/contexts/ToastContext';
 
 // Accept props: jobId, onBack
 export default function JobApplicationsBoard({
@@ -38,10 +40,29 @@ export default function JobApplicationsBoard({
   jobId: string;
   onBack: () => void;
 }) {
+  const { showToast } = useToast();
   // --- Board/List State and Logic ---
   const initialColumns: Column[] = [
-    { id: 'all', title: 'All Applications', appIds: [] },
-    { id: 'shortlisted', title: 'Shortlisted', appIds: [] },
+    {
+      id: 'PENDING' as ApplicationStatus,
+      title: 'Pending',
+      appIds: [] as string[],
+    },
+    {
+      id: 'SELECTED' as ApplicationStatus,
+      title: 'Selected',
+      appIds: [] as string[],
+    },
+    {
+      id: 'REJECTED' as ApplicationStatus,
+      title: 'Rejected',
+      appIds: [] as string[],
+    },
+    {
+      id: 'HIRED' as ApplicationStatus,
+      title: 'Hired',
+      appIds: [] as string[],
+    },
   ];
 
   const [columns, setColumns] = useState<Column[]>(initialColumns);
@@ -50,11 +71,6 @@ export default function JobApplicationsBoard({
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [modalOpen, setModalOpen] = useState<null | {
-    mode: 'add' | 'edit';
-    colId?: string;
-  }>(null);
-  const [modalValue, setModalValue] = useState('');
   const [view, setView] = useState<'board' | 'list'>('board');
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
@@ -88,14 +104,25 @@ export default function JobApplicationsBoard({
 
         setApplications(applicationsRecord);
 
-        // Update columns with application IDs
-        const newColumns = [...columns];
-        const allColumn = newColumns.find((col) => col.id === 'all');
-        if (allColumn) {
-          allColumn.appIds = response.items.map((app) => app.id);
-        }
-        setColumns(newColumns);
+        // Update columns with application IDs based on status
+        const newColumns = columns.map((col) => ({
+          ...col,
+          appIds: [] as string[], // Reset all columns with explicit type
+        }));
 
+        // Distribute applications to appropriate columns
+        response.items.forEach((app) => {
+          const status = app.status?.toUpperCase() || 'PENDING';
+          // If status is not one of our defined columns, put it in PENDING
+          const column =
+            newColumns.find((col) => col.id === status) ||
+            newColumns.find((col) => col.id === 'PENDING');
+          if (column) {
+            column.appIds.push(app.id);
+          }
+        });
+
+        setColumns(newColumns);
         setError(null);
       } catch (err) {
         console.error('Error fetching applications:', err);
@@ -108,7 +135,7 @@ export default function JobApplicationsBoard({
     fetchApplications();
   }, [jobId]);
 
-  function onDragEnd(result: DropResult) {
+  async function onDragEnd(result: DropResult) {
     const { source, destination } = result;
 
     // If dropped outside a droppable area
@@ -165,58 +192,31 @@ export default function JobApplicationsBoard({
     });
 
     setColumns(newColumns);
+
+    // Update application status in the backend
+    try {
+      await applicationService.changeApplicationStatus({
+        id: removed,
+        status: destination.droppableId as ApplicationStatus,
+      });
+
+      // Show success toast
+      showToast({
+        type: 'success',
+        message: `Application status changed to ${destColumn.title}`,
+      });
+    } catch (err) {
+      console.error('Error updating application status:', err);
+      // Revert the UI change if the API call fails
+      setColumns(columns);
+      // Show error toast
+      showToast({
+        type: 'error',
+        message: 'Failed to update application status',
+      });
+    }
   }
 
-  function openAddModal() {
-    setModalValue('');
-    setModalOpen({ mode: 'add' });
-  }
-  function openEditModal(colId: string, current: string) {
-    setModalValue(current);
-    setModalOpen({ mode: 'edit', colId });
-  }
-  function closeModal() {
-    setModalOpen(null);
-    setModalValue('');
-  }
-  function handleModalSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!modalValue.trim()) return;
-    if (modalOpen?.mode === 'add') {
-      const id = `col-${Date.now()}`;
-      setColumns([...columns, { id, title: modalValue.trim(), appIds: [] }]);
-    } else if (modalOpen?.mode === 'edit' && modalOpen.colId) {
-      const idx = columns.findIndex((c) => c.id === modalOpen.colId);
-      if (idx >= 0) {
-        const newColumns = [...columns];
-        newColumns[idx] = { ...newColumns[idx], title: modalValue.trim() };
-        setColumns(newColumns);
-      }
-    }
-    closeModal();
-  }
-  function handleDeleteColumn(colId: string) {
-    if (
-      !confirm(
-        'Delete this column? Applications will be moved to All Applications.',
-      )
-    )
-      return;
-    const idx = columns.findIndex((c) => c.id === colId);
-    if (idx < 0) return;
-    const col = columns[idx];
-    // Move apps to 'all'
-    const allIdx = columns.findIndex((c) => c.id === 'all');
-    const newColumns = [...columns];
-    if (allIdx >= 0) {
-      newColumns[allIdx] = {
-        ...newColumns[allIdx],
-        appIds: [...newColumns[allIdx].appIds, ...col.appIds],
-      };
-    }
-    newColumns.splice(idx, 1);
-    setColumns(newColumns);
-  }
   // Bulk select logic
   const allAppIds = Object.keys(applications);
   let filteredAppIds = allAppIds.filter((id) => {
@@ -298,18 +298,18 @@ export default function JobApplicationsBoard({
   }
   // Helper to get color for a status/column
   function getStatusColor(colId: string) {
-    if (colId === 'all') return 'bg-gray-200 text-gray-700';
-    if (colId === 'shortlisted') return 'bg-green-100 text-green-700';
-    // Generate color for custom columns
-    const colors = [
-      'bg-blue-100 text-blue-700',
-      'bg-yellow-100 text-yellow-700',
-      'bg-purple-100 text-purple-700',
-      'bg-pink-100 text-pink-700',
-      'bg-indigo-100 text-indigo-700',
-    ];
-    const idx = columns.findIndex((c) => c.id === colId);
-    return colors[(idx - 2) % colors.length] || 'bg-gray-100 text-gray-700';
+    switch (colId) {
+      case 'PENDING':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'SELECTED':
+        return 'bg-blue-100 text-blue-700';
+      case 'REJECTED':
+        return 'bg-red-100 text-red-700';
+      case 'HIRED':
+        return 'bg-green-100 text-green-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
+    }
   }
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -572,25 +572,6 @@ export default function JobApplicationsBoard({
                           ({col.appIds.length})
                         </span>
                       </div>
-                      {/* Only show edit/delete for custom columns */}
-                      {col.id !== 'all' && col.id !== 'shortlisted' && (
-                        <div className='flex gap-2'>
-                          <button
-                            title='Edit'
-                            onClick={() => openEditModal(col.id, col.title)}
-                            className='text-gray-400 hover:text-blue-600 p-1 rounded hover:bg-blue-50'
-                          >
-                            <PencilSquareIcon className='w-5 h-5' />
-                          </button>
-                          <button
-                            title='Delete'
-                            onClick={() => handleDeleteColumn(col.id)}
-                            className='text-gray-400 hover:text-red-600 p-1 rounded hover:bg-red-50'
-                          >
-                            <TrashIcon className='w-5 h-5' />
-                          </button>
-                        </div>
-                      )}
                     </div>
                     <div className='flex flex-col gap-4'>
                       {col.appIds
@@ -658,16 +639,6 @@ export default function JobApplicationsBoard({
                                           <button
                                             className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
                                             onClick={() => {
-                                              /* TODO: Change status logic */
-                                              setOpenActionMenu(null);
-                                            }}
-                                          >
-                                            <ArrowPathIcon className='w-5 h-5 text-blue-500' />{' '}
-                                            Change Status
-                                          </button>
-                                          <button
-                                            className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
-                                            onClick={() => {
                                               /* TODO: Send email logic */
                                               setOpenActionMenu(null);
                                             }}
@@ -684,16 +655,6 @@ export default function JobApplicationsBoard({
                                           >
                                             <ArrowDownTrayIcon className='w-5 h-5 text-indigo-500' />{' '}
                                             Download CV
-                                          </button>
-                                          <button
-                                            className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
-                                            onClick={() => {
-                                              /* TODO: Delete logic */
-                                              setOpenActionMenu(null);
-                                            }}
-                                          >
-                                            <TrashIcon className='w-5 h-5 text-red-500' />{' '}
-                                            Delete
                                           </button>
                                         </div>
                                       )}
@@ -730,15 +691,6 @@ export default function JobApplicationsBoard({
               </Droppable>
             ))}
           </DragDropContext>
-          {/* Add Column button */}
-          <div className='min-w-[250px] max-w-[250px] '>
-            <button
-              onClick={openAddModal}
-              className='flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 font-medium shadow-sm border border-blue-200'
-            >
-              <PlusIcon className='w-5 h-5' /> Add Column
-            </button>
-          </div>
         </div>
       ) : (
         <div className='bg-white rounded-lg shadow p-4'>
@@ -863,16 +815,6 @@ export default function JobApplicationsBoard({
                           <button
                             className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
                             onClick={() => {
-                              /* TODO: Change status logic */
-                              setOpenActionMenu(null);
-                            }}
-                          >
-                            <ArrowPathIcon className='w-5 h-5 text-blue-500' />{' '}
-                            Change Status
-                          </button>
-                          <button
-                            className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
-                            onClick={() => {
                               /* TODO: Send email logic */
                               setOpenActionMenu(null);
                             }}
@@ -890,16 +832,6 @@ export default function JobApplicationsBoard({
                             <ArrowDownTrayIcon className='w-5 h-5 text-indigo-500' />{' '}
                             Download CV
                           </button>
-                          <button
-                            className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
-                            onClick={() => {
-                              /* TODO: Delete logic */
-                              setOpenActionMenu(null);
-                            }}
-                          >
-                            <TrashIcon className='w-5 h-5 text-red-500' />{' '}
-                            Delete
-                          </button>
                         </div>
                       )}
                     </td>
@@ -908,39 +840,6 @@ export default function JobApplicationsBoard({
               })}
             </tbody>
           </table>
-        </div>
-      )}
-      {/* Modal for add/edit column */}
-      {modalOpen && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/30'>
-          <form
-            onSubmit={handleModalSubmit}
-            className='bg-white rounded-lg shadow-lg p-6 min-w-[320px] relative'
-          >
-            <button
-              type='button'
-              onClick={closeModal}
-              className='absolute top-2 right-2 text-gray-400 hover:text-gray-600'
-            >
-              <XMarkIcon className='w-5 h-5' />
-            </button>
-            <h2 className='text-lg font-semibold mb-4'>
-              {modalOpen.mode === 'add' ? 'Add Column' : 'Edit Column'}
-            </h2>
-            <input
-              autoFocus
-              className='border rounded px-3 py-2 w-full mb-4 focus:ring-2 focus:ring-blue-200 outline-none'
-              placeholder='Column name'
-              value={modalValue}
-              onChange={(e) => setModalValue(e.target.value)}
-            />
-            <button
-              type='submit'
-              className='w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-medium'
-            >
-              {modalOpen.mode === 'add' ? 'Add' : 'Save'}
-            </button>
-          </form>
         </div>
       )}
       <ApplicationDetailModal

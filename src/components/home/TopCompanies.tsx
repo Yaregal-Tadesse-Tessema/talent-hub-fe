@@ -2,100 +2,99 @@ import React from 'react';
 
 const companies = [
   {
-    name: 'Dribbble',
+    name: 'Ethio Telecom',
     logo: (
-      <div className='bg-pink-500 rounded-lg w-12 h-12 flex items-center justify-center'>
-        <svg width='28' height='28' fill='white' viewBox='0 0 24 24'>
-          <circle cx='12' cy='12' r='10' />
+      <div className='bg-green-600 rounded-lg w-12 h-12 flex items-center justify-center'>
+        <svg width='20' height='20' fill='white' viewBox='0 0 24 24'>
+          <path d='M12 2a10 10 0 100 20 10 10 0 000-20z' />
         </svg>
       </div>
     ),
-    location: 'United States',
+    location: 'Addis Ababa, Ethiopia',
     featured: true,
   },
   {
-    name: 'Upwork',
+    name: 'Ethiopian Airlines',
     logo: (
-      <div className='bg-green-400 rounded-lg w-12 h-12 flex items-center justify-center'>
-        <span className='text-white font-bold text-xl'>Up</span>
-      </div>
-    ),
-    location: 'United States',
-    featured: false,
-  },
-  {
-    name: 'Slack',
-    logo: (
-      <div className='bg-gray-100 rounded-lg w-12 h-12 flex items-center justify-center'>
-        <img
-          src='https://cdn-icons-png.flaticon.com/512/2111/2111615.png'
-          alt='Slack'
-          className='w-7 h-7'
-        />
-      </div>
-    ),
-    location: 'China',
-    featured: false,
-  },
-  {
-    name: 'Freepik',
-    logo: (
-      <div className='bg-blue-700 rounded-lg w-12 h-12 flex items-center justify-center'>
+      <div className='bg-yellow-500 rounded-lg w-12 h-12 flex items-center justify-center'>
         <svg width='28' height='28' fill='white' viewBox='0 0 24 24'>
-          <circle cx='12' cy='12' r='10' />
+          <path d='M2 12l20-6-6 20-4-8-8-4z' />
         </svg>
       </div>
     ),
-    location: 'United States',
-    featured: false,
-  },
-  // Duplicate for second row
-  {
-    name: 'Dribbble',
-    logo: (
-      <div className='bg-pink-500 rounded-lg w-12 h-12 flex items-center justify-center'>
-        <svg width='28' height='28' fill='white' viewBox='0 0 24 24'>
-          <circle cx='12' cy='12' r='10' />
-        </svg>
-      </div>
-    ),
-    location: 'United States',
+    location: 'Addis Ababa, Ethiopia',
     featured: true,
   },
   {
-    name: 'Upwork',
-    logo: (
-      <div className='bg-green-400 rounded-lg w-12 h-12 flex items-center justify-center'>
-        <span className='text-white font-bold text-xl'>Up</span>
-      </div>
-    ),
-    location: 'United States',
-    featured: false,
-  },
-  {
-    name: 'Slack',
-    logo: (
-      <div className='bg-gray-100 rounded-lg w-12 h-12 flex items-center justify-center'>
-        <img
-          src='https://cdn-icons-png.flaticon.com/512/2111/2111615.png'
-          alt='Slack'
-          className='w-7 h-7'
-        />
-      </div>
-    ),
-    location: 'China',
-    featured: false,
-  },
-  {
-    name: 'Freepik',
+    name: 'Commercial Bank of Ethiopia',
     logo: (
       <div className='bg-blue-700 rounded-lg w-12 h-12 flex items-center justify-center'>
+        <svg width='28' height='28' fill='white' viewBox='0 0 24 24'>
+          <path d='M4 4h16v16H4z' />
+        </svg>
+      </div>
+    ),
+    location: 'Addis Ababa, Ethiopia',
+    featured: true,
+  },
+  {
+    name: 'Metals and Engineering Corporation (METEC)',
+    logo: (
+      <div className='bg-gray-800 rounded-lg w-12 h-12 flex items-center justify-center'>
         <svg width='28' height='28' fill='white' viewBox='0 0 24 24'>
           <circle cx='12' cy='12' r='10' />
         </svg>
       </div>
     ),
-    location: 'United States',
+    location: 'Addis Ababa, Ethiopia',
+    featured: true,
+  },
+  {
+    name: 'Ethiopian Shipping Lines',
+    logo: (
+      <div className='bg-indigo-600 rounded-lg w-12 h-12 flex items-center justify-center'>
+        <svg width='28' height='28' fill='white' viewBox='0 0 24 24'>
+          <path d='M3 12h18v2H3z' />
+        </svg>
+      </div>
+    ),
+    location: 'Addis Ababa, Ethiopia',
+    featured: true,
+  },
+  {
+    name: 'Flintstone Homes',
+    logo: (
+      <div className='bg-orange-500 rounded-lg w-12 h-12 flex items-center justify-center'>
+        <svg width='28' height='28' fill='white' viewBox='0 0 24 24'>
+          <path d='M12 3l9 9h-6v9h-6v-9H3z' />
+        </svg>
+      </div>
+    ),
+    location: 'Addis Ababa, Ethiopia',
+    featured: false,
+  },
+  {
+    name: 'Zergaw Cloud',
+    logo: (
+      <div className='bg-teal-500 rounded-lg w-12 h-12 flex items-center justify-center'>
+        <svg width='28' height='28' fill='white' viewBox='0 0 24 24'>
+          <path d='M6 19h12a4 4 0 00-4-4H10a4 4 0 00-4 4z' />
+        </svg>
+      </div>
+    ),
+    location: 'Addis Ababa, Ethiopia',
+    featured: false,
+  },
+  {
+    name: 'Kifiya Financial Technology',
+    logo: (
+      <div className='bg-purple-600 rounded-lg w-12 h-12 flex items-center justify-center'>
+        <svg width='28' height='28' fill='white' viewBox='0 0 24 24'>
+          <path d='M4 4h16v16H4z' />
+        </svg>
+      </div>
+    ),
+    location: 'Addis Ababa, Ethiopia',
     featured: false,
   },
 ];
@@ -133,18 +132,20 @@ export default function TopCompanies() {
           {companies.map((company, i) => (
             <div
               key={i}
-              className='bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 flex flex-col items-center transition hover:shadow-lg hover:scale-[1.02] hover:ring-2 hover:ring-blue-200'
+              className='bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 flex flex-col items-center transition hover:shadow-lg hover:scale-[1.02] hover:ring-2 hover:ring-blue-200 h-full'
             >
-              {company.logo}
-              <div className='flex items-center gap-2 mt-4 mb-1'>
-                <span className='font-semibold text-base sm:text-lg'>
-                  {company.name}
-                </span>
-                {company.featured && (
-                  <span className='bg-red-50 text-red-400 px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold'>
-                    Featured
+              <div className='flex-shrink-0'>{company.logo}</div>
+              <div className='w-full mt-4 mb-1'>
+                <div className='flex items-center gap-2 flex-wrap justify-center'>
+                  <span className='font-semibold text-base sm:text-lg text-center line-clamp-1'>
+                    {company.name}
                   </span>
-                )}
+                  {company.featured && (
+                    <span className='bg-red-50 text-red-400 px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap'>
+                      Featured
+                    </span>
+                  )}
+                </div>
               </div>
               <div className='flex items-center gap-1 text-gray-400 text-sm mb-4 sm:mb-6'>
                 <svg
@@ -161,9 +162,9 @@ export default function TopCompanies() {
                   />
                   <circle cx='12' cy='13' r='4' strokeWidth='2' />
                 </svg>
-                {company.location}
+                <span className='line-clamp-1'>{company.location}</span>
               </div>
-              <button className='w-full py-2 sm:py-3 rounded-lg font-semibold transition bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm sm:text-base'>
+              <button className='w-full py-2 sm:py-3 rounded-lg font-semibold transition bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm sm:text-base mt-auto'>
                 Open Position
               </button>
             </div>

@@ -162,7 +162,7 @@ export default function MyJobsTab() {
   }
 
   return (
-    <div className='flex-1 p-6'>
+    <div className='flex-1 md:px-6'>
       {showConfirmDialog && pendingStatusChange && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
           <div className='bg-white rounded-lg p-6 max-w-md w-full mx-4'>
@@ -203,10 +203,10 @@ export default function MyJobsTab() {
           }}
         />
       )}
-      <h1 className='text-2xl font-bold mb-8'>
+      <h6 className='text-xl font-bold mb-4'>
         My Jobs{' '}
         <span className='text-gray-400 font-normal'>({jobs.length})</span>
-      </h1>
+      </h6>
       <div className='bg-white rounded-lg shadow p-6'>
         <div className='flex items-center justify-between mb-4'>
           <div className='font-semibold text-lg'>Jobs</div>
@@ -239,7 +239,6 @@ export default function MyJobsTab() {
                   (new Date(job.deadline).getTime() - new Date().getTime()) /
                     (1000 * 60 * 60 * 24),
                 );
-                const isExpired = daysRemaining <= 0;
 
                 return (
                   <tr
@@ -250,28 +249,22 @@ export default function MyJobsTab() {
                       <div className='font-medium'>{job.title}</div>
                       <div className='text-gray-400 text-xs flex gap-2 items-center'>
                         <span>{job.employmentType}</span>
-                        {!isExpired && (
-                          <>
-                            <span>•</span>
-                            <span>{daysRemaining} days remaining</span>
-                          </>
-                        )}
-                        {isExpired && (
-                          <>
-                            <span>•</span>
-                            <span className='text-red-500'>Expired</span>
-                          </>
-                        )}
+                        <span>•</span>
+                        <span>{daysRemaining} days remaining</span>
                       </div>
                     </td>
                     <td className='py-3 px-4'>
-                      {!isExpired ? (
-                        <span className='text-green-600 font-medium'>
-                          Active
-                        </span>
-                      ) : (
-                        <span className='text-red-500 font-medium'>Expire</span>
-                      )}
+                      <span
+                        className={`font-medium ${
+                          job.status === 'Posted'
+                            ? 'text-green-600'
+                            : job.status === 'Withdrawn'
+                              ? 'text-red-500'
+                              : 'text-gray-600'
+                        }`}
+                      >
+                        {job.status || 'Draft'}
+                      </span>
                     </td>
                     <td className='py-3 px-4'>
                       {job.applicationCount || 0} Applications

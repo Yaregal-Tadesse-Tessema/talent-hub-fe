@@ -40,10 +40,9 @@ export const jobService = {
       const url = queryParams
         ? `/jobs/get-all-tenant-job-postings?${queryParams}`
         : '/jobs/get-all-tenant-job-postings';
-      console.log('Making API call to:', url);
-      console.log('Full URL:', `${API_BASE_URL}${url}`);
+
       const response = await api.get(url);
-      console.log('API Response Data:', response.data);
+
       return response.data;
     } catch (error) {
       console.error('Error fetching jobs:', error);
@@ -93,6 +92,7 @@ export const jobService = {
         throw new Error('Tenant ID not found in user data');
       }
 
+      console.log(userData);
       const response = await api.post('/jobs/create-job-posting', {
         ...jobData,
         organizationId: userData.tenantId,

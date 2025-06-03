@@ -197,10 +197,9 @@ export default function PostJobTab() {
 
   return (
     <div className='flex-1 pb-10'>
-      <h1 className='text-2xl font-bold mb-8'>Post a job</h1>
       <form
         onSubmit={handleSubmit}
-        className='max-w-5xl mx-auto bg-white rounded-xl shadow p-8 space-y-10'
+        className='max-w-5xl mx-auto bg-white rounded-xl shadow p-4 space-y-10'
       >
         {/* Basic Information */}
         <div className='space-y-6'>

@@ -3,6 +3,7 @@ import { jobService } from '@/services/jobService';
 import { Job } from '@/types/job';
 import { useToast } from '@/contexts/ToastContext';
 import JobDetailModal from './JobDetailModal';
+import { useRouter } from 'next/navigation';
 
 // Mock data for stats and jobs
 const stats = [
@@ -62,6 +63,7 @@ export default function OverviewTab() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const menuRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const { showToast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -132,7 +134,7 @@ export default function OverviewTab() {
   }
 
   return (
-    <div className='flex-1 p-6'>
+    <div className='flex-1'>
       {selectedJob && (
         <JobDetailModal
           job={selectedJob}
@@ -173,7 +175,10 @@ export default function OverviewTab() {
       <div className='bg-white rounded-lg shadow p-6'>
         <div className='flex items-center justify-between mb-4'>
           <div className='font-semibold text-lg'>Recently Posted Jobs</div>
-          <button className='text-blue-600 hover:underline text-sm'>
+          <button
+            className='text-blue-600 hover:underline text-sm'
+            onClick={() => router.push('/my-jobs')}
+          >
             View all →
           </button>
         </div>
@@ -193,7 +198,6 @@ export default function OverviewTab() {
                   (new Date(job.deadline).getTime() - new Date().getTime()) /
                     (1000 * 60 * 60 * 24),
                 );
-                const isExpired = daysRemaining <= 0;
 
                 return (
                   <tr key={job.id} className='border-t'>
@@ -201,28 +205,22 @@ export default function OverviewTab() {
                       <div className='font-medium'>{job.title}</div>
                       <div className='text-gray-400 text-xs flex gap-2 items-center'>
                         <span>{job.employmentType}</span>
-                        {!isExpired && (
-                          <>
-                            <span>•</span>
-                            <span>{daysRemaining} days remaining</span>
-                          </>
-                        )}
-                        {isExpired && (
-                          <>
-                            <span>•</span>
-                            <span className='text-red-500'>Expired</span>
-                          </>
-                        )}
+                        <span>•</span>
+                        <span>{daysRemaining} days remaining</span>
                       </div>
                     </td>
                     <td className='py-3 px-4'>
-                      {!isExpired ? (
-                        <span className='text-green-600 font-medium'>
-                          Active
-                        </span>
-                      ) : (
-                        <span className='text-red-500 font-medium'>Expire</span>
-                      )}
+                      <span
+                        className={`font-medium ${
+                          job.status === 'Posted'
+                            ? 'text-green-600'
+                            : job.status === 'Withdrawn'
+                              ? 'text-red-500'
+                              : 'text-gray-600'
+                        }`}
+                      >
+                        {job.status || 'Draft'}
+                      </span>
                     </td>
                     <td className='py-3 px-4'>
                       {job.applicationCount || 0} Applications
@@ -239,28 +237,7 @@ export default function OverviewTab() {
                         ref={(el) => {
                           menuRefs.current[job.id] = el;
                         }}
-                      >
-                        <button
-                          className='w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 border border-gray-200'
-                          onClick={() =>
-                            setOpenMenuId(openMenuId === job.id ? null : job.id)
-                          }
-                          aria-label='Open actions menu'
-                          type='button'
-                        >
-                          <span className='text-xl'>⋮</span>
-                        </button>
-                        {openMenuId === job.id && (
-                          <div className='absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-10'>
-                            <button
-                              className='block w-full text-left px-4 py-2 hover:bg-gray-100'
-                              onClick={() => handleViewDetail(job)}
-                            >
-                              View Detail
-                            </button>
-                          </div>
-                        )}
-                      </div>
+                      ></div>
                     </td>
                   </tr>
                 );

@@ -1,25 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './Button';
-import {
-  X,
-  Bold,
-  Italic,
-  Underline,
-  Strikethrough,
-  List,
-  ListOrdered,
-  Link as LinkIcon,
-} from 'lucide-react';
+import { X, Link as LinkIcon } from 'lucide-react';
 import { useToast } from '@/contexts/ToastContext';
 import { useRouter } from 'next/navigation';
 import { applicationService } from '@/services/applicationService';
 import { screeningQuestionsService } from '@/services/screeningQuestionsService';
 
 interface ScreeningQuestion {
+  id?: string;
   jobPostId: string;
   question: string;
   type: string;
-  options: string[];
+  options?: string[];
   isKnockout: boolean;
   isOptional: boolean;
   weight: number;
@@ -75,18 +67,13 @@ export const ApplyJobModal: React.FC<ApplyJobModalProps> = ({
 
     const fetchScreeningQuestions = async () => {
       try {
-        console.log('Fetching questions for jobId:', jobId);
         const response =
           await screeningQuestionsService.getQuestionsByJobId(jobId);
-        console.log('Full response:', response);
-        console.log('Response items:', response.items);
-        console.log('Items length:', response.items?.length);
 
-        if (response.items && response.items.length > 0) {
-          console.log('Setting questions:', response.items);
-          setScreeningQuestions(response.items);
+        if (response && response.length > 0) {
+          setScreeningQuestions(response);
           // Initialize answers state
-          const initialAnswers = response.items.reduce(
+          const initialAnswers = response.reduce(
             (acc: Record<string, any>, q: ScreeningQuestion) => {
               acc[q.question] =
                 q.type === 'MULTIPLE_CHOICE'
@@ -132,7 +119,7 @@ export const ApplyJobModal: React.FC<ApplyJobModalProps> = ({
               )}
             </label>
             <div className='space-y-2'>
-              {question.options.map((option) => (
+              {question.options?.map((option) => (
                 <label key={option} className='flex items-center space-x-2'>
                   <input
                     type='checkbox'

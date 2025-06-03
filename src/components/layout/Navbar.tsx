@@ -5,6 +5,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 import { cn } from '@/lib/utils';
+import EmployerSelection from '@/components/EmployerSelection';
+import { EmployerData, Tenant } from '@/types/employer';
+import { API_BASE_URL } from '@/config/api';
 
 // Placeholder icons (replace with Heroicons or similar in real app)
 const BriefcaseIcon = () => (
@@ -61,9 +64,14 @@ export function Navbar({ page = 'home' }: NavbarProps) {
     role: 'employer' | 'employee';
     name?: string;
     avatar?: string;
+    email?: string;
+    selectedEmployer?: EmployerData;
   } | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [showEmployerSelection, setShowEmployerSelection] = useState(false);
+  const [employers, setEmployers] = useState<EmployerData[]>([]);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -72,7 +80,8 @@ export function Navbar({ page = 'home' }: NavbarProps) {
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
         try {
-          setUser(JSON.parse(storedUser));
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
         } catch {
           setUser(null);
         }
@@ -81,6 +90,88 @@ export function Navbar({ page = 'home' }: NavbarProps) {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (user?.role === 'employer') {
+      fetchEmployers();
+    }
+  }, [user?.role]);
+
+  const fetchEmployers = async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/tenants/get-tenants/by-token`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          },
+        },
+      );
+      if (response.ok) {
+        const tenants = await response.json();
+        // Transform tenants into EmployerData format
+        const employersData: EmployerData[] = tenants.map((tenant: Tenant) => ({
+          id: tenant.id,
+          jobTitle: '',
+          lookupId: '',
+          status: tenant.status,
+          tenantId: tenant.id,
+          tenant_Id: tenant.id,
+          tenantName: tenant.name,
+          tenant: tenant,
+          createdAt: tenant.createdAt || '',
+          updatedAt: tenant.updatedAt || '',
+        }));
+        setEmployers(employersData);
+      }
+    } catch (error) {
+      console.error('Error fetching employers:', error);
+    }
+  };
+
+  const handleEmployerSelect = async (employer: EmployerData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/regenerate-token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+        body: JSON.stringify({
+          orgId: employer.tenant.id,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok && user) {
+        // Store user data with role as employer
+        const userData = {
+          ...user,
+          role: user.role, // Ensure role is preserved
+          selectedEmployer: employer,
+        };
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+        // Store tokens
+        localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
+        setShowEmployerSelection(false);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      setIsMenuVisible(true);
+    } else {
+      const timer = setTimeout(() => {
+        setIsMenuVisible(false);
+      }, 300); // Match this with the transition duration
+      return () => clearTimeout(timer);
+    }
+  }, [mobileMenuOpen]);
 
   const showAuthButtons = !user && page === 'home';
 
@@ -123,42 +214,54 @@ export function Navbar({ page = 'home' }: NavbarProps) {
   return (
     <header className='w-full border-b bg-white sticky top-0 z-50'>
       <div className='flex items-center justify-between px-4 md:px-16 py-4 text-sm text-gray-800 bg-gray-100'>
-        <button
-          className='md:hidden flex items-center mr-2'
-          aria-label='Open menu'
-          onClick={() => setMobileMenuOpen(true)}
-        >
-          <svg
-            width='28'
-            height='28'
-            fill='none'
-            viewBox='0 0 24 24'
-            stroke='currentColor'
-          >
-            <path d='M4 6h16M4 12h16M4 18h16' strokeWidth='2' />
-          </svg>
-        </button>
-        <nav className='gap-6 hidden md:flex'>
-          {(user && user.role === 'employer'
-            ? employerNavLinks
-            : user && user.role === 'employee'
-              ? employeeNavLinks
-              : navLinks
-          ).map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                'hover:text-blue-600 transition-colors',
-                pathname === link.href &&
-                  'text-blue-600 border-b-2 border-blue-600 pb-2',
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        <div className='flex-1'>
+          <nav className='gap-6 hidden md:flex'>
+            {(user && user.role === 'employer'
+              ? employerNavLinks
+              : user && user.role === 'employee'
+                ? employeeNavLinks
+                : navLinks
+            ).map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  'hover:text-blue-600 transition-colors',
+                  pathname === link.href &&
+                    'text-blue-600 border-b-2 border-blue-600 pb-2',
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
         <div className='flex items-center gap-4'>
+          {user?.role === 'employer' && (
+            <div className='hidden md:flex items-center gap-2'>
+              <button
+                onClick={() => setShowEmployerSelection(true)}
+                className='flex items-center min-w-52 gap-2 px-3 py-1.5 border rounded-md hover:bg-gray-50'
+              >
+                <div className='w-6 h-6 rounded bg-gray-200 flex items-center justify-center text-xs font-semibold'>
+                  {user.selectedEmployer?.tenant.tradeName[0] || '?'}
+                </div>
+                <span className='font-medium'>
+                  {user.selectedEmployer?.tenant.tradeName ||
+                    'No Company Selected'}
+                </span>
+                <svg
+                  width='12'
+                  height='12'
+                  fill='none'
+                  viewBox='0 0 20 20'
+                  stroke='currentColor'
+                >
+                  <path d='M6 8l4 4 4-4' strokeWidth='2' />
+                </svg>
+              </button>
+            </div>
+          )}
           {!(user && user.role === 'employer') && (
             <>
               <span className='hidden md:flex items-center gap-1'>
@@ -191,6 +294,21 @@ export function Navbar({ page = 'home' }: NavbarProps) {
               </div>
             </>
           )}
+          <button
+            className='md:hidden flex items-center'
+            aria-label='Open menu'
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <svg
+              width='28'
+              height='28'
+              fill='none'
+              viewBox='0 0 24 24'
+              stroke='currentColor'
+            >
+              <path d='M4 6h16M4 12h16M4 18h16' strokeWidth='2' />
+            </svg>
+          </button>
         </div>
       </div>
       <div className='flex items-center justify-between px-4 md:px-16 py-4 bg-white'>
@@ -241,7 +359,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                 </button>
                 {user.role === 'employer' && (
                   <Link href='/dashboard?tab=post-job'>
-                    <button className='flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700'>
+                    <button className='flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700'>
                       <svg
                         width='24'
                         height='24'
@@ -256,7 +374,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                           strokeLinejoin='round'
                         />
                       </svg>
-                      Create Job
+                      Job
                     </button>
                   </Link>
                 )}
@@ -303,9 +421,17 @@ export function Navbar({ page = 'home' }: NavbarProps) {
           ) : null}
         </div>
       </div>
-      {mobileMenuOpen && (
-        <div className='fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-end md:hidden'>
-          <div className='w-80 max-w-full bg-white h-full shadow-lg flex flex-col'>
+      {isMenuVisible && (
+        <div
+          className={`fixed inset-0 z-50 bg-black bg-opacity-40 md:hidden transition-opacity duration-300 ${
+            mobileMenuOpen ? 'opacity-100' : 'opacity-0'
+          } flex`}
+        >
+          <div
+            className={`fixed right-0 top-0 h-full w-80 max-w-full bg-white shadow-lg flex flex-col transform transition-transform duration-300 ease-in-out ${
+              mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+            }`}
+          >
             <div className='flex items-center justify-between px-4 py-4 border-b'>
               <div className='flex items-center gap-2'>
                 <BriefcaseIcon />
@@ -376,6 +502,14 @@ export function Navbar({ page = 'home' }: NavbarProps) {
           </div>
           <div className='flex-1' onClick={() => setMobileMenuOpen(false)} />
         </div>
+      )}
+      {showEmployerSelection && (
+        <EmployerSelection
+          employers={employers}
+          onSelect={handleEmployerSelect}
+          isOpen={showEmployerSelection}
+          onClose={() => setShowEmployerSelection(false)}
+        />
       )}
     </header>
   );

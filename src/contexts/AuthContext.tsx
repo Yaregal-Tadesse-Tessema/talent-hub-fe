@@ -4,12 +4,14 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_BASE_URL } from '@/config/api';
 import { useToast } from '@/contexts/ToastContext';
+import { EmployerData } from '@/types/employer';
 
 interface User {
   id: string;
   email: string;
   name: string;
   role: 'employer' | 'employee';
+  selectedEmployer?: EmployerData;
 }
 
 interface AuthContextType {
@@ -20,6 +22,7 @@ interface AuthContextType {
     password: string,
   ) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
+  selectEmployer: (employer: EmployerData) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -81,12 +84,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Store both tokens
           localStorage.setItem('accessToken', employerData.accessToken);
           localStorage.setItem('refreshToken', employerData.refreshToken);
+          // Store employers data
+          localStorage.setItem('employers', JSON.stringify(employerData || []));
         }
         showToast({
           type: 'success',
           message: 'Login successful! Redirecting...',
         });
-        router.push('/dashboard');
         return { success: true, message: 'Login successful! Redirecting...' };
       }
 
@@ -158,8 +162,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push('/login');
   };
 
+  const selectEmployer = (employer: EmployerData) => {
+    if (user) {
+      const updatedUser = {
+        ...user,
+        selectedEmployer: employer,
+      };
+      setUser(updatedUser);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }
+      router.push('/dashboard');
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, logout, selectEmployer }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import OverviewTab from './components/candidate/OverviewTab';
 import AppliedJobsTab from './components/candidate/AppliedJobsTab';
@@ -18,7 +18,7 @@ const TABS = [
   { key: 'settings', label: 'Settings' },
 ];
 
-export default function DashboardPage() {
+function DashboardContent() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState('overview');
   const [userType, setUserType] = useState<string | null>(null);
@@ -102,5 +102,13 @@ export default function DashboardPage() {
       {/* Main Content */}
       <main className='flex-1'>{renderTabContent()}</main>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }

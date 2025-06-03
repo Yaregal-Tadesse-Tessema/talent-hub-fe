@@ -9,10 +9,12 @@ import { jobService } from '@/services/jobService';
 import { Job } from '@/types/job';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/contexts/ToastContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function FindJobPage() {
   const router = useRouter();
   const { showToast } = useToast();
+  const { user } = useAuth();
   const [selectedPage, setSelectedPage] = useState(1);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('list');
   const [hoveredJobId, setHoveredJobId] = useState<string | null>(null);
@@ -155,8 +157,28 @@ export default function FindJobPage() {
       showToast({ type: 'success', message: 'Job unsaved successfully' });
     } catch (error) {
       console.error('Error unsaving job:', error);
-      showToast({ type: 'error', message: 'Failed to unsave job' });
     }
+  };
+
+  const handleApplyClick = (jobId: string) => {
+    if (!user) {
+      // Store the job ID in localStorage to redirect after login
+      localStorage.setItem('returnToJob', jobId);
+      router.push('/login');
+      return;
+    }
+
+    // Check if user is an employee
+    if (user.role !== 'employee') {
+      showToast({
+        type: 'error',
+        message: 'Only employees can apply for jobs',
+      });
+      router.push('/dashboard');
+      return;
+    }
+
+    router.push(`/find-job/${jobId}?apply=true`);
   };
 
   return (
@@ -508,9 +530,7 @@ export default function FindJobPage() {
                     </button>
                     <button
                       className='bg-blue-50 text-blue-700 font-semibold px-5 py-2 rounded-lg hover:bg-blue-600 hover:text-white flex items-center gap-2 transition'
-                      onClick={() =>
-                        router.push(`/find-job/${job.id}?apply=true`)
-                      }
+                      onClick={() => handleApplyClick(job.id)}
                     >
                       Apply Now
                       <ArrowRight className='w-4 h-4' />

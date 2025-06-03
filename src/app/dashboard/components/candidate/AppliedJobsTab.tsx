@@ -91,10 +91,9 @@ export default function AppliedJobsTab() {
             </div>
             {/* Status */}
             <div className='col-span-2 flex items-center gap-2 text-green-600 font-medium'>
-              {React.createElement(FaCheckCircle, {
-                className: 'text-green-500',
-                size: 16,
-              })}
+              <span className='text-green-500'>
+                <FaCheckCircle size={16} />
+              </span>
               {application.status}
             </div>
             {/* Action */}

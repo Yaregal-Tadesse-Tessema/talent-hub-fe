@@ -1,6 +1,8 @@
 import { api } from '@/config/api';
 import { API_URL } from '@/config/constants';
 
+export type ApplicationStatus = 'PENDING' | 'SELECTED' | 'REJECTED' | 'HIRED';
+
 interface FileInfo {
   path: string;
   size: number;
@@ -78,9 +80,14 @@ export interface ApplicationsResponse {
 }
 
 export interface Column {
-  id: string;
+  id: ApplicationStatus;
   title: string;
   appIds: string[];
+}
+
+export interface ChangeApplicationStatusRequest {
+  id: string;
+  status: ApplicationStatus;
 }
 
 class ApplicationService {
@@ -161,6 +168,17 @@ class ApplicationService {
       return response.data;
     } catch (error) {
       console.error('Error fetching applications by user:', error);
+      throw error;
+    }
+  }
+
+  async changeApplicationStatus(
+    data: ChangeApplicationStatusRequest,
+  ): Promise<void> {
+    try {
+      await api.put('/applications/change-application-status', data);
+    } catch (error) {
+      console.error('Error changing application status:', error);
       throw error;
     }
   }

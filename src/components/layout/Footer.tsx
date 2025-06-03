@@ -43,11 +43,10 @@ export function Footer() {
           </div>
           <div>
             <span className='text-gray-400'>Call now:</span>{' '}
-            <span className='text-white font-semibold'>(319) 555-0115</span>
+            <span className='text-white font-semibold'>(+251) 965-123-456</span>
           </div>
           <div className='text-gray-400 text-sm'>
-            6391 Elgin St. Celina, Delaware 10299, New York, United States of
-            America
+            Bole, Addis Ababa, Ethiopia
           </div>
         </div>
         <div>
@@ -117,7 +116,7 @@ export function Footer() {
         </div>
       </div>
       <div className='max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between pt-6 text-gray-500 text-sm gap-4'>
-        <div>@ 2024 MyJob - Job Portal. All rights reserved</div>
+        <div>@ 2025 Talent hub. All rights reserved</div>
         <div className='flex gap-4'>
           <SocialIcon>
             <svg width='20' height='20' fill='currentColor' viewBox='0 0 24 24'>

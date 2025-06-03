@@ -34,12 +34,26 @@ api.interceptors.response.use(
   (error) => {
     // Handle common error cases
     if (error.response?.status === 401) {
-      // Handle unauthorized access
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
-      // Redirect to login page or handle as needed
-      window.location.href = '/login';
+      // Get current path
+      const currentPath = window.location.pathname;
+      // List of public routes that don't require authentication
+      const publicRoutes = [
+        '/find-job',
+        '/',
+        '/login',
+        '/signup',
+        '/forgot-password',
+        '/verify-email',
+        '/reset-password',
+      ];
+
+      // Only redirect to login if not on a public route
+      if (!publicRoutes.some((route) => currentPath.startsWith(route))) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   },
