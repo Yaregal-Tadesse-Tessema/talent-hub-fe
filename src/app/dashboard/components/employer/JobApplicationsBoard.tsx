@@ -89,6 +89,48 @@ export default function JobApplicationsBoard({
     string | null
   >(null);
 
+  const fetchApplications = async () => {
+    try {
+      setLoading(true);
+      const response = await applicationService.getApplicationsByJobId(jobId);
+
+      // Convert applications array to record
+      const applicationsRecord: Record<string, Application> = {};
+      console.log(response.items);
+      response.items.forEach((app) => {
+        applicationsRecord[app.id] = app;
+      });
+
+      setApplications(applicationsRecord);
+
+      // Update columns with application IDs based on status
+      const newColumns = columns.map((col) => ({
+        ...col,
+        appIds: [] as string[], // Reset all columns with explicit type
+      }));
+
+      // Distribute applications to appropriate columns
+      response.items.forEach((app) => {
+        const status = app.status?.toUpperCase() || 'PENDING';
+        // If status is not one of our defined columns, put it in PENDING
+        const column =
+          newColumns.find((col) => col.id === status) ||
+          newColumns.find((col) => col.id === 'PENDING');
+        if (column) {
+          column.appIds.push(app.id);
+        }
+      });
+
+      setColumns(newColumns);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching applications:', err);
+      setError('Failed to fetch applications. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Add employer change handler
   useEmployerChange((employer) => {
     // Refresh job applications data
@@ -97,48 +139,6 @@ export default function JobApplicationsBoard({
 
   // Fetch applications when component mounts or jobId changes
   useEffect(() => {
-    const fetchApplications = async () => {
-      try {
-        setLoading(true);
-        const response = await applicationService.getApplicationsByJobId(jobId);
-
-        // Convert applications array to record
-        const applicationsRecord: Record<string, Application> = {};
-        console.log(response.items);
-        response.items.forEach((app) => {
-          applicationsRecord[app.id] = app;
-        });
-
-        setApplications(applicationsRecord);
-
-        // Update columns with application IDs based on status
-        const newColumns = columns.map((col) => ({
-          ...col,
-          appIds: [] as string[], // Reset all columns with explicit type
-        }));
-
-        // Distribute applications to appropriate columns
-        response.items.forEach((app) => {
-          const status = app.status?.toUpperCase() || 'PENDING';
-          // If status is not one of our defined columns, put it in PENDING
-          const column =
-            newColumns.find((col) => col.id === status) ||
-            newColumns.find((col) => col.id === 'PENDING');
-          if (column) {
-            column.appIds.push(app.id);
-          }
-        });
-
-        setColumns(newColumns);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching applications:', err);
-        setError('Failed to fetch applications. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchApplications();
   }, [jobId]);
 
