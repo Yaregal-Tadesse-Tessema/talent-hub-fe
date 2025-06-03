@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import OverviewTab from './employer/OverviewTab';
 import PostJobTab from './employer/PostJobTab';
 import MyJobsTab from './employer/MyJobsTab';
+import ProfileTab from './employer/ProfileTab';
 import {
   FiHome,
   FiUser,
@@ -55,6 +56,8 @@ function EmployerDashboardContent() {
     switch (activeTab) {
       case 'overview':
         return <OverviewTab />;
+      case 'profile':
+        return <ProfileTab />;
       case 'post-job':
         return <PostJobTab />;
       case 'myjobs':
@@ -81,7 +84,7 @@ function EmployerDashboardContent() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r transform transition-transform duration-200 ease-in-out md:translate-x-0 ${
+        className={`fixed  left-0 z-40 w-64 bg-white border-r transform transition-transform duration-200 ease-in-out md:translate-x-0 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -109,7 +112,7 @@ function EmployerDashboardContent() {
             })}
           </nav>
         </div>
-        <div className='absolute bottom-0 left-0 right-0 p-6'>
+        <div className=' bottom-0 left-0 right-0 p-6'>
           <button className='flex items-center gap-2 text-gray-500 hover:text-red-600 text-sm'>
             <FiLogOut className='w-5 h-5' />
             <span>Log-out</span>
@@ -119,7 +122,7 @@ function EmployerDashboardContent() {
 
       {/* Main Content */}
       <main
-        className={`flex-1 transition-all duration-200 ease-in-out ${
+        className={`flex-1 transition-all p-4 duration-200 ease-in-out ${
           isSidebarOpen ? 'ml-64' : 'ml-0'
         } md:ml-64`}
       >

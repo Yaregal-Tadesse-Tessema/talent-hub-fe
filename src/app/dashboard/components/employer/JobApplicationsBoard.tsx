@@ -31,6 +31,7 @@ import {
   ApplicationStatus,
 } from '@/services/applicationService';
 import { useToast } from '@/contexts/ToastContext';
+import { useEmployerChange } from '@/hooks/useEmployerChange';
 
 // Accept props: jobId, onBack
 export default function JobApplicationsBoard({
@@ -87,6 +88,12 @@ export default function JobApplicationsBoard({
   const [selectedApplicationId, setSelectedApplicationId] = useState<
     string | null
   >(null);
+
+  // Add employer change handler
+  useEmployerChange((employer) => {
+    // Refresh job applications data
+    fetchApplications();
+  });
 
   // Fetch applications when component mounts or jobId changes
   useEffect(() => {

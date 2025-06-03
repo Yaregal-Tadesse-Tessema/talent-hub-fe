@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import { cn } from '@/lib/utils';
 import EmployerSelection from '@/components/EmployerSelection';
@@ -49,9 +49,8 @@ const BellIcon = () => (
     />
   </svg>
 );
-const FlagETH = () => <span className='text-xl'>🇪🇹</span>;
-
 const FlagUS = () => <span className='text-xl'>🇺🇸</span>;
+const FlagET = () => <span className='text-xl'>🇪🇹</span>;
 
 interface NavbarProps {
   page?: string;
@@ -60,9 +59,12 @@ interface NavbarProps {
 export function Navbar({ page = 'home' }: NavbarProps) {
   const [country, setCountry] = useState('India');
   const [language, setLanguage] = useState('English');
+  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
+  const languageDropdownRef = useRef<HTMLDivElement>(null);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
   const [user, setUser] = useState<{
     role: 'employer' | 'employee';
-    name?: string;
+    firstName?: string;
     avatar?: string;
     email?: string;
     selectedEmployer?: EmployerData;
@@ -74,6 +76,16 @@ export function Navbar({ page = 'home' }: NavbarProps) {
   const [employers, setEmployers] = useState<EmployerData[]>([]);
   const pathname = usePathname();
   const router = useRouter();
+
+  const languages = [
+    { code: 'en', name: 'English', flag: <FlagUS /> },
+    { code: 'am', name: 'አማርኛ', flag: <FlagET /> },
+  ];
+
+  const handleLanguageChange = (lang: string) => {
+    setLanguage(lang);
+    setShowLanguageDropdown(false);
+  };
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -156,6 +168,12 @@ export function Navbar({ page = 'home' }: NavbarProps) {
         localStorage.setItem('accessToken', data.accessToken);
         localStorage.setItem('refreshToken', data.refreshToken);
         setShowEmployerSelection(false);
+
+        // Dispatch a custom event to notify all components about the employer change
+        const employerChangeEvent = new CustomEvent('employerChanged', {
+          detail: { employer },
+        });
+        window.dispatchEvent(employerChangeEvent);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -179,16 +197,14 @@ export function Navbar({ page = 'home' }: NavbarProps) {
     localStorage.removeItem('user');
     setUser(null);
     setDropdownOpen(false);
-    router.push('/login');
+    router.push('/');
   };
 
   // Links for home page (not logged in)
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/find-job', label: 'Find Job' },
-    { href: '/employers', label: 'Employers' },
     { href: '/find-candidates', label: 'Find Candidates' },
-    { href: '/candidates', label: 'Candidates' },
     { href: '/pricing', label: 'Pricing Plans' },
     { href: '/customer-supports', label: 'Customer Supports' },
   ];
@@ -210,6 +226,31 @@ export function Navbar({ page = 'home' }: NavbarProps) {
     { href: '/job-alerts', label: 'Job Alerts' },
     { href: '/customer-supports', label: 'Customer Supports' },
   ];
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      // Handle language dropdown
+      if (
+        languageDropdownRef.current &&
+        !languageDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowLanguageDropdown(false);
+      }
+
+      // Handle profile dropdown
+      if (
+        profileDropdownRef.current &&
+        !profileDropdownRef.current.contains(event.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <header className='w-full border-b bg-white sticky top-0 z-50'>
@@ -277,20 +318,50 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                     strokeWidth='2'
                   />
                 </svg>{' '}
-                +1-202-555-0178
+                +251-911-123-456
               </span>
-              <div className='hidden md:flex items-center gap-1 cursor-pointer'>
-                <FlagUS />
-                <span>{language}</span>
-                <svg
-                  width='12'
-                  height='12'
-                  fill='none'
-                  viewBox='0 0 20 20'
-                  stroke='currentColor'
+              <div
+                className='hidden md:flex items-center gap-1 relative'
+                ref={languageDropdownRef}
+              >
+                <button
+                  onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
+                  className='flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100'
                 >
-                  <path d='M6 8l4 4 4-4' strokeWidth='2' />
-                </svg>
+                  {languages.find((lang) => lang.name === language)?.flag || (
+                    <FlagUS />
+                  )}
+                  <span>{language}</span>
+                  <svg
+                    width='12'
+                    height='12'
+                    fill='none'
+                    viewBox='0 0 20 20'
+                    stroke='currentColor'
+                    className={`transform transition-transform duration-200 ${
+                      showLanguageDropdown ? 'rotate-180' : ''
+                    }`}
+                  >
+                    <path d='M6 8l4 4 4-4' strokeWidth='2' />
+                  </svg>
+                </button>
+
+                {showLanguageDropdown && (
+                  <div className='absolute top-full right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200'>
+                    {languages.map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => handleLanguageChange(lang.name)}
+                        className={`flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-gray-100 ${
+                          language === lang.name ? 'bg-gray-50' : ''
+                        }`}
+                      >
+                        {lang.flag}
+                        <span>{lang.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </>
           )}
@@ -319,7 +390,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
         {!(user && user.role === 'employer') && (
           <div className='hidden md:flex items-center w-1/2 max-w-xl'>
             <div className='flex items-center border rounded-l-md px-3 py-2 bg-gray-50'>
-              <FlagETH />
+              <FlagET />
               <span className='ml-2'>Ethiopia</span>
               <svg
                 width='12'
@@ -374,12 +445,12 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                           strokeLinejoin='round'
                         />
                       </svg>
-                      Job
+                      Add Job
                     </button>
                   </Link>
                 )}
               </div>
-              <div className='relative'>
+              <div className='relative' ref={profileDropdownRef}>
                 <button
                   onClick={() => setDropdownOpen((v) => !v)}
                   className='focus:outline-none'
@@ -392,7 +463,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                     />
                   ) : (
                     <div className='w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-lg font-bold text-gray-600'>
-                      {user.name ? user.name[0] : 'U'}
+                      {user.firstName ? user.firstName[0] : 'U'}
                     </div>
                   )}
                 </button>

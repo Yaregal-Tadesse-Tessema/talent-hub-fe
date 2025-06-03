@@ -35,6 +35,7 @@ export default function LoginPage() {
 
       const employerData = await employerResponse.json();
       if (employerResponse.ok) {
+        console.log('employerData', employerData);
         // Store employers data
         localStorage.setItem('employers', JSON.stringify(employerData || []));
         // Show employer selection popup
@@ -100,8 +101,6 @@ export default function LoginPage() {
       });
 
       const data = await response.json();
-      console.log('Selected employer:', employer);
-      console.log('API Response:', data);
 
       if (response.ok) {
         // Store user data with role as employer and selected employer

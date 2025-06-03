@@ -6,6 +6,7 @@ import { jobService } from '@/services/jobService';
 import { Job } from '@/types/job';
 import { useToast } from '@/contexts/ToastContext';
 import JobDetailModal from './JobDetailModal';
+import { useEmployerChange } from '@/hooks/useEmployerChange';
 
 const PAGE_SIZE = 8;
 
@@ -27,6 +28,29 @@ export default function MyJobsTab() {
   const menuRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const router = useRouter();
   const { showToast } = useToast();
+
+  useEmployerChange((employer) => {
+    // Refresh your component's data here
+    const fetchJobs = async () => {
+      try {
+        setLoading(true);
+        const response = await jobService.getJobs();
+        setJobs(
+          response.items.sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+          ),
+        );
+      } catch (err) {
+        console.error('Error fetching jobs:', err);
+        setError('Failed to fetch jobs. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+  });
 
   useEffect(() => {
     const fetchJobs = async () => {

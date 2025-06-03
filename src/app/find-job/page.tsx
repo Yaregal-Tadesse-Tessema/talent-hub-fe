@@ -96,8 +96,23 @@ export default function FindJobPage() {
     const fetchJobs = async () => {
       try {
         setLoading(true);
-        const response = await jobService.getJobs();
-        console.log(response);
+        // Check if user is logged in and their role
+        const storedUser = localStorage.getItem('user');
+        let userData = null;
+        if (storedUser) {
+          try {
+            userData = JSON.parse(storedUser);
+          } catch (error) {
+            console.error('Error parsing user data:', error);
+          }
+        }
+
+        // Use getPublicJobs for non-logged-in users and employees
+        const response =
+          !userData || userData?.role === 'employee'
+            ? await jobService.getPublicJobs()
+            : await jobService.getJobs();
+
         setJobs(response.items);
       } catch (err) {
         console.error('Error fetching jobs:', err);

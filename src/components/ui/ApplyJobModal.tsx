@@ -85,7 +85,6 @@ export const ApplyJobModal: React.FC<ApplyJobModalProps> = ({
             },
             {} as Record<string, any>,
           );
-          console.log('Initial answers:', initialAnswers);
           setQuestionAnswers(initialAnswers);
         } else {
           console.log('No questions found in response');

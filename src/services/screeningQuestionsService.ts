@@ -29,8 +29,6 @@ export const screeningQuestionsService = {
         `/pre-screening-questions?q=w=jobPostId:=:${jobId}`,
       );
 
-      console.log('API Response:', response); // Debug log
-
       // Ensure we return an array
       if (!response.data) {
         return [];
@@ -43,7 +41,6 @@ export const screeningQuestionsService = {
           ? response.data.items
           : [];
 
-      console.log('Processed Questions:', questions); // Debug log
       return questions;
     } catch (error) {
       console.error('Error fetching screening questions:', error);

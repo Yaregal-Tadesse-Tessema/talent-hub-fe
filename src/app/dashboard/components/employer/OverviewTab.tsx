@@ -5,56 +5,8 @@ import { useToast } from '@/contexts/ToastContext';
 import JobDetailModal from './JobDetailModal';
 import { useRouter } from 'next/navigation';
 
-// Mock data for stats and jobs
-const stats = [
-  { label: 'Open Jobs', value: 589, icon: '📁' },
-  { label: 'Saved Candidates', value: 2517, icon: '🗂️' },
-];
-
-const jobs = [
-  {
-    id: 1,
-    title: 'UI/UX Designer',
-    type: 'Full Time',
-    daysRemaining: 27,
-    status: 'Active',
-    applications: 798,
-  },
-  {
-    id: 2,
-    title: 'Senior UX Designer',
-    type: 'Internship',
-    daysRemaining: 8,
-    status: 'Active',
-    applications: 185,
-  },
-  {
-    id: 3,
-    title: 'Technical Support Specialist',
-    type: 'Part Time',
-    daysRemaining: 4,
-    status: 'Active',
-    applications: 556,
-  },
-  {
-    id: 4,
-    title: 'Junior Graphic Designer',
-    type: 'Full Time',
-    daysRemaining: 24,
-    status: 'Active',
-    applications: 583,
-  },
-  {
-    id: 5,
-    title: 'Front End Developer',
-    type: 'Full Time',
-    daysRemaining: 0,
-    status: 'Expire',
-    applications: 740,
-  },
-];
-
 export default function OverviewTab() {
+  const [user, setUser] = useState<any | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,6 +16,20 @@ export default function OverviewTab() {
   const menuRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const { showToast } = useToast();
   const router = useRouter();
+
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    if (user) {
+      setUser(JSON.parse(user));
+    }
+  }, []);
+
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    if (user) {
+      setUser(JSON.parse(user));
+    }
+  }, []);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -146,7 +112,7 @@ export default function OverviewTab() {
         />
       )}
       {/* Header */}
-      <h1 className='text-2xl font-bold mb-1'>Hello, Instagram</h1>
+      <h1 className='text-2xl font-bold mb-1'>Hello, {user?.firstName}</h1>
       <p className='text-gray-500 mb-8'>
         Here is your daily activities and applications
       </p>

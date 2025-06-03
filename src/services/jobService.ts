@@ -107,7 +107,6 @@ export const jobService = {
   async getPublicJobs(): Promise<JobsResponse> {
     try {
       const response = await api.get('/jobs/get-all-public-job-postings');
-      console.log(response.data);
       return response.data;
     } catch (error) {
       console.error('Error fetching public jobs:', error);

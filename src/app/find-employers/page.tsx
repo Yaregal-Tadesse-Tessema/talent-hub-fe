@@ -1,51 +1,11 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-
-const mockEmployers = [
-  {
-    name: 'Dribbble',
-    country: 'United States',
-    jobs: 3,
-    logo: 'https://cdn.worldvectorlogo.com/logos/dribbble-icon-1.svg',
-  },
-  {
-    name: 'Udemy',
-    country: 'China',
-    jobs: 3,
-    logo: 'https://cdn.worldvectorlogo.com/logos/udemy-2.svg',
-  },
-  {
-    name: 'Figma',
-    country: 'United States',
-    jobs: 3,
-    logo: 'https://cdn.worldvectorlogo.com/logos/figma-1.svg',
-  },
-  {
-    name: 'Google',
-    country: 'Australia',
-    jobs: 3,
-    logo: 'https://cdn.worldvectorlogo.com/logos/google-icon.svg',
-  },
-  {
-    name: 'Slack',
-    country: 'Germany',
-    jobs: 3,
-    logo: 'https://cdn.worldvectorlogo.com/logos/slack-new-logo.svg',
-  },
-  {
-    name: 'Reddit',
-    country: 'France',
-    jobs: 3,
-    logo: 'https://cdn.worldvectorlogo.com/logos/reddit-2.svg',
-  },
-  {
-    name: 'Upwork',
-    country: 'China',
-    jobs: 3,
-    logo: 'https://cdn.worldvectorlogo.com/logos/upwork.svg',
-  },
-];
+import {
+  employerService,
+  Employer,
+  EmployersResponse,
+} from '@/services/employer.service';
 
 const orgTypes = [
   'Government',
@@ -117,12 +77,39 @@ export default function FindEmployersPage() {
   const [showRadius, setShowRadius] = useState(true);
   const [showOrgType, setShowOrgType] = useState(true);
   const [page, setPage] = useState(1);
+  const [employers, setEmployers] = useState<Employer[]>([]);
+  const [loading, setLoading] = useState(true);
   const perPage = 3;
-  const totalPages = Math.ceil(mockEmployers.length / perPage);
-  const paginatedEmployers = mockEmployers.slice(
+
+  useEffect(() => {
+    const fetchEmployers = async () => {
+      try {
+        const response = await employerService.getEmployers();
+        setEmployers(response.items || []);
+      } catch (error) {
+        console.error('Failed to fetch employers:', error);
+        setEmployers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEmployers();
+  }, []);
+
+  const totalPages = Math.ceil(employers.length / perPage);
+  const paginatedEmployers = employers.slice(
     (page - 1) * perPage,
     page * perPage,
   );
+
+  if (loading) {
+    return (
+      <div className='flex justify-center items-center min-h-[200px]'>
+        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+      </div>
+    );
+  }
 
   return (
     <div className='min-h-screen'>
@@ -399,56 +386,85 @@ export default function FindEmployersPage() {
                 className='flex items-center bg-white rounded-lg border border-gray-200 shadow-sm p-6 justify-between'
               >
                 <div className='flex items-center gap-4'>
-                  <img
-                    src={employer.logo}
-                    alt={employer.name}
-                    className='w-16 h-16 rounded-lg object-contain bg-gray-100'
-                  />
+                  <div className='w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center'>
+                    <span className='text-2xl font-bold text-gray-400'>
+                      {employer.tradeName[0]}
+                    </span>
+                  </div>
                   <div>
                     <div className='font-semibold text-lg'>
                       <Link
-                        href={`/find-employers/${encodeURIComponent(employer.name.toLowerCase().replace(/\s+/g, '-'))}`}
+                        href={`/find-employers/${encodeURIComponent(employer.tradeName.toLowerCase().replace(/\s+/g, '-'))}`}
                         className='hover:underline text-blue-700'
                       >
-                        {employer.name}
+                        {employer.tradeName}
                       </Link>
                     </div>
-                    <div className='flex items-center gap-2 text-gray-500 text-sm'>
-                      <svg
-                        width='16'
-                        height='16'
-                        fill='none'
-                        viewBox='0 0 24 24'
-                        stroke='currentColor'
-                      >
-                        <path
-                          d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z'
-                          strokeWidth='2'
-                        />
-                      </svg>
-                      {employer.country}
-                      <svg
-                        width='16'
-                        height='16'
-                        fill='none'
-                        viewBox='0 0 24 24'
-                        stroke='currentColor'
-                      >
-                        <rect
-                          x='3'
-                          y='7'
-                          width='18'
-                          height='13'
-                          rx='2'
-                          strokeWidth='2'
-                        />
-                      </svg>
-                      {employer.jobs} - open Job
+                    <div className='flex items-center gap-4 text-gray-500 text-sm'>
+                      <div className='flex items-center gap-1'>
+                        <svg
+                          width='16'
+                          height='16'
+                          fill='none'
+                          viewBox='0 0 24 24'
+                          stroke='currentColor'
+                        >
+                          <path
+                            d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z'
+                            strokeWidth='2'
+                          />
+                        </svg>
+                        {employer.address.subcity}
+                      </div>
+                      {employer.industry && (
+                        <div className='flex items-center gap-1'>
+                          <svg
+                            width='16'
+                            height='16'
+                            fill='none'
+                            viewBox='0 0 24 24'
+                            stroke='currentColor'
+                          >
+                            <rect
+                              x='3'
+                              y='7'
+                              width='18'
+                              height='13'
+                              rx='2'
+                              strokeWidth='2'
+                            />
+                          </svg>
+                          {employer.industry}
+                        </div>
+                      )}
+                      {employer.companySize && (
+                        <div className='flex items-center gap-1'>
+                          <svg
+                            width='16'
+                            height='16'
+                            fill='none'
+                            viewBox='0 0 24 24'
+                            stroke='currentColor'
+                          >
+                            <path
+                              d='M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2'
+                              strokeWidth='2'
+                            />
+                            <circle cx='9' cy='7' r='4' strokeWidth='2' />
+                            <path
+                              d='M23 21v-2a4 4 0 00-3-3.87'
+                              strokeWidth='2'
+                            />
+                            <path d='M16 3.13a4 4 0 010 7.75' strokeWidth='2' />
+                          </svg>
+                          {employer.companySize}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
                 <button className='bg-blue-100 text-blue-700 px-6 py-2 rounded-md font-semibold flex items-center gap-2 hover:bg-blue-200 transition'>
-                  Open Position
+                  View Details
                   <svg
                     width='18'
                     height='18'
