@@ -1,58 +1,46 @@
+import { jobService } from '@/services/jobService';
 import Link from 'next/link';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-const vacancies = [
-  [
-    { title: 'Anesthesiologists', count: '45,904' },
-    { title: 'Maxillofacial Surgeons', count: '74,875' },
-    { title: 'Financial Manager', count: '61,391' },
-  ],
-  [
-    { title: 'Surgeons', count: '50,364' },
-    { title: 'Software Developer', count: '43,359' },
-    { title: 'Management Analysis', count: '93,046' },
-  ],
-  [
-    { title: 'Obstetricians-Gynecologists', count: '4,339' },
-    { title: 'Psychiatrists', count: '18,599' },
-    { title: 'IT Manager', count: '50,963' },
-  ],
-  [
-    { title: 'Orthodontists', count: '20,079' },
-    { title: 'Data Scientist', count: '28,200', link: true },
-    { title: 'Operations Research Analysis', count: '16,627' },
-  ],
-];
+interface Vacancy {
+  title: string;
+  openPositions: string;
+}
 
 export default function PopularVacancies() {
+  const [vacancies, setVacancies] = useState<Vacancy[]>([]);
+
+  useEffect(() => {
+    const fetchJobStats = async () => {
+      const stats = await jobService.getJobStats();
+      setVacancies(stats);
+    };
+    fetchJobStats();
+  }, []);
+
   return (
-    <section className='py-12 sm:py-16 lg:py-20 bg-white'>
-      <div className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8'>
-        <h2 className='text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-14'>
+    <section className='py-12 sm:py-16 lg:py-20 bg-gray-50'>
+      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+        <h2 className='text-3xl sm:text-4xl font-bold text-center mb-12'>
           Most Popular Vacancies
         </h2>
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10'>
-          {vacancies.map((col, i) => (
-            <div key={i} className='space-y-6 sm:space-y-10'>
-              {col.map((job, j) => (
-                <div key={j} className='flex flex-col gap-1'>
-                  {job.link ? (
-                    <Link
-                      href='#'
-                      className='text-base sm:text-lg font-semibold text-blue-600 hover:underline'
-                    >
-                      {job.title}
-                    </Link>
-                  ) : (
-                    <div className='text-base sm:text-lg font-semibold text-gray-900'>
-                      {job.title}
-                    </div>
-                  )}
-                  <div className='text-gray-400 text-sm sm:text-base'>
-                    {job.count} Open Positions
-                  </div>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
+          {vacancies.map((vacancy, index) => (
+            <div
+              key={index}
+              className='group bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-blue-100'
+            >
+              <div className='flex flex-col h-full'>
+                <h3 className='text-xl font-semibold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors'>
+                  {vacancy.title}
+                </h3>
+                <div className='mt-auto flex items-center text-blue-600'>
+                  <span className='text-md'>{vacancy.openPositions}</span>
+                  <span className='ml-2 text-sm text-gray-500'>
+                    Open Positions
+                  </span>
                 </div>
-              ))}
+              </div>
             </div>
           ))}
         </div>

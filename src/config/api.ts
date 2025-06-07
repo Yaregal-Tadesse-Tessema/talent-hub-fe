@@ -28,31 +28,94 @@ api.interceptors.request.use(
   },
 );
 
+// Flag to prevent multiple refresh attempts
+let isRefreshing = false;
+// Store pending requests
+let failedQueue: any[] = [];
+
+const processQueue = (error: any = null, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 // Add response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    // Handle common error cases
-    if (error.response?.status === 401) {
-      // Get current path
-      const currentPath = window.location.pathname;
-      // List of public routes that don't require authentication
-      const publicRoutes = [
-        '/find-job',
-        '/',
-        '/login',
-        '/signup',
-        '/forgot-password',
-        '/verify-email',
-        '/reset-password',
-      ];
+  async (error) => {
+    const originalRequest = error.config;
 
-      // Only redirect to login if not on a public route
-      if (!publicRoutes.some((route) => currentPath.startsWith(route))) {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+    // Handle common error cases
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // If refresh is in progress, add request to queue
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) {
+          throw new Error('No refresh token available');
+        }
+
+        const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+          refreshToken,
+        });
+
+        const { accessToken } = response.data;
+
+        // Update tokens in localStorage
+        localStorage.setItem('accessToken', accessToken);
+
+        // Update Authorization header
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+        // Process queued requests
+        processQueue(null, accessToken);
+
+        return api(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+
+        // Get current path
+        const currentPath = window.location.pathname;
+        // List of public routes that don't require authentication
+        const publicRoutes = [
+          '/find-job',
+          '/',
+          '/login',
+          '/signup',
+          '/forgot-password',
+          '/verify-email',
+          '/reset-password',
+        ];
+
+        // Only redirect to login if not on a public route
+        if (!publicRoutes.some((route) => currentPath.startsWith(route))) {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+        }
+
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
     return Promise.reject(error);

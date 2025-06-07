@@ -39,6 +39,11 @@ export interface EmployersResponse {
   items: Employer[];
 }
 
+export interface TenantAndCandidateCount {
+  tenants: number;
+  candidates: number;
+}
+
 export const employerService = {
   async getEmployers(): Promise<EmployersResponse> {
     try {
@@ -46,6 +51,18 @@ export const employerService = {
       return response.data;
     } catch (error) {
       console.error('Error fetching employers:', error);
+      throw error;
+    }
+  },
+
+  async getTenantAndCandidateCount(): Promise<TenantAndCandidateCount> {
+    try {
+      const response = await api.get(
+        '/tenants/get-tenant-and-candidates/count',
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching tenant and candidate counts:', error);
       throw error;
     }
   },

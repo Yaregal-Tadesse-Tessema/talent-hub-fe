@@ -292,7 +292,7 @@ export default function FindCandidatesPage() {
                 Join thousands of companies already using TalentHub
               </p>
               <Link
-                href='/register'
+                href='/signup'
                 className='inline-block px-8 py-4 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors'
               >
                 Start Hiring Today

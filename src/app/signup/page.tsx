@@ -2,18 +2,209 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
+import { api } from '@/config/api';
+import { useToast } from '@/contexts/ToastContext';
 
-const userTypes = [
-  { label: 'Employers', value: 'employer' },
-  { label: 'Candidates', value: 'candidate' },
-];
+type UserType = 'employee' | 'employer';
+
+interface EmployeeFormData {
+  phone: string;
+  email: string;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  gender: string;
+  status: 'Active';
+  password: string;
+  address: Record<string, any>;
+  birthDate: string;
+}
+
+interface ValidationErrors {
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+  phone?: string;
+  birthDate?: string;
+}
 
 export default function SignupPage() {
-  const [userType, setUserType] = useState(userTypes[0].value);
-  const [agreed, setAgreed] = useState(false);
+  const router = useRouter();
+  const { showToast } = useToast();
+  const [userType, setUserType] = useState<UserType>('employee');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [errors, setErrors] = useState<ValidationErrors>({});
+
+  const [employeeData, setEmployeeData] = useState<EmployeeFormData>({
+    phone: '',
+    email: '',
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    gender: 'male',
+    status: 'Active',
+    password: '',
+    address: {},
+    birthDate: '',
+  });
+
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password: string): boolean => {
+    // At least 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
+  };
+
+  const validatePhone = (phone: string): boolean => {
+    // Basic phone validation - can be adjusted based on requirements
+    const phoneRegex = /^\+?[\d\s-]{10,}$/;
+    return phoneRegex.test(phone);
+  };
+
+  const validateName = (name: string): boolean => {
+    // Only letters, spaces, and hyphens, 2-50 characters
+    const nameRegex = /^[A-Za-z\s-]{2,50}$/;
+    return nameRegex.test(name);
+  };
+
+  const validateBirthDate = (date: string): boolean => {
+    const birthDate = new Date(date);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      return age - 1 >= 18;
+    }
+    return age >= 18;
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: ValidationErrors = {};
+
+    // Email validation
+    if (!employeeData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!validateEmail(employeeData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    // Password validation
+    if (!employeeData.password) {
+      newErrors.password = 'Password is required';
+    } else if (!validatePassword(employeeData.password)) {
+      newErrors.password =
+        'Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character';
+    }
+
+    // Confirm password validation
+    if (!confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (employeeData.password !== confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    // First name validation
+    if (!employeeData.firstName) {
+      newErrors.firstName = 'First name is required';
+    } else if (!validateName(employeeData.firstName)) {
+      newErrors.firstName =
+        'First name should only contain letters, 2-50 characters';
+    }
+
+    // Last name validation
+    if (!employeeData.lastName) {
+      newErrors.lastName = 'Last name is required';
+    } else if (!validateName(employeeData.lastName)) {
+      newErrors.lastName =
+        'Last name should only contain letters, 2-50 characters';
+    }
+
+    // Phone validation (if provided)
+    if (employeeData.phone && !validatePhone(employeeData.phone)) {
+      newErrors.phone = 'Please enter a valid phone number';
+    }
+
+    // Birth date validation
+    if (!employeeData.birthDate) {
+      newErrors.birthDate = 'Date of birth is required';
+    } else if (!validateBirthDate(employeeData.birthDate)) {
+      newErrors.birthDate = 'You must be at least 18 years old';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleEmployeeInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target;
+    setEmployeeData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    // Clear error when user starts typing
+    if (errors[name as keyof ValidationErrors]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: undefined,
+      }));
+    }
+  };
+
+  const handleEmployeeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      // Show the first error in toast
+      const firstError = Object.values(errors)[0];
+      showToast({
+        type: 'error',
+        message: firstError || 'Please check the form for errors',
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await api.post('/users', employeeData);
+
+      if (response.data) {
+        showToast({
+          type: 'success',
+          message: 'Account created successfully! Please log in.',
+        });
+        router.push('/login');
+      }
+    } catch (error: any) {
+      showToast({
+        type: 'error',
+        message:
+          error.response?.data?.message ||
+          'Failed to create account. Please try again.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className='min-h-screen flex flex-col md:flex-row'>
@@ -58,101 +249,222 @@ export default function SignupPage() {
               Log In
             </Link>
           </p>
-          <form className='space-y-4'>
-            <div className='flex gap-2'>
-              <input
-                type='text'
-                placeholder='Full Name'
-                className='w-1/2 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200'
-              />
-              <input
-                type='text'
-                placeholder='Username'
-                className='w-1/2 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200'
-              />
-            </div>
-            <input
-              type='email'
-              placeholder='Email address'
-              className='w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200'
-            />
-            <div className='relative'>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder='Password'
-                className='w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200'
-              />
-              <button
-                type='button'
-                className='absolute right-2 top-2 text-gray-400'
-                onClick={() => setShowPassword((v) => !v)}
-              >
-                <svg width='20' height='20' fill='none' viewBox='0 0 20 20'>
-                  <path
-                    d='M10 4.167c-4.167 0-7.5 3.333-7.5 5.833s3.333 5.833 7.5 5.833 7.5-3.333 7.5-5.833-3.333-5.833-7.5-5.833Zm0 9.166a3.333 3.333 0 1 1 0-6.666 3.333 3.333 0 0 1 0 6.666Z'
-                    stroke='#9CA3AF'
-                    strokeWidth='1.5'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                  />
-                </svg>
-              </button>
-            </div>
-            <div className='relative'>
-              <input
-                type={showConfirm ? 'text' : 'password'}
-                placeholder='Confirm Password'
-                className='w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200'
-              />
-              <button
-                type='button'
-                className='absolute right-2 top-2 text-gray-400'
-                onClick={() => setShowConfirm((v) => !v)}
-              >
-                <svg width='20' height='20' fill='none' viewBox='0 0 20 20'>
-                  <path
-                    d='M10 4.167c-4.167 0-7.5 3.333-7.5 5.833s3.333 5.833 7.5 5.833 7.5-3.333 7.5-5.833-3.333-5.833-7.5-5.833Zm0 9.166a3.333 3.333 0 1 1 0-6.666 3.333 3.333 0 0 1 0 6.666Z'
-                    stroke='#9CA3AF'
-                    strokeWidth='1.5'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                  />
-                </svg>
-              </button>
-            </div>
-            <select
-              value={userType}
-              onChange={(e) => setUserType(e.target.value)}
-              className='w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200'
+
+          {/* User Type Switcher */}
+          <div className='mb-6 flex gap-4'>
+            <button
+              onClick={() => setUserType('employee')}
+              className={`flex-1 py-2 px-4 rounded-lg text-center font-medium transition-colors ${
+                userType === 'employee'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
             >
-              {userTypes.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
-              ))}
-            </select>
-            <div className='flex items-center gap-2'>
-              <input
-                id='terms'
-                type='checkbox'
-                checked={agreed}
-                onChange={(e) => setAgreed(e.target.checked)}
-                className='h-4 w-4 border rounded'
-              />
-              <label htmlFor='terms' className='text-sm text-gray-600'>
-                I've read and agree with your{' '}
-                <Link
-                  href='#'
-                  className='text-blue-600 font-medium hover:underline'
-                >
-                  Terms of Services
-                </Link>
-              </label>
+              Employee
+            </button>
+            <button
+              onClick={() => setUserType('employer')}
+              className={`flex-1 py-2 px-4 rounded-lg text-center font-medium transition-colors ${
+                userType === 'employer'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              Employer
+            </button>
+          </div>
+
+          {userType === 'employee' ? (
+            <form onSubmit={handleEmployeeSubmit} className='space-y-4'>
+              <div className='grid grid-cols-2 gap-4'>
+                <div>
+                  <input
+                    type='text'
+                    name='firstName'
+                    placeholder='First Name'
+                    value={employeeData.firstName}
+                    onChange={handleEmployeeInputChange}
+                    required
+                    className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200 ${
+                      errors.firstName ? 'border-red-500' : ''
+                    }`}
+                  />
+                  {errors.firstName && (
+                    <p className='mt-1 text-sm text-red-500'>
+                      {errors.firstName}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <input
+                    type='text'
+                    name='middleName'
+                    placeholder='Middle Name'
+                    value={employeeData.middleName}
+                    onChange={handleEmployeeInputChange}
+                    className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200 ${
+                      errors.middleName ? 'border-red-500' : ''
+                    }`}
+                  />
+                </div>
+              </div>
+              <div>
+                <input
+                  type='text'
+                  name='lastName'
+                  placeholder='Last Name'
+                  value={employeeData.lastName}
+                  onChange={handleEmployeeInputChange}
+                  required
+                  className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200 ${
+                    errors.lastName ? 'border-red-500' : ''
+                  }`}
+                />
+                {errors.lastName && (
+                  <p className='mt-1 text-sm text-red-500'>{errors.lastName}</p>
+                )}
+              </div>
+              <div>
+                <input
+                  type='email'
+                  name='email'
+                  placeholder='Email address'
+                  value={employeeData.email}
+                  onChange={handleEmployeeInputChange}
+                  required
+                  className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200 ${
+                    errors.email ? 'border-red-500' : ''
+                  }`}
+                />
+                {errors.email && (
+                  <p className='mt-1 text-sm text-red-500'>{errors.email}</p>
+                )}
+              </div>
+              <div>
+                <input
+                  type='tel'
+                  name='phone'
+                  placeholder='Phone Number'
+                  value={employeeData.phone}
+                  onChange={handleEmployeeInputChange}
+                  className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200 ${
+                    errors.phone ? 'border-red-500' : ''
+                  }`}
+                />
+                {errors.phone && (
+                  <p className='mt-1 text-sm text-red-500'>{errors.phone}</p>
+                )}
+              </div>
+              <select
+                name='gender'
+                value={employeeData.gender}
+                onChange={handleEmployeeInputChange}
+                className='w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200'
+              >
+                <option value='male'>Male</option>
+                <option value='female'>Female</option>
+                <option value='other'>Other</option>
+              </select>
+              <div>
+                <input
+                  type='date'
+                  name='birthDate'
+                  value={employeeData.birthDate}
+                  onChange={handleEmployeeInputChange}
+                  required
+                  className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200 ${
+                    errors.birthDate ? 'border-red-500' : ''
+                  }`}
+                />
+                {errors.birthDate && (
+                  <p className='mt-1 text-sm text-red-500'>
+                    {errors.birthDate}
+                  </p>
+                )}
+              </div>
+              <div>
+                <div className='relative'>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    name='password'
+                    placeholder='Password'
+                    value={employeeData.password}
+                    onChange={handleEmployeeInputChange}
+                    required
+                    className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200 ${
+                      errors.password ? 'border-red-500' : ''
+                    }`}
+                  />
+                  <button
+                    type='button'
+                    className='absolute right-2 top-2 text-gray-400'
+                    onClick={() => setShowPassword((v) => !v)}
+                  >
+                    <svg width='20' height='20' fill='none' viewBox='0 0 20 20'>
+                      <path
+                        d='M10 4.167c-4.167 0-7.5 3.333-7.5 5.833s3.333 5.833 7.5 5.833 7.5-3.333 7.5-5.833-3.333-5.833-7.5-5.833Zm0 9.166a3.333 3.333 0 1 1 0-6.666 3.333 3.333 0 0 1 0 6.666Z'
+                        stroke='#9CA3AF'
+                        strokeWidth='1.5'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                    </svg>
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className='mt-1 text-sm text-red-500'>{errors.password}</p>
+                )}
+              </div>
+              <div>
+                <div className='relative'>
+                  <input
+                    type={showConfirm ? 'text' : 'password'}
+                    placeholder='Confirm Password'
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200 ${
+                      errors.confirmPassword ? 'border-red-500' : ''
+                    }`}
+                  />
+                  <button
+                    type='button'
+                    className='absolute right-2 top-2 text-gray-400'
+                    onClick={() => setShowConfirm((v) => !v)}
+                  >
+                    <svg width='20' height='20' fill='none' viewBox='0 0 20 20'>
+                      <path
+                        d='M10 4.167c-4.167 0-7.5 3.333-7.5 5.833s3.333 5.833 7.5 5.833 7.5-3.333 7.5-5.833-3.333-5.833-7.5-5.833Zm0 9.166a3.333 3.333 0 1 1 0-6.666 3.333 3.333 0 0 1 0 6.666Z'
+                        stroke='#9CA3AF'
+                        strokeWidth='1.5'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                    </svg>
+                  </button>
+                </div>
+                {errors.confirmPassword && (
+                  <p className='mt-1 text-sm text-red-500'>
+                    {errors.confirmPassword}
+                  </p>
+                )}
+              </div>
+              <Button
+                type='submit'
+                className='w-full mt-2'
+                disabled={isLoading}
+              >
+                {isLoading ? 'Creating Account...' : 'Create Account'}
+              </Button>
+            </form>
+          ) : (
+            <div className='text-center py-8'>
+              <p className='text-gray-600'>
+                Employer registration coming soon!
+              </p>
             </div>
-            <Button type='submit' className='w-full mt-2'>
-              Create Account
-            </Button>
-          </form>
+          )}
+
           <div className='flex items-center my-4'>
             <div className='flex-grow h-px bg-gray-200' />
             <span className='mx-2 text-gray-400 text-sm'>or</span>

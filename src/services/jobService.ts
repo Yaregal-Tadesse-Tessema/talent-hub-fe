@@ -42,6 +42,7 @@ export const jobService = {
         : '/jobs/get-all-tenant-job-postings';
 
       const response = await api.get(url);
+      console.log(response.data);
 
       return response.data;
     } catch (error) {
@@ -114,6 +115,39 @@ export const jobService = {
     }
   },
 
+  async searchJobs(
+    title?: string,
+    location?: string,
+    category?: string,
+  ): Promise<JobsResponse> {
+    try {
+      console.log(title, location, category);
+      let queryParams = '';
+      const conditions = [];
+      if (title) {
+        conditions.push(`title:LIKE:${title}`);
+      }
+      if (location) {
+        conditions.push(`location:Like:${location}`);
+        conditions.push(`city:Like:${location}`);
+      }
+      if (category) {
+        conditions.push(`employmentType:LIKE:${category}`);
+      }
+      if (conditions.length > 0) {
+        queryParams = `q=w=${conditions.join(',')}`;
+      }
+
+      const response = await api.get(
+        `/jobs/get-all-public-job-postings?${queryParams}`,
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error searching jobs:', error);
+      throw error;
+    }
+  },
+
   async saveJob(jobPostId: string, userId: string): Promise<void> {
     try {
       await api.put('/save-jobs/save-job-post', {
@@ -149,6 +183,25 @@ export const jobService = {
       });
     } catch (error) {
       console.error('Error changing job status:', error);
+      throw error;
+    }
+  },
+  async getActiveJobPosts(): Promise<number> {
+    try {
+      const response = await api.get('/jobs/get-active-job-post/count');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching active job posts:', error);
+      throw error;
+    }
+  },
+
+  async getJobStats(): Promise<any> {
+    try {
+      const response = await api.get('/jobs/get-job-title/statistics');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching active job posts:', error);
       throw error;
     }
   },

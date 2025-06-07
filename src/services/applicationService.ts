@@ -92,6 +92,7 @@ export interface ChangeApplicationStatusRequest {
 
 class ApplicationService {
   async getApplicationsByJobId(jobId: string): Promise<ApplicationsResponse> {
+    console.log(jobId);
     try {
       const response = await api.get(
         `/applications?q=i=JobPost%26%26w=JobPostId:=:${jobId}`,

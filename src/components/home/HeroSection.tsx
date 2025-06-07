@@ -1,4 +1,13 @@
-import React from 'react';
+'use client';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+import { useEffect } from 'react';
+import {
+  employerService,
+  TenantAndCandidateCount,
+} from '@/services/employer.service';
+import { jobService } from '@/services/jobService';
 
 const BriefcaseIcon = () => (
   <svg
@@ -1085,6 +1094,40 @@ const LocationIcon = () => (
 );
 
 export default function HeroSection() {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [location, setLocation] = useState('');
+
+  const [activePosts, setActivePosts] = useState(0);
+  const [counts, setCounts] = useState<TenantAndCandidateCount>({
+    tenants: 0,
+    candidates: 0,
+  });
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const data = await employerService.getTenantAndCandidateCount();
+        setCounts(data);
+
+        const activeJobsCount = await jobService.getActiveJobPosts();
+        setActivePosts(activeJobsCount);
+      } catch (error) {
+        console.error('Error fetching counts:', error);
+      }
+    };
+
+    fetchCounts();
+  }, []);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const queryParams = new URLSearchParams();
+    if (searchQuery) queryParams.set('title', searchQuery); // Changed from 'q' to 'title'
+    if (location) queryParams.set('location', location);
+    router.push(`/jobs?${queryParams.toString()}`);
+  };
+
   return (
     <section className='bg-[#F8F9FB] pt-16 pb-12'>
       <div className='max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-8 px-4'>
@@ -1098,7 +1141,10 @@ export default function HeroSection() {
             passion. Start your journey to a brighter career with us—your dream
             job is just a search away.
           </p>
-          <form className='flex flex-col md:flex-row md:items-center bg-white md:rounded-full shadow-md p-2 mb-3 gap-2 md:gap-0 border border-gray-200'>
+          <form
+            onSubmit={handleSubmit}
+            className='flex flex-col md:flex-row md:items-center bg-white md:rounded-full shadow-md p-2 mb-3 gap-2 md:gap-0 border border-gray-200'
+          >
             <div className='flex items-center flex-1 px-3'>
               <svg
                 width='20'
@@ -1112,6 +1158,8 @@ export default function HeroSection() {
                 <path d='M21 21l-4.35-4.35' strokeWidth='2' />
               </svg>
               <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className='w-full bg-gray-50 rounded-full px-4 py-2 outline-none text-gray-700 border-none focus:ring-2 focus:ring-blue-100 transition'
                 placeholder='Job title, Keyword...'
               />
@@ -1120,6 +1168,8 @@ export default function HeroSection() {
             <div className='flex items-center flex-1 px-3'>
               <LocationIcon />
               <input
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
                 className='w-full bg-gray-50 rounded-full px-4 py-2 outline-none text-gray-700 ml-2 border-none focus:ring-2 focus:ring-blue-100 transition'
                 placeholder='Your Location'
               />
@@ -1150,21 +1200,27 @@ export default function HeroSection() {
         <div className='bg-white rounded-xl shadow p-6 flex items-center gap-4'>
           <BriefcaseIcon />
           <div>
-            <div className='text-2xl font-bold text-gray-900'>1,75,324</div>
+            <div className='text-2xl font-bold text-gray-900'>
+              {activePosts?.toLocaleString() || '0'}
+            </div>
             <div className='text-gray-500 text-sm'>Live Job</div>
           </div>
         </div>
         <div className='bg-white rounded-xl shadow p-6 flex items-center gap-4'>
           <BuildingIcon />
           <div>
-            <div className='text-2xl font-bold text-gray-900'>97,354</div>
+            <div className='text-2xl font-bold text-gray-900'>
+              {counts?.tenants?.toLocaleString() || '0'}
+            </div>
             <div className='text-gray-500 text-sm'>Companies</div>
           </div>
         </div>
         <div className='bg-white rounded-xl shadow p-6 flex items-center gap-4'>
           <UserGroupIcon />
           <div>
-            <div className='text-2xl font-bold text-gray-900'>38,47,154</div>
+            <div className='text-2xl font-bold text-gray-900'>
+              {counts?.candidates?.toLocaleString() || '0'}
+            </div>
             <div className='text-gray-500 text-sm'>Candidates</div>
           </div>
         </div>

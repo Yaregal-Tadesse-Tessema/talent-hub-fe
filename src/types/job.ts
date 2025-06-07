@@ -65,6 +65,7 @@ export interface Application {
 
 export interface Job {
   id: string;
+  jobPostId?: string;
   title: string;
   description: string;
   position: string;

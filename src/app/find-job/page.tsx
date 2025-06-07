@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { Bookmark, ArrowRight } from 'lucide-react';
+import { Bookmark, ArrowRight, User } from 'lucide-react';
 import FilterModal from '@/components/ui/FilterModal';
 import { jobService } from '@/services/jobService';
 import { Job } from '@/types/job';
@@ -14,7 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function FindJobPage() {
   const router = useRouter();
   const { showToast } = useToast();
-  const { user } = useAuth();
+  const [user, setUser] = useState<any | null>(null);
   const [selectedPage, setSelectedPage] = useState(1);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('list');
   const [hoveredJobId, setHoveredJobId] = useState<string | null>(null);
@@ -22,7 +22,6 @@ export default function FindJobPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userData, setUserData] = useState<{ id: string } | null>(null);
   const [searchFilters, setSearchFilters] = useState({
     keyword: '',
     location: '',
@@ -93,23 +92,23 @@ export default function FindJobPage() {
   };
 
   useEffect(() => {
+    const getUser = async () => {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    };
+
+    getUser();
+  }, []); // Empty dependency array since we only want to run this once on mount
+
+  useEffect(() => {
     const fetchJobs = async () => {
       try {
         setLoading(true);
-        // Check if user is logged in and their role
-        const storedUser = localStorage.getItem('user');
-        let userData = null;
-        if (storedUser) {
-          try {
-            userData = JSON.parse(storedUser);
-          } catch (error) {
-            console.error('Error parsing user data:', error);
-          }
-        }
-
         // Use getPublicJobs for non-logged-in users and employees
         const response =
-          !userData || userData?.role === 'employee'
+          !user || user?.role === 'employee'
             ? await jobService.getPublicJobs()
             : await jobService.getJobs();
 
@@ -123,29 +122,16 @@ export default function FindJobPage() {
     };
 
     fetchJobs();
-  }, []);
-
-  useEffect(() => {
-    // Get user data from localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUserData({ id: parsedUser.id });
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-      }
-    }
-  }, []);
+  }, [user]); // Only re-run when user changes
 
   const handleSaveJob = async (jobId: string) => {
-    if (!userData) {
+    if (!user) {
       showToast({ type: 'error', message: 'Please login to save jobs' });
       return;
     }
 
     try {
-      await jobService.saveJob(jobId, userData.id);
+      await jobService.saveJob(jobId, user.id);
       setJobs(
         jobs.map((job) => (job.id === jobId ? { ...job, isSaved: true } : job)),
       );
@@ -157,13 +143,13 @@ export default function FindJobPage() {
   };
 
   const handleUnsaveJob = async (jobId: string) => {
-    if (!userData) {
+    if (!user) {
       showToast({ type: 'error', message: 'Please login to unsave jobs' });
       return;
     }
 
     try {
-      await jobService.unsaveJob(jobId, userData.id);
+      await jobService.unsaveJob(jobId, user.id);
       setJobs(
         jobs.map((job) =>
           job.id === jobId ? { ...job, isSaved: false } : job,
@@ -176,6 +162,7 @@ export default function FindJobPage() {
   };
 
   const handleApplyClick = (jobId: string) => {
+    // Check if user is logged in
     if (!user) {
       // Store the job ID in localStorage to redirect after login
       localStorage.setItem('returnToJob', jobId);

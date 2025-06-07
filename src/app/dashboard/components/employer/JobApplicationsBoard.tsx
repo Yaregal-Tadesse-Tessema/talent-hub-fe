@@ -92,6 +92,7 @@ export default function JobApplicationsBoard({
   const fetchApplications = async () => {
     try {
       setLoading(true);
+      console.log(jobId);
       const response = await applicationService.getApplicationsByJobId(jobId);
 
       // Convert applications array to record

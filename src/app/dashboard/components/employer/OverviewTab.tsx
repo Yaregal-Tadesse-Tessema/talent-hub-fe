@@ -212,6 +212,17 @@ export default function OverviewTab() {
           </table>
         </div>
       </div>
+
+      {selectedJob && (
+        <JobDetailModal
+          job={selectedJob}
+          isOpen={isDetailModalOpen}
+          onClose={() => {
+            setIsDetailModalOpen(false);
+            setSelectedJob(null);
+          }}
+        />
+      )}
     </div>
   );
 }

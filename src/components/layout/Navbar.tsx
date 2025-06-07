@@ -68,6 +68,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
     avatar?: string;
     email?: string;
     selectedEmployer?: EmployerData;
+    profile?: { path?: string };
   } | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -455,9 +456,9 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                   onClick={() => setDropdownOpen((v) => !v)}
                   className='focus:outline-none'
                 >
-                  {user.avatar ? (
+                  {user.profile?.path ? (
                     <img
-                      src={user.avatar}
+                      src={user.profile.path}
                       alt='avatar'
                       className='w-10 h-10 rounded-full object-cover'
                     />
