@@ -240,7 +240,7 @@ export const ApplyJobModal: React.FC<ApplyJobModalProps> = ({
 
       await applicationService.createApplication(
         jobId,
-        userData.id,
+        userData,
         coverLetter,
         resumeFile,
       );

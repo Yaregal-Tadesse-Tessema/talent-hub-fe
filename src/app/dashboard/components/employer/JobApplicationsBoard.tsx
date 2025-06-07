@@ -229,9 +229,11 @@ export default function JobApplicationsBoard({
   const allAppIds = Object.keys(applications);
   let filteredAppIds = allAppIds.filter((id) => {
     const app = applications[id];
+    if (!app.userInfo) return false;
+
     if (
       filters.name &&
-      !`${app.userInfo.firstName} ${app.userInfo.lastName}`
+      !`${app.userInfo.firstName || ''} ${app.userInfo.lastName || ''}`
         .toLowerCase()
         .includes(filters.name.toLowerCase())
     )
@@ -610,7 +612,7 @@ export default function JobApplicationsBoard({
                                   <div className='flex justify-between items-start mb-2'>
                                     <div>
                                       <div className='font-semibold'>
-                                        {`${app.userInfo.firstName} ${app.userInfo.lastName}`}
+                                        {`${app?.userInfo?.firstName} ${app?.userInfo?.lastName}`}
                                       </div>
                                       <div className='text-xs text-gray-500'>
                                         {app.jobPost.position}

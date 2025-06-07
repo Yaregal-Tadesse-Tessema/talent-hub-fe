@@ -111,16 +111,17 @@ class ApplicationService {
 
   async createApplication(
     jobId: string,
-    userId: string,
+    userData: any,
     coverLetter: string,
     file: File,
-  ): Promise<Application> {
+  ) {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('userId', userId);
+      formData.append('userId', userData.id);
       formData.append('JobPostId', jobId);
       formData.append('coverLetter', coverLetter);
+      formData.append('userInfo', JSON.stringify(userData));
 
       const response = await api.post(
         '/applications/create-application',
