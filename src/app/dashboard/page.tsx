@@ -39,9 +39,11 @@ function DashboardContent() {
 
   useEffect(() => {
     // Set active tab from URL query parameter
-    const tab = searchParams.get('tab');
-    if (tab && TABS.some((t) => t.key === tab)) {
-      setActiveTab(tab);
+    if (searchParams) {
+      const tab = searchParams.get('tab');
+      if (tab && TABS.some((t) => t.key === tab)) {
+        setActiveTab(tab);
+      }
     }
   }, [searchParams]);
 

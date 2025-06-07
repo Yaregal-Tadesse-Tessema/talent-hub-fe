@@ -47,7 +47,7 @@ export default function JobDetailsPage({
 
   useEffect(() => {
     // Check if apply parameter is present
-    if (searchParams.get('apply') === 'true') {
+    if (searchParams && searchParams.get('apply') === 'true') {
       setIsApplyOpen(true);
     }
   }, [searchParams]);

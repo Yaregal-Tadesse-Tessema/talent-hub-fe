@@ -37,9 +37,11 @@ function EmployerDashboardContent() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    const tab = searchParams.get('tab');
-    if (tab && TABS.some((t) => t.key === tab)) {
-      setActiveTab(tab);
+    if (searchParams) {
+      const tab = searchParams.get('tab');
+      if (tab && TABS.some((t) => t.key === tab)) {
+        setActiveTab(tab);
+      }
     }
   }, [searchParams]);
 
