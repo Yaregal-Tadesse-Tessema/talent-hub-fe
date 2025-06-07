@@ -3,16 +3,17 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { Bookmark, ArrowRight, User } from 'lucide-react';
+import { Bookmark, ArrowRight, User, MapPin, Briefcase } from 'lucide-react';
 import FilterModal from '@/components/ui/FilterModal';
 import { jobService } from '@/services/jobService';
 import { Job } from '@/types/job';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/contexts/ToastContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function FindJobPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { showToast } = useToast();
   const [user, setUser] = useState<any | null>(null);
   const [selectedPage, setSelectedPage] = useState(1);
@@ -30,58 +31,47 @@ export default function FindJobPage() {
   const jobsPerPage = 12;
   const totalPages = 5;
 
-  const handleSearch = async () => {
-    try {
-      setLoading(true);
-      const queryParams = new URLSearchParams();
+  // Update searchFilters when searchParams change
+  useEffect(() => {
+    if (!searchParams) return;
 
-      if (searchFilters.keyword) {
-        // Use search parameter for keyword search
-        queryParams.append('search', searchFilters.keyword.trim());
-      }
-      if (searchFilters.location) {
-        queryParams.append('location', searchFilters.location.trim());
-      }
-      if (searchFilters.category) {
-        queryParams.append('type', searchFilters.category);
-      }
+    setSearchFilters({
+      keyword: searchParams.get('title') || '',
+      location: searchParams.get('location') || '',
+      category: searchParams.get('category') || '',
+    });
+  }, [searchParams]);
 
-      const queryString = queryParams.toString();
-      console.log('Search Query Parameters:', {
-        keyword: searchFilters.keyword,
-        location: searchFilters.location,
-        category: searchFilters.category,
-      });
-      console.log('Final Query String:', queryString);
-
-      const response = await jobService.getJobs(queryString);
-
-      if (response && response.items) {
-        console.log('Number of results:', response.items.length);
+  // Fetch jobs when searchParams change
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        setLoading(true);
+        const response = await jobService.searchJobs(
+          searchParams?.get('title') || '',
+          searchParams?.get('location') || '',
+          searchParams?.get('category') || '',
+        );
         setJobs(response.items);
-        if (response.items.length === 0) {
-          showToast({
-            type: 'error',
-            message: 'No jobs found matching your criteria',
-          });
-        }
-      } else {
-        setJobs([]);
-        showToast({
-          type: 'error',
-          message: 'No jobs found matching your criteria',
-        });
+      } catch (err) {
+        console.error('Error fetching jobs:', err);
+        setError('Failed to fetch jobs. Please try again later.');
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error('Error searching jobs:', err);
-      setError('Failed to search jobs. Please try again later.');
-      showToast({
-        type: 'error',
-        message: 'Failed to search jobs. Please try again later.',
-      });
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    fetchJobs();
+  }, [searchParams]);
+
+  const handleSearch = () => {
+    const queryParams = new URLSearchParams();
+    if (searchFilters.keyword) queryParams.set('title', searchFilters.keyword);
+    if (searchFilters.location)
+      queryParams.set('location', searchFilters.location);
+    if (searchFilters.category)
+      queryParams.set('category', searchFilters.category);
+    router.push(`/find-job?${queryParams.toString()}`);
   };
 
   // Add keyboard event handler for search
@@ -215,12 +205,13 @@ export default function FindJobPage() {
               fill='none'
               viewBox='0 0 24 24'
               stroke='#2563eb'
+              className='mr-2'
             >
               <circle cx='11' cy='11' r='7' strokeWidth='2' />
               <path d='M21 21l-4.35-4.35' strokeWidth='2' />
             </svg>
             <input
-              className='flex-1 bg-transparent border-none outline-none text-gray-700 placeholder-gray-400'
+              className='w-full bg-transparent border-none outline-none text-gray-700 placeholder-gray-400'
               placeholder='Job title, Keyword...'
               value={searchFilters.keyword}
               onChange={(e) =>
@@ -233,22 +224,10 @@ export default function FindJobPage() {
             />
           </div>
           {/* Location */}
-          <div className='flex items-center gap-2 border-b lg:border-b-0 lg:border-r px-0 lg:px-4 pb-4 lg:pb-0 w-full lg:w-auto'>
-            <svg
-              width='22'
-              height='22'
-              fill='none'
-              viewBox='0 0 24 24'
-              stroke='#2563eb'
-            >
-              <path
-                d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z'
-                strokeWidth='2'
-              />
-              <circle cx='12' cy='9' r='2.5' strokeWidth='2' />
-            </svg>
+          <div className='flex items-center gap-2 flex-1 border-b lg:border-b-0 lg:border-r pb-4 lg:pb-0 pr-0 lg:pr-4'>
+            <MapPin className='w-5 h-5 text-blue-600 mr-2' />
             <input
-              className='bg-transparent border-none outline-none text-gray-700 placeholder-gray-400 w-full'
+              className='w-full bg-transparent border-none outline-none text-gray-700 placeholder-gray-400'
               placeholder='Location'
               value={searchFilters.location}
               onChange={(e) =>
@@ -261,22 +240,10 @@ export default function FindJobPage() {
             />
           </div>
           {/* Category */}
-          <div className='flex items-center gap-2 border-b lg:border-b-0 lg:border-r px-0 lg:px-4 pb-4 lg:pb-0 w-full lg:w-auto'>
-            <svg
-              width='22'
-              height='22'
-              fill='none'
-              viewBox='0 0 24 24'
-              stroke='#2563eb'
-            >
-              <g strokeWidth='2'>
-                <rect x='3' y='3' width='18' height='6' rx='2' />
-                <rect x='3' y='9' width='18' height='6' rx='2' />
-                <rect x='3' y='15' width='18' height='6' rx='2' />
-              </g>
-            </svg>
+          <div className='flex items-center gap-2 flex-1 border-b lg:border-b-0 lg:border-r pb-4 lg:pb-0 pr-0 lg:pr-4'>
+            <Briefcase className='w-5 h-5 text-blue-600 mr-2' />
             <select
-              className='bg-transparent border-none outline-none text-gray-700 w-full'
+              className='w-full bg-transparent border-none outline-none text-gray-700'
               value={searchFilters.category}
               onChange={(e) =>
                 setSearchFilters((prev) => ({
@@ -286,35 +253,15 @@ export default function FindJobPage() {
               }
             >
               <option value=''>Select Category</option>
-              <option value='FULL_TIME'>Full Time</option>
-              <option value='PART_TIME'>Part Time</option>
-              <option value='CONTRACT'>Contract</option>
-              <option value='INTERNSHIP'>Internship</option>
-              <option value='TEMPORARY'>Temporary</option>
-              <option value='FREELANCE'>Freelance</option>
+              <option value='FullTime'>Full Time</option>
+              <option value='PartTime'>Part Time</option>
+              <option value='Contract'>Contract</option>
+              <option value='Internship'>Internship</option>
             </select>
           </div>
 
-          {/* Advanced filter */}
-          <div className='flex items-center gap-2 border-b lg:border-b-0 lg:border-r px-0 lg:px-4 pb-4 lg:pb-0 w-full lg:w-auto'>
-            <div
-              className='flex items-center cursor-pointer'
-              onClick={() => setIsFilterOpen(true)}
-            >
-              <span className='text-gray-500 mr-2'>Advance Filter</span>
-              <svg
-                className='w-4 h-4 text-gray-400'
-                fill='none'
-                stroke='currentColor'
-                strokeWidth='2'
-                viewBox='0 0 24 24'
-              >
-                <path d='M19 9l-7 7-7-7' />
-              </svg>
-            </div>
-          </div>
-          {/* Find Job button */}
-          <div className='flex items-center gap-2 pl-0 lg:pl-2 w-full lg:w-auto'>
+          {/* Find Job Button */}
+          <div className='flex items-center pl-0 lg:pl-4 w-full lg:w-auto'>
             <button
               className='bg-blue-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-blue-700 transition w-full lg:w-auto'
               onClick={handleSearch}
