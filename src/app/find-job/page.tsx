@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
@@ -12,6 +12,20 @@ import { useToast } from '@/contexts/ToastContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function FindJobPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className='flex justify-center items-center min-h-[200px]'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+        </div>
+      }
+    >
+      <FindJobContent />
+    </Suspense>
+  );
+}
+
+function FindJobContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { showToast } = useToast();
