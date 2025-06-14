@@ -1,3 +1,31 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* SimpleBar custom styles */
+.simplebar-horizontal {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+}
+
+.simplebar-horizontal .simplebar-scrollbar {
+  height: 8px !important;
+}
+
+.simplebar-horizontal .simplebar-track.simplebar-horizontal {
+  height: 8px !important;
+  background: #f3f4f6;
+}
+
+.simplebar-horizontal
+  .simplebar-track.simplebar-horizontal
+  .simplebar-scrollbar {
+  background: #9ca3af;
+  border-radius: 4px;
+}
+
+.simplebar-horizontal
+  .simplebar-track.simplebar-horizontal
+  .simplebar-scrollbar:hover {
+  background: #6b7280;
+}

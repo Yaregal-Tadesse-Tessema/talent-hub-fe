@@ -7,6 +7,7 @@ import {
   TrashIcon,
   UserGroupIcon,
   DocumentTextIcon,
+  Squares2X2Icon,
 } from '@heroicons/react/24/outline';
 import {
   screeningQuestionsService,
@@ -71,15 +72,12 @@ export default function JobDetailModal({
   const loadQuestions = async () => {
     try {
       setIsLoading(true);
-      console.log('Loading questions for job:', job.id); // Debug log
       const response = await screeningQuestionsService.getQuestionsByJobId(
         job.id,
       );
-      console.log('Questions response:', response); // Debug log
 
       // Ensure we have an array
       const questionsArray = Array.isArray(response) ? response : [];
-      console.log('Processed Questions:', questionsArray); // Debug log
 
       setQuestions(questionsArray);
     } catch (error) {
@@ -664,9 +662,23 @@ export default function JobDetailModal({
             <div className='space-y-8'>
               {/* Applications List */}
               <div>
-                <h3 className='text-lg font-semibold mb-4 text-gray-900'>
-                  Applications
-                </h3>
+                <div className='flex justify-between items-center mb-4'>
+                  <h3 className='text-lg font-semibold text-gray-900'>
+                    Applications
+                  </h3>
+                  {applications.length > 0 && (
+                    <button
+                      onClick={() => {
+                        onClose();
+                        window.location.href = `/dashboard?tab=myjobs&selectedJob=${job.id}`;
+                      }}
+                      className='flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
+                    >
+                      <Squares2X2Icon className='h-5 w-5 mr-2' />
+                      Manage Applications
+                    </button>
+                  )}
+                </div>
                 <div className='bg-white rounded-lg p-6 border border-gray-200'>
                   {isLoadingApplications ? (
                     <div className='text-center py-4 text-gray-500'>
@@ -686,34 +698,35 @@ export default function JobDetailModal({
                           <div className='flex justify-between items-start'>
                             <div>
                               <h4 className='font-medium text-gray-900'>
-                                {app.userInfo.firstName} {app.userInfo.lastName}
+                                {app?.userInfo?.firstName}{' '}
+                                {app?.userInfo?.lastName}
                               </h4>
                               <p className='text-sm text-gray-500 mt-1'>
-                                {app.userInfo.email}
+                                {app?.userInfo?.email}
                               </p>
-                              {app.userInfo.phone && (
+                              {app?.userInfo?.phone && (
                                 <p className='text-sm text-gray-500'>
-                                  {app.userInfo.phone}
+                                  {app?.userInfo?.phone}
                                 </p>
                               )}
                             </div>
                             <div className='flex items-center space-x-2'>
                               <span
                                 className={`px-2 py-1 rounded text-xs ${
-                                  app.status === 'PENDING'
+                                  app?.status === 'PENDING'
                                     ? 'bg-yellow-100 text-yellow-800'
-                                    : app.status === 'SELECTED'
+                                    : app?.status === 'SELECTED'
                                       ? 'bg-blue-100 text-blue-800'
-                                      : app.status === 'REJECTED'
+                                      : app?.status === 'REJECTED'
                                         ? 'bg-red-100 text-red-800'
                                         : 'bg-green-100 text-green-800'
                                 }`}
                               >
-                                {app.status}
+                                {app?.status}
                               </span>
                             </div>
                           </div>
-                          {app.coverLetter && (
+                          {app?.coverLetter && (
                             <div className='mt-3'>
                               <p className='text-sm text-gray-500'>
                                 Cover Letter:
@@ -723,24 +736,6 @@ export default function JobDetailModal({
                               </p>
                             </div>
                           )}
-                          <div className='mt-3 flex justify-end space-x-2'>
-                            <button
-                              onClick={() => {
-                                // TODO: Implement view details
-                              }}
-                              className='text-sm text-blue-600 hover:text-blue-700'
-                            >
-                              View Details
-                            </button>
-                            <button
-                              onClick={() => {
-                                // TODO: Implement download CV
-                              }}
-                              className='text-sm text-blue-600 hover:text-blue-700'
-                            >
-                              Download CV
-                            </button>
-                          </div>
                         </div>
                       ))}
                     </div>

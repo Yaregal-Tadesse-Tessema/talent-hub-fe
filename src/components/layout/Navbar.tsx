@@ -255,7 +255,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
 
   return (
     <header className='w-full border-b bg-white sticky top-0 z-50'>
-      <div className='flex items-center justify-between px-4 md:px-16 py-4 text-sm text-gray-800 bg-gray-100'>
+      <div className='flex items-center justify-between px-4 md:px-6 py-4 text-sm text-gray-800 bg-gray-100'>
         <div className='flex-1'>
           <nav className='gap-6 hidden md:flex'>
             {(user && user.role === 'employer'
@@ -283,15 +283,17 @@ export function Navbar({ page = 'home' }: NavbarProps) {
             <div className='hidden md:flex items-center gap-2'>
               <button
                 onClick={() => setShowEmployerSelection(true)}
-                className='flex items-center min-w-52 gap-2 px-3 py-1.5 border rounded-md hover:bg-gray-50'
+                className='flex items-center justify-between min-w-52 gap-2 px-3 py-1.5 border rounded-md hover:bg-gray-50'
               >
-                <div className='w-6 h-6 rounded bg-gray-200 flex items-center justify-center text-xs font-semibold'>
-                  {user.selectedEmployer?.tenant.tradeName[0] || '?'}
+                <div className='flex items-center gap-2'>
+                  <div className='w-6 h-6 rounded bg-gray-200 flex items-center justify-center text-xs font-semibold'>
+                    {user.selectedEmployer?.tenant.tradeName[0] || '?'}
+                  </div>
+                  <span className='font-medium'>
+                    {user.selectedEmployer?.tenant.tradeName ||
+                      'No Company Selected'}
+                  </span>
                 </div>
-                <span className='font-medium'>
-                  {user.selectedEmployer?.tenant.tradeName ||
-                    'No Company Selected'}
-                </span>
                 <svg
                   width='12'
                   height='12'
@@ -383,7 +385,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
           </button>
         </div>
       </div>
-      <div className='flex items-center justify-between px-4 md:px-16 py-4 bg-white'>
+      <div className='flex items-center justify-between px-4 md:px-6 py-4 bg-white'>
         <div className='flex items-center gap-2'>
           <BriefcaseIcon />
           <span className='text-2xl font-bold ml-2'>TalentHub</span>

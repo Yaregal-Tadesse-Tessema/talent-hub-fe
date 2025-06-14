@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import JobApplicationsBoard from './JobApplicationsBoard';
 import { jobService } from '@/services/jobService';
 import { Job } from '@/types/job';
@@ -27,52 +27,65 @@ export default function MyJobsTab() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const menuRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { showToast } = useToast();
 
-  useEmployerChange((employer) => {
-    // Refresh your component's data here
-    const fetchJobs = async () => {
-      try {
-        setLoading(true);
-        const response = await jobService.getJobs();
-        setJobs(
-          response.items.sort(
-            (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-          ),
-        );
-      } catch (err) {
-        console.error('Error fetching jobs:', err);
-        setError('Failed to fetch jobs. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
+  useEffect(() => {
+    const selectedJobParam = searchParams?.get('selectedJob');
+    if (selectedJobParam) {
+      setSelectedJobId(selectedJobParam);
+    }
+  }, [searchParams]);
 
+  const fetchJobs = async (
+    filterType: 'all' | 'active' | 'expired' = filter,
+  ) => {
+    try {
+      setLoading(true);
+      let queryParams = '';
+
+      if (filterType !== 'all') {
+        const conditions = [];
+        if (filterType === 'active') {
+          conditions.push('status:=:Posted');
+        } else if (filterType === 'expired') {
+          conditions.push('status:=:Expired');
+        } else if (filterType === 'Withdrawn') {
+          conditions.push('status:=:Withdrawn');
+        } else if (filterType === 'Draft') {
+          conditions.push('status:=:Draft');
+        }
+        if (conditions.length > 0) {
+          queryParams = `q=w=${conditions.join(',')}`;
+        }
+      }
+
+      const response = await jobService.getJobs(queryParams);
+      setJobs(
+        response.items.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        ),
+      );
+    } catch (err) {
+      console.error('Error fetching jobs:', err);
+      setError('Failed to fetch jobs. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEmployerChange((employer) => {
     fetchJobs();
   });
 
   useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        setLoading(true);
-        const response = await jobService.getJobs();
-        setJobs(
-          response.items.sort(
-            (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-          ),
-        );
-      } catch (err) {
-        console.error('Error fetching jobs:', err);
-        setError('Failed to fetch jobs. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchJobs();
   }, []);
+
+  useEffect(() => {
+    fetchJobs();
+  }, [filter]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -95,20 +108,7 @@ export default function MyJobsTab() {
   }, [openMenuId]);
 
   const totalPages = Math.ceil(jobs.length / PAGE_SIZE);
-  const filteredJobs = jobs.filter((job) => {
-    const daysRemaining = Math.ceil(
-      (new Date(job.deadline).getTime() - new Date().getTime()) /
-        (1000 * 60 * 60 * 24),
-    );
-    if (filter === 'all') return true;
-    if (filter === 'active') return daysRemaining > 0;
-    if (filter === 'expired') return daysRemaining <= 0;
-    return true;
-  });
-  const paginatedJobs = filteredJobs.slice(
-    (page - 1) * PAGE_SIZE,
-    page * PAGE_SIZE,
-  );
+  const paginatedJobs = jobs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const handleStatusChange = async (
     jobId: string,
@@ -245,6 +245,8 @@ export default function MyJobsTab() {
             <option value='all'>All Jobs</option>
             <option value='active'>Active</option>
             <option value='expired'>Expired</option>
+            <option value='Withdrawn'>Withdrawn</option>
+            <option value='Draft'>Draft</option>
           </select>
         </div>
         <div className='overflow-x-auto'>
@@ -274,7 +276,14 @@ export default function MyJobsTab() {
                       <div className='text-gray-400 text-xs flex gap-2 items-center'>
                         <span>{job.employmentType}</span>
                         <span>•</span>
-                        <span>{daysRemaining} days remaining</span>
+                        <span>
+                          {Math.ceil(
+                            (new Date().getTime() -
+                              new Date(job.createdAt).getTime()) /
+                              (1000 * 60 * 60 * 24),
+                          )}
+                          d
+                        </span>
                       </div>
                     </td>
                     <td className='py-3 px-4'>
@@ -324,22 +333,26 @@ export default function MyJobsTab() {
                             >
                               View Detail
                             </button>
-                            <button
-                              className='block w-full text-left px-4 py-2 hover:bg-gray-100'
-                              onClick={() =>
-                                handleStatusChange(job.id, 'Withdrawn')
-                              }
-                            >
-                              Withdraw Job
-                            </button>
-                            <button
-                              className='block w-full text-left px-4 py-2 hover:bg-gray-100'
-                              onClick={() =>
-                                handleStatusChange(job.id, 'Posted')
-                              }
-                            >
-                              Post Job
-                            </button>
+                            {job.applicationCount === 0 && (
+                              <button
+                                className='block w-full text-left px-4 py-2 hover:bg-gray-100'
+                                onClick={() =>
+                                  handleStatusChange(job.id, 'Withdrawn')
+                                }
+                              >
+                                Withdraw Job
+                              </button>
+                            )}
+                            {(!job.status || job.status === 'Draft') && (
+                              <button
+                                className='block w-full text-left px-4 py-2 hover:bg-gray-100'
+                                onClick={() =>
+                                  handleStatusChange(job.id, 'Posted')
+                                }
+                              >
+                                Post Job
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>

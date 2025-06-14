@@ -75,7 +75,7 @@ export default function ProfileTab() {
   }
 
   return (
-    <div className='max-w-4xl p-6'>
+    <div className='p-6 w-full'>
       <div className='bg-white rounded-lg shadow-lg overflow-hidden'>
         {/* Header with Logo and Basic Info */}
         <div className='p-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white'>

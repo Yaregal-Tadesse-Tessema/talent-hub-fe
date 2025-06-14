@@ -42,7 +42,6 @@ export const jobService = {
         : '/jobs/get-all-tenant-job-postings';
 
       const response = await api.get(url);
-      console.log(response.data);
 
       return response.data;
     } catch (error) {
@@ -107,7 +106,9 @@ export const jobService = {
 
   async getPublicJobs(): Promise<JobsResponse> {
     try {
-      const response = await api.get('/jobs/get-all-public-job-postings');
+      const response = await api.get(
+        '/jobs/get-all-public-job-postings?status=Posted',
+      );
       return response.data;
     } catch (error) {
       console.error('Error fetching public jobs:', error);
@@ -168,6 +169,43 @@ export const jobService = {
       });
     } catch (error) {
       console.error('Error unsaving job:', error);
+      throw error;
+    }
+  },
+
+  async favoriteJob(
+    jobPostId: string,
+    userId: string,
+    remark?: string,
+  ): Promise<void> {
+    try {
+      await api.post('/user-favorite-jobs', {
+        jobPostId,
+        userId,
+        remark: remark || '',
+      });
+    } catch (error) {
+      console.error('Error favoriting job:', error);
+      throw error;
+    }
+  },
+
+  async unfavoriteJob(jobPostId: string, userId: string): Promise<void> {
+    try {
+      await api.delete(`/user-favorite-jobs/${jobPostId}/${userId}`);
+    } catch (error) {
+      console.error('Error unfavoriting job:', error);
+      throw error;
+    }
+  },
+
+  async getFavoriteJobs(): Promise<any> {
+    try {
+      const response = await api.get(`/user-favorite-jobs`);
+      console.log(response);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching favorite jobs:', error);
       throw error;
     }
   },

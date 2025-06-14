@@ -11,6 +11,7 @@ import {
   Facebook,
   Twitter,
   Youtube,
+  Heart,
 } from 'lucide-react';
 import { ApplyJobModal } from '@/components/ui/ApplyJobModal';
 import { Card } from '@/components/ui/Card';
@@ -118,6 +119,38 @@ export default function JobDetailsPage({
     }
   };
 
+  const handleFavoriteJob = async () => {
+    if (!userData?.id) {
+      showToast({ type: 'error', message: 'Please login to favorite jobs' });
+      return;
+    }
+
+    try {
+      await jobService.favoriteJob(job!.id, userData.id);
+      setJob((prev) => (prev ? { ...prev, isFavorited: true } : null));
+      showToast({ type: 'success', message: 'Job favorited successfully' });
+    } catch (error) {
+      console.error('Error favoriting job:', error);
+      showToast({ type: 'error', message: 'Failed to favorite job' });
+    }
+  };
+
+  const handleUnfavoriteJob = async () => {
+    if (!userData?.id) {
+      showToast({ type: 'error', message: 'Please login to unfavorite jobs' });
+      return;
+    }
+
+    try {
+      await jobService.unfavoriteJob(job!.id, userData.id);
+      setJob((prev) => (prev ? { ...prev, isFavorited: false } : null));
+      showToast({ type: 'success', message: 'Job unfavorited successfully' });
+    } catch (error) {
+      console.error('Error unfavoriting job:', error);
+      showToast({ type: 'error', message: 'Failed to unfavorite job' });
+    }
+  };
+
   if (loading) {
     return (
       <div className='flex justify-center items-center min-h-screen'>
@@ -186,6 +219,18 @@ export default function JobDetailsPage({
               </div>
               <div className='flex flex-col items-end gap-2 min-w-[220px]'>
                 <div className='flex gap-2 w-full justify-end'>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    className={`border-gray-200 ${job.isFavorited ? 'text-red-600' : 'text-gray-400 hover:text-red-600'}`}
+                    onClick={() =>
+                      job.isFavorited
+                        ? handleUnfavoriteJob()
+                        : handleFavoriteJob()
+                    }
+                  >
+                    <Heart className='w-5 h-5' />
+                  </Button>
                   <Button
                     variant='outline'
                     size='sm'

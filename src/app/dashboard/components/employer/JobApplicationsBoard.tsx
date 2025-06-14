@@ -5,6 +5,8 @@ import {
   Draggable,
   DropResult,
 } from '@hello-pangea/dnd';
+import SimpleBar from 'simplebar-react';
+import 'simplebar-react/dist/simplebar.min.css';
 import {
   PencilSquareIcon,
   TrashIcon,
@@ -92,12 +94,12 @@ export default function JobApplicationsBoard({
   const fetchApplications = async () => {
     try {
       setLoading(true);
-      console.log(jobId);
+
       const response = await applicationService.getApplicationsByJobId(jobId);
 
       // Convert applications array to record
       const applicationsRecord: Record<string, Application> = {};
-      console.log(response.items);
+
       response.items.forEach((app) => {
         applicationsRecord[app.id] = app;
       });
@@ -561,146 +563,162 @@ export default function JobApplicationsBoard({
       </div>
       {/* Main Content: Board or List */}
       {view === 'board' ? (
-        <div className='flex gap-6 overflow-x-auto'>
-          <DragDropContext onDragEnd={onDragEnd}>
-            {columns.map((col) => (
-              <Droppable droppableId={col.id} key={col.id}>
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={`bg-white rounded-lg shadow p-4 min-w-[300px] max-w-[320px] flex-1 transition border ${
-                      snapshot.isDraggingOver
-                        ? 'bg-blue-50 border-blue-400'
-                        : 'border-gray-200'
-                    }`}
-                  >
-                    <div className='flex items-center justify-between mb-4'>
-                      <div className='font-semibold'>
-                        {col.title}{' '}
-                        <span className='text-gray-400'>
-                          ({col.appIds.length})
-                        </span>
-                      </div>
-                    </div>
-                    <div className='flex flex-col gap-4'>
-                      {col.appIds
-                        .filter((appId) => filteredAppIds.includes(appId))
-                        .map((appId, idx) => {
-                          const app = applications[appId];
-                          return (
-                            <Draggable
-                              draggableId={appId}
-                              index={idx}
-                              key={appId}
-                            >
-                              {(provided, snapshot) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className={`bg-gray-50 rounded-lg p-4 shadow-sm border border-gray-200 ${
-                                    snapshot.isDragging
-                                      ? 'bg-blue-100 border-blue-400'
-                                      : ''
-                                  }`}
-                                  style={{
-                                    ...provided.draggableProps.style,
-                                    cursor: 'grab',
-                                  }}
+        <div className='w-full h-[calc(100vh-200px)]'>
+          <SimpleBar
+            style={{ height: '100%' }}
+            className='simplebar-horizontal'
+          >
+            <div className='flex gap-6 pb-4 min-w-max'>
+              <DragDropContext onDragEnd={onDragEnd}>
+                {columns.map((col) => (
+                  <Droppable droppableId={col.id} key={col.id}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className={`bg-white rounded-lg shadow p-4 min-w-[300px] w-[300px] flex-shrink-0 transition border ${
+                          snapshot.isDraggingOver
+                            ? 'bg-blue-50 border-blue-400'
+                            : 'border-gray-200'
+                        }`}
+                      >
+                        <div className='flex items-center justify-between mb-4'>
+                          <div className='font-semibold'>
+                            {col.title}{' '}
+                            <span className='text-gray-400'>
+                              (
+                              {
+                                col.appIds.filter((appId) =>
+                                  filteredAppIds.includes(appId),
+                                ).length
+                              }
+                              )
+                            </span>
+                          </div>
+                        </div>
+                        <div className='flex flex-col gap-4'>
+                          {col.appIds
+                            .filter((appId) => filteredAppIds.includes(appId))
+                            .map((appId, idx) => {
+                              const app = applications[appId];
+                              return (
+                                <Draggable
+                                  draggableId={appId}
+                                  index={idx}
+                                  key={appId}
                                 >
-                                  <div className='flex justify-between items-start mb-2'>
-                                    <div>
-                                      <div className='font-semibold'>
-                                        {`${app?.userInfo?.firstName} ${app?.userInfo?.lastName}`}
-                                      </div>
-                                      <div className='text-xs text-gray-500'>
-                                        {app.jobPost.position}
-                                      </div>
-                                    </div>
-                                    <div className='relative'>
-                                      <button
-                                        className='w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 border border-gray-200'
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setOpenActionMenu(
-                                            openActionMenu === appId
-                                              ? null
-                                              : appId,
-                                          );
-                                        }}
-                                        aria-label='Open actions menu'
-                                        type='button'
-                                      >
-                                        <EllipsisVerticalIcon className='w-5 h-5' />
-                                      </button>
-                                      {openActionMenu === appId && (
-                                        <div className='absolute right-0 mt-2 w-44 bg-white border rounded shadow-lg z-10'>
-                                          <button
-                                            className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
-                                            onClick={() => {
-                                              setSelectedApplicationId(appId);
-                                              setOpenActionMenu(null);
-                                            }}
-                                          >
-                                            <PencilSquareIcon className='w-5 h-5 text-blue-500' />{' '}
-                                            View Details
-                                          </button>
-                                          <button
-                                            className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
-                                            onClick={() => {
-                                              /* TODO: Send email logic */
-                                              setOpenActionMenu(null);
-                                            }}
-                                          >
-                                            <EnvelopeIcon className='w-5 h-5 text-green-500' />{' '}
-                                            Send Email
-                                          </button>
-                                          <button
-                                            className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
-                                            onClick={() => {
-                                              /* TODO: Download CV logic */
-                                              setOpenActionMenu(null);
-                                            }}
-                                          >
-                                            <ArrowDownTrayIcon className='w-5 h-5 text-indigo-500' />{' '}
-                                            Download CV
-                                          </button>
+                                  {(provided, snapshot) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                      className={`bg-gray-50 rounded-lg p-4 shadow-sm border border-gray-200 ${
+                                        snapshot.isDragging
+                                          ? 'bg-blue-100 border-blue-400'
+                                          : ''
+                                      }`}
+                                      style={{
+                                        ...provided.draggableProps.style,
+                                        cursor: 'grab',
+                                      }}
+                                    >
+                                      <div className='flex justify-between items-start mb-2'>
+                                        <div>
+                                          <div className='font-semibold'>
+                                            {`${app?.userInfo?.firstName} ${app?.userInfo?.lastName}`}
+                                          </div>
+                                          <div className='text-xs text-gray-500'>
+                                            {app.jobPost.position}
+                                          </div>
                                         </div>
-                                      )}
+                                        <div className='relative'>
+                                          <button
+                                            className='w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 border border-gray-200'
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setOpenActionMenu(
+                                                openActionMenu === appId
+                                                  ? null
+                                                  : appId,
+                                              );
+                                            }}
+                                            aria-label='Open actions menu'
+                                            type='button'
+                                          >
+                                            <EllipsisVerticalIcon className='w-5 h-5' />
+                                          </button>
+                                          {openActionMenu === appId && (
+                                            <div className='absolute right-0 mt-2 w-44 bg-white border rounded shadow-lg z-10'>
+                                              <button
+                                                className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
+                                                onClick={() => {
+                                                  setSelectedApplicationId(
+                                                    appId,
+                                                  );
+                                                  setOpenActionMenu(null);
+                                                }}
+                                              >
+                                                <PencilSquareIcon className='w-5 h-5 text-blue-500' />{' '}
+                                                View Details
+                                              </button>
+                                              <button
+                                                className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
+                                                onClick={() => {
+                                                  /* TODO: Send email logic */
+                                                  setOpenActionMenu(null);
+                                                }}
+                                              >
+                                                <EnvelopeIcon className='w-5 h-5 text-green-500' />{' '}
+                                                Send Email
+                                              </button>
+                                              <button
+                                                className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
+                                                onClick={() => {
+                                                  /* TODO: Download CV logic */
+                                                  setOpenActionMenu(null);
+                                                }}
+                                              >
+                                                <ArrowDownTrayIcon className='w-5 h-5 text-indigo-500' />{' '}
+                                                Download CV
+                                              </button>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <ul className='text-xs text-gray-600 mb-2'>
+                                        <li>
+                                          Experience:{' '}
+                                          {app.userInfo.yearOfExperience ||
+                                            'Not specified'}{' '}
+                                          years
+                                        </li>
+                                        <li>
+                                          Education:{' '}
+                                          {app.userInfo
+                                            .highestLevelOfEducation ||
+                                            'Not specified'}
+                                        </li>
+                                        <li>
+                                          Applied:{' '}
+                                          {new Date(
+                                            app.userInfo.createdAt,
+                                          ).toLocaleDateString()}
+                                        </li>
+                                      </ul>
                                     </div>
-                                  </div>
-                                  <ul className='text-xs text-gray-600 mb-2'>
-                                    <li>
-                                      Experience:{' '}
-                                      {app.userInfo.yearOfExperience ||
-                                        'Not specified'}{' '}
-                                      years
-                                    </li>
-                                    <li>
-                                      Education:{' '}
-                                      {app.userInfo.highestLevelOfEducation ||
-                                        'Not specified'}
-                                    </li>
-                                    <li>
-                                      Applied:{' '}
-                                      {new Date(
-                                        app.userInfo.createdAt,
-                                      ).toLocaleDateString()}
-                                    </li>
-                                  </ul>
-                                </div>
-                              )}
-                            </Draggable>
-                          );
-                        })}
-                      {provided.placeholder}
-                    </div>
-                  </div>
-                )}
-              </Droppable>
-            ))}
-          </DragDropContext>
+                                  )}
+                                </Draggable>
+                              );
+                            })}
+                          {provided.placeholder}
+                        </div>
+                      </div>
+                    )}
+                  </Droppable>
+                ))}
+              </DragDropContext>
+            </div>
+          </SimpleBar>
         </div>
       ) : (
         <div className='bg-white rounded-lg shadow p-4'>

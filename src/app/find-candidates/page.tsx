@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import CandidateDetailModal from './CandidateDetailModal';
 import Image from 'next/image';
 import Link from 'next/link';
+import { employeeService } from '@/services/employee.service';
 
 const candidateLevels = ['Entry Level', 'Mid Level', 'Expert Level'];
 const experiences = [
@@ -120,6 +121,9 @@ export default function FindCandidatesPage() {
   const [showMobileFilter, setShowMobileFilter] = useState(false);
 
   useEffect(() => {
+    employeeService.getEmployers().then((res) => {
+      console.log(res);
+    });
     if (typeof window !== 'undefined') {
       const storedUser = localStorage.getItem('user');
       if (storedUser) {

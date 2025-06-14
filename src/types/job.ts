@@ -99,6 +99,7 @@ export interface Job {
   savedUsers: Application[];
   preScreeningQuestions: Application[];
   isSaved: boolean;
+  isFavorited: boolean;
   isApplied: boolean;
   positionNumbers: number;
   paymentType: string;

@@ -900,24 +900,40 @@ export default function ProfilePage() {
                         </p>
                       </div>
                     </div>
-                    <a
-                      href={profile.resume.path}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800'
-                    >
-                      View
-                    </a>
+                    <div className='flex items-center space-x-4'>
+                      <a
+                        href={profile.resume.path}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800'
+                      >
+                        View
+                      </a>
+                      <button
+                        onClick={() => router.push('/cv-builder')}
+                        className='px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700'
+                      >
+                        Generate CV
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div className='text-center py-8'>
                     <p className='text-gray-500'>No resume uploaded yet</p>
-                    <button
-                      onClick={() => setActiveResumeTab('upload')}
-                      className='mt-2 text-blue-600 hover:text-blue-800'
-                    >
-                      Upload your resume
-                    </button>
+                    <div className='mt-4 space-x-4'>
+                      <button
+                        onClick={() => setActiveResumeTab('upload')}
+                        className='px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800'
+                      >
+                        Upload your resume
+                      </button>
+                      <button
+                        onClick={() => router.push('/cv-builder')}
+                        className='px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700'
+                      >
+                        Generate CV with AI
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

@@ -68,9 +68,14 @@ export default function LoginPage() {
 
         // Check if there's a return URL stored
         const returnToJob = localStorage.getItem('returnToJob');
+        const returnToCVBuilder = localStorage.getItem('returnToCVBuilder');
+
         if (returnToJob) {
           localStorage.removeItem('returnToJob'); // Clean up
           router.push(`/find-job/${returnToJob}?apply=true`);
+        } else if (returnToCVBuilder) {
+          localStorage.removeItem('returnToCVBuilder'); // Clean up
+          router.push(returnToCVBuilder);
         } else {
           router.push('/dashboard');
         }
