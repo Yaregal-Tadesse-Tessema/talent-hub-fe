@@ -13,7 +13,14 @@ export default function PopularVacancies() {
   useEffect(() => {
     const fetchJobStats = async () => {
       const stats = await jobService.getJobStats();
-      setVacancies(stats);
+      const sortedAndLimitedStats = stats
+        .sort(
+          (a: Vacancy, b: Vacancy) =>
+            parseInt(b.openPositions) - parseInt(a.openPositions),
+        )
+        .slice(0, 6);
+
+      setVacancies(sortedAndLimitedStats);
     };
     fetchJobStats();
   }, []);
