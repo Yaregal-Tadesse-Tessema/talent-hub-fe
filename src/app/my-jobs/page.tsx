@@ -2,6 +2,7 @@
 
 import MyJobsTab from '../dashboard/components/employer/MyJobsTab';
 import { useRouter } from 'next/navigation';
+import { Suspense } from 'react';
 
 export default function MyJobsPage() {
   const router = useRouter();
@@ -18,7 +19,9 @@ export default function MyJobsPage() {
         <span className='text-gray-400'>/</span>
         <span className='text-gray-700'>My Jobs</span>
       </div>
-      <MyJobsTab />
+      <Suspense>
+        <MyJobsTab />
+      </Suspense>
     </div>
   );
 }

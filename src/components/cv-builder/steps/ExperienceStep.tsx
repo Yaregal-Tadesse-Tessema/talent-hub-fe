@@ -14,11 +14,13 @@ export default function ExperienceStep({
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   const [newExperience, setNewExperience] = useState({
-    title: '',
+    position: '',
     company: '',
     startDate: '',
     endDate: '',
+    current: false,
     description: '',
+    location: '',
   });
 
   const handleAddExperience = () => {
@@ -31,17 +33,28 @@ export default function ExperienceStep({
       onUpdate({ experience: [...profile.experience, newExperience] });
     }
     setNewExperience({
-      title: '',
+      position: '',
       company: '',
       startDate: '',
       endDate: '',
+      current: false,
       description: '',
+      location: '',
     });
     setIsAdding(false);
   };
 
   const handleEditExperience = (index: number) => {
-    setNewExperience(profile.experience[index]);
+    const exp = profile.experience[index];
+    setNewExperience({
+      position: exp.position || '',
+      company: exp.company || '',
+      startDate: exp.startDate || '',
+      endDate: exp.endDate || '',
+      current: exp.current || false,
+      description: exp.description || '',
+      location: exp.location || '',
+    });
     setEditingIndex(index);
     setIsAdding(true);
   };
@@ -67,7 +80,7 @@ export default function ExperienceStep({
             <div className='flex justify-between items-start'>
               <div>
                 <h3 className='text-lg font-medium text-gray-900'>
-                  {exp.title}
+                  {exp.position}
                 </h3>
                 <p className='text-gray-600'>{exp.company}</p>
                 <p className='text-sm text-gray-500'>
@@ -103,23 +116,25 @@ export default function ExperienceStep({
           <div className='space-y-4'>
             <div>
               <label
-                htmlFor='title'
+                htmlFor='position'
                 className='block text-sm font-medium text-gray-700'
               >
                 Job Title
               </label>
               <input
                 type='text'
-                id='title'
-                value={newExperience.title}
+                id='position'
+                value={newExperience.position}
                 onChange={(e) =>
-                  setNewExperience({ ...newExperience, title: e.target.value })
+                  setNewExperience({
+                    ...newExperience,
+                    position: e.target.value,
+                  })
                 }
                 className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
                 placeholder='Software Engineer'
               />
             </div>
-
             <div>
               <label
                 htmlFor='company'
@@ -141,7 +156,6 @@ export default function ExperienceStep({
                 placeholder='Company Name'
               />
             </div>
-
             <div className='grid grid-cols-2 gap-4'>
               <div>
                 <label
@@ -163,7 +177,6 @@ export default function ExperienceStep({
                   className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
                 />
               </div>
-
               <div>
                 <label
                   htmlFor='endDate'
@@ -185,7 +198,41 @@ export default function ExperienceStep({
                 />
               </div>
             </div>
-
+            <div className='flex items-center space-x-2'>
+              <input
+                type='checkbox'
+                checked={newExperience.current}
+                onChange={(e) =>
+                  setNewExperience({
+                    ...newExperience,
+                    current: e.target.checked,
+                  })
+                }
+                className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+              />
+              <label className='text-sm text-gray-600'>Current Position</label>
+            </div>
+            <div>
+              <label
+                htmlFor='location'
+                className='block text-sm font-medium text-gray-700'
+              >
+                Location
+              </label>
+              <input
+                type='text'
+                id='location'
+                value={newExperience.location}
+                onChange={(e) =>
+                  setNewExperience({
+                    ...newExperience,
+                    location: e.target.value,
+                  })
+                }
+                className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
+                placeholder='City, Country'
+              />
+            </div>
             <div>
               <label
                 htmlFor='description'
@@ -204,10 +251,9 @@ export default function ExperienceStep({
                   })
                 }
                 className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
-                placeholder='Describe your responsibilities and achievements...'
+                placeholder='Describe your responsibilities, achievements, etc.'
               />
             </div>
-
             <div className='flex justify-end space-x-3'>
               <button
                 onClick={() => {

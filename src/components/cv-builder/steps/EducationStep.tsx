@@ -16,9 +16,12 @@ export default function EducationStep({
   const [newEducation, setNewEducation] = useState({
     degree: '',
     institution: '',
+    field: '',
     startDate: '',
     endDate: '',
+    current: false,
     description: '',
+    location: '',
   });
 
   const handleAddEducation = () => {
@@ -33,15 +36,28 @@ export default function EducationStep({
     setNewEducation({
       degree: '',
       institution: '',
+      field: '',
       startDate: '',
       endDate: '',
+      current: false,
       description: '',
+      location: '',
     });
     setIsAdding(false);
   };
 
   const handleEditEducation = (index: number) => {
-    setNewEducation(profile.education[index]);
+    const edu = profile.education[index];
+    setNewEducation({
+      degree: edu.degree || '',
+      institution: edu.institution || '',
+      field: edu.field || '',
+      startDate: edu.startDate || '',
+      endDate: edu.endDate || '',
+      current: edu.current || false,
+      description: edu.description || '',
+      location: edu.location || '',
+    });
     setEditingIndex(index);
     setIsAdding(true);
   };
@@ -119,7 +135,24 @@ export default function EducationStep({
                 placeholder='Bachelor of Science in Computer Science'
               />
             </div>
-
+            <div>
+              <label
+                htmlFor='field'
+                className='block text-sm font-medium text-gray-700'
+              >
+                Field of Study
+              </label>
+              <input
+                type='text'
+                id='field'
+                value={newEducation.field}
+                onChange={(e) =>
+                  setNewEducation({ ...newEducation, field: e.target.value })
+                }
+                className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
+                placeholder='Computer Science'
+              />
+            </div>
             <div>
               <label
                 htmlFor='institution'
@@ -141,7 +174,6 @@ export default function EducationStep({
                 placeholder='University Name'
               />
             </div>
-
             <div className='grid grid-cols-2 gap-4'>
               <div>
                 <label
@@ -163,7 +195,6 @@ export default function EducationStep({
                   className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
                 />
               </div>
-
               <div>
                 <label
                   htmlFor='endDate'
@@ -185,7 +216,38 @@ export default function EducationStep({
                 />
               </div>
             </div>
-
+            <div className='flex items-center space-x-2'>
+              <input
+                type='checkbox'
+                checked={newEducation.current}
+                onChange={(e) =>
+                  setNewEducation({
+                    ...newEducation,
+                    current: e.target.checked,
+                  })
+                }
+                className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+              />
+              <label className='text-sm text-gray-600'>Current Education</label>
+            </div>
+            <div>
+              <label
+                htmlFor='location'
+                className='block text-sm font-medium text-gray-700'
+              >
+                Location
+              </label>
+              <input
+                type='text'
+                id='location'
+                value={newEducation.location}
+                onChange={(e) =>
+                  setNewEducation({ ...newEducation, location: e.target.value })
+                }
+                className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
+                placeholder='City, Country'
+              />
+            </div>
             <div>
               <label
                 htmlFor='description'
@@ -204,7 +266,7 @@ export default function EducationStep({
                   })
                 }
                 className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
-                placeholder='Describe your major achievements, relevant coursework, or academic projects...'
+                placeholder='Describe your studies, achievements, etc.'
               />
             </div>
 

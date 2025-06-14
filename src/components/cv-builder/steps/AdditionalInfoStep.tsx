@@ -28,7 +28,11 @@ export default function AdditionalInfoStep({
   const [newProject, setNewProject] = useState({
     name: '',
     description: '',
+    startDate: '',
+    endDate: '',
+    current: false,
     url: '',
+    technologies: [] as string[],
   });
 
   const [newAward, setNewAward] = useState({
@@ -44,6 +48,7 @@ export default function AdditionalInfoStep({
     role: '',
     startDate: '',
     endDate: '',
+    current: false,
     description: '',
   });
 
@@ -74,11 +79,19 @@ export default function AdditionalInfoStep({
   };
 
   const handleAddProject = () => {
-    if (newProject.name) {
+    if (newProject.name && newProject.startDate) {
       onUpdate({
         projects: [...profile.projects, newProject],
       });
-      setNewProject({ name: '', description: '', url: '' });
+      setNewProject({
+        name: '',
+        description: '',
+        startDate: '',
+        endDate: '',
+        current: false,
+        url: '',
+        technologies: [],
+      });
     }
   };
 
@@ -110,6 +123,7 @@ export default function AdditionalInfoStep({
         role: '',
         startDate: '',
         endDate: '',
+        current: false,
         description: '',
       });
     }
@@ -269,7 +283,7 @@ export default function AdditionalInfoStep({
       case 'projects':
         return (
           <div className='space-y-4'>
-            <div className='grid grid-cols-1 gap-4'>
+            <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
               <input
                 type='text'
                 value={newProject.name}
@@ -279,22 +293,65 @@ export default function AdditionalInfoStep({
                 placeholder='Project Name'
                 className='rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
               />
-              <textarea
+              <input
+                type='text'
                 value={newProject.description}
                 onChange={(e) =>
                   setNewProject({ ...newProject, description: e.target.value })
                 }
                 placeholder='Project Description'
-                rows={3}
                 className='rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
               />
               <input
-                type='url'
+                type='month'
+                value={newProject.startDate}
+                onChange={(e) =>
+                  setNewProject({ ...newProject, startDate: e.target.value })
+                }
+                placeholder='Start Date'
+                className='rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
+              />
+              <input
+                type='month'
+                value={newProject.endDate}
+                onChange={(e) =>
+                  setNewProject({ ...newProject, endDate: e.target.value })
+                }
+                placeholder='End Date'
+                className='rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
+              />
+              <div className='flex items-center space-x-2'>
+                <input
+                  type='checkbox'
+                  checked={newProject.current}
+                  onChange={(e) =>
+                    setNewProject({ ...newProject, current: e.target.checked })
+                  }
+                  className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                />
+                <label className='text-sm text-gray-600'>Current Project</label>
+              </div>
+              <input
+                type='text'
                 value={newProject.url}
                 onChange={(e) =>
                   setNewProject({ ...newProject, url: e.target.value })
                 }
                 placeholder='Project URL'
+                className='rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
+              />
+              <input
+                type='text'
+                value={newProject.technologies.join(', ')}
+                onChange={(e) =>
+                  setNewProject({
+                    ...newProject,
+                    technologies: e.target.value
+                      .split(',')
+                      .map((tech) => tech.trim()),
+                  })
+                }
+                placeholder='Technologies (comma-separated)'
                 className='rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
               />
             </div>
@@ -305,19 +362,35 @@ export default function AdditionalInfoStep({
               Add Project
             </button>
             <div className='space-y-2'>
-              {profile.projects.map((proj, index) => (
+              {profile.projects.map((project, index) => (
                 <div key={index} className='bg-gray-50 p-3 rounded-md'>
-                  <h4 className='font-medium'>{proj.name}</h4>
-                  <p className='text-sm text-gray-600'>{proj.description}</p>
-                  {proj.url && (
+                  <h4 className='font-medium'>{project.name}</h4>
+                  <p className='text-sm text-gray-600'>{project.description}</p>
+                  <p className='text-sm text-gray-500'>
+                    {project.startDate} -{' '}
+                    {project.current ? 'Present' : project.endDate}
+                  </p>
+                  {project.url && (
                     <a
-                      href={proj.url}
+                      href={project.url}
                       target='_blank'
                       rel='noopener noreferrer'
                       className='text-sm text-blue-600 hover:text-blue-800'
                     >
                       View Project
                     </a>
+                  )}
+                  {project.technologies && project.technologies.length > 0 && (
+                    <div className='mt-2 flex flex-wrap gap-1'>
+                      {project.technologies.map((tech, techIndex) => (
+                        <span
+                          key={techIndex}
+                          className='px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full'
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
                   )}
                 </div>
               ))}
@@ -408,7 +481,7 @@ export default function AdditionalInfoStep({
       case 'volunteer':
         return (
           <div className='space-y-4'>
-            <div className='grid grid-cols-1 gap-4'>
+            <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
               <input
                 type='text'
                 value={newVolunteer.organization}
@@ -430,33 +503,45 @@ export default function AdditionalInfoStep({
                 placeholder='Role'
                 className='rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
               />
-              <div className='grid grid-cols-2 gap-4'>
+              <input
+                type='month'
+                value={newVolunteer.startDate}
+                onChange={(e) =>
+                  setNewVolunteer({
+                    ...newVolunteer,
+                    startDate: e.target.value,
+                  })
+                }
+                placeholder='Start Date'
+                className='rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
+              />
+              <input
+                type='month'
+                value={newVolunteer.endDate}
+                onChange={(e) =>
+                  setNewVolunteer({ ...newVolunteer, endDate: e.target.value })
+                }
+                placeholder='End Date'
+                className='rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
+              />
+              <div className='flex items-center space-x-2'>
                 <input
-                  type='month'
-                  value={newVolunteer.startDate}
+                  type='checkbox'
+                  checked={newVolunteer.current}
                   onChange={(e) =>
                     setNewVolunteer({
                       ...newVolunteer,
-                      startDate: e.target.value,
+                      current: e.target.checked,
                     })
                   }
-                  placeholder='Start Date'
-                  className='rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
+                  className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
                 />
-                <input
-                  type='month'
-                  value={newVolunteer.endDate}
-                  onChange={(e) =>
-                    setNewVolunteer({
-                      ...newVolunteer,
-                      endDate: e.target.value,
-                    })
-                  }
-                  placeholder='End Date'
-                  className='rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
-                />
+                <label className='text-sm text-gray-600'>
+                  Current Volunteer Role
+                </label>
               </div>
-              <textarea
+              <input
+                type='text'
                 value={newVolunteer.description}
                 onChange={(e) =>
                   setNewVolunteer({
@@ -465,7 +550,6 @@ export default function AdditionalInfoStep({
                   })
                 }
                 placeholder='Description'
-                rows={3}
                 className='rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
               />
             </div>
@@ -478,14 +562,14 @@ export default function AdditionalInfoStep({
             <div className='space-y-2'>
               {profile.volunteer.map((vol, index) => (
                 <div key={index} className='bg-gray-50 p-3 rounded-md'>
-                  <h4 className='font-medium'>{vol.role}</h4>
-                  <p className='text-sm text-gray-600'>{vol.organization}</p>
+                  <h4 className='font-medium'>{vol.organization}</h4>
+                  <p className='text-sm text-gray-600'>{vol.role}</p>
                   <p className='text-sm text-gray-500'>
-                    {vol.startDate} - {vol.endDate}
+                    {vol.startDate} - {vol.current ? 'Present' : vol.endDate}
                   </p>
-                  <p className='text-sm text-gray-700 mt-1'>
-                    {vol.description}
-                  </p>
+                  {vol.description && (
+                    <p className='text-sm'>{vol.description}</p>
+                  )}
                 </div>
               ))}
             </div>

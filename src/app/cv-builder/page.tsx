@@ -24,54 +24,68 @@ export type Profile = {
   website: string;
   skills: string[];
   experience: Array<{
-    title: string;
+    position: string;
     company: string;
     startDate: string;
-    endDate: string;
+    endDate?: string;
+    current: boolean;
     description: string;
+    location?: string;
   }>;
   education: Array<{
     degree: string;
     institution: string;
+    field: string;
     startDate: string;
-    endDate: string;
-    description: string;
+    endDate?: string;
+    current: boolean;
+    description?: string;
+    location?: string;
   }>;
   certificates: Array<{
     name: string;
     issuer: string;
     date: string;
+    description?: string;
   }>;
   publications: Array<{
     title: string;
     publisher: string;
     date: string;
-    url: string;
+    url?: string;
+    description?: string;
   }>;
   projects: Array<{
     name: string;
     description: string;
-    url: string;
+    startDate: string;
+    endDate?: string;
+    current: boolean;
+    url?: string;
+    technologies?: string[];
   }>;
   awards: Array<{
     title: string;
     issuer: string;
     date: string;
+    description?: string;
   }>;
   interests: string[];
   volunteer: Array<{
     organization: string;
     role: string;
     startDate: string;
-    endDate: string;
-    description: string;
+    endDate?: string;
+    current: boolean;
+    description?: string;
   }>;
   references: Array<{
     name: string;
     position: string;
     company: string;
-    email: string;
-    phone: string;
+    email?: string;
+    phone?: string;
+    relationship?: string;
   }>;
 };
 
@@ -126,37 +140,47 @@ const sampleProfile: Profile = {
   ],
   experience: [
     {
-      title: 'Senior Software Engineer',
+      position: 'Senior Software Engineer',
       company: 'Tech Corp',
       startDate: '2020-01',
       endDate: '2023-12',
+      current: false,
       description:
         'Led development of microservices architecture. Improved system performance by 40%. Mentored junior developers and implemented CI/CD pipelines.',
+      location: 'San Francisco, CA',
     },
     {
-      title: 'Software Engineer',
+      position: 'Software Engineer',
       company: 'StartUp Inc',
       startDate: '2018-03',
       endDate: '2019-12',
+      current: false,
       description:
         'Developed and maintained web applications using React and Node.js. Implemented automated testing and deployment processes.',
+      location: 'San Francisco, CA',
     },
   ],
   education: [
     {
       degree: 'Master of Science in Computer Science',
       institution: 'Stanford University',
+      field: 'Computer Science',
       startDate: '2016-09',
       endDate: '2018-05',
+      current: false,
       description:
         'Specialized in Artificial Intelligence and Machine Learning. Graduated with honors.',
+      location: 'Stanford, CA',
     },
     {
       degree: 'Bachelor of Science in Computer Science',
       institution: 'University of California, Berkeley',
+      field: 'Computer Science',
       startDate: '2012-09',
       endDate: '2016-05',
+      current: false,
       description: "Dean's List. Computer Science Club President.",
+      location: 'Berkeley, CA',
     },
   ],
   certificates: [
@@ -164,11 +188,14 @@ const sampleProfile: Profile = {
       name: 'AWS Certified Solutions Architect',
       issuer: 'Amazon Web Services',
       date: '2022-06',
+      description:
+        'Professional level certification for AWS cloud architecture',
     },
     {
       name: 'Google Cloud Professional Developer',
       issuer: 'Google',
       date: '2021-03',
+      description: 'Professional level certification for Google Cloud Platform',
     },
   ],
   publications: [
@@ -177,6 +204,8 @@ const sampleProfile: Profile = {
       publisher: 'Tech Journal',
       date: '2022-09',
       url: 'https://example.com/publication1',
+      description:
+        'A comprehensive guide to building and scaling microservices architecture',
     },
   ],
   projects: [
@@ -184,7 +213,11 @@ const sampleProfile: Profile = {
       name: 'Open Source Task Manager',
       description:
         'A full-stack task management application built with React and Node.js',
+      startDate: '2021-01',
+      endDate: '2022-12',
+      current: false,
       url: 'https://github.com/johndoe/task-manager',
+      technologies: ['React', 'Node.js', 'MongoDB', 'Express'],
     },
   ],
   awards: [
@@ -192,6 +225,8 @@ const sampleProfile: Profile = {
       title: 'Best Developer Award',
       issuer: 'Tech Corp',
       date: '2022-12',
+      description:
+        "Recognized for outstanding contributions to the company's technical initiatives",
     },
   ],
   interests: [
@@ -207,6 +242,7 @@ const sampleProfile: Profile = {
       role: 'Mentor',
       startDate: '2021-01',
       endDate: '2023-12',
+      current: false,
       description: 'Teaching programming to underprivileged youth',
     },
   ],
@@ -217,6 +253,7 @@ const sampleProfile: Profile = {
       company: 'Tech Corp',
       email: 'jane.smith@techcorp.com',
       phone: '+1 (555) 987-6543',
+      relationship: 'Former Manager',
     },
   ],
 };
