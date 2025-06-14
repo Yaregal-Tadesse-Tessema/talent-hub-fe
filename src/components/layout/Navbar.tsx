@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import EmployerSelection from '@/components/EmployerSelection';
 import { EmployerData, Tenant } from '@/types/employer';
 import { API_BASE_URL } from '@/config/api';
+import { employerService } from '@/services/employerService';
 
 // Placeholder icons (replace with Heroicons or similar in real app)
 const BriefcaseIcon = () => (
@@ -112,31 +113,8 @@ export function Navbar({ page = 'home' }: NavbarProps) {
 
   const fetchEmployers = async () => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/tenants/get-tenants/by-token`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-          },
-        },
-      );
-      if (response.ok) {
-        const tenants = await response.json();
-        // Transform tenants into EmployerData format
-        const employersData: EmployerData[] = tenants.map((tenant: Tenant) => ({
-          id: tenant.id,
-          jobTitle: '',
-          lookupId: '',
-          status: tenant.status,
-          tenantId: tenant.id,
-          tenant_Id: tenant.id,
-          tenantName: tenant.name,
-          tenant: tenant,
-          createdAt: tenant.createdAt || '',
-          updatedAt: tenant.updatedAt || '',
-        }));
-        setEmployers(employersData);
-      }
+      const employersData = await employerService.getTenantsByToken();
+      setEmployers(employersData);
     } catch (error) {
       console.error('Error fetching employers:', error);
     }
@@ -144,19 +122,8 @@ export function Navbar({ page = 'home' }: NavbarProps) {
 
   const handleEmployerSelect = async (employer: EmployerData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/regenerate-token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-        body: JSON.stringify({
-          orgId: employer.tenant.id,
-        }),
-      });
-
-      const data = await response.json();
-      if (response.ok && user) {
+      const data = await employerService.regenerateToken(employer.tenant.id);
+      if (user) {
         // Store user data with role as employer
         const userData = {
           ...user,

@@ -56,16 +56,32 @@ function FindJobContent() {
     });
   }, [searchParams]);
 
-  // Fetch jobs when searchParams change
+  // Combined effect for fetching jobs
   useEffect(() => {
     const fetchJobs = async () => {
       try {
         setLoading(true);
-        const response = await jobService.searchJobs(
-          searchParams?.get('title') || '',
-          searchParams?.get('location') || '',
-          searchParams?.get('category') || '',
-        );
+        let response;
+
+        // If we have search params, use searchJobs
+        if (
+          searchParams?.get('title') ||
+          searchParams?.get('location') ||
+          searchParams?.get('category')
+        ) {
+          response = await jobService.searchJobs(
+            searchParams.get('title') || '',
+            searchParams.get('location') || '',
+            searchParams.get('category') || '',
+          );
+        } else {
+          // Otherwise, use getPublicJobs or getJobs based on user role
+          response =
+            !user || user?.role === 'employee'
+              ? await jobService.getPublicJobs()
+              : await jobService.getJobs();
+        }
+
         setJobs(response.items);
       } catch (err) {
         console.error('Error fetching jobs:', err);
@@ -76,7 +92,7 @@ function FindJobContent() {
     };
 
     fetchJobs();
-  }, [searchParams]);
+  }, [searchParams, user]); // Dependencies include both searchParams and user
 
   const handleSearch = () => {
     const queryParams = new URLSearchParams();
@@ -105,28 +121,6 @@ function FindJobContent() {
 
     getUser();
   }, []); // Empty dependency array since we only want to run this once on mount
-
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        setLoading(true);
-        // Use getPublicJobs for non-logged-in users and employees
-        const response =
-          !user || user?.role === 'employee'
-            ? await jobService.getPublicJobs()
-            : await jobService.getJobs();
-
-        setJobs(response.items);
-      } catch (err) {
-        console.error('Error fetching jobs:', err);
-        setError('Failed to fetch jobs. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchJobs();
-  }, [user]); // Only re-run when user changes
 
   const handleSaveJob = async (jobId: string) => {
     if (!user) {

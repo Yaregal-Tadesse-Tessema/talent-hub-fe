@@ -379,7 +379,7 @@ export default function CVBuilderPage() {
 
   return (
     <div className='min-h-screen bg-gray-50 py-12'>
-      <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
+      <div className='md:max-w-6xl mx-auto px-4 sm:px-6 lg:px-8'>
         {/* Sample Data Button */}
         <div className='mb-8 flex justify-end'>
           <button

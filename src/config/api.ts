@@ -80,7 +80,7 @@ api.interceptors.response.use(
           {},
           {
             headers: {
-              Authorization: `Bearer ${refreshToken}`,
+              'x-refresh-token': refreshToken,
             },
           },
         );
