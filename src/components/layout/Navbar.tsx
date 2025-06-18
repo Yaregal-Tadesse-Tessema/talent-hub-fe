@@ -9,6 +9,7 @@ import EmployerSelection from '@/components/EmployerSelection';
 import { EmployerData, Tenant } from '@/types/employer';
 import { API_BASE_URL } from '@/config/api';
 import { employerService } from '@/services/employerService';
+import { notificationService } from '@/services/notificationService';
 
 // Placeholder icons (replace with Heroicons or similar in real app)
 const BriefcaseIcon = () => (
@@ -78,6 +79,11 @@ export function Navbar({ page = 'home' }: NavbarProps) {
   const [employers, setEmployers] = useState<EmployerData[]>([]);
   const pathname = usePathname();
   const router = useRouter();
+  const [notificationCount, setNotificationCount] = useState<number>(0);
+  const [notificationDropdownOpen, setNotificationDropdownOpen] =
+    useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const notificationDropdownRef = useRef<HTMLDivElement>(null);
 
   const languages = [
     { code: 'en', name: 'English', flag: <FlagUS /> },
@@ -210,6 +216,14 @@ export function Navbar({ page = 'home' }: NavbarProps) {
       ) {
         setDropdownOpen(false);
       }
+
+      // Handle notification dropdown
+      if (
+        notificationDropdownRef.current &&
+        !notificationDropdownRef.current.contains(event.target as Node)
+      ) {
+        setNotificationDropdownOpen(false);
+      }
     }
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -217,6 +231,20 @@ export function Navbar({ page = 'home' }: NavbarProps) {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    const fetchNotificationCount = async () => {
+      if (user) {
+        try {
+          const count = await notificationService.getNotificationCount();
+          setNotificationCount(count);
+        } catch (error) {
+          setNotificationCount(0);
+        }
+      }
+    };
+    fetchNotificationCount();
+  }, [user]);
 
   return (
     <header className='w-full border-b bg-white sticky top-0 z-50'>
@@ -287,8 +315,13 @@ export function Navbar({ page = 'home' }: NavbarProps) {
 
           {showAuthButtons ? (
             <>
+              <Link href='/signup'>
+                <button className='px-6 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-md font-bold shadow-md hover:from-blue-600 hover:to-cyan-600 transition-all duration-200'>
+                  Register
+                </button>
+              </Link>
               <Link href='/login'>
-                <button className='px-6 py-2 border border-blue-600 text-blue-600 rounded-md font-medium bg-white hover:bg-blue-50'>
+                <button className='px-6 py-2 border border-blue-600 text-blue-600 rounded-md font-medium bg-white hover:bg-blue-50 ml-2'>
                   Sign In
                 </button>
               </Link>
@@ -296,10 +329,55 @@ export function Navbar({ page = 'home' }: NavbarProps) {
           ) : user ? (
             <>
               <div className='relative flex items-center gap-3'>
-                <button className='relative'>
-                  <BellIcon />
-                  <span className='absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white'></span>
-                </button>
+                <div className='relative' ref={notificationDropdownRef}>
+                  <button
+                    className='relative'
+                    onClick={async () => {
+                      setNotificationDropdownOpen((v) => !v);
+                      if (!notificationDropdownOpen && user) {
+                        try {
+                          const newNotifications =
+                            await notificationService.getNewNotifications();
+                          setNotifications(newNotifications);
+                        } catch (error) {
+                          setNotifications([]);
+                        }
+                      }
+                    }}
+                  >
+                    <BellIcon />
+                    {notificationCount > 0 && (
+                      <span className='absolute top-0 right-0 block h-4 w-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center ring-2 ring-white'>
+                        {notificationCount}
+                      </span>
+                    )}
+                  </button>
+                  {notificationDropdownOpen && (
+                    <div className='absolute right-0 mt-2 w-80 max-w-xs bg-white border rounded shadow-lg z-50 overflow-y-auto max-h-96'>
+                      <div className='p-4 border-b font-semibold'>
+                        Notifications
+                      </div>
+                      {notifications.length === 0 ? (
+                        <div className='p-4 text-gray-500 text-sm'>
+                          No new notifications
+                        </div>
+                      ) : (
+                        <ul className='divide-y'>
+                          {notifications.map((notif, idx) => (
+                            <li
+                              key={notif.id || idx}
+                              className='p-4 hover:bg-gray-50 text-sm'
+                            >
+                              {notif.message ||
+                                notif.title ||
+                                'New notification'}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
+                </div>
                 {user.role === 'employer' && (
                   <Link href='/dashboard?tab=post-job'>
                     <button className='flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700'>
@@ -363,53 +441,6 @@ export function Navbar({ page = 'home' }: NavbarProps) {
             </>
           ) : null}
 
-          {!(user && user.role === 'employer') && (
-            <>
-              <div
-                className='hidden md:flex items-center gap-1 relative'
-                ref={languageDropdownRef}
-              >
-                <button
-                  onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
-                  className='flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100'
-                >
-                  {languages.find((lang) => lang.name === language)?.flag || (
-                    <FlagUS />
-                  )}
-                  <span>{language}</span>
-                  <svg
-                    width='12'
-                    height='12'
-                    fill='none'
-                    viewBox='0 0 20 20'
-                    stroke='currentColor'
-                    className={`transform transition-transform duration-200 ${
-                      showLanguageDropdown ? 'rotate-180' : ''
-                    }`}
-                  >
-                    <path d='M6 8l4 4 4-4' strokeWidth='2' />
-                  </svg>
-                </button>
-
-                {showLanguageDropdown && (
-                  <div className='absolute top-full right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200'>
-                    {languages.map((lang) => (
-                      <button
-                        key={lang.code}
-                        onClick={() => handleLanguageChange(lang.name)}
-                        className={`flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-gray-100 ${
-                          language === lang.name ? 'bg-gray-50' : ''
-                        }`}
-                      >
-                        {lang.flag}
-                        <span>{lang.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </>
-          )}
           <button
             className='md:hidden flex items-center'
             aria-label='Open menu'

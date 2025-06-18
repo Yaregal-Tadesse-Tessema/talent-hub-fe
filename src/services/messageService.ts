@@ -9,6 +9,14 @@ export interface Message {
   createdAt: string;
 }
 
+export interface SendMessageRequest {
+  senderFullName: string;
+  senderEmployerId: string;
+  receiverUserId: string;
+  content: string;
+  applicationId: string;
+}
+
 export const messageService = {
   async getMessagesByApplicationId(applicationId: string): Promise<Message[]> {
     try {
@@ -23,6 +31,16 @@ export const messageService = {
     } catch (error) {
       console.error('Error fetching messages:', error);
       return [];
+    }
+  },
+
+  async sendMessage(data: SendMessageRequest): Promise<Message> {
+    try {
+      const response = await api.post('/messages', data);
+      return response.data;
+    } catch (error) {
+      console.error('Error sending message:', error);
+      throw error;
     }
   },
 };

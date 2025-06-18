@@ -129,7 +129,7 @@ export default function JobApplicationsBoard({
       response.items.forEach((app) => {
         applicationsRecord[app.id] = app;
       });
-      console.log(applicationsRecord);
+
       setApplications(applicationsRecord);
 
       const job = await jobService.getJobById(jobId);
@@ -516,6 +516,7 @@ export default function JobApplicationsBoard({
 const mockApplicationDetail: ApplicationDetail = {
   name: 'Esther Howard',
   role: 'Website Designer (UI/UX)',
+  userId: 'mock-user-id',
   biography: `I've been passionate about graphic design and digital art from an early age with a keen interest in Website and Mobile Application User Interfaces. I can create high-quality and aesthetically pleasing designs in a quick turnaround time. Check out the portfolio section of my profile to see samples of my work and feel free to discuss your designing needs. I mostly use Adobe Photoshop, Illustrator, XD and Figma. *Website User Experience and Interface (UI/UX) Design - for all kinds of Professional and Personal websites. *Mobile Application User Experience and Interface Design - for all kinds of IOS/Android and Hybrid Mobile Applications. *Wireframe Designs.`,
   coverLetter: `Dear Sir,\n\nI am writing to express my interest in the fourth grade instructional position that is currently available in the Fort Wayne Community School System. I learned of the opening through a notice posted on JobZone, IPFW's job database. I am confident that my academic background and curriculum development skills would be successfully utilized in this teaching position.\n\nI have just completed my Bachelor of Science degree in Elementary Education and have successfully completed Praxis I and Praxis II. During my student teaching experience, I developed and initiated a three-week curriculum sequence on animal species and earth resources. This collaborative unit involved working with three other third grade teachers within my team, and culminated in a field trip to the Indianapolis Zoo Animal Research Unit.\n\nSincerely,\nEsther Howard`,
   socialLinks: [
@@ -551,6 +552,7 @@ function mapApplicationToDetail(app?: Application): ApplicationDetail {
   return {
     name: `${user.firstName} ${user.lastName}`,
     role: app.jobPost?.title || '',
+    userId: app.userId || '',
     avatarUrl: user.profile?.path || undefined,
     biography: user.professionalSummery || '',
     coverLetter: app.coverLetter || '',

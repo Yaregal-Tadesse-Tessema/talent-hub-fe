@@ -10,7 +10,13 @@ import {
   PhoneIcon,
   ArrowRightIcon,
 } from '@heroicons/react/24/outline';
-import { messageService } from '@/services/messageService';
+import {
+  messageService,
+  Message,
+  SendMessageRequest,
+} from '@/services/messageService';
+import { useEmployerChange } from '@/hooks/useEmployerChange';
+import { applicationService } from '@/services/applicationService';
 
 export type ApplicationDetail = {
   name: string;
@@ -26,6 +32,7 @@ export type ApplicationDetail = {
   experience: string;
   education: string;
   resumeUrl: string;
+  userId: string;
   contact: {
     website: string;
     location: string;
@@ -48,32 +55,52 @@ export default function ApplicationDetailModal({
   application: ApplicationDetail;
 }) {
   const [activeTab, setActiveTab] = useState<'details' | 'chat'>('details');
-  const [messages, setMessages] = useState([
-    { sender: 'employer', text: 'Hello, thank you for your application!' },
-    { sender: 'employee', text: 'Thank you for considering me.' },
-    {
-      sender: 'employer',
-      text: 'Can you tell us more about your last project?',
-    },
-    {
-      sender: 'employee',
-      text: 'Sure! I worked on a web app using React and Node.js.',
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
+  const [employer, setEmployer] = useState<any>(null);
+  const [applicationData, setApplicationData] = useState<any>(null);
 
-  const handleSend = () => {
-    if (input.trim()) {
-      setMessages([...messages, { sender: 'employer', text: input }]);
-      setInput('');
+  useEmployerChange((employerData) => {
+    setEmployer(employerData);
+  });
+
+  const handleSend = async () => {
+    if (input.trim() && applicationId && employer) {
+      try {
+        const messageData: SendMessageRequest = {
+          senderFullName: `${employer.firstName} ${employer.lastName}`,
+          senderEmployerId: employer.id,
+          receiverUserId: applicationData?.userInfo?.id,
+          content: input.trim(),
+          applicationId: applicationId,
+        };
+        const newMessage = await messageService.sendMessage(messageData);
+        setMessages((prev) => [...prev, newMessage]);
+        setInput('');
+      } catch (error) {
+        console.error('Error sending message:', error);
+        // You might want to show an error toast here
+      }
     }
   };
 
   useEffect(() => {
-    console.log('application', applicationId);
-    if (open && applicationId) {
-      messageService.getMessagesByApplicationId(applicationId);
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setEmployer(parsedUser);
+      applicationService.getApplicationById(applicationId || '').then((res) => {
+        setApplicationData(res);
+      });
     }
+    const fetchMessages = async () => {
+      if (open && applicationId) {
+        const fetchedMessages =
+          await messageService.getMessagesByApplicationId(applicationId);
+        setMessages(fetchedMessages);
+      }
+    };
+    fetchMessages();
   }, [open, applicationId]);
 
   if (!open) return null;
@@ -283,12 +310,12 @@ export default function ApplicationDetailModal({
             <div className='flex-1 overflow-y-auto mb-4 bg-gray-50 rounded p-4'>
               {messages.map((msg, idx) => (
                 <div
-                  key={idx}
-                  className={`mb-2 flex ${msg.sender === 'employer' ? 'justify-end' : 'justify-start'}`}
+                  key={msg.id}
+                  className={`mb-2 flex ${msg.senderId === 'employer' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
                     className={`px-4 py-2 rounded-lg max-w-xs text-sm ${
-                      msg.sender === 'employer'
+                      msg.senderId === 'employer'
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-200 text-gray-800'
                     }`}
@@ -306,12 +333,18 @@ export default function ApplicationDetailModal({
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleSend();
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSend();
+                  }
                 }}
               />
               <button
                 className='bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-medium'
-                onClick={handleSend}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleSend();
+                }}
               >
                 Send
               </button>

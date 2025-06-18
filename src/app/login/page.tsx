@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import EmployerSelection from '@/components/EmployerSelection';
 import { EmployerData } from '@/types/employer';
 import { API_BASE_URL } from '@/config/api';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -15,8 +16,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
   const [showEmployerSelection, setShowEmployerSelection] = useState(false);
-  const { login, user } = useAuth();
   const router = useRouter();
+  const { showToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,9 +36,9 @@ export default function LoginPage() {
 
       const employerData = await employerResponse.json();
       if (employerResponse.ok) {
-        console.log('employerData', employerData);
         // Store employers data
         localStorage.setItem('employers', JSON.stringify(employerData || []));
+        console.log('employerData', employerData);
         // Show employer selection popup
         setShowEmployerSelection(true);
         return;
@@ -81,10 +82,10 @@ export default function LoginPage() {
         }
       } else {
         // Show error message
-        console.error(
-          'Login failed:',
-          employeeData.message || 'Invalid credentials',
-        );
+        showToast({
+          type: 'error',
+          message: 'Invalid credentials',
+        });
       }
     } catch (error) {
       console.error('Login error:', error);

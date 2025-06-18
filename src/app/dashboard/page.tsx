@@ -74,7 +74,7 @@ function DashboardContent() {
 
   // Otherwise, render CandidateDashboard
   return (
-    <div className='flex min-h-screen bg-gray-50 px-16'>
+    <div className='flex min-h-screen bg-gray-50'>
       {/* Sidebar Navigation (Candidate) */}
       <aside className='w-64 bg-white border-r p-6 flex flex-col justify-between'>
         <div>

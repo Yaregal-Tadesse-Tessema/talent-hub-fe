@@ -8,6 +8,7 @@ import {
   UserGroupIcon,
   DocumentTextIcon,
   Squares2X2Icon,
+  ChartBarIcon,
 } from '@heroicons/react/24/outline';
 import {
   screeningQuestionsService,
@@ -16,6 +17,21 @@ import {
 import { applicationService, Application } from '@/services/applicationService';
 import { toast } from 'react-hot-toast';
 import { messageService } from '@/services/messageService';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 
 interface JobDetailModalProps {
   job: Job;
@@ -23,7 +39,7 @@ interface JobDetailModalProps {
   onClose: () => void;
 }
 
-type Tab = 'details' | 'applications';
+type Tab = 'details' | 'applications' | 'statistics';
 
 export default function JobDetailModal({
   job,
@@ -178,11 +194,54 @@ export default function JobDetailModal({
     }
   };
 
+  // Mock data for charts - replace with real data from your API
+  const applicationStatusData = [
+    {
+      name: 'Pending',
+      value: applications.filter((app) => app.status === 'PENDING').length,
+    },
+    {
+      name: 'Shortlisted',
+      value: applications.filter((app) => app.status === 'SELECTED').length,
+    },
+    {
+      name: 'Rejected',
+      value: applications.filter((app) => app.status === 'REJECTED').length,
+    },
+    {
+      name: 'Hired',
+      value: applications.filter((app) => app.status === 'HIRED').length,
+    },
+  ];
+
+  const experienceLevelData = [
+    { name: 'Entry Level', value: 30 },
+    { name: 'Mid Level', value: 45 },
+    { name: 'Senior Level', value: 25 },
+  ];
+
+  const educationLevelData = [
+    { name: "Bachelor's", value: 40 },
+    { name: "Master's", value: 35 },
+    { name: 'PhD', value: 15 },
+    { name: 'Other', value: 10 },
+  ];
+
+  const applicationsOverTimeData = [
+    { date: '2024-01', applications: 5 },
+    { date: '2024-02', applications: 8 },
+    { date: '2024-03', applications: 12 },
+    { date: '2024-04', applications: 15 },
+    { date: '2024-05', applications: 10 },
+  ];
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+
   if (!isOpen) return null;
 
   return (
     <div className='fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100]'>
-      <div className='bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col'>
+      <div className='bg-white rounded-xl shadow-2xl w-full max-w-6xl mx-4 max-h-[90vh] flex flex-col'>
         {/* Header */}
         <div className='flex justify-between items-center p-6 border-b border-gray-200 sticky top-0 bg-white rounded-t-xl'>
           <h2 className='text-2xl font-bold text-gray-900'>{job.title}</h2>
@@ -223,6 +282,17 @@ export default function JobDetailModal({
                   {applications.length}
                 </span>
               )}
+            </button>
+            <button
+              onClick={() => setActiveTab('statistics')}
+              className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'statistics'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <ChartBarIcon className='h-5 w-5 mr-2' />
+              Statistics
             </button>
           </nav>
         </div>
@@ -664,7 +734,7 @@ export default function JobDetailModal({
                 )}
               </div>
             </div>
-          ) : (
+          ) : activeTab === 'applications' ? (
             <div className='space-y-8'>
               {/* Applications List */}
               <div>
@@ -746,6 +816,129 @@ export default function JobDetailModal({
                       ))}
                     </div>
                   )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className='space-y-8'>
+              {/* Application Overview */}
+              <div>
+                <h3 className='text-lg font-semibold mb-4 text-gray-900'>
+                  Application Overview
+                </h3>
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                  <div className='bg-white rounded-lg p-6 border border-gray-200'>
+                    <h4 className='text-sm font-medium text-gray-500 mb-4'>
+                      Applications Over Time
+                    </h4>
+                    <div className='h-[300px]'>
+                      <ResponsiveContainer width='100%' height='100%'>
+                        <LineChart data={applicationsOverTimeData}>
+                          <CartesianGrid strokeDasharray='3 3' />
+                          <XAxis dataKey='date' />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Line
+                            type='monotone'
+                            dataKey='applications'
+                            stroke='#0088FE'
+                            strokeWidth={2}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                  <div className='bg-white rounded-lg p-6 border border-gray-200'>
+                    <h4 className='text-sm font-medium text-gray-500 mb-4'>
+                      Application Status
+                    </h4>
+                    <div className='h-[300px]'>
+                      <ResponsiveContainer width='100%' height='100%'>
+                        <PieChart>
+                          <Pie
+                            data={applicationStatusData}
+                            cx='50%'
+                            cy='50%'
+                            labelLine={false}
+                            outerRadius={80}
+                            fill='#8884d8'
+                            dataKey='value'
+                            label={({ name, percent }) =>
+                              `${name} ${(percent * 100).toFixed(0)}%`
+                            }
+                          >
+                            {applicationStatusData.map((entry, index) => (
+                              <Cell
+                                key={`cell-${index}`}
+                                fill={COLORS[index % COLORS.length]}
+                              />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Applicant Demographics */}
+              <div>
+                <h3 className='text-lg font-semibold mb-4 text-gray-900'>
+                  Applicant Demographics
+                </h3>
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                  <div className='bg-white rounded-lg p-6 border border-gray-200'>
+                    <h4 className='text-sm font-medium text-gray-500 mb-4'>
+                      Experience Level Distribution
+                    </h4>
+                    <div className='h-[300px]'>
+                      <ResponsiveContainer width='100%' height='100%'>
+                        <BarChart data={experienceLevelData}>
+                          <CartesianGrid strokeDasharray='3 3' />
+                          <XAxis dataKey='name' />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey='value' fill='#8884d8' />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                  <div className='bg-white rounded-lg p-6 border border-gray-200'>
+                    <h4 className='text-sm font-medium text-gray-500 mb-4'>
+                      Education Level Distribution
+                    </h4>
+                    <div className='h-[300px]'>
+                      <ResponsiveContainer width='100%' height='100%'>
+                        <PieChart>
+                          <Pie
+                            data={educationLevelData}
+                            cx='50%'
+                            cy='50%'
+                            labelLine={false}
+                            outerRadius={80}
+                            fill='#8884d8'
+                            dataKey='value'
+                            label={({ name, percent }) =>
+                              `${name} ${(percent * 100).toFixed(0)}%`
+                            }
+                          >
+                            {educationLevelData.map((entry, index) => (
+                              <Cell
+                                key={`cell-${index}`}
+                                fill={COLORS[index % COLORS.length]}
+                              />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

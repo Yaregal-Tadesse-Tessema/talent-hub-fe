@@ -184,6 +184,11 @@ class ApplicationService {
       throw error;
     }
   }
+
+  async getApplicationById(applicationId: string): Promise<Application> {
+    const response = await api.get(`/applications/${applicationId}`);
+    return response.data;
+  }
 }
 
 export const applicationService = new ApplicationService();
