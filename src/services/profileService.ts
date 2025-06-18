@@ -10,7 +10,7 @@ class ProfileService {
     userId: string,
     profile: UserProfile,
   ): Promise<UserProfile> {
-    const response = await api.put(`/users/${userId}`, profile);
+    const response = await api.put(`/users`, profile);
     return response.data;
   }
 

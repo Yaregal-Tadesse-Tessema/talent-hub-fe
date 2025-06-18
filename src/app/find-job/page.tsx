@@ -292,9 +292,12 @@ function FindJobContent() {
                 <div className='flex items-center gap-3 mb-2'>
                   {job.companyLogo && (
                     <img
-                      src={job.companyLogo.path}
+                      src={
+                        job.companyLogo?.path ||
+                        '/images/default-company-logo.png'
+                      }
                       alt={job.companyName}
-                      className='w-10 h-10 object-contain'
+                      className='w-20 h-20 object-contain'
                     />
                   )}
                   <span className='font-semibold text-gray-800'>
@@ -365,7 +368,10 @@ function FindJobContent() {
                   <div className='flex items-center gap-4 min-w-[56px]'>
                     {job.companyLogo && (
                       <img
-                        src={job.companyLogo.path}
+                        src={
+                          job.companyLogo?.path ||
+                          '/images/default-company-logo.png'
+                        }
                         alt={job.companyName}
                         className='w-12 h-12 object-contain'
                       />

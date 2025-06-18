@@ -15,6 +15,7 @@ import {
 } from '@/services/screeningQuestionsService';
 import { applicationService, Application } from '@/services/applicationService';
 import { toast } from 'react-hot-toast';
+import { messageService } from '@/services/messageService';
 
 interface JobDetailModalProps {
   job: Job;
@@ -51,6 +52,11 @@ export default function JobDetailModal({
       loadQuestions();
       if (activeTab === 'applications') {
         loadApplications();
+      }
+      // Fetch chat history for the first application (if any)
+      if (activeTab === 'applications' && applications.length > 0) {
+        const firstAppId = applications[0].id;
+        messageService.getMessagesByApplicationId(firstAppId);
       }
     }
   }, [isOpen, activeTab]);

@@ -111,7 +111,10 @@ export default function ProfilePage() {
         profile.id,
         profile,
       );
-      localStorage.setItem('user', JSON.stringify(updatedProfile));
+      localStorage.setItem(
+        'user',
+        JSON.stringify({ ...updatedProfile, role: 'employee' }),
+      );
       setProfile(updatedProfile);
       setIsEditing(false);
       showToast({ type: 'success', message: 'Profile updated successfully' });

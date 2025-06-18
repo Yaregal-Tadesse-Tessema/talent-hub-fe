@@ -34,6 +34,16 @@ import {
 } from '@/services/applicationService';
 import { useToast } from '@/contexts/ToastContext';
 import { useEmployerChange } from '@/hooks/useEmployerChange';
+import { jobService } from '@/services/jobService';
+import { Job } from '@/types/job';
+import { BadgeCheckIcon } from 'lucide-react';
+import BoardView from './job-applications-board/BoardView';
+import ListView from './job-applications-board/ListView';
+import FilterModal from './job-applications-board/FilterModal';
+import SortModal from './job-applications-board/SortModal';
+import BulkActionsBar from './job-applications-board/BulkActionsBar';
+import BulkActionModal from './job-applications-board/BulkActionModal';
+import Breadcrumb from './job-applications-board/Breadcrumb';
 
 // Accept props: jobId, onBack
 export default function JobApplicationsBoard({
@@ -90,7 +100,23 @@ export default function JobApplicationsBoard({
   const [selectedApplicationId, setSelectedApplicationId] = useState<
     string | null
   >(null);
-
+  const [job, setJob] = useState<Job | null>(null);
+  const [bulkActionModal, setBulkActionModal] = useState<{
+    open: boolean;
+    action: null | 'move' | 'shortlist' | 'remark' | 'mail' | 'reject' | 'tag';
+  }>({ open: false, action: null });
+  const [notifyByEmail, setNotifyByEmail] = useState(false);
+  const [remarkText, setRemarkText] = useState('');
+  const [mailDraft, setMailDraft] = useState('');
+  const [availableTags, setAvailableTags] = useState([
+    'Top Talent',
+    'Needs Review',
+    'Interviewed',
+    'Follow Up',
+    'Potential Fit',
+  ]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState('');
   const fetchApplications = async () => {
     try {
       setLoading(true);
@@ -103,8 +129,11 @@ export default function JobApplicationsBoard({
       response.items.forEach((app) => {
         applicationsRecord[app.id] = app;
       });
-
+      console.log(applicationsRecord);
       setApplications(applicationsRecord);
+
+      const job = await jobService.getJobById(jobId);
+      setJob(job);
 
       // Update columns with application IDs based on status
       const newColumns = columns.map((col) => ({
@@ -301,6 +330,14 @@ export default function JobApplicationsBoard({
   function clearSelection() {
     setSelectedRows([]);
   }
+
+  function openBulkModal(
+    action: 'move' | 'shortlist' | 'remark' | 'mail' | 'reject' | 'tag',
+  ) {
+    setBulkActionModal({ open: true, action });
+    console.log('openBulkModal', bulkActionModal);
+    setOpenActionMenu(null);
+  }
   // Helper to get status/column for an application
   function getAppStatus(appId: string) {
     const col = columns.find((c) => c.appIds.includes(appId));
@@ -357,177 +394,10 @@ export default function JobApplicationsBoard({
 
   // --- UI ---
   return (
-    <div className='flex-1 p-6'>
-      {/* Breadcrumb */}
-      <nav className='text-sm text-gray-500 mb-4 flex items-center gap-1'>
-        <Link href='/dashboard' className='hover:underline'>
-          Dashboard
-        </Link>
-        <span>/</span>
-        <Link href='/dashboard' className='hover:underline'>
-          My Jobs
-        </Link>
-        <span>/</span>
-        <span className='text-gray-700 font-semibold'>Applications</span>
-      </nav>
-
-      {/* Filter Modal */}
-      {filterOpen && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/30'>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              setFilterOpen(false);
-            }}
-            className='bg-white rounded-lg shadow-lg p-6 min-w-[340px] relative'
-          >
-            <button
-              type='button'
-              onClick={() => setFilterOpen(false)}
-              className='absolute top-2 right-2 text-gray-400 hover:text-gray-600'
-            >
-              <XMarkIcon className='w-5 h-5' />
-            </button>
-            <h2 className='text-lg font-semibold mb-4'>Filter Applications</h2>
-            <div className='mb-3'>
-              <label className='block text-xs mb-1'>Name</label>
-              <input
-                className='border rounded px-3 py-2 w-full'
-                value={filters.name}
-                onChange={(e) =>
-                  setFilters((f) => ({ ...f, name: e.target.value }))
-                }
-              />
-            </div>
-            <div className='mb-3'>
-              <label className='block text-xs mb-1'>Experience</label>
-              <input
-                className='border rounded px-3 py-2 w-full'
-                value={filters.experience}
-                onChange={(e) =>
-                  setFilters((f) => ({ ...f, experience: e.target.value }))
-                }
-              />
-            </div>
-            <div className='mb-3'>
-              <label className='block text-xs mb-1'>Education</label>
-              <input
-                className='border rounded px-3 py-2 w-full'
-                value={filters.education}
-                onChange={(e) =>
-                  setFilters((f) => ({ ...f, education: e.target.value }))
-                }
-              />
-            </div>
-            <div className='mb-3 flex gap-2'>
-              <div className='flex-1'>
-                <label className='block text-xs mb-1'>Applied From</label>
-                <input
-                  type='date'
-                  className='border rounded px-3 py-2 w-full'
-                  value={filters.appliedFrom}
-                  onChange={(e) =>
-                    setFilters((f) => ({ ...f, appliedFrom: e.target.value }))
-                  }
-                />
-              </div>
-              <div className='flex-1'>
-                <label className='block text-xs mb-1'>Applied To</label>
-                <input
-                  type='date'
-                  className='border rounded px-3 py-2 w-full'
-                  value={filters.appliedTo}
-                  onChange={(e) =>
-                    setFilters((f) => ({ ...f, appliedTo: e.target.value }))
-                  }
-                />
-              </div>
-            </div>
-            <div className='flex gap-2 mt-4'>
-              <button
-                type='submit'
-                className='flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-medium'
-              >
-                Apply
-              </button>
-              <button
-                type='button'
-                className='flex-1 bg-gray-100 text-gray-700 py-2 rounded hover:bg-gray-200 font-medium'
-                onClick={() => {
-                  setFilters({
-                    name: '',
-                    experience: '',
-                    education: '',
-                    appliedFrom: '',
-                    appliedTo: '',
-                  });
-                  setFilterOpen(false);
-                }}
-              >
-                Reset
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-      {/* Sort Modal */}
-      {sortOpen && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/30'>
-          <div className='bg-white rounded-lg shadow-lg p-6 min-w-[240px] relative'>
-            <button
-              type='button'
-              onClick={() => setSortOpen(false)}
-              className='absolute top-2 right-2 text-gray-400 hover:text-gray-600'
-            >
-              <XMarkIcon className='w-5 h-5' />
-            </button>
-            <h2 className='text-lg font-semibold mb-4'>Sort Applications</h2>
-            <div className='flex flex-col gap-2'>
-              <button
-                className={`text-left px-3 py-2 rounded ${sort === 'newest' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}
-                onClick={() => {
-                  setSort('newest');
-                  setSortOpen(false);
-                }}
-              >
-                Newest
-              </button>
-              <button
-                className={`text-left px-3 py-2 rounded ${sort === 'oldest' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}
-                onClick={() => {
-                  setSort('oldest');
-                  setSortOpen(false);
-                }}
-              >
-                Oldest
-              </button>
-              <button
-                className={`text-left px-3 py-2 rounded ${sort === 'az' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}
-                onClick={() => {
-                  setSort('az');
-                  setSortOpen(false);
-                }}
-              >
-                Name A-Z
-              </button>
-              <button
-                className={`text-left px-3 py-2 rounded ${sort === 'za' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}
-                onClick={() => {
-                  setSort('za');
-                  setSortOpen(false);
-                }}
-              >
-                Name Z-A
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Header Row: Title left, controls right */}
+    <div className='flex-1'>
+      {/* Header: Breadcrumb left, toggler/filter/sort right */}
       <div className='flex items-center justify-between mb-2'>
-        <p className='text-sm font-bold'>
-          Job ID: <span className='text-gray-500 text-sm'>{jobId}</span>
-        </p>
+        <Breadcrumb job={job} onBack={onBack} />
         <div className='flex items-center gap-2'>
           <div className='flex bg-gray-100 rounded overflow-hidden border border-gray-200'>
             <button
@@ -561,319 +431,83 @@ export default function JobApplicationsBoard({
           </button>
         </div>
       </div>
+      {/* Filter Modal */}
+      <FilterModal
+        filters={filters}
+        setFilters={setFilters}
+        filterOpen={filterOpen}
+        setFilterOpen={setFilterOpen}
+      />
+      {/* Sort Modal */}
+      <SortModal
+        sort={sort}
+        setSort={setSort}
+        sortOpen={sortOpen}
+        setSortOpen={setSortOpen}
+      />
       {/* Main Content: Board or List */}
       {view === 'board' ? (
-        <div className='w-full h-[calc(100vh-200px)]'>
-          <SimpleBar
-            style={{ height: '100%' }}
-            className='simplebar-horizontal'
-          >
-            <div className='flex gap-6 pb-4 min-w-max'>
-              <DragDropContext onDragEnd={onDragEnd}>
-                {columns.map((col) => (
-                  <Droppable droppableId={col.id} key={col.id}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className={`bg-white rounded-lg shadow p-4 min-w-[300px] w-[300px] flex-shrink-0 transition border ${
-                          snapshot.isDraggingOver
-                            ? 'bg-blue-50 border-blue-400'
-                            : 'border-gray-200'
-                        }`}
-                      >
-                        <div className='flex items-center justify-between mb-4'>
-                          <div className='font-semibold'>
-                            {col.title}{' '}
-                            <span className='text-gray-400'>
-                              (
-                              {
-                                col.appIds.filter((appId) =>
-                                  filteredAppIds.includes(appId),
-                                ).length
-                              }
-                              )
-                            </span>
-                          </div>
-                        </div>
-                        <div className='flex flex-col gap-4'>
-                          {col.appIds
-                            .filter((appId) => filteredAppIds.includes(appId))
-                            .map((appId, idx) => {
-                              const app = applications[appId];
-                              return (
-                                <Draggable
-                                  draggableId={appId}
-                                  index={idx}
-                                  key={appId}
-                                >
-                                  {(provided, snapshot) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                      className={`bg-gray-50 rounded-lg p-4 shadow-sm border border-gray-200 ${
-                                        snapshot.isDragging
-                                          ? 'bg-blue-100 border-blue-400'
-                                          : ''
-                                      }`}
-                                      style={{
-                                        ...provided.draggableProps.style,
-                                        cursor: 'grab',
-                                      }}
-                                    >
-                                      <div className='flex justify-between items-start mb-2'>
-                                        <div>
-                                          <div className='font-semibold'>
-                                            {`${app?.userInfo?.firstName} ${app?.userInfo?.lastName}`}
-                                          </div>
-                                          <div className='text-xs text-gray-500'>
-                                            {app.jobPost.position}
-                                          </div>
-                                        </div>
-                                        <div className='relative'>
-                                          <button
-                                            className='w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 border border-gray-200'
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              setOpenActionMenu(
-                                                openActionMenu === appId
-                                                  ? null
-                                                  : appId,
-                                              );
-                                            }}
-                                            aria-label='Open actions menu'
-                                            type='button'
-                                          >
-                                            <EllipsisVerticalIcon className='w-5 h-5' />
-                                          </button>
-                                          {openActionMenu === appId && (
-                                            <div className='absolute right-0 mt-2 w-44 bg-white border rounded shadow-lg z-10'>
-                                              <button
-                                                className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
-                                                onClick={() => {
-                                                  setSelectedApplicationId(
-                                                    appId,
-                                                  );
-                                                  setOpenActionMenu(null);
-                                                }}
-                                              >
-                                                <PencilSquareIcon className='w-5 h-5 text-blue-500' />{' '}
-                                                View Details
-                                              </button>
-                                              <button
-                                                className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
-                                                onClick={() => {
-                                                  /* TODO: Send email logic */
-                                                  setOpenActionMenu(null);
-                                                }}
-                                              >
-                                                <EnvelopeIcon className='w-5 h-5 text-green-500' />{' '}
-                                                Send Email
-                                              </button>
-                                              <button
-                                                className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
-                                                onClick={() => {
-                                                  /* TODO: Download CV logic */
-                                                  setOpenActionMenu(null);
-                                                }}
-                                              >
-                                                <ArrowDownTrayIcon className='w-5 h-5 text-indigo-500' />{' '}
-                                                Download CV
-                                              </button>
-                                            </div>
-                                          )}
-                                        </div>
-                                      </div>
-                                      <ul className='text-xs text-gray-600 mb-2'>
-                                        <li>
-                                          Experience:{' '}
-                                          {app.userInfo.yearOfExperience ||
-                                            'Not specified'}{' '}
-                                          years
-                                        </li>
-                                        <li>
-                                          Education:{' '}
-                                          {app.userInfo
-                                            .highestLevelOfEducation ||
-                                            'Not specified'}
-                                        </li>
-                                        <li>
-                                          Applied:{' '}
-                                          {new Date(
-                                            app.userInfo.createdAt,
-                                          ).toLocaleDateString()}
-                                        </li>
-                                      </ul>
-                                    </div>
-                                  )}
-                                </Draggable>
-                              );
-                            })}
-                          {provided.placeholder}
-                        </div>
-                      </div>
-                    )}
-                  </Droppable>
-                ))}
-              </DragDropContext>
-            </div>
-          </SimpleBar>
-        </div>
+        <BoardView
+          columns={columns}
+          applications={applications}
+          filteredAppIds={filteredAppIds}
+          onDragEnd={onDragEnd}
+          setSelectedApplicationId={setSelectedApplicationId}
+        />
       ) : (
-        <div className='bg-white rounded-lg shadow p-4'>
-          {/* Bulk actions bar */}
+        <>
           {selectedRows.length > 0 && (
-            <div className='flex items-center gap-4 mb-4 bg-blue-50 border border-blue-200 rounded px-4 py-2'>
-              <span className='font-medium text-blue-700'>
-                {selectedRows.length} selected
-              </span>
-              {/* Placeholder for bulk actions */}
-              <button
-                className='text-sm text-blue-600 hover:underline'
-                onClick={clearSelection}
-              >
-                Clear
-              </button>
-              <button className='text-sm text-gray-700 bg-gray-100 px-3 py-1 rounded hover:bg-gray-200'>
-                Move to column
-              </button>
-              <button className='text-sm text-gray-700 bg-gray-100 px-3 py-1 rounded hover:bg-gray-200'>
-                Shortlist
-              </button>
-              <button className='text-sm text-red-600 bg-red-50 px-3 py-1 rounded hover:bg-red-100'>
-                Delete
-              </button>
-            </div>
+            <BulkActionsBar
+              selectedRows={selectedRows}
+              clearSelection={clearSelection}
+              openActionMenu={openActionMenu}
+              setOpenActionMenu={setOpenActionMenu}
+              setBulkActionModal={setBulkActionModal}
+            />
           )}
-          <table className='min-w-full text-sm'>
-            <thead>
-              <tr className='text-gray-400 text-left'>
-                <th className='py-2 px-4'>
-                  <input
-                    type='checkbox'
-                    checked={allSelected}
-                    ref={(el) => {
-                      if (el) el.indeterminate = isIndeterminate;
-                    }}
-                    onChange={toggleSelectAll}
-                  />
-                </th>
-                <th className='py-2 px-4'>Name</th>
-                <th className='py-2 px-4'>Role</th>
-                <th className='py-2 px-4'>Experience</th>
-                <th className='py-2 px-4'>Education</th>
-                <th className='py-2 px-4'>Applied</th>
-                <th className='py-2 px-4'>Status</th>
-                <th className='py-2 px-4'>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredAppIds.map((appId) => {
-                const app = applications[appId];
-                const status = getAppStatus(appId);
-                return (
-                  <tr
-                    key={appId}
-                    className='border-t hover:bg-blue-50 cursor-pointer'
-                    onClick={() => setSelectedApplicationId(appId)}
-                  >
-                    <td
-                      className='py-3 px-4'
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <input
-                        type='checkbox'
-                        checked={selectedRows.includes(appId)}
-                        onChange={() => toggleSelectRow(appId)}
-                      />
-                    </td>
-                    <td className='py-3 px-4 font-medium'>
-                      {app.userInfo.firstName} {app.userInfo.lastName}
-                    </td>
-                    <td className='py-3 px-4'>{app.jobPost.position}</td>
-                    <td className='py-3 px-4'>
-                      {app.userInfo.yearOfExperience || 'Not specified'} years
-                    </td>
-                    <td className='py-3 px-4'>
-                      {app.userInfo.highestLevelOfEducation || 'Not specified'}
-                    </td>
-                    <td className='py-3 px-4'>
-                      {new Date(app.userInfo.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className='py-3 px-4'>
-                      <span
-                        className={`inline-block px-3 py-1 rounded-full text-xs font-semibold cursor-default ${getStatusColor(status.id)}`}
-                        title={status.title}
-                      >
-                        {status.title.length > 14
-                          ? status.title.slice(0, 12) + '…'
-                          : status.title}
-                      </span>
-                    </td>
-                    <td
-                      className='py-3 px-4 relative'
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <button
-                        className='w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 border border-gray-200'
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setOpenActionMenu(
-                            openActionMenu === appId ? null : appId,
-                          );
-                        }}
-                        aria-label='Open actions menu'
-                        type='button'
-                      >
-                        <EllipsisVerticalIcon className='w-5 h-5' />
-                      </button>
-                      {openActionMenu === appId && (
-                        <div className='absolute right-0 mt-2 w-44 bg-white border rounded shadow-lg z-10'>
-                          <button
-                            className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
-                            onClick={() => {
-                              setSelectedApplicationId(appId);
-                              setOpenActionMenu(null);
-                            }}
-                          >
-                            <PencilSquareIcon className='w-5 h-5 text-blue-500' />{' '}
-                            View Details
-                          </button>
-                          <button
-                            className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
-                            onClick={() => {
-                              /* TODO: Send email logic */
-                              setOpenActionMenu(null);
-                            }}
-                          >
-                            <EnvelopeIcon className='w-5 h-5 text-green-500' />{' '}
-                            Send Email
-                          </button>
-                          <button
-                            className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
-                            onClick={() => {
-                              /* TODO: Download CV logic */
-                              setOpenActionMenu(null);
-                            }}
-                          >
-                            <ArrowDownTrayIcon className='w-5 h-5 text-indigo-500' />{' '}
-                            Download CV
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+          {bulkActionModal.open && (
+            <BulkActionModal
+              bulkActionModal={bulkActionModal}
+              setBulkActionModal={setBulkActionModal}
+              selectedRows={selectedRows}
+              notifyByEmail={notifyByEmail}
+              setNotifyByEmail={setNotifyByEmail}
+              remarkText={remarkText}
+              setRemarkText={setRemarkText}
+              mailDraft={mailDraft}
+              setMailDraft={setMailDraft}
+              availableTags={availableTags}
+              setAvailableTags={setAvailableTags}
+              selectedTags={selectedTags}
+              setSelectedTags={setSelectedTags}
+              newTag={newTag}
+              setNewTag={setNewTag}
+            />
+          )}
+          <ListView
+            applications={applications}
+            filteredAppIds={filteredAppIds}
+            selectedRows={selectedRows}
+            toggleSelectRow={toggleSelectRow}
+            allSelected={allSelected}
+            isIndeterminate={isIndeterminate}
+            toggleSelectAll={toggleSelectAll}
+            clearSelection={clearSelection}
+            setSelectedApplicationId={setSelectedApplicationId}
+            openActionMenu={openActionMenu}
+            setOpenActionMenu={setOpenActionMenu}
+          />
+        </>
       )}
       <ApplicationDetailModal
         open={!!selectedApplicationId}
         onClose={() => setSelectedApplicationId(null)}
-        application={mockApplicationDetail}
+        applicationId={selectedApplicationId}
+        application={
+          selectedApplicationId
+            ? mapApplicationToDetail(applications[selectedApplicationId])
+            : mockApplicationDetail
+        }
       />
     </div>
   );
@@ -907,3 +541,44 @@ const mockApplicationDetail: ApplicationDetail = {
     email: 'esther.howard@gmail.com',
   },
 };
+
+// Helper to map Application to ApplicationDetail
+function mapApplicationToDetail(app?: Application): ApplicationDetail {
+  if (!app) {
+    return mockApplicationDetail;
+  }
+  const user = app.userInfo;
+  return {
+    name: `${user.firstName} ${user.lastName}`,
+    role: app.jobPost?.title || '',
+    avatarUrl: user.profile?.path || undefined,
+    biography: user.professionalSummery || '',
+    coverLetter: app.coverLetter || '',
+    socialLinks: [
+      ...(user.linkedinUrl
+        ? [{ type: 'linkedin', url: user.linkedinUrl }]
+        : []),
+      ...(user.portfolioUrl
+        ? [{ type: 'portfolio', url: user.portfolioUrl }]
+        : []),
+      ...(user.telegramUserId
+        ? [{ type: 'telegram', url: `https://t.me/${user.telegramUserId}` }]
+        : []),
+    ],
+    dob: user.birthDate ? new Date(user.birthDate).toLocaleDateString() : '',
+    nationality: '',
+    maritalStatus: '',
+    gender: user.gender || '',
+    experience: user.yearOfExperience ? `${user.yearOfExperience} Years` : '',
+    education: user.highestLevelOfEducation || '',
+    resumeUrl: user.resume?.path || '',
+    contact: {
+      website: user.portfolioUrl || '',
+      location: user.preferredJobLocation || '',
+      address: '',
+      phone: user.phone || '',
+      phone2: '',
+      email: user.email || '',
+    },
+  };
+}

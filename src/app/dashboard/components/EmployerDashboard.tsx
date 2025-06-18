@@ -22,11 +22,9 @@ import {
 const TABS = [
   { key: 'overview', label: 'Overview', icon: FiHome },
   { key: 'profile', label: 'Employers Profile', icon: FiUser },
-  { key: 'post-job', label: 'Post a Job', icon: FiPlusCircle },
   { key: 'myjobs', label: 'My Jobs', icon: FiBriefcase },
   { key: 'saved', label: 'Saved Candidate', icon: FiBookmark },
   { key: 'plans', label: 'Plans & Billing', icon: FiCreditCard },
-  { key: 'companies', label: 'All Companies', icon: FiUsers },
   { key: 'settings', label: 'Settings', icon: FiSettings },
 ] as const;
 
@@ -86,39 +84,41 @@ function EmployerDashboardContent() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed  left-0 z-40 w-64 bg-white border-r transform transition-transform duration-200 ease-in-out md:translate-x-0 ${
+        className={`fixed top-0 left-0 z-40 w-64 pt-20 h-screen bg-white border-r transform transition-transform duration-200 ease-in-out md:translate-x-0 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className='p-6'>
-          <h2 className='text-xs font-semibold text-gray-400 mb-6'>
-            EMPLOYER DASHBOARD
-          </h2>
-          <nav className='flex flex-col gap-2'>
-            {TABS.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.key}
-                  onClick={() => handleTabChange(tab.key)}
-                  className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 ${
-                    activeTab === tab.key
-                      ? 'bg-blue-50 text-blue-600'
-                      : 'hover:bg-gray-100 text-gray-700'
-                  }`}
-                >
-                  <Icon className='w-5 h-5' />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-        <div className=' bottom-0 left-0 right-0 p-6'>
-          <button className='flex items-center gap-2 text-gray-500 hover:text-red-600 text-sm'>
-            <FiLogOut className='w-5 h-5' />
-            <span>Log-out</span>
-          </button>
+        <div className='flex flex-col h-full'>
+          <div className='p-6'>
+            <h2 className='text-xs font-semibold text-gray-400 mb-6'>
+              EMPLOYER DASHBOARD
+            </h2>
+            <nav className='flex flex-col gap-2 overflow-y-auto'>
+              {TABS.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => handleTabChange(tab.key)}
+                    className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 ${
+                      activeTab === tab.key
+                        ? 'bg-blue-50 text-blue-600'
+                        : 'hover:bg-gray-100 text-gray-700'
+                    }`}
+                  >
+                    <Icon className='w-5 h-5' />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+          <div className='mt-auto border-t p-6'>
+            <button className='flex items-center gap-2 text-gray-500 hover:text-red-600 text-sm'>
+              <FiLogOut className='w-5 h-5' />
+              <span>Log-out</span>
+            </button>
+          </div>
         </div>
       </aside>
 

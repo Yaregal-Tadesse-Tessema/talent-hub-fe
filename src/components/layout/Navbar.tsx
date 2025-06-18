@@ -174,25 +174,23 @@ export function Navbar({ page = 'home' }: NavbarProps) {
     { href: '/find-job', label: 'Find Job' },
     { href: '/find-candidates', label: 'Find Candidates' },
     { href: '/pricing', label: 'Pricing Plans' },
-    { href: '/customer-supports', label: 'Customer Supports' },
+    { href: '/customer-supports', label: 'Support' },
   ];
 
   // Links for employer
   const employerNavLinks = [
-    { href: '/find-candidates', label: 'Find Candidates' },
     { href: '/dashboard', label: 'Dashboard' },
-    { href: '/my-jobs', label: 'My Jobs' },
-    { href: '/applications', label: 'Applications' },
-    { href: '/customer-supports', label: 'Customer Supports' },
+    { href: '/find-candidates', label: 'Find Candidates' },
+    { href: '/customer-supports', label: 'Support' },
   ];
 
   // Links for employee
   const employeeNavLinks = [
+    { href: '/dashboard', label: 'Dashboard' },
     { href: '/find-job', label: 'Find Job' },
     { href: '/find-employers', label: 'Find Employers' },
-    { href: '/dashboard', label: 'Dashboard' },
     { href: '/job-alerts', label: 'Job Alerts' },
-    { href: '/customer-supports', label: 'Customer Supports' },
+    { href: '/customer-supports', label: 'Support' },
   ];
 
   useEffect(() => {
@@ -224,25 +222,38 @@ export function Navbar({ page = 'home' }: NavbarProps) {
     <header className='w-full border-b bg-white sticky top-0 z-50'>
       <div className='flex items-center justify-between px-4 md:px-6 py-4 text-sm text-gray-800 bg-gray-100'>
         <div className='flex-1'>
-          <nav className='gap-6 hidden md:flex'>
-            {(user && user.role === 'employer'
-              ? employerNavLinks
-              : user && user.role === 'employee'
-                ? employeeNavLinks
-                : navLinks
-            ).map((link) => (
+          <nav className='hidden md:flex items-center gap-6'>
+            <div className='flex items-center gap-2 w-52'>
               <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  'hover:text-blue-600 transition-colors',
-                  pathname === link.href &&
-                    'text-blue-600 border-b-2 border-blue-600 pb-2',
-                )}
+                href='/'
+                className='flex items-center gap-1 hover:opacity-80 transition-opacity'
               >
-                {link.label}
+                <BriefcaseIcon />
+                <span className='text-2xl text-blue-600 font-bold ml-1'>
+                  TalentHub
+                </span>
               </Link>
-            ))}
+            </div>
+            <div className='flex items-center gap-6'>
+              {(user && user.role === 'employer'
+                ? employerNavLinks
+                : user && user.role === 'employee'
+                  ? employeeNavLinks
+                  : navLinks
+              ).map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    'hover:text-blue-600 transition-colors px-3 py-1.5 relative',
+                    pathname === link.href &&
+                      'text-blue-600 font-semibold bg-blue-50/50 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-1 before:h-6 before:bg-blue-600 before:rounded-r',
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
           </nav>
         </div>
         <div className='flex items-center gap-4'>
@@ -273,116 +284,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
               </button>
             </div>
           )}
-          {!(user && user.role === 'employer') && (
-            <>
-              <span className='hidden md:flex items-center gap-1'>
-                <svg
-                  width='18'
-                  height='18'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                  stroke='currentColor'
-                >
-                  <path
-                    d='M22 16.92V19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-2.08a6 6 0 0 1 2.09-4.58l5.91-5.33a2 2 0 0 1 2.58 0l5.91 5.33A6 6 0 0 1 22 16.92z'
-                    strokeWidth='2'
-                  />
-                </svg>{' '}
-                +251-911-123-456
-              </span>
-              <div
-                className='hidden md:flex items-center gap-1 relative'
-                ref={languageDropdownRef}
-              >
-                <button
-                  onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
-                  className='flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100'
-                >
-                  {languages.find((lang) => lang.name === language)?.flag || (
-                    <FlagUS />
-                  )}
-                  <span>{language}</span>
-                  <svg
-                    width='12'
-                    height='12'
-                    fill='none'
-                    viewBox='0 0 20 20'
-                    stroke='currentColor'
-                    className={`transform transition-transform duration-200 ${
-                      showLanguageDropdown ? 'rotate-180' : ''
-                    }`}
-                  >
-                    <path d='M6 8l4 4 4-4' strokeWidth='2' />
-                  </svg>
-                </button>
 
-                {showLanguageDropdown && (
-                  <div className='absolute top-full right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200'>
-                    {languages.map((lang) => (
-                      <button
-                        key={lang.code}
-                        onClick={() => handleLanguageChange(lang.name)}
-                        className={`flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-gray-100 ${
-                          language === lang.name ? 'bg-gray-50' : ''
-                        }`}
-                      >
-                        {lang.flag}
-                        <span>{lang.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-          <button
-            className='md:hidden flex items-center'
-            aria-label='Open menu'
-            onClick={() => setMobileMenuOpen(true)}
-          >
-            <svg
-              width='28'
-              height='28'
-              fill='none'
-              viewBox='0 0 24 24'
-              stroke='currentColor'
-            >
-              <path d='M4 6h16M4 12h16M4 18h16' strokeWidth='2' />
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div className='flex items-center justify-between px-4 md:px-6 py-4 bg-white'>
-        <div className='flex items-center gap-2'>
-          <BriefcaseIcon />
-          <span className='text-2xl font-bold ml-2'>TalentHub</span>
-        </div>
-        {!(user && user.role === 'employer') && (
-          <div className='hidden md:flex items-center w-1/2 max-w-xl'>
-            <div className='flex items-center border rounded-l-md px-3 py-2 bg-gray-50'>
-              <FlagET />
-              <span className='ml-2'>Ethiopia</span>
-              <svg
-                width='12'
-                height='12'
-                fill='none'
-                viewBox='0 0 20 20'
-                stroke='currentColor'
-                className='ml-1'
-              >
-                <path d='M6 8l4 4 4-4' strokeWidth='2' />
-              </svg>
-            </div>
-            <input
-              className='flex-1 border-t border-b border-r rounded-r-md px-4 py-2 focus:outline-none'
-              placeholder='Job tittle, keyword, company'
-            />
-            <button className='-ml-8 z-10'>
-              <SearchIcon />
-            </button>
-          </div>
-        )}
-        <div className='flex items-center gap-4'>
           {showAuthButtons ? (
             <>
               <Link href='/login'>
@@ -460,8 +362,72 @@ export function Navbar({ page = 'home' }: NavbarProps) {
               </div>
             </>
           ) : null}
+
+          {!(user && user.role === 'employer') && (
+            <>
+              <div
+                className='hidden md:flex items-center gap-1 relative'
+                ref={languageDropdownRef}
+              >
+                <button
+                  onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
+                  className='flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100'
+                >
+                  {languages.find((lang) => lang.name === language)?.flag || (
+                    <FlagUS />
+                  )}
+                  <span>{language}</span>
+                  <svg
+                    width='12'
+                    height='12'
+                    fill='none'
+                    viewBox='0 0 20 20'
+                    stroke='currentColor'
+                    className={`transform transition-transform duration-200 ${
+                      showLanguageDropdown ? 'rotate-180' : ''
+                    }`}
+                  >
+                    <path d='M6 8l4 4 4-4' strokeWidth='2' />
+                  </svg>
+                </button>
+
+                {showLanguageDropdown && (
+                  <div className='absolute top-full right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200'>
+                    {languages.map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => handleLanguageChange(lang.name)}
+                        className={`flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-gray-100 ${
+                          language === lang.name ? 'bg-gray-50' : ''
+                        }`}
+                      >
+                        {lang.flag}
+                        <span>{lang.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+          <button
+            className='md:hidden flex items-center'
+            aria-label='Open menu'
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <svg
+              width='28'
+              height='28'
+              fill='none'
+              viewBox='0 0 24 24'
+              stroke='currentColor'
+            >
+              <path d='M4 6h16M4 12h16M4 18h16' strokeWidth='2' />
+            </svg>
+          </button>
         </div>
       </div>
+
       {isMenuVisible && (
         <div
           className={`fixed inset-0 z-50 bg-black bg-opacity-40 md:hidden transition-opacity duration-300 ${
@@ -505,8 +471,9 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    'py-2 px-2 rounded hover:bg-blue-50',
-                    pathname === link.href && 'text-blue-600 font-semibold',
+                    'py-2 px-3 relative hover:bg-blue-50/50 transition-colors',
+                    pathname === link.href &&
+                      'text-blue-600 bg-blue-50/50 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-1 before:h-6 before:bg-blue-600 before:rounded-r',
                   )}
                   onClick={() => setMobileMenuOpen(false)}
                 >
