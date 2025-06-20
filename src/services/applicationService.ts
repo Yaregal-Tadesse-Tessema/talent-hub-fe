@@ -72,6 +72,7 @@ export interface Application {
   remark: string | null;
   jobPost: JobPost;
   userInfo: UserInfo;
+  createdAt?: string;
 }
 
 export interface ApplicationsResponse {

@@ -1,28 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { DropResult } from '@hello-pangea/dnd';
 import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-  DropResult,
-} from '@hello-pangea/dnd';
-import SimpleBar from 'simplebar-react';
-import 'simplebar-react/dist/simplebar.min.css';
-import {
-  PencilSquareIcon,
-  TrashIcon,
-  XMarkIcon,
-  PlusIcon,
   Squares2X2Icon,
   ListBulletIcon,
   FunnelIcon,
-  ArrowUpTrayIcon,
   ChevronDownIcon,
-  EllipsisVerticalIcon,
-  EnvelopeIcon,
-  ArrowDownTrayIcon,
-  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
-import Link from 'next/link';
 import ApplicationDetailModal, {
   ApplicationDetail,
 } from './ApplicationDetailModal';
@@ -36,7 +19,6 @@ import { useToast } from '@/contexts/ToastContext';
 import { useEmployerChange } from '@/hooks/useEmployerChange';
 import { jobService } from '@/services/jobService';
 import { Job } from '@/types/job';
-import { BadgeCheckIcon } from 'lucide-react';
 import BoardView from './job-applications-board/BoardView';
 import ListView from './job-applications-board/ListView';
 import FilterModal from './job-applications-board/FilterModal';
@@ -131,6 +113,7 @@ export default function JobApplicationsBoard({
       });
 
       setApplications(applicationsRecord);
+      console.log('applicationsRecord', applicationsRecord);
 
       const job = await jobService.getJobById(jobId);
       setJob(job);

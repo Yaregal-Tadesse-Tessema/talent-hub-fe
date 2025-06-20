@@ -241,6 +241,7 @@ const BoardView: React.FC<BoardViewProps> = ({
                                         onClick={() => {
                                           setSelectedApplicationId(appId);
                                         }}
+                                        title='View Application Details'
                                       >
                                         <svg
                                           xmlns='http://www.w3.org/2000/svg'
@@ -262,21 +263,21 @@ const BoardView: React.FC<BoardViewProps> = ({
                                           />
                                         </svg>
                                       </button>
-                                      {app.userInfo.resume && (
+                                      {(app.cv || app.userInfo.resume) && (
                                         <button
                                           className='text-gray-500 pl-2 hover:text-blue-600'
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            if (
-                                              typeof app.userInfo.resume ===
-                                              'string'
-                                            ) {
+                                            const cvData =
+                                              app.cv || app.userInfo.resume;
+                                            if (cvData && cvData.path) {
                                               window.open(
-                                                app.userInfo.resume,
+                                                cvData.path,
                                                 '_blank',
                                               );
                                             }
                                           }}
+                                          title='Download CV'
                                         >
                                           <ArrowDownTrayIcon className='w-4 h-4' />
                                         </button>

@@ -3,16 +3,32 @@ import { api } from '@/config/api';
 export interface Message {
   id: string;
   applicationId: string;
-  senderId: string;
-  receiverId: string;
-  text: string;
+  content: string;
   createdAt: string;
+  createdBy: string | null;
+  deletedAt: string | null;
+  deletedBy: string | null;
+  updatedAt: string;
+  updatedBy: string | null;
+
+  senderUserId: string | null;
+  senderFullName: string;
+  senderEmployerId: string;
+
+  receiverUserId: string | null;
+  receiverFullName: string | null;
+  receiverEmployerId: string | null;
+
+  tenantId: string;
 }
 
 export interface SendMessageRequest {
-  senderFullName: string;
-  senderEmployerId: string;
-  receiverUserId: string;
+  senderFullName?: string;
+  receiverFullName?: string;
+  senderEmployerId?: string;
+  senderUserId?: string;
+  receiverEmployerId?: string;
+  receiverUserId?: string;
   content: string;
   applicationId: string;
 }
@@ -23,7 +39,6 @@ export const messageService = {
       const response = await api.get(
         `/messages?q=w=applicationId:=:${applicationId}`,
       );
-      console.log('Fetched messages:', response.data);
       // Return the array of messages if available, otherwise empty array
       if (Array.isArray(response.data)) return response.data;
       if (Array.isArray(response.data?.items)) return response.data.items;

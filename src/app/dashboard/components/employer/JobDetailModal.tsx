@@ -46,7 +46,7 @@ export default function JobDetailModal({
   isOpen,
   onClose,
 }: JobDetailModalProps) {
-  const [activeTab, setActiveTab] = useState<Tab>('details');
+  const [activeTab, setActiveTab] = useState<Tab>('applications');
   const [questions, setQuestions] = useState<ScreeningQuestion[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(false);

@@ -1,6 +1,45 @@
 import { api } from '@/config/api';
 import { EmployerData, Tenant } from '@/types/employer';
 
+export interface UpdateTenantPayload {
+  id: string;
+  prefix: string;
+  name: string;
+  schemaName: string;
+  type: string;
+  tradeName: string;
+  email: string;
+  code: string;
+  phoneNumber: string;
+  address: {
+    city: string;
+    region: string;
+    street: string;
+    country: string;
+    postalCode: string;
+  };
+  subscriptionType: string;
+  isVerified: boolean;
+  tin: string;
+  licenseNumber: string;
+  registrationNumber: string;
+  isActive: boolean;
+  status: string;
+  logo: {
+    filename: string;
+    path: string;
+    originalname: string;
+    mimetype: string;
+    size: number;
+    bucketName: string;
+  };
+  companySize: string;
+  industry: string;
+  organizationType: string;
+  selectedCalender: string;
+  archiveReason: string;
+}
+
 export const employerService = {
   async getTenantsByToken(): Promise<EmployerData[]> {
     try {
@@ -33,6 +72,82 @@ export const employerService = {
       return response.data;
     } catch (error) {
       console.error('Error regenerating token:', error);
+      throw error;
+    }
+  },
+
+  async updateTenant(payload: UpdateTenantPayload): Promise<Tenant> {
+    try {
+      const response = await api.put('/tenants', payload);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating tenant:', error);
+      throw error;
+    }
+  },
+
+  async uploadLogo(
+    tenantId: string,
+    file: File,
+  ): Promise<{
+    logo: {
+      filename: string;
+      path: string;
+      originalname: string;
+      mimetype: string;
+      size: number;
+      bucketName: string;
+    };
+  }> {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await api.put(
+        `/tenants/upload-logo/${tenantId}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      throw error;
+    }
+  },
+
+  async uploadBanner(
+    tenantId: string,
+    file: File,
+  ): Promise<{
+    banner: {
+      filename: string;
+      path: string;
+      originalname: string;
+      mimetype: string;
+      size: number;
+      bucketName: string;
+    };
+  }> {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await api.put(
+        `/tenants/upload-cover/${tenantId}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error uploading banner:', error);
       throw error;
     }
   },

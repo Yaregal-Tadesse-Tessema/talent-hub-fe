@@ -16,11 +16,13 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
   const [showEmployerSelection, setShowEmployerSelection] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { showToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       // First try employer login
       const employerResponse = await fetch(
@@ -41,6 +43,7 @@ export default function LoginPage() {
         console.log('employerData', employerData);
         // Show employer selection popup
         setShowEmployerSelection(true);
+        setIsLoading(false);
         return;
       }
 
@@ -89,6 +92,12 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.error('Login error:', error);
+      showToast({
+        type: 'error',
+        message: 'An error occurred during login. Please try again.',
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -230,8 +239,16 @@ export default function LoginPage() {
               <Button
                 type='submit'
                 className='w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold'
+                disabled={isLoading}
               >
-                Sign In
+                {isLoading ? (
+                  <div className='flex items-center justify-center gap-2'>
+                    <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
+                    Signing In...
+                  </div>
+                ) : (
+                  'Sign In'
+                )}
               </Button>
               <div className='flex items-center justify-between text-sm mt-2'>
                 <div className='flex items-center gap-2'>

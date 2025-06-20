@@ -560,45 +560,7 @@ export default function FindCandidatesPage() {
                 </svg>
                 Filter
               </button>
-              {/* Location Radius */}
-              <div>
-                <div
-                  className='flex justify-between items-center mb-2 cursor-pointer select-none'
-                  onClick={() => toggleSection('location')}
-                >
-                  <span className='font-medium text-sm sm:text-base'>
-                    Location Radius:{' '}
-                    <span className='text-blue-600 font-semibold'>
-                      {radius} miles
-                    </span>
-                  </span>
-                  <svg
-                    width='20'
-                    height='20'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                    className={`transform transition-transform ${expandedSections.location ? 'rotate-180' : ''}`}
-                  >
-                    <path
-                      d='M19 9l-7 7-7-7'
-                      strokeWidth='2'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    />
-                  </svg>
-                </div>
-                {expandedSections.location && (
-                  <input
-                    type='range'
-                    min={0}
-                    max={100}
-                    value={radius}
-                    onChange={(e) => setRadius(Number(e.target.value))}
-                    className='w-full accent-blue-600 mt-4'
-                  />
-                )}
-              </div>
+
               {/* Candidate Level */}
               <div>
                 <div
@@ -646,7 +608,7 @@ export default function FindCandidatesPage() {
                 )}
               </div>
               {/* Experiences */}
-              <div>
+              <div className='pt-4'>
                 <div
                   className='flex justify-between items-center mb-2 cursor-pointer select-none'
                   onClick={() => toggleSection('experience')}

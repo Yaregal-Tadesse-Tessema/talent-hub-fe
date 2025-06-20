@@ -1,15 +1,18 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { FaCheckCircle } from 'react-icons/fa';
 import type { IconType } from 'react-icons';
 import { applicationService } from '@/services/applicationService';
 import type { Application } from '@/services/applicationService';
+import ApplicationDetailModal from './ApplicationDetailModal';
 
 export default function AppliedJobsTab() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedApplication, setSelectedApplication] =
+    useState<Application | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchApplications = async () => {
@@ -31,6 +34,16 @@ export default function AppliedJobsTab() {
 
     fetchApplications();
   }, []);
+
+  const handleViewDetails = (application: Application) => {
+    setSelectedApplication(application);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedApplication(null);
+  };
 
   if (loading) {
     return (
@@ -98,15 +111,26 @@ export default function AppliedJobsTab() {
             </div>
             {/* Action */}
             <div className='col-span-2'>
-              <Link href={`/jobs/${application.JobPostId}`}>
-                <button className='w-full px-4 py-2 rounded font-medium transition-all hover:bg-blue-600 hover:text-white bg-gray-100 text-blue-600 hover:bg-blue-100'>
-                  View Details
-                </button>
-              </Link>
+              <button
+                onClick={() => handleViewDetails(application)}
+                className='w-full px-4 py-2 rounded font-medium transition-all hover:bg-blue-600 hover:text-white bg-gray-100 text-blue-600 hover:bg-blue-100'
+              >
+                View Details
+              </button>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Application Detail Modal */}
+      {selectedApplication && (
+        <ApplicationDetailModal
+          open={isModalOpen}
+          onClose={handleCloseModal}
+          applicationId={selectedApplication.id}
+          application={selectedApplication}
+        />
+      )}
     </div>
   );
 }

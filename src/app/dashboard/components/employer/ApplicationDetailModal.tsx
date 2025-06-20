@@ -65,11 +65,12 @@ export default function ApplicationDetailModal({
   });
 
   const handleSend = async () => {
+    console.log('employer', employer);
     if (input.trim() && applicationId && employer) {
       try {
         const messageData: SendMessageRequest = {
           senderFullName: `${employer.firstName} ${employer.lastName}`,
-          senderEmployerId: employer.id,
+          senderEmployerId: employer.tenantId,
           receiverUserId: applicationData?.userInfo?.id,
           content: input.trim(),
           applicationId: applicationId,
@@ -91,6 +92,7 @@ export default function ApplicationDetailModal({
       setEmployer(parsedUser);
       applicationService.getApplicationById(applicationId || '').then((res) => {
         setApplicationData(res);
+        console.log('applicationData', applicationData);
       });
     }
     const fetchMessages = async () => {
@@ -98,6 +100,7 @@ export default function ApplicationDetailModal({
         const fetchedMessages =
           await messageService.getMessagesByApplicationId(applicationId);
         setMessages(fetchedMessages);
+        console.log('fetchedMessages', fetchedMessages);
       }
     };
     fetchMessages();
@@ -307,45 +310,143 @@ export default function ApplicationDetailModal({
           </>
         ) : (
           <div className='flex flex-col h-[60vh]'>
-            <div className='flex-1 overflow-y-auto mb-4 bg-gray-50 rounded p-4'>
-              {messages.map((msg, idx) => (
-                <div
-                  key={msg.id}
-                  className={`mb-2 flex ${msg.senderId === 'employer' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`px-4 py-2 rounded-lg max-w-xs text-sm ${
-                      msg.senderId === 'employer'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 text-gray-800'
-                    }`}
-                  >
-                    {msg.text}
+            <div className='flex-1 overflow-y-auto mb-4 bg-gray-50 rounded p-4 space-y-3'>
+              {messages.map((msg, idx) => {
+                const isEmployerMessage = msg.tenantId === employer?.tenantId;
+                const messageDate = new Date(msg.createdAt);
+                const isToday =
+                  new Date().toDateString() === messageDate.toDateString();
+                const timeString = isToday
+                  ? messageDate.toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })
+                  : messageDate.toLocaleDateString([], {
+                      month: 'short',
+                      day: 'numeric',
+                    }) +
+                    ' ' +
+                    messageDate.toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    });
+
+                // Check if we should show date separator
+                const showDateSeparator =
+                  idx === 0 ||
+                  (idx > 0 &&
+                    new Date(messages[idx - 1].createdAt).toDateString() !==
+                      messageDate.toDateString());
+
+                return (
+                  <div key={msg.id}>
+                    {/* Date separator */}
+                    {showDateSeparator && (
+                      <div className='flex justify-center my-4'>
+                        <div className='bg-white px-3 py-1 rounded-full text-xs text-gray-500 border'>
+                          {isToday
+                            ? 'Today'
+                            : messageDate.toLocaleDateString([], {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Message */}
+                    <div
+                      className={`flex ${isEmployerMessage ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-xs lg:max-w-md flex ${isEmployerMessage ? 'order-2 flex-row-reverse' : 'order-1'}`}
+                      >
+                        {/* Avatar for non-employer messages */}
+                        {!isEmployerMessage && (
+                          <div className='w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-xs font-medium text-gray-600 mr-2 flex-shrink-0'>
+                            {msg.senderFullName
+                              ? msg.senderFullName[0].toUpperCase()
+                              : 'U'}
+                          </div>
+                        )}
+
+                        <div
+                          className={`flex-1 ${isEmployerMessage ? 'text-right' : ''}`}
+                        >
+                          {/* Sender name for non-employer messages */}
+                          {!isEmployerMessage && (
+                            <div className='text-xs text-gray-600 mb-1 font-medium'>
+                              {msg.senderFullName}
+                            </div>
+                          )}
+
+                          {/* Message bubble */}
+                          <div
+                            className={`px-4 py-2 rounded-2xl text-sm shadow-sm ${
+                              isEmployerMessage
+                                ? 'bg-blue-600 text-white rounded-br-md'
+                                : 'bg-white text-gray-800 rounded-bl-md border border-gray-200'
+                            }`}
+                          >
+                            <div className='whitespace-pre-wrap break-words'>
+                              {msg.content}
+                            </div>
+                          </div>
+
+                          {/* Timestamp */}
+                          <div
+                            className={`text-xs text-gray-500 mt-1 ${isEmployerMessage ? 'text-right' : ''}`}
+                          >
+                            {timeString}
+                            {msg.updatedAt !== msg.createdAt && (
+                              <span className='ml-1 italic'>(edited)</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
+                );
+              })}
+
+              {/* Empty state */}
+              {messages.length === 0 && (
+                <div className='flex flex-col items-center justify-center h-full text-gray-500'>
+                  <EnvelopeIcon className='w-12 h-12 mb-2 opacity-50' />
+                  <p className='text-sm'>No messages yet</p>
+                  <p className='text-xs'>
+                    Start a conversation with the candidate
+                  </p>
                 </div>
-              ))}
+              )}
             </div>
-            <div className='flex gap-2'>
+
+            {/* Input area */}
+            <div className='flex gap-2 bg-white border-t border-gray-200 p-4 rounded-b-lg'>
               <input
                 type='text'
-                className='flex-1 border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200'
+                className='flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300'
                 placeholder='Type your message...'
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     handleSend();
                   }
                 }}
               />
               <button
-                className='bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-medium'
+                className='bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2'
                 onClick={(e) => {
                   e.preventDefault();
                   handleSend();
                 }}
+                disabled={!input.trim()}
               >
+                <EnvelopeIcon className='w-4 h-4' />
                 Send
               </button>
             </div>
