@@ -298,6 +298,7 @@ export default function PostJobForm() {
   const renderProgressBar = () => (
     <div className='mb-8'>
       <div className='flex items-center justify-between mb-4'>
+        <h1 className='text-2xl font-bold text-gray-900'>Post a New Job</h1>
         <div className='flex items-center space-x-4'>
           <span className='text-sm text-gray-500'>
             Step {currentStep} of {totalSteps}
@@ -929,7 +930,6 @@ export default function PostJobForm() {
           </select>
         </div>
       </div>
-
       <div className='space-y-2'>
         <label className='block text-sm font-medium text-gray-700'>
           How to Apply <span className='text-red-500'>*</span>
@@ -1052,7 +1052,7 @@ export default function PostJobForm() {
 
   return (
     <div className='min-h-screen bg-gray-50 py-8'>
-      <div className='max-w-4xl mx-auto px-4'>
+      <div className='max-w-5xl mx-auto px-4'>
         {renderProgressBar()}
 
         <div className='bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden'>

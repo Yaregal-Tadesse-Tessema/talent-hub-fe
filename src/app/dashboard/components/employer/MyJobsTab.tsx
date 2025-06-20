@@ -346,12 +346,14 @@ export default function MyJobsTab() {
                             >
                               View Detail
                             </button>
-                            <button
-                              className='block w-full text-left px-4 py-2 hover:bg-gray-100'
-                              onClick={() => handleDeleteJob(job.id)}
-                            >
-                              Delete Job
-                            </button>
+                            {job.status === 'Draft' && (
+                              <button
+                                className='block w-full text-left px-4 py-2 hover:bg-gray-100'
+                                onClick={() => handleDeleteJob(job.id)}
+                              >
+                                Delete Job
+                              </button>
+                            )}
                             {job.applicationCount === 0 && (
                               <button
                                 className='block w-full text-left px-4 py-2 hover:bg-gray-100'
