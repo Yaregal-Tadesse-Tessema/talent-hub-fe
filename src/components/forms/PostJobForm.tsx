@@ -37,7 +37,7 @@ interface FormData {
   paymentType: string;
 }
 
-export default function PostJobTab() {
+export default function PostJobForm() {
   const [formData, setFormData] = useState<FormData>({
     title: 'Senior Software Engineer',
     description:
@@ -199,11 +199,13 @@ export default function PostJobTab() {
     <div className='flex-1 pb-10'>
       <form
         onSubmit={handleSubmit}
-        className='max-w-5xl bg-white rounded-xl shadow p-4 space-y-10'
+        className='max-w-6xl bg-white rounded-xl shadow p-4 space-y-10'
       >
         {/* Basic Information */}
         <div className='space-y-6'>
-          <h2 className='text-lg font-semibold'>Basic Information</h2>
+          <h2 className='text-lg text-blue-500 font-semibold'>
+            Basic Information
+          </h2>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             <div className='flex flex-col'>
               <label className='font-medium mb-2'>Job Title</label>
@@ -263,9 +265,25 @@ export default function PostJobTab() {
           </div>
         </div>
 
+        {/* Description */}
+        <div className='space-y-6'>
+          <h2 className='text-lg text-blue-500 font-semibold'>
+            Job Description
+          </h2>
+          <div className='flex flex-col'>
+            <RichTextEditor
+              content={formData.description}
+              onChange={(content) =>
+                setFormData((prev) => ({ ...prev, description: content }))
+              }
+              placeholder='Enter detailed job description...'
+            />
+          </div>
+        </div>
+
         {/* Location Information */}
         <div className='space-y-6'>
-          <h2 className='text-lg font-semibold'>Location</h2>
+          <h2 className='text-lg text-blue-500 font-semibold'>Location</h2>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             <div className='flex flex-col'>
               <label className='font-medium mb-2'>City</label>
@@ -294,7 +312,9 @@ export default function PostJobTab() {
 
         {/* Salary Information */}
         <div className='space-y-6'>
-          <h2 className='text-lg font-semibold'>Salary Information</h2>
+          <h2 className='text-lg text-blue-500 font-semibold'>
+            Salary Information
+          </h2>
           <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
             <div className='flex flex-col'>
               <label className='font-medium mb-2'>Minimum Salary</label>
@@ -337,7 +357,7 @@ export default function PostJobTab() {
 
         {/* Requirements and Qualifications */}
         <div className='space-y-6'>
-          <h2 className='text-lg font-semibold'>
+          <h2 className='text-lg text-blue-500 font-semibold'>
             Requirements and Qualifications
           </h2>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
@@ -401,7 +421,9 @@ export default function PostJobTab() {
 
         {/* Skills and Requirements */}
         <div className='space-y-6'>
-          <h2 className='text-lg font-semibold'>Skills and Requirements</h2>
+          <h2 className='text-lg text-blue-500 font-semibold'>
+            Skills and Requirements
+          </h2>
           <div className='space-y-4'>
             {formData.skill.map((skill, index) => (
               <div key={index} className='flex gap-2'>
@@ -428,7 +450,7 @@ export default function PostJobTab() {
 
         {/* Benefits */}
         <div className='space-y-6'>
-          <h2 className='text-lg font-semibold'>Benefits</h2>
+          <h2 className='text-lg text-blue-500 font-semibold'>Benefits</h2>
           <div className='space-y-4'>
             {formData.benefits.map((benefit, index) => (
               <div key={index} className='flex gap-2'>
@@ -455,7 +477,9 @@ export default function PostJobTab() {
 
         {/* Responsibilities */}
         <div className='space-y-6'>
-          <h2 className='text-lg font-semibold'>Responsibilities</h2>
+          <h2 className='text-lg text-blue-500 font-semibold'>
+            Responsibilities
+          </h2>
           <div className='space-y-4'>
             {formData.responsibilities.map((responsibility, index) => (
               <div key={index} className='flex gap-2'>
@@ -486,7 +510,9 @@ export default function PostJobTab() {
 
         {/* Additional Information */}
         <div className='space-y-6'>
-          <h2 className='text-lg font-semibold'>Additional Information</h2>
+          <h2 className='text-lg text-blue-500 font-semibold'>
+            Additional Information
+          </h2>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             <div className='flex flex-col'>
               <label className='font-medium mb-2'>Application URL</label>
@@ -538,23 +564,9 @@ export default function PostJobTab() {
           </div>
         </div>
 
-        {/* Description */}
-        <div className='space-y-6'>
-          <h2 className='text-lg font-semibold'>Job Description</h2>
-          <div className='flex flex-col'>
-            <RichTextEditor
-              content={formData.description}
-              onChange={(content) =>
-                setFormData((prev) => ({ ...prev, description: content }))
-              }
-              placeholder='Enter detailed job description...'
-            />
-          </div>
-        </div>
-
         {/* How to Apply */}
         <div className='space-y-6'>
-          <h2 className='text-lg font-semibold'>How to Apply</h2>
+          <h2 className='text-lg text-blue-500 font-semibold'>How to Apply</h2>
           <div className='flex flex-col'>
             <textarea
               name='howToApply'

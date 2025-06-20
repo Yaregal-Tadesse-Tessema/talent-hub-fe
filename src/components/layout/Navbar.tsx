@@ -379,7 +379,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                   )}
                 </div>
                 {user.role === 'employer' && (
-                  <Link href='/dashboard?tab=post-job'>
+                  <Link href='/post-job'>
                     <button className='flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700'>
                       <svg
                         width='24'

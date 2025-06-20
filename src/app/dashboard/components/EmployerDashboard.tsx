@@ -2,7 +2,6 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import OverviewTab from './employer/OverviewTab';
-import PostJobTab from './employer/PostJobTab';
 import MyJobsTab from './employer/MyJobsTab';
 import ProfileTab from './employer/ProfileTab';
 import {
@@ -58,8 +57,6 @@ function EmployerDashboardContent() {
         return <OverviewTab />;
       case 'profile':
         return <ProfileTab />;
-      case 'post-job':
-        return <PostJobTab />;
       case 'myjobs':
         return <MyJobsTab />;
       // Add more cases for other tabs as needed
