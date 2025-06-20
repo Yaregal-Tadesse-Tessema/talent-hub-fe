@@ -156,6 +156,19 @@ export default function MyJobsTab() {
     setOpenMenuId(null);
   };
 
+  const handleDeleteJob = async (jobId: string) => {
+    try {
+      await jobService.deleteJob(jobId);
+      setJobs(jobs.filter((job) => job.id !== jobId));
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      showToast({
+        type: 'error',
+        message: 'Failed to delete job. Please try again.',
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className='flex-1 p-6'>
@@ -332,6 +345,12 @@ export default function MyJobsTab() {
                               onClick={() => handleViewDetail(job)}
                             >
                               View Detail
+                            </button>
+                            <button
+                              className='block w-full text-left px-4 py-2 hover:bg-gray-100'
+                              onClick={() => handleDeleteJob(job.id)}
+                            >
+                              Delete Job
                             </button>
                             {job.applicationCount === 0 && (
                               <button

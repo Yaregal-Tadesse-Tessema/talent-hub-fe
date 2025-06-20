@@ -28,7 +28,6 @@ export default function ProfilePage() {
       if (storedUser) {
         try {
           const userData = JSON.parse(storedUser);
-          console.log('Raw user data from localStorage:', userData);
 
           if (userData.role !== 'employee') {
             router.push('/dashboard');

@@ -60,6 +60,15 @@ export const jobService = {
     }
   },
 
+  async deleteJob(id: string): Promise<void> {
+    try {
+      await api.delete(`/jobs/${id}`);
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      throw error;
+    }
+  },
+
   async getArchivedJobs(): Promise<JobsResponse> {
     try {
       const response = await api.get('/jobs/archived/items');
