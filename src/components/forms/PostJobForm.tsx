@@ -253,10 +253,10 @@ export default function PostJobForm() {
       let response;
       if (draftJobId) {
         // Update existing draft
-        response = await jobService.updateJobPosting(
-          draftJobId,
-          cleanedData as JobPosting,
-        );
+        response = await jobService.updateJobPosting({
+          ...cleanedData,
+          id: draftJobId,
+        } as JobPosting);
       } else {
         // Create new draft
         response = await jobService.createJobPosting(cleanedData as JobPosting);
@@ -307,10 +307,10 @@ export default function PostJobForm() {
       let response;
       if (draftJobId) {
         // Update existing draft
-        response = await jobService.updateJobPosting(
-          draftJobId,
-          cleanedData as JobPosting,
-        );
+        response = await jobService.updateJobPosting({
+          ...cleanedData,
+          id: draftJobId,
+        } as JobPosting);
       } else {
         // Create new draft
         response = await jobService.createJobPosting(cleanedData as JobPosting);
@@ -390,10 +390,10 @@ export default function PostJobForm() {
 
       if (draftJobId) {
         // Update existing draft to published status
-        await jobService.updateJobPosting(
-          draftJobId,
-          cleanedData as JobPosting,
-        );
+        await jobService.updateJobPosting({
+          ...cleanedData,
+          id: draftJobId,
+        } as JobPosting);
       } else {
         // Create new job posting as published
         await jobService.createJobPosting(cleanedData as JobPosting);
@@ -1346,7 +1346,7 @@ export default function PostJobForm() {
         message='Are you sure you want to publish this job posting? This action cannot be undone.'
         confirmText='Publish Job'
         cancelText='Cancel'
-        variant='warning'
+        variant='info'
         isLoading={isSubmitting}
       />
     </div>

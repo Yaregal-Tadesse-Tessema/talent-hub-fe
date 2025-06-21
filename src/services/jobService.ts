@@ -113,7 +113,7 @@ export const jobService = {
     }
   },
 
-  async updateJobPosting(jobId: string, jobData: Partial<JobPosting>) {
+  async updateJobPosting(jobData: Partial<JobPosting>) {
     try {
       // Get user data from localStorage
       const storedUser = localStorage.getItem('user');
@@ -126,7 +126,7 @@ export const jobService = {
         throw new Error('Tenant ID not found in user data');
       }
 
-      const response = await api.put(`/jobs/update-job-posting/${jobId}`, {
+      const response = await api.put(`/jobs/update-job-posting`, {
         ...jobData,
         organizationId: userData.tenantId,
       });
