@@ -23,7 +23,10 @@ export default function SignupSuccess() {
         <p className='text-gray-600 text-center mb-6'>
           Your account has been successfully created.
           <br />
-          You can now sign in and start using Talent Hub.
+          <strong>Please check your email to activate your account.</strong>
+          <br />
+          Once you click the activation link in your email, you'll be able to
+          sign in and start using Talent Hub!
         </p>
         <Link
           href='/login'

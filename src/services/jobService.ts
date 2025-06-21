@@ -113,6 +113,30 @@ export const jobService = {
     }
   },
 
+  async updateJobPosting(jobId: string, jobData: Partial<JobPosting>) {
+    try {
+      // Get user data from localStorage
+      const storedUser = localStorage.getItem('user');
+      if (!storedUser) {
+        throw new Error('User not logged in');
+      }
+
+      const userData = JSON.parse(storedUser);
+      if (!userData.tenantId) {
+        throw new Error('Tenant ID not found in user data');
+      }
+
+      const response = await api.put(`/jobs/update-job-posting/${jobId}`, {
+        ...jobData,
+        organizationId: userData.tenantId,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error updating job posting:', error);
+      throw error;
+    }
+  },
+
   async getPublicJobs(): Promise<JobsResponse> {
     try {
       const response = await api.get(

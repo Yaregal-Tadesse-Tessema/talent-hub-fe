@@ -194,7 +194,6 @@ export function Navbar({ page = 'home' }: NavbarProps) {
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/find-job', label: 'Find Job' },
     { href: '/find-employers', label: 'Find Employers' },
-    { href: '/job-alerts', label: 'Job Alerts' },
     { href: '/customer-supports', label: 'Support' },
   ];
 

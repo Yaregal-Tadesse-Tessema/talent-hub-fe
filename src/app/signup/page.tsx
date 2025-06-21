@@ -47,7 +47,7 @@ export default function SignupPage() {
   const searchParams = useSearchParams();
   const { showToast } = useToast();
   const [userType, setUserType] = useState<UserType>(() => {
-    const typeParam = searchParams.get('type');
+    const typeParam = searchParams?.get('type');
     return typeParam === 'employer' ? 'employer' : 'employee';
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -219,6 +219,23 @@ export default function SignupPage() {
         router.push('/signup/success');
       }
     } catch (error: any) {
+      // Handle existing user scenarios
+      if (error.response?.data?.status === 'ACTIVE') {
+        showToast({
+          type: 'error',
+          message: 'User already exists. Please click on "Return to Sign In".',
+        });
+        router.push('/login');
+        return;
+      } else if (error.response?.data?.status === 'PENDING') {
+        showToast({
+          type: 'success',
+          message: 'Activation email has been resent. Please check your email.',
+        });
+        router.push('/signup/success');
+        return;
+      }
+
       showToast({
         type: 'error',
         message:
@@ -423,14 +440,19 @@ export default function SignupPage() {
               <option value='male'>Male</option>
               <option value='female'>Female</option>
             </select>
-            <input
-              type='date'
-              name='birthDate'
-              value={employeeData.birthDate}
-              onChange={handleEmployeeInputChange}
-              required
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 md:col-span-2 ${errors.birthDate ? 'border-red-500' : ''}`}
-            />
+            <div className='md:col-span-2'>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
+                Date of Birth
+              </label>
+              <input
+                type='date'
+                name='birthDate'
+                value={employeeData.birthDate}
+                onChange={handleEmployeeInputChange}
+                required
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 ${errors.birthDate ? 'border-red-500' : ''}`}
+              />
+            </div>
             <div className='relative w-full'>
               <input
                 type={showPassword ? 'text' : 'password'}

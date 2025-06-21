@@ -3,6 +3,7 @@ import RichTextEditor from './RichTextEditor';
 import { jobService, JobPosting } from '@/services/jobService';
 import { useToast } from '@/contexts/ToastContext';
 import { useRouter } from 'next/navigation';
+import ConfirmationDialog from '@/components/ui/ConfirmationDialog';
 
 interface FormData {
   title: string;
@@ -52,7 +53,9 @@ export default function PostJobForm() {
       min: '50000',
       max: '80000',
     },
-    deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 16),
     requirementId: 'req123',
     skill: ['React', 'TypeScript', 'Node.js', 'AWS'],
     benefits: [
@@ -92,6 +95,8 @@ export default function PostJobForm() {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
+  const [draftJobId, setDraftJobId] = useState<string | null>(null);
+  const [showPublishConfirmation, setShowPublishConfirmation] = useState(false);
   const { showToast } = useToast();
   const router = useRouter();
 
@@ -226,32 +231,58 @@ export default function PostJobForm() {
     return Object.keys(errors).length === 0;
   };
 
-  const nextStep = () => {
-    if (validateCurrentStep() && currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
-      setValidationErrors({});
+  const saveDraft = async () => {
+    setIsSubmitting(true);
+
+    try {
+      // Filter out empty array items and ensure proper date formatting
+      const cleanedData = {
+        ...formData,
+        skill: formData.skill.filter(Boolean),
+        benefits: formData.benefits.filter(Boolean),
+        responsibilities: formData.responsibilities.filter(Boolean),
+        jobPostRequirement: formData.jobPostRequirement.filter(Boolean),
+        postedDate: new Date(formData.postedDate).toISOString(),
+        deadline: new Date(formData.deadline).toISOString(),
+        onHoldDate: formData.onHoldDate
+          ? new Date(formData.onHoldDate).toISOString()
+          : null,
+        status: 'Draft',
+      };
+
+      let response;
+      if (draftJobId) {
+        // Update existing draft
+        response = await jobService.updateJobPosting(
+          draftJobId,
+          cleanedData as JobPosting,
+        );
+      } else {
+        // Create new draft
+        response = await jobService.createJobPosting(cleanedData as JobPosting);
+        setDraftJobId(response.id || response.jobPostId);
+      }
+
+      showToast({
+        type: 'success',
+        message: 'Draft saved successfully!',
+      });
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      showToast({
+        type: 'error',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to save draft. Please try again.',
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const prevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-      setValidationErrors({});
-    }
-  };
-
-  const handleSubmit = async () => {
-    // Validate the final step before submitting
+  const saveAsDraft = async () => {
     if (!validateCurrentStep()) {
-      return;
-    }
-
-    // Show confirmation dialog
-    const confirmed = window.confirm(
-      'Are you sure you want to publish this job posting? This action cannot be undone.',
-    );
-
-    if (!confirmed) {
       return;
     }
 
@@ -270,9 +301,103 @@ export default function PostJobForm() {
         onHoldDate: formData.onHoldDate
           ? new Date(formData.onHoldDate).toISOString()
           : null,
+        status: 'Draft',
       };
 
-      await jobService.createJobPosting(cleanedData as JobPosting);
+      let response;
+      if (draftJobId) {
+        // Update existing draft
+        response = await jobService.updateJobPosting(
+          draftJobId,
+          cleanedData as JobPosting,
+        );
+      } else {
+        // Create new draft
+        response = await jobService.createJobPosting(cleanedData as JobPosting);
+        setDraftJobId(response.id || response.jobPostId);
+      }
+
+      showToast({
+        type: 'success',
+        message: 'Draft saved successfully!',
+      });
+
+      // Move to next step
+      setCurrentStep(currentStep + 1);
+      setValidationErrors({});
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      showToast({
+        type: 'error',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to save draft. Please try again.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const nextStep = () => {
+    if (validateCurrentStep() && currentStep < totalSteps) {
+      // If it's the first step, save as draft first
+      if (currentStep === 1) {
+        saveAsDraft();
+      } else {
+        setCurrentStep(currentStep + 1);
+        setValidationErrors({});
+      }
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+      setValidationErrors({});
+    }
+  };
+
+  const handleSubmit = async () => {
+    // Validate the final step before submitting
+    if (!validateCurrentStep()) {
+      return;
+    }
+
+    // Show confirmation dialog
+    setShowPublishConfirmation(true);
+  };
+
+  const confirmPublish = async () => {
+    setShowPublishConfirmation(false);
+    setIsSubmitting(true);
+
+    try {
+      // Filter out empty array items and ensure proper date formatting
+      const cleanedData = {
+        ...formData,
+        skill: formData.skill.filter(Boolean),
+        benefits: formData.benefits.filter(Boolean),
+        responsibilities: formData.responsibilities.filter(Boolean),
+        jobPostRequirement: formData.jobPostRequirement.filter(Boolean),
+        postedDate: new Date(formData.postedDate).toISOString(),
+        deadline: new Date(formData.deadline).toISOString(),
+        onHoldDate: formData.onHoldDate
+          ? new Date(formData.onHoldDate).toISOString()
+          : null,
+        status: 'Posted',
+      };
+
+      if (draftJobId) {
+        // Update existing draft to published status
+        await jobService.updateJobPosting(
+          draftJobId,
+          cleanedData as JobPosting,
+        );
+      } else {
+        // Create new job posting as published
+        await jobService.createJobPosting(cleanedData as JobPosting);
+      }
 
       showToast({
         type: 'success',
@@ -302,6 +427,11 @@ export default function PostJobForm() {
           <span className='text-sm text-gray-500 dark:text-gray-400'>
             Step {currentStep} of {totalSteps}
           </span>
+          {draftJobId && (
+            <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400'>
+              Draft Saved
+            </span>
+          )}
           {currentStep === totalSteps && (
             <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'>
               Ready to Publish
@@ -1114,13 +1244,54 @@ export default function PostJobForm() {
               </button>
 
               <div className='flex gap-3'>
+                {draftJobId && currentStep > 1 && (
+                  <button
+                    type='button'
+                    onClick={saveDraft}
+                    disabled={isSubmitting}
+                    className='px-4 py-3 bg-gray-600 dark:bg-gray-500 text-white rounded-lg font-medium hover:bg-gray-700 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200'
+                  >
+                    {isSubmitting ? 'Saving...' : 'Save Draft'}
+                  </button>
+                )}
                 {currentStep < totalSteps ? (
                   <button
                     type='button'
                     onClick={nextStep}
+                    disabled={isSubmitting}
                     className='px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200'
                   >
-                    Next Step
+                    {currentStep === 1 ? (
+                      isSubmitting ? (
+                        <span className='flex items-center'>
+                          <svg
+                            className='animate-spin -ml-1 mr-3 h-5 w-5 text-white'
+                            xmlns='http://www.w3.org/2000/svg'
+                            fill='none'
+                            viewBox='0 0 24 24'
+                          >
+                            <circle
+                              className='opacity-25'
+                              cx='12'
+                              cy='12'
+                              r='10'
+                              stroke='currentColor'
+                              strokeWidth='4'
+                            ></circle>
+                            <path
+                              className='opacity-75'
+                              fill='currentColor'
+                              d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                            ></path>
+                          </svg>
+                          Saving Draft...
+                        </span>
+                      ) : (
+                        'Save As Draft and Continue'
+                      )
+                    ) : (
+                      'Next Step'
+                    )}
                   </button>
                 ) : (
                   <button
@@ -1165,6 +1336,19 @@ export default function PostJobForm() {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        open={showPublishConfirmation}
+        onClose={() => setShowPublishConfirmation(false)}
+        onConfirm={confirmPublish}
+        title='Confirm Job Posting'
+        message='Are you sure you want to publish this job posting? This action cannot be undone.'
+        confirmText='Publish Job'
+        cancelText='Cancel'
+        variant='warning'
+        isLoading={isSubmitting}
+      />
     </div>
   );
 }
