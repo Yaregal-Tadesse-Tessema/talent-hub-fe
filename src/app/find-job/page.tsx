@@ -15,8 +15,8 @@ export default function FindJobPage() {
   return (
     <Suspense
       fallback={
-        <div className='flex justify-center items-center min-h-[200px]'>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+        <div className='flex justify-center items-center min-h-[200px] bg-gray-50 dark:bg-gray-900'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400'></div>
         </div>
       }
     >
@@ -182,31 +182,39 @@ function FindJobContent() {
   };
 
   return (
-    <main className='min-h-screen pb-16'>
+    <main className='min-h-screen pb-16 bg-gray-50 dark:bg-gray-900'>
       {/* Page title and breadcrumb */}
-      <div className='flex flex-col sm:flex-row justify-between bg-gray-100 items-center px-4 sm:px-16 pt-8 gap-2'>
-        <h2 className='text-md text-gray-500'>Find Job</h2>
-        <nav className='text-gray-400 text-sm flex items-center gap-1'>
-          <span className='hover:text-gray-600 cursor-pointer'>Home</span>
+      <div className='flex flex-col sm:flex-row justify-between bg-gray-100 dark:bg-gray-800 items-center px-4 sm:px-16 pt-8 gap-2'>
+        <h2 className='text-md text-gray-500 dark:text-gray-400'>Find Job</h2>
+        <nav className='text-gray-400 dark:text-gray-500 text-sm flex items-center gap-1'>
+          <span className='hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer'>
+            Home
+          </span>
           <span className='mx-1'>/</span>
-          <span className='text-gray-700 font-medium'>Find Job</span>
+          <span className='text-gray-700 dark:text-gray-300 font-medium'>
+            Find Job
+          </span>
         </nav>
       </div>
 
       {/* Loading and error states */}
       {loading && (
-        <div className='flex justify-center items-center min-h-[200px]'>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+        <div className='flex justify-center items-center min-h-[200px] bg-gray-50 dark:bg-gray-900'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400'></div>
         </div>
       )}
 
-      {error && <div className='text-red-500 text-center py-4'>{error}</div>}
+      {error && (
+        <div className='text-red-500 dark:text-red-400 text-center py-4'>
+          {error}
+        </div>
+      )}
 
       {/* Top search/filter bar */}
-      <div className='bg-gray-100 px-4 sm:px-16 py-4 pb-8 border-b'>
-        <div className='flex flex-col lg:flex-row gap-4 items-center shadow rounded-xl px-4 sm:px-6 py-4 bg-white'>
+      <div className='bg-gray-100 dark:bg-gray-800 px-4 sm:px-16 py-4 pb-8 border-b border-gray-200 dark:border-gray-700'>
+        <div className='flex flex-col lg:flex-row gap-4 items-center shadow dark:shadow-gray-700/50 rounded-xl px-4 sm:px-6 py-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
           {/* Job title search */}
-          <div className='flex items-center gap-2 flex-1 border-b lg:border-b-0 lg:border-r pb-4 lg:pb-0 pr-0 lg:pr-4 w-full'>
+          <div className='flex items-center gap-2 flex-1 border-b border-gray-200 dark:border-gray-600 lg:border-b-0 lg:border-r lg:border-gray-200 dark:lg:border-gray-600 pb-4 lg:pb-0 pr-0 lg:pr-4 w-full'>
             <svg
               width='22'
               height='22'
@@ -219,7 +227,7 @@ function FindJobContent() {
               <path d='M21 21l-4.35-4.35' strokeWidth='2' />
             </svg>
             <input
-              className='w-full bg-transparent border-none outline-none text-gray-700 placeholder-gray-400'
+              className='w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500'
               placeholder='Job title, Keyword...'
               value={searchFilters.keyword}
               onChange={(e) =>
@@ -232,10 +240,10 @@ function FindJobContent() {
             />
           </div>
           {/* Location */}
-          <div className='flex items-center gap-2 flex-1 border-b lg:border-b-0 lg:border-r pb-4 lg:pb-0 pr-0 lg:pr-4'>
-            <MapPin className='w-5 h-5 text-blue-600 mr-2' />
+          <div className='flex items-center gap-2 flex-1 border-b border-gray-200 dark:border-gray-600 lg:border-b-0 lg:border-r lg:border-gray-200 dark:lg:border-gray-600 pb-4 lg:pb-0 pr-0 lg:pr-4'>
+            <MapPin className='w-5 h-5 text-blue-600 dark:text-blue-400 mr-2' />
             <input
-              className='w-full bg-transparent border-none outline-none text-gray-700 placeholder-gray-400'
+              className='w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500'
               placeholder='Location'
               value={searchFilters.location}
               onChange={(e) =>
@@ -248,10 +256,10 @@ function FindJobContent() {
             />
           </div>
           {/* Category */}
-          <div className='flex items-center gap-2 flex-1 border-b lg:border-b-0 lg:border-r pb-4 lg:pb-0 pr-0 lg:pr-4'>
-            <Briefcase className='w-5 h-5 text-blue-600 mr-2' />
+          <div className='flex items-center gap-2 flex-1 border-b border-gray-200 dark:border-gray-600 lg:border-b-0 lg:border-r lg:border-gray-200 dark:lg:border-gray-600 pb-4 lg:pb-0 pr-0 lg:pr-4'>
+            <Briefcase className='w-5 h-5 text-blue-600 dark:text-blue-400 mr-2' />
             <select
-              className='w-full bg-transparent border-none outline-none text-gray-700'
+              className='w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-300'
               value={searchFilters.category}
               onChange={(e) =>
                 setSearchFilters((prev) => ({
@@ -271,7 +279,7 @@ function FindJobContent() {
           {/* Find Job Button */}
           <div className='flex items-center pl-0 lg:pl-4 w-full lg:w-auto'>
             <button
-              className='bg-blue-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-blue-700 transition w-full lg:w-auto'
+              className='bg-blue-600 dark:bg-blue-500 text-white px-8 py-3 rounded-md font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition w-full lg:w-auto'
               onClick={handleSearch}
             >
               Find Job
@@ -287,7 +295,7 @@ function FindJobContent() {
             {jobs.map((job) => (
               <div
                 key={job.id}
-                className='rounded-xl border bg-white p-6 shadow-sm transition hover:shadow-md relative hover:border-blue-600'
+                className='rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm dark:shadow-gray-700/50 transition hover:shadow-md dark:hover:shadow-gray-600/50 relative hover:border-blue-600 dark:hover:border-blue-500'
               >
                 <div className='flex items-center gap-3 mb-2'>
                   {job.companyLogo && (
@@ -300,23 +308,25 @@ function FindJobContent() {
                       className='w-20 h-20 object-contain'
                     />
                   )}
-                  <span className='font-semibold text-gray-800'>
+                  <span className='font-semibold text-gray-800 dark:text-white'>
                     {job.companyName}
                   </span>
                   {job.isSaved && (
-                    <span className='ml-2 bg-pink-100 text-pink-600 text-xs px-2 py-0.5 rounded-full font-medium'>
+                    <span className='ml-2 bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 text-xs px-2 py-0.5 rounded-full font-medium'>
                       Saved
                     </span>
                   )}
                 </div>
-                <div className='text-xs text-gray-400 mb-1'>{job.location}</div>
+                <div className='text-xs text-gray-400 dark:text-gray-500 mb-1'>
+                  {job.location}
+                </div>
                 <Link
                   href={`/find-job/${job.id}`}
-                  className='block text-blue-600 font-semibold text-lg mb-1 hover:underline'
+                  className='block text-blue-600 dark:text-blue-400 font-semibold text-lg mb-1 hover:underline'
                 >
                   {job.title}
                 </Link>
-                <div className='flex items-center text-xs text-gray-500 gap-2'>
+                <div className='flex items-center text-xs text-gray-500 dark:text-gray-400 gap-2'>
                   <span>{job.employmentType}</span>
                   <span>•</span>
                   <span>
@@ -324,7 +334,7 @@ function FindJobContent() {
                     {job.salaryRange?.max || 'N/A'}
                   </span>
                 </div>
-                <div className='mt-2 text-xs text-gray-500'>
+                <div className='mt-2 text-xs text-gray-500 dark:text-gray-400'>
                   <span>
                     Posted: {new Date(job.postedDate).toLocaleDateString()}
                   </span>
@@ -334,7 +344,7 @@ function FindJobContent() {
                   </span>
                 </div>
                 <button
-                  className={`${job.isSaved ? 'text-blue-600' : 'text-gray-400 hover:text-blue-600'}`}
+                  className={`${job.isSaved ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400'}`}
                   onClick={() =>
                     job.isSaved
                       ? handleUnsaveJob(job.id)
@@ -358,8 +368,8 @@ function FindJobContent() {
                 <div
                   key={job.id}
                   className={`
-                    flex items-center justify-between rounded-xl border bg-white px-6 py-5 transition
-                    border-gray-200 hover:border-blue-600
+                    flex items-center justify-between rounded-xl border bg-white dark:bg-gray-800 px-6 py-5 transition
+                    border-gray-200 dark:border-gray-700 hover:border-blue-600 dark:hover:border-blue-500
                   `}
                   onMouseEnter={() => setHoveredJobId(job.id)}
                   onMouseLeave={() => setHoveredJobId(null)}
@@ -382,22 +392,22 @@ function FindJobContent() {
                     <div className='flex items-center gap-2'>
                       <Link
                         href={`/find-job/${job.id}`}
-                        className='font-semibold text-gray-800 text-base hover:underline text-blue-600'
+                        className='font-semibold text-gray-800 dark:text-white text-base hover:underline text-blue-600 dark:text-blue-400'
                       >
                         {job.title}
                       </Link>
                       {job.isSaved && (
-                        <span className='ml-2 bg-pink-100 text-pink-600 text-xs px-2 py-0.5 rounded-full font-medium'>
+                        <span className='ml-2 bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 text-xs px-2 py-0.5 rounded-full font-medium'>
                           Saved
                         </span>
                       )}
                       {job.employmentType && (
-                        <span className='ml-2 bg-blue-100 text-blue-600 text-xs px-2 py-0.5 rounded-full font-medium'>
+                        <span className='ml-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs px-2 py-0.5 rounded-full font-medium'>
                           {job.employmentType}
                         </span>
                       )}
                     </div>
-                    <div className='flex flex-wrap items-center gap-4 text-sm text-gray-500 mt-1'>
+                    <div className='flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mt-1'>
                       <span className='flex items-center gap-1'>
                         <svg
                           width='16'
@@ -480,7 +490,7 @@ function FindJobContent() {
                   {/* Bookmark and Apply */}
                   <div className='flex items-center gap-4 ml-4'>
                     <button
-                      className={`${job.isSaved ? 'text-blue-600' : 'text-gray-400 hover:text-blue-600'}`}
+                      className={`${job.isSaved ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400'}`}
                       onClick={() =>
                         job.isSaved
                           ? handleUnsaveJob(job.id)
@@ -492,7 +502,7 @@ function FindJobContent() {
                       />
                     </button>
                     <button
-                      className='bg-blue-50 text-blue-700 font-semibold px-5 py-2 rounded-lg hover:bg-blue-600 hover:text-white flex items-center gap-2 transition'
+                      className='bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-semibold px-5 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white flex items-center gap-2 transition border border-blue-200 dark:border-blue-700'
                       onClick={() => handleApplyClick(job.id)}
                     >
                       Apply Now
@@ -507,27 +517,31 @@ function FindJobContent() {
         {/* Pagination */}
         <div className='flex justify-center items-center gap-2 mt-10'>
           <button
-            className='p-2 rounded-full hover:bg-gray-200 disabled:opacity-50'
+            className='p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors'
             disabled={selectedPage === 1}
             onClick={() => setSelectedPage((p) => Math.max(1, p - 1))}
           >
-            <span className='text-lg'>&larr;</span>
+            <span className='text-lg text-gray-700 dark:text-gray-300'>
+              &larr;
+            </span>
           </button>
           {[1, 2, 3, 4, 5].map((page) => (
             <button
               key={page}
-              className={`w-8 h-8 rounded-full flex items-center justify-center font-medium ${selectedPage === page ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-200'}`}
+              className={`w-8 h-8 rounded-full flex items-center justify-center font-medium transition-colors ${selectedPage === page ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
               onClick={() => setSelectedPage(page)}
             >
               {page}
             </button>
           ))}
           <button
-            className='p-2 rounded-full hover:bg-gray-200 disabled:opacity-50'
+            className='p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors'
             disabled={selectedPage === totalPages}
             onClick={() => setSelectedPage((p) => Math.min(totalPages, p + 1))}
           >
-            <span className='text-lg'>&rarr;</span>
+            <span className='text-lg text-gray-700 dark:text-gray-300'>
+              &rarr;
+            </span>
           </button>
         </div>
       </div>

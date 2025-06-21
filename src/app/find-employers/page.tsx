@@ -29,7 +29,7 @@ function Pagination({
   return (
     <div className='flex justify-center items-center gap-2 mt-10'>
       <button
-        className={`w-8 h-8 flex items-center justify-center rounded-full ${current === 1 ? 'bg-blue-100 text-blue-300' : 'hover:bg-blue-50 text-blue-600'}`}
+        className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${current === 1 ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-300 dark:text-blue-400' : 'hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400'}`}
         onClick={() => onChange(current - 1)}
         disabled={current === 1}
       >
@@ -46,14 +46,14 @@ function Pagination({
       {pages.map((page) => (
         <button
           key={page}
-          className={`w-8 h-8 flex items-center justify-center rounded-full font-medium ${current === page ? 'bg-blue-600 text-white' : 'hover:bg-blue-50 text-blue-600'}`}
+          className={`w-8 h-8 flex items-center justify-center rounded-full font-medium transition-colors ${current === page ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400'}`}
           onClick={() => onChange(page)}
         >
           {page.toString().padStart(2, '0')}
         </button>
       ))}
       <button
-        className={`w-8 h-8 flex items-center justify-center rounded-full ${current === total ? 'bg-blue-100 text-blue-300' : 'hover:bg-blue-50 text-blue-600'}`}
+        className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${current === total ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-300 dark:text-blue-400' : 'hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400'}`}
         onClick={() => onChange(current + 1)}
         disabled={current === total}
       >
@@ -105,28 +105,34 @@ export default function FindEmployersPage() {
 
   if (loading) {
     return (
-      <div className='flex justify-center items-center min-h-[200px]'>
-        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+      <div className='flex justify-center items-center min-h-[200px] bg-gray-50 dark:bg-gray-900'>
+        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400'></div>
       </div>
     );
   }
 
   return (
-    <div className='min-h-screen'>
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-900'>
       {/* Page title and breadcrumb */}
-      <div className='flex justify-between bg-gray-100 items-center px-16 pt-8'>
-        <h2 className='text-md text-gray-500'>Find Employers</h2>
-        <nav className='text-gray-400 text-sm flex items-center gap-1'>
-          <span className='hover:text-gray-600 cursor-pointer'>Home</span>
+      <div className='flex justify-between bg-gray-100 dark:bg-gray-800 items-center px-16 pt-8'>
+        <h2 className='text-md text-gray-500 dark:text-gray-400'>
+          Find Employers
+        </h2>
+        <nav className='text-gray-400 dark:text-gray-500 text-sm flex items-center gap-1'>
+          <span className='hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer'>
+            Home
+          </span>
           <span className='mx-1'>/</span>
-          <span className='text-gray-700 font-medium'>Find Employers</span>
+          <span className='text-gray-700 dark:text-gray-300 font-medium'>
+            Find Employers
+          </span>
         </nav>
       </div>
       {/* Top search/filter bar */}
-      <div className='bg-gray-100 px-16 py-4 pb-8 border-b'>
-        <div className='flex gap-4 items-center shadow rounded-xl px-6 py-2 bg-white'>
+      <div className='bg-gray-100 dark:bg-gray-800 px-16 py-4 pb-8 border-b border-gray-200 dark:border-gray-700'>
+        <div className='flex gap-4 items-center shadow dark:shadow-gray-700/50 rounded-xl px-6 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
           {/* Job title search */}
-          <div className='flex items-center gap-2 flex-1 border-r pr-4'>
+          <div className='flex items-center gap-2 flex-1 border-r border-gray-200 dark:border-gray-600 pr-4'>
             <svg
               width='22'
               height='22'
@@ -138,12 +144,12 @@ export default function FindEmployersPage() {
               <path d='M21 21l-4.35-4.35' strokeWidth='2' />
             </svg>
             <input
-              className='flex-1 bg-transparent border-none outline-none text-gray-700 placeholder-gray-400'
+              className='flex-1 bg-transparent border-none outline-none text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500'
               placeholder='Job tittle, Keyword...'
             />
           </div>
           {/* Location */}
-          <div className='flex items-center gap-2 border-r px-4 min-w-[200px]'>
+          <div className='flex items-center gap-2 border-r border-gray-200 dark:border-gray-600 px-4 min-w-[200px]'>
             <svg
               width='22'
               height='22'
@@ -158,12 +164,12 @@ export default function FindEmployersPage() {
               <circle cx='12' cy='9' r='2.5' strokeWidth='2' />
             </svg>
             <input
-              className='bg-transparent border-none outline-none text-gray-700 placeholder-gray-400 w-full'
+              className='bg-transparent border-none outline-none text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 w-full'
               placeholder='Location'
             />
           </div>
           {/* Category */}
-          <div className='flex items-center gap-2 border-r px-4 min-w-[200px]'>
+          <div className='flex items-center gap-2 border-r border-gray-200 dark:border-gray-600 px-4 min-w-[200px]'>
             <svg
               width='22'
               height='22'
@@ -177,13 +183,13 @@ export default function FindEmployersPage() {
                 <rect x='3' y='15' width='18' height='6' rx='2' />
               </g>
             </svg>
-            <select className='bg-transparent border-none outline-none text-gray-700 w-full'>
+            <select className='bg-transparent border-none outline-none text-gray-700 dark:text-gray-300 w-full'>
               <option>Select Category</option>
             </select>
           </div>
           {/* Chevron and Find Job button */}
           <div className='flex items-center gap-2 pl-2'>
-            <button className='bg-blue-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-blue-700 transition'>
+            <button className='bg-blue-600 dark:bg-blue-500 text-white px-8 py-3 rounded-md font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition'>
               Find Job
             </button>
           </div>
@@ -191,8 +197,8 @@ export default function FindEmployersPage() {
       </div>
       <div className='flex px-16 py-8 gap-8'>
         {/* Sidebar filter */}
-        <div className='w-80 bg-white rounded-lg border border-gray-200 p-6 shadow-sm h-fit'>
-          <button className='w-full bg-blue-600 text-white py-2 rounded mb-6 font-semibold flex items-center justify-center gap-2'>
+        <div className='w-80 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm dark:shadow-gray-700/50 h-fit'>
+          <button className='w-full bg-blue-600 dark:bg-blue-500 text-white py-2 rounded mb-6 font-semibold flex items-center justify-center gap-2 hover:bg-blue-700 dark:hover:bg-blue-600 transition'>
             {/* Sliders icon for filter */}
             <svg
               width='16'
@@ -273,9 +279,9 @@ export default function FindEmployersPage() {
               className='flex justify-between items-center mb-2 cursor-pointer select-none'
               onClick={() => setShowRadius((v) => !v)}
             >
-              <span className='font-medium'>
+              <span className='font-medium text-gray-900 dark:text-white'>
                 Location Radius:{' '}
-                <span className='text-blue-600 font-semibold'>
+                <span className='text-blue-600 dark:text-blue-400 font-semibold'>
                   {radius} miles
                 </span>
               </span>
@@ -285,7 +291,7 @@ export default function FindEmployersPage() {
                 fill='none'
                 viewBox='0 0 20 20'
                 stroke='currentColor'
-                className={`transition-transform ${showRadius ? '' : 'rotate-180'}`}
+                className={`transition-transform text-gray-600 dark:text-gray-400 ${showRadius ? '' : 'rotate-180'}`}
               >
                 <path d='M6 8l4 4 4-4' strokeWidth='2' />
               </svg>
@@ -297,7 +303,7 @@ export default function FindEmployersPage() {
                 max={100}
                 value={radius}
                 onChange={(e) => setRadius(Number(e.target.value))}
-                className='w-full accent-blue-600 mt-4'
+                className='w-full accent-blue-600 dark:accent-blue-400 mt-4'
               />
             )}
           </div>
@@ -307,14 +313,16 @@ export default function FindEmployersPage() {
               className='flex justify-between items-center mb-2 cursor-pointer select-none'
               onClick={() => setShowOrgType((v) => !v)}
             >
-              <span className='font-medium'>Organization Type</span>
+              <span className='font-medium text-gray-900 dark:text-white'>
+                Organization Type
+              </span>
               <svg
                 width='18'
                 height='18'
                 fill='none'
                 viewBox='0 0 20 20'
                 stroke='currentColor'
-                className={`transition-transform ${showOrgType ? '' : 'rotate-180'}`}
+                className={`transition-transform text-gray-600 dark:text-gray-400 ${showOrgType ? '' : 'rotate-180'}`}
               >
                 <path d='M6 8l4 4 4-4' strokeWidth='2' />
               </svg>
@@ -329,9 +337,14 @@ export default function FindEmployersPage() {
                     value={type}
                     checked={selectedOrg === type}
                     onChange={() => setSelectedOrg(type)}
-                    className='mr-2 accent-blue-600'
+                    className='mr-2 accent-blue-600 dark:accent-blue-400'
                   />
-                  <label htmlFor={type}>{type}</label>
+                  <label
+                    htmlFor={type}
+                    className='text-gray-900 dark:text-white'
+                  >
+                    {type}
+                  </label>
                 </div>
               ))}
           </div>
@@ -340,18 +353,18 @@ export default function FindEmployersPage() {
         <div className='flex-1 rounded-lg'>
           <div className='flex justify-between items-center mb-6'>
             <div className='flex gap-2'>
-              <select className='w-24 border rounded-md px-3 py-2'>
+              <select className='w-24 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white'>
                 <option>Latest</option>
                 <option>Oldest</option>
               </select>
-              <select className='w-36 border rounded-md px-3 py-2'>
+              <select className='w-36 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white'>
                 <option>12 per page</option>
                 <option>24 per page</option>
                 <option>48 per page</option>
               </select>
             </div>
             <div className='flex gap-2'>
-              <button className='border rounded p-2 bg-blue-50 text-blue-600'>
+              <button className='border border-gray-300 dark:border-gray-600 rounded p-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors'>
                 <svg
                   width='20'
                   height='20'
@@ -365,7 +378,7 @@ export default function FindEmployersPage() {
                   <rect x='3' y='14' width='7' height='7' strokeWidth='2' />
                 </svg>
               </button>
-              <button className='border rounded p-2'>
+              <button className='border border-gray-300 dark:border-gray-600 rounded p-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors'>
                 <svg
                   width='20'
                   height='20'
@@ -383,11 +396,11 @@ export default function FindEmployersPage() {
             {paginatedEmployers.map((employer, idx) => (
               <div
                 key={employer.name}
-                className='flex items-center bg-white rounded-lg border border-gray-200 shadow-sm p-6 justify-between'
+                className='flex items-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-gray-700/50 p-6 justify-between'
               >
                 <div className='flex items-center gap-4'>
-                  <div className='w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center'>
-                    <span className='text-2xl font-bold text-gray-400'>
+                  <div className='w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center'>
+                    <span className='text-2xl font-bold text-gray-400 dark:text-gray-500'>
                       {employer.tradeName[0]}
                     </span>
                   </div>
@@ -395,12 +408,12 @@ export default function FindEmployersPage() {
                     <div className='font-semibold text-lg'>
                       <Link
                         href={`/find-employers/${encodeURIComponent(employer.tradeName.toLowerCase().replace(/\s+/g, '-'))}`}
-                        className='hover:underline text-blue-700'
+                        className='hover:underline text-blue-700 dark:text-blue-400'
                       >
                         {employer.tradeName}
                       </Link>
                     </div>
-                    <div className='flex items-center gap-4 text-gray-500 text-sm'>
+                    <div className='flex items-center gap-4 text-gray-500 dark:text-gray-400 text-sm'>
                       <div className='flex items-center gap-1'>
                         <svg
                           width='16'
@@ -463,7 +476,7 @@ export default function FindEmployersPage() {
                     </div>
                   </div>
                 </div>
-                <button className='bg-blue-100 text-blue-700 px-6 py-2 rounded-md font-semibold flex items-center gap-2 hover:bg-blue-200 transition'>
+                <button className='bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-6 py-2 rounded-md font-semibold flex items-center gap-2 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors border border-blue-200 dark:border-blue-700'>
                   View Details
                   <svg
                     width='18'

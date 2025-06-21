@@ -232,8 +232,8 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className='flex justify-center items-center min-h-screen'>
-        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+      <div className='flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900'>
+        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400'></div>
       </div>
     );
   }
@@ -243,9 +243,11 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className='max-w-4xl mx-auto px-4 py-8'>
+    <div className='max-w-4xl mx-auto px-4 py-8 bg-gray-50 dark:bg-gray-900 min-h-screen'>
       <div className='flex justify-between items-center mb-8'>
-        <h1 className='text-2xl font-bold'>Profile</h1>
+        <h1 className='text-2xl font-bold text-gray-900 dark:text-white'>
+          Profile
+        </h1>
         <Button
           onClick={() => setIsEditing(!isEditing)}
           variant={isEditing ? 'outline' : 'primary'}
@@ -254,11 +256,11 @@ export default function ProfilePage() {
         </Button>
       </div>
 
-      <div className='bg-white rounded-lg shadow p-6 space-y-6'>
+      <div className='bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-6 space-y-6 border border-gray-200 dark:border-gray-700'>
         {/* Profile Picture Section */}
         <section className='flex flex-col items-center mb-8'>
           <div className='relative group'>
-            <div className='w-32 h-32 rounded-full overflow-hidden bg-gray-100 border-4 border-gray-200'>
+            <div className='w-32 h-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 border-4 border-gray-200 dark:border-gray-600'>
               {profile?.profile?.path ? (
                 <Image
                   src={profile.profile.path}
@@ -268,7 +270,7 @@ export default function ProfilePage() {
                   className='w-full h-full object-cover'
                 />
               ) : (
-                <div className='w-full h-full flex items-center justify-center bg-gray-200 text-gray-500'>
+                <div className='w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400'>
                   <span className='text-4xl'>
                     {profile?.firstName?.[0]?.toUpperCase() || '?'}
                   </span>
@@ -283,10 +285,10 @@ export default function ProfilePage() {
                   className='hidden'
                   onChange={handleProfileImageUpload}
                 />
-                <div className='p-2 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-colors'>
+                <div className='p-2 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors'>
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
-                    className='h-6 w-6 text-gray-600'
+                    className='h-6 w-6 text-gray-600 dark:text-gray-400'
                     fill='none'
                     viewBox='0 0 24 24'
                     stroke='currentColor'
@@ -308,18 +310,20 @@ export default function ProfilePage() {
               </label>
             </div>
           </div>
-          <p className='mt-2 text-sm text-gray-500'>
+          <p className='mt-2 text-sm text-gray-500 dark:text-gray-400'>
             Hover over the profile picture to upload a new one
           </p>
         </section>
 
         {/* Basic Information */}
         <section>
-          <h2 className='text-xl font-semibold mb-4'>Basic Information</h2>
+          <h2 className='text-xl font-semibold mb-4 text-gray-900 dark:text-white'>
+            Basic Information
+          </h2>
           {isEditing ? (
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   First Name
                 </label>
                 <Input
@@ -330,7 +334,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Middle Name
                 </label>
                 <Input
@@ -341,7 +345,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Last Name
                 </label>
                 <Input
@@ -352,7 +356,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Email
                 </label>
                 <Input
@@ -364,7 +368,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Phone
                 </label>
                 <Input
@@ -375,7 +379,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Gender
                 </label>
                 <Select
@@ -391,7 +395,7 @@ export default function ProfilePage() {
                 </Select>
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Birth Date
                 </label>
                 <Input
@@ -407,7 +411,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Status
                 </label>
                 <Input
@@ -420,43 +424,53 @@ export default function ProfilePage() {
             </div>
           ) : (
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <h3 className='text-sm font-medium text-gray-500'>Full Name</h3>
-                <p className='mt-1 text-lg font-semibold text-gray-900'>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                  Full Name
+                </h3>
+                <p className='mt-1 text-lg font-semibold text-gray-900 dark:text-white'>
                   {`${profile.firstName} ${profile.middleName ? profile.middleName + ' ' : ''}${profile.lastName}`}
                 </p>
               </div>
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <h3 className='text-sm font-medium text-gray-500'>Email</h3>
-                <p className='mt-1 text-lg font-semibold text-gray-900'>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                  Email
+                </h3>
+                <p className='mt-1 text-lg font-semibold text-gray-900 dark:text-white'>
                   {profile.email}
                 </p>
               </div>
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <h3 className='text-sm font-medium text-gray-500'>Phone</h3>
-                <p className='mt-1 text-lg font-semibold text-gray-900'>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                  Phone
+                </h3>
+                <p className='mt-1 text-lg font-semibold text-gray-900 dark:text-white'>
                   {profile.phone}
                 </p>
               </div>
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <h3 className='text-sm font-medium text-gray-500'>Gender</h3>
-                <p className='mt-1 text-lg font-semibold text-gray-900'>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                  Gender
+                </h3>
+                <p className='mt-1 text-lg font-semibold text-gray-900 dark:text-white'>
                   {profile.gender}
                 </p>
               </div>
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <h3 className='text-sm font-medium text-gray-500'>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
                   Birth Date
                 </h3>
-                <p className='mt-1 text-lg font-semibold text-gray-900'>
+                <p className='mt-1 text-lg font-semibold text-gray-900 dark:text-white'>
                   {profile.birthDate
                     ? new Date(profile.birthDate).toLocaleDateString()
                     : 'Not specified'}
                 </p>
               </div>
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <h3 className='text-sm font-medium text-gray-500'>Status</h3>
-                <p className='mt-1 text-lg font-semibold text-gray-900'>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                  Status
+                </h3>
+                <p className='mt-1 text-lg font-semibold text-gray-900 dark:text-white'>
                   {profile.status}
                 </p>
               </div>
@@ -466,13 +480,13 @@ export default function ProfilePage() {
 
         {/* Professional Information */}
         <section>
-          <h2 className='text-xl font-semibold mb-4'>
+          <h2 className='text-xl font-semibold mb-4 text-gray-900 dark:text-white'>
             Professional Information
           </h2>
           {isEditing ? (
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Profile Headline
                 </label>
                 <Input
@@ -483,7 +497,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Years of Experience
                 </label>
                 <Input
@@ -498,7 +512,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Highest Level of Education
                 </label>
                 <Select
@@ -519,7 +533,7 @@ export default function ProfilePage() {
                 </Select>
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Salary Expectations
                 </label>
                 <Input
@@ -534,7 +548,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Industry
                 </label>
                 <Input
@@ -549,7 +563,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Preferred Job Location
                 </label>
                 <Input
@@ -568,60 +582,62 @@ export default function ProfilePage() {
             </div>
           ) : (
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <h3 className='text-sm font-medium text-gray-500'>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
                   Profile Headline
                 </h3>
-                <p className='mt-1 text-lg font-semibold text-gray-900'>
+                <p className='mt-1 text-lg font-semibold text-gray-900 dark:text-white'>
                   {profile.profileHeadLine}
                 </p>
               </div>
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <h3 className='text-sm font-medium text-gray-500'>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
                   Years of Experience
                 </h3>
-                <p className='mt-1 text-lg font-semibold text-gray-900'>
+                <p className='mt-1 text-lg font-semibold text-gray-900 dark:text-white'>
                   {profile.yearOfExperience} years
                 </p>
               </div>
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <h3 className='text-sm font-medium text-gray-500'>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
                   Highest Education
                 </h3>
-                <p className='mt-1 text-lg font-semibold text-gray-900'>
+                <p className='mt-1 text-lg font-semibold text-gray-900 dark:text-white'>
                   {profile.highestLevelOfEducation}
                 </p>
               </div>
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <h3 className='text-sm font-medium text-gray-500'>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
                   Salary Expectations
                 </h3>
-                <p className='mt-1 text-lg font-semibold text-gray-900'>
+                <p className='mt-1 text-lg font-semibold text-gray-900 dark:text-white'>
                   ${profile.salaryExpectations.toLocaleString()}
                 </p>
               </div>
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <h3 className='text-sm font-medium text-gray-500'>Industry</h3>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                  Industry
+                </h3>
                 <div className='mt-1 flex flex-wrap gap-2'>
                   {profile.industry?.map((ind, index) => (
                     <span
                       key={index}
-                      className='px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm'
+                      className='px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-sm'
                     >
                       {ind}
                     </span>
                   ))}
                 </div>
               </div>
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <h3 className='text-sm font-medium text-gray-500'>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
                   Preferred Locations
                 </h3>
                 <div className='mt-1 flex flex-wrap gap-2'>
                   {profile.preferredJobLocation?.map((loc, index) => (
                     <span
                       key={index}
-                      className='px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm'
+                      className='px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-sm'
                     >
                       {loc}
                     </span>
@@ -634,11 +650,13 @@ export default function ProfilePage() {
 
         {/* Skills */}
         <section>
-          <h2 className='text-xl font-semibold mb-4'>Skills</h2>
+          <h2 className='text-xl font-semibold mb-4 text-gray-900 dark:text-white'>
+            Skills
+          </h2>
           {isEditing ? (
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Technical Skills
                 </label>
                 <Input
@@ -655,7 +673,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Soft Skills
                 </label>
                 <Input
@@ -674,30 +692,30 @@ export default function ProfilePage() {
             </div>
           ) : (
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <h3 className='text-sm font-medium text-gray-500'>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
                   Technical Skills
                 </h3>
                 <div className='mt-1 flex flex-wrap gap-2'>
                   {profile.technicalSkills?.map((skill, index) => (
                     <span
                       key={index}
-                      className='px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-sm'
+                      className='px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-full text-sm'
                     >
                       {skill}
                     </span>
                   ))}
                 </div>
               </div>
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <h3 className='text-sm font-medium text-gray-500'>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
                   Soft Skills
                 </h3>
                 <div className='mt-1 flex flex-wrap gap-2'>
                   {profile.softSkills?.map((skill, index) => (
                     <span
                       key={index}
-                      className='px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm'
+                      className='px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 rounded-full text-sm'
                     >
                       {skill}
                     </span>
@@ -710,10 +728,12 @@ export default function ProfilePage() {
 
         {/* Professional Summary */}
         <section>
-          <h2 className='text-xl font-semibold mb-4'>Professional Summary</h2>
+          <h2 className='text-xl font-semibold mb-4 text-gray-900 dark:text-white'>
+            Professional Summary
+          </h2>
           {isEditing ? (
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                 Summary
               </label>
               <Textarea
@@ -728,8 +748,8 @@ export default function ProfilePage() {
               />
             </div>
           ) : (
-            <div className='bg-gray-50 p-4 rounded-lg'>
-              <p className='text-gray-900 whitespace-pre-wrap'>
+            <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+              <p className='text-gray-900 dark:text-white whitespace-pre-wrap'>
                 {profile.professionalSummery}
               </p>
             </div>
@@ -738,36 +758,43 @@ export default function ProfilePage() {
 
         {/* Cover Letter */}
         <section>
-          <h2 className='text-xl font-semibold mb-4'>Cover Letter</h2>
+          <h2 className='text-xl font-semibold mb-4 text-gray-900 dark:text-white'>
+            Cover Letter
+          </h2>
           {isEditing ? (
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                 Cover Letter
               </label>
               <Textarea
                 value={profile.coverLetter}
                 onChange={(e) =>
-                  setProfile({ ...profile, coverLetter: e.target.value })
+                  setProfile({
+                    ...profile,
+                    coverLetter: e.target.value,
+                  })
                 }
-                rows={4}
+                rows={6}
               />
             </div>
           ) : (
-            <div className='bg-gray-50 p-4 rounded-lg'>
-              <p className='text-gray-900 whitespace-pre-wrap'>
+            <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+              <p className='text-gray-900 dark:text-white whitespace-pre-wrap'>
                 {profile.coverLetter}
               </p>
             </div>
           )}
         </section>
 
-        {/* Social Links */}
+        {/* Social Media Links */}
         <section>
-          <h2 className='text-xl font-semibold mb-4'>Social Links</h2>
+          <h2 className='text-xl font-semibold mb-4 text-gray-900 dark:text-white'>
+            Social Media Links
+          </h2>
           {isEditing ? (
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   LinkedIn URL
                 </label>
                 <Input
@@ -776,10 +803,11 @@ export default function ProfilePage() {
                     setProfile({ ...profile, linkedinUrl: e.target.value })
                   }
                   type='url'
+                  placeholder='https://linkedin.com/in/yourprofile'
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Portfolio URL
                 </label>
                 <Input
@@ -788,10 +816,11 @@ export default function ProfilePage() {
                     setProfile({ ...profile, portfolioUrl: e.target.value })
                   }
                   type='url'
+                  placeholder='https://yourportfolio.com'
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Telegram User ID
                 </label>
                 <Input
@@ -804,34 +833,40 @@ export default function ProfilePage() {
             </div>
           ) : (
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <h3 className='text-sm font-medium text-gray-500'>LinkedIn</h3>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                  LinkedIn
+                </h3>
                 <a
                   href={profile.linkedinUrl}
                   target='_blank'
                   rel='noopener noreferrer'
-                  className='mt-1 text-blue-600 hover:text-blue-800'
+                  className='mt-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300'
                 >
                   {profile.linkedinUrl}
                 </a>
               </div>
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <h3 className='text-sm font-medium text-gray-500'>Portfolio</h3>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                  Portfolio
+                </h3>
                 <a
                   href={profile.portfolioUrl}
                   target='_blank'
                   rel='noopener noreferrer'
-                  className='mt-1 text-blue-600 hover:text-blue-800'
+                  className='mt-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300'
                 >
                   {profile.portfolioUrl}
                 </a>
               </div>
               {profile.telegramUserId && (
-                <div className='bg-gray-50 p-4 rounded-lg'>
-                  <h3 className='text-sm font-medium text-gray-500'>
+                <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                  <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
                     Telegram
                   </h3>
-                  <p className='mt-1 text-gray-900'>{profile.telegramUserId}</p>
+                  <p className='mt-1 text-gray-900 dark:text-white'>
+                    {profile.telegramUserId}
+                  </p>
                 </div>
               )}
             </div>
@@ -839,19 +874,21 @@ export default function ProfilePage() {
         </section>
 
         {/* Resume Section */}
-        <section className='bg-white rounded-lg shadow p-6 space-y-6'>
-          <h2 className='text-xl font-semibold mb-4'>Resume</h2>
+        <section className='bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-6 space-y-6 border border-gray-200 dark:border-gray-700'>
+          <h2 className='text-xl font-semibold mb-4 text-gray-900 dark:text-white'>
+            Resume
+          </h2>
 
           {/* Resume Tabs */}
-          <div className='border-b border-gray-200'>
+          <div className='border-b border-gray-200 dark:border-gray-600'>
             <nav className='-mb-px flex space-x-8'>
               <button
                 onClick={() => setActiveResumeTab('view')}
                 className={`${
                   activeResumeTab === 'view'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                    ? 'border-blue-500 dark:border-blue-400 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
               >
                 Current Resume
               </button>
@@ -859,9 +896,9 @@ export default function ProfilePage() {
                 onClick={() => setActiveResumeTab('upload')}
                 className={`${
                   activeResumeTab === 'upload'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                    ? 'border-blue-500 dark:border-blue-400 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
               >
                 Upload New Resume
               </button>
@@ -873,10 +910,10 @@ export default function ProfilePage() {
             {activeResumeTab === 'view' ? (
               <div className='space-y-4'>
                 {profile?.resume?.path ? (
-                  <div className='flex items-center justify-between p-4 bg-gray-50 rounded-lg'>
+                  <div className='flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600'>
                     <div className='flex items-center space-x-4'>
                       <svg
-                        className='w-8 h-8 text-gray-400'
+                        className='w-8 h-8 text-gray-400 dark:text-gray-500'
                         fill='none'
                         stroke='currentColor'
                         viewBox='0 0 24 24'
@@ -889,10 +926,10 @@ export default function ProfilePage() {
                         />
                       </svg>
                       <div>
-                        <p className='text-sm font-medium text-gray-900'>
+                        <p className='text-sm font-medium text-gray-900 dark:text-white'>
                           {profile.resume.filename || 'Resume.pdf'}
                         </p>
-                        <p className='text-sm text-gray-500'>
+                        <p className='text-sm text-gray-500 dark:text-gray-400'>
                           Last updated:{' '}
                           {profile.resume.updatedAt
                             ? new Date(
@@ -907,13 +944,13 @@ export default function ProfilePage() {
                         href={profile.resume.path}
                         target='_blank'
                         rel='noopener noreferrer'
-                        className='px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800'
+                        className='px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300'
                       >
                         View
                       </a>
                       <button
                         onClick={() => router.push('/cv-builder')}
-                        className='px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700'
+                        className='px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors'
                       >
                         Generate CV
                       </button>
@@ -921,17 +958,19 @@ export default function ProfilePage() {
                   </div>
                 ) : (
                   <div className='text-center py-8'>
-                    <p className='text-gray-500'>No resume uploaded yet</p>
+                    <p className='text-gray-500 dark:text-gray-400'>
+                      No resume uploaded yet
+                    </p>
                     <div className='mt-4 space-x-4'>
                       <button
                         onClick={() => setActiveResumeTab('upload')}
-                        className='px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800'
+                        className='px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300'
                       >
                         Upload your resume
                       </button>
                       <button
                         onClick={() => router.push('/cv-builder')}
-                        className='px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700'
+                        className='px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors'
                       >
                         Generate CV with AI
                       </button>
@@ -941,10 +980,10 @@ export default function ProfilePage() {
               </div>
             ) : (
               <div className='space-y-4'>
-                <div className='border-2 border-dashed border-gray-300 rounded-lg p-6'>
+                <div className='border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6'>
                   <div className='text-center'>
                     <svg
-                      className='mx-auto h-12 w-12 text-gray-400'
+                      className='mx-auto h-12 w-12 text-gray-400 dark:text-gray-500'
                       fill='none'
                       stroke='currentColor'
                       viewBox='0 0 24 24'
@@ -959,7 +998,7 @@ export default function ProfilePage() {
                     <div className='mt-4'>
                       <label
                         htmlFor='resume-upload'
-                        className='cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500'
+                        className='cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 dark:focus-within:ring-offset-gray-800'
                       >
                         <span>Upload a file</span>
                         <input
@@ -971,7 +1010,7 @@ export default function ProfilePage() {
                           onChange={handleResumeUpload}
                         />
                       </label>
-                      <p className='text-xs text-gray-500 mt-2'>
+                      <p className='text-xs text-gray-500 dark:text-gray-400 mt-2'>
                         PDF files only, up to 12MB
                       </p>
                     </div>

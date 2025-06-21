@@ -1129,21 +1129,21 @@ export default function HeroSection() {
   };
 
   return (
-    <section className='bg-[#F8F9FB] dark:bg-gray-900 pt-16 pb-12'>
+    <section className='bg-[#F8F9FB] pt-16 pb-12'>
       <div className='max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-8 px-4'>
         {/* Left: Text and Search */}
         <div className='flex-1 max-w-xl'>
-          <h1 className='text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 leading-tight'>
+          <h1 className='text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight'>
             Find a job that suits your interest & skills.
           </h1>
-          <p className='text-lg text-gray-500 dark:text-gray-300 mb-8'>
+          <p className='text-lg text-gray-500 mb-8'>
             Discover thousands of opportunities tailored to your expertise and
             passion. Start your journey to a brighter career with us—your dream
             job is just a search away.
           </p>
           <form
             onSubmit={handleSubmit}
-            className='flex flex-col md:flex-row md:items-center bg-white dark:bg-gray-800 md:rounded-full shadow-md dark:shadow-gray-900/20 p-2 mb-3 gap-2 md:gap-0 border border-gray-200 dark:border-gray-600'
+            className='flex flex-col md:flex-row md:items-center bg-white md:rounded-full shadow-md p-2 mb-3 gap-2 md:gap-0 border border-gray-200'
           >
             <div className='flex items-center flex-1 px-3'>
               <svg

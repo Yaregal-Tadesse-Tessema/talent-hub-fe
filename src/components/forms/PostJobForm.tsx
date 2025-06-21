@@ -299,50 +299,50 @@ export default function PostJobForm() {
     <div className='mb-8'>
       <div className='flex items-center justify-between mb-4'>
         <div className='flex items-center space-x-4'>
-          <span className='text-sm text-gray-500'>
+          <span className='text-sm text-gray-500 dark:text-gray-400'>
             Step {currentStep} of {totalSteps}
           </span>
           {currentStep === totalSteps && (
-            <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800'>
+            <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'>
               Ready to Publish
             </span>
           )}
         </div>
       </div>
-      <div className='w-full bg-gray-200 rounded-full h-2'>
+      <div className='w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2'>
         <div
           className='bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-300'
           style={{ width: `${(currentStep / totalSteps) * 100}%` }}
         ></div>
       </div>
-      <div className='flex justify-between mt-2 text-xs text-gray-500'>
+      <div className='flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400'>
         <span
-          className={`${currentStep >= 1 ? 'text-blue-600 font-medium' : ''}`}
+          className={`${currentStep >= 1 ? 'text-blue-600 dark:text-blue-400 font-medium' : ''}`}
         >
           Basic Info
         </span>
         <span
-          className={`${currentStep >= 2 ? 'text-blue-600 font-medium' : ''}`}
+          className={`${currentStep >= 2 ? 'text-blue-600 dark:text-blue-400 font-medium' : ''}`}
         >
           Description
         </span>
         <span
-          className={`${currentStep >= 3 ? 'text-blue-600 font-medium' : ''}`}
+          className={`${currentStep >= 3 ? 'text-blue-600 dark:text-blue-400 font-medium' : ''}`}
         >
           Location
         </span>
         <span
-          className={`${currentStep >= 4 ? 'text-blue-600 font-medium' : ''}`}
+          className={`${currentStep >= 4 ? 'text-blue-600 dark:text-blue-400 font-medium' : ''}`}
         >
           Requirements
         </span>
         <span
-          className={`${currentStep >= 5 ? 'text-blue-600 font-medium' : ''}`}
+          className={`${currentStep >= 5 ? 'text-blue-600 dark:text-blue-400 font-medium' : ''}`}
         >
           Benefits
         </span>
         <span
-          className={`${currentStep >= 6 ? 'text-blue-600 font-medium' : ''}`}
+          className={`${currentStep >= 6 ? 'text-blue-600 dark:text-blue-400 font-medium' : ''}`}
         >
           Review
         </span>
@@ -354,10 +354,10 @@ export default function PostJobForm() {
     <div
       className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
         currentStep === step
-          ? 'bg-blue-50 text-blue-600 border border-blue-200'
+          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-700'
           : currentStep > step
-            ? 'bg-green-50 text-green-600 border border-green-200'
-            : 'bg-gray-50 text-gray-400 border border-gray-200'
+            ? 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-700'
+            : 'bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700'
       }`}
     >
       <span className='text-lg'>{icon}</span>
@@ -368,20 +368,24 @@ export default function PostJobForm() {
   const renderBasicInfo = () => (
     <div className='space-y-6'>
       <div className='flex items-center space-x-3 mb-6'>
-        <div className='w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center'>
-          <span className='text-blue-600 font-semibold'>1</span>
+        <div className='w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center'>
+          <span className='text-blue-600 dark:text-blue-400 font-semibold'>
+            1
+          </span>
         </div>
         <div>
-          <h2 className='text-xl font-semibold text-gray-900'>
+          <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
             Basic Information
           </h2>
-          <p className='text-gray-600'>Tell us about the job position</p>
+          <p className='text-gray-600 dark:text-gray-300'>
+            Tell us about the job position
+          </p>
         </div>
       </div>
 
       <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
         <div className='space-y-2'>
-          <label className='block text-sm font-medium text-gray-700'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
             Job Title <span className='text-red-500'>*</span>
           </label>
           <input
@@ -390,10 +394,10 @@ export default function PostJobForm() {
             value={formData.title}
             onChange={handleInputChange}
             placeholder='Enter job title'
-            className={`w-full border rounded-lg px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+            className={`w-full border rounded-lg px-4 py-3 text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700 ${
               validationErrors.title
                 ? 'border-red-300 focus:ring-red-500'
-                : 'border-gray-300'
+                : 'border-gray-300 dark:border-gray-600'
             }`}
           />
           {validationErrors.title && (
@@ -404,7 +408,7 @@ export default function PostJobForm() {
         </div>
 
         <div className='space-y-2'>
-          <label className='block text-sm font-medium text-gray-700'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
             Position <span className='text-red-500'>*</span>
           </label>
           <input
@@ -413,10 +417,10 @@ export default function PostJobForm() {
             value={formData.position}
             onChange={handleInputChange}
             placeholder='Enter position'
-            className={`w-full border rounded-lg px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+            className={`w-full border rounded-lg px-4 py-3 text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700 ${
               validationErrors.position
                 ? 'border-red-300 focus:ring-red-500'
-                : 'border-gray-300'
+                : 'border-gray-300 dark:border-gray-600'
             }`}
           />
           {validationErrors.position && (
@@ -427,17 +431,17 @@ export default function PostJobForm() {
         </div>
 
         <div className='space-y-2'>
-          <label className='block text-sm font-medium text-gray-700'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
             Industry <span className='text-red-500'>*</span>
           </label>
           <select
             name='industry'
             value={formData.industry}
             onChange={handleInputChange}
-            className={`w-full border rounded-lg px-4 py-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+            className={`w-full border rounded-lg px-4 py-3 text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700 ${
               validationErrors.industry
                 ? 'border-red-300 focus:ring-red-500'
-                : 'border-gray-300'
+                : 'border-gray-300 dark:border-gray-600'
             }`}
           >
             <option value=''>Select Industry</option>
@@ -448,6 +452,11 @@ export default function PostJobForm() {
             <option value='Finance'>Finance</option>
             <option value='Education'>Education</option>
             <option value='Manufacturing'>Manufacturing</option>
+            <option value='Retail'>Retail</option>
+            <option value='Marketing'>Marketing</option>
+            <option value='Sales'>Sales</option>
+            <option value='Consulting'>Consulting</option>
+            <option value='Other'>Other</option>
           </select>
           {validationErrors.industry && (
             <p className='text-red-500 text-sm mt-1'>
@@ -457,24 +466,25 @@ export default function PostJobForm() {
         </div>
 
         <div className='space-y-2'>
-          <label className='block text-sm font-medium text-gray-700'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
             Employment Type <span className='text-red-500'>*</span>
           </label>
           <select
             name='employmentType'
             value={formData.employmentType}
             onChange={handleInputChange}
-            className={`w-full border rounded-lg px-4 py-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+            className={`w-full border rounded-lg px-4 py-3 text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700 ${
               validationErrors.employmentType
                 ? 'border-red-300 focus:ring-red-500'
-                : 'border-gray-300'
+                : 'border-gray-300 dark:border-gray-600'
             }`}
           >
-            <option value=''>Select Type</option>
+            <option value=''>Select Employment Type</option>
             <option value='FullTime'>Full Time</option>
             <option value='PartTime'>Part Time</option>
             <option value='Contract'>Contract</option>
             <option value='Internship'>Internship</option>
+            <option value='Freelance'>Freelance</option>
           </select>
           {validationErrors.employmentType && (
             <p className='text-red-500 text-sm mt-1'>
@@ -489,24 +499,26 @@ export default function PostJobForm() {
   const renderDescription = () => (
     <div className='space-y-6'>
       <div className='flex items-center space-x-3 mb-6'>
-        <div className='w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center'>
-          <span className='text-blue-600 font-semibold'>2</span>
+        <div className='w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center'>
+          <span className='text-blue-600 dark:text-blue-400 font-semibold'>
+            2
+          </span>
         </div>
         <div>
-          <h2 className='text-xl font-semibold text-gray-900'>
+          <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
             Job Description
           </h2>
-          <p className='text-gray-600'>
+          <p className='text-gray-600 dark:text-gray-300'>
             Describe the role and responsibilities
           </p>
         </div>
       </div>
 
       <div className='space-y-2'>
-        <label className='block text-sm font-medium text-gray-700'>
+        <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
           Detailed Description <span className='text-red-500'>*</span>
         </label>
-        <div className='border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all duration-200'>
+        <div className='border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all duration-200'>
           <RichTextEditor
             content={formData.description}
             onChange={(content) =>
@@ -522,14 +534,16 @@ export default function PostJobForm() {
   const renderLocation = () => (
     <div className='space-y-6'>
       <div className='flex items-center space-x-3 mb-6'>
-        <div className='w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center'>
-          <span className='text-blue-600 font-semibold'>3</span>
+        <div className='w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center'>
+          <span className='text-blue-600 dark:text-blue-400 font-semibold'>
+            3
+          </span>
         </div>
         <div>
-          <h2 className='text-xl font-semibold text-gray-900'>
+          <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
             Location & Salary
           </h2>
-          <p className='text-gray-600'>
+          <p className='text-gray-600 dark:text-gray-300'>
             Where is the job located and what's the compensation?
           </p>
         </div>
@@ -537,7 +551,7 @@ export default function PostJobForm() {
 
       <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-8'>
         <div className='space-y-2'>
-          <label className='block text-sm font-medium text-gray-700'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
             City <span className='text-red-500'>*</span>
           </label>
           <input
@@ -546,12 +560,12 @@ export default function PostJobForm() {
             value={formData.city}
             onChange={handleInputChange}
             placeholder='e.g., Addis Ababa'
-            className='w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+            className='w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700'
           />
         </div>
 
         <div className='space-y-2'>
-          <label className='block text-sm font-medium text-gray-700'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
             Detailed Location <span className='text-red-500'>*</span>
           </label>
           <input
@@ -560,59 +574,63 @@ export default function PostJobForm() {
             value={formData.location}
             onChange={handleInputChange}
             placeholder='e.g., Bole Road, Addis Ababa, Ethiopia'
-            className='w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+            className='w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700'
           />
         </div>
       </div>
 
-      <div className='bg-gray-50 rounded-lg p-6'>
-        <h3 className='text-lg font-semibold text-gray-900 mb-4'>
+      <div className='bg-gray-50 dark:bg-gray-700 rounded-lg p-6'>
+        <h3 className='text-lg font-semibold text-gray-900 dark:text-white mb-4'>
           Salary Information
         </h3>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
           <div className='space-y-2'>
-            <label className='block text-sm font-medium text-gray-700'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
               Minimum Salary <span className='text-red-500'>*</span>
             </label>
             <div className='relative'>
-              <span className='absolute left-3 top-3 text-gray-400'>$</span>
+              <span className='absolute left-3 top-3 text-gray-400 dark:text-gray-500'>
+                $
+              </span>
               <input
                 type='number'
                 name='salaryRange.min'
                 value={formData.salaryRange.min}
                 onChange={handleInputChange}
                 placeholder='50000'
-                className='w-full border border-gray-300 rounded-lg pl-8 pr-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+                className='w-full border border-gray-300 dark:border-gray-600 rounded-lg pl-8 pr-4 py-3 text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700'
               />
             </div>
           </div>
 
           <div className='space-y-2'>
-            <label className='block text-sm font-medium text-gray-700'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
               Maximum Salary <span className='text-red-500'>*</span>
             </label>
             <div className='relative'>
-              <span className='absolute left-3 top-3 text-gray-400'>$</span>
+              <span className='absolute left-3 top-3 text-gray-400 dark:text-gray-500'>
+                $
+              </span>
               <input
                 type='number'
                 name='salaryRange.max'
                 value={formData.salaryRange.max}
                 onChange={handleInputChange}
                 placeholder='80000'
-                className='w-full border border-gray-300 rounded-lg pl-8 pr-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+                className='w-full border border-gray-300 dark:border-gray-600 rounded-lg pl-8 pr-4 py-3 text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700'
               />
             </div>
           </div>
 
           <div className='space-y-2'>
-            <label className='block text-sm font-medium text-gray-700'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
               Payment Type <span className='text-red-500'>*</span>
             </label>
             <select
               name='paymentType'
               value={formData.paymentType}
               onChange={handleInputChange}
-              className='w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+              className='w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700'
             >
               <option value=''>Select Payment Type</option>
               <option value='Hourly'>Hourly</option>
@@ -628,14 +646,16 @@ export default function PostJobForm() {
   const renderRequirements = () => (
     <div className='space-y-6'>
       <div className='flex items-center space-x-3 mb-6'>
-        <div className='w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center'>
-          <span className='text-blue-600 font-semibold'>4</span>
+        <div className='w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center'>
+          <span className='text-blue-600 dark:text-blue-400 font-semibold'>
+            4
+          </span>
         </div>
         <div>
-          <h2 className='text-xl font-semibold text-gray-900'>
+          <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
             Requirements & Qualifications
           </h2>
-          <p className='text-gray-600'>
+          <p className='text-gray-600 dark:text-gray-300'>
             What skills and qualifications are needed?
           </p>
         </div>
@@ -643,14 +663,14 @@ export default function PostJobForm() {
 
       <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-8'>
         <div className='space-y-2'>
-          <label className='block text-sm font-medium text-gray-700'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
             Experience Level <span className='text-red-500'>*</span>
           </label>
           <select
             name='experienceLevel'
             value={formData.experienceLevel}
             onChange={handleInputChange}
-            className='w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+            className='w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700'
           >
             <option value=''>Select Experience Level</option>
             <option value='Entry'>Entry Level</option>
@@ -661,14 +681,14 @@ export default function PostJobForm() {
         </div>
 
         <div className='space-y-2'>
-          <label className='block text-sm font-medium text-gray-700'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
             Education Level <span className='text-red-500'>*</span>
           </label>
           <select
             name='educationLevel'
             value={formData.educationLevel}
             onChange={handleInputChange}
-            className='w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+            className='w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700'
           >
             <option value=''>Select Education Level</option>
             <option value='HighSchool'>High School</option>
@@ -679,7 +699,7 @@ export default function PostJobForm() {
         </div>
 
         <div className='space-y-2'>
-          <label className='block text-sm font-medium text-gray-700'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
             Field of Study <span className='text-red-500'>*</span>
           </label>
           <input
@@ -688,12 +708,12 @@ export default function PostJobForm() {
             value={formData.fieldOfStudy}
             onChange={handleInputChange}
             placeholder='e.g., Computer Science'
-            className='w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+            className='w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700'
           />
         </div>
 
         <div className='space-y-2'>
-          <label className='block text-sm font-medium text-gray-700'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
             Minimum GPA
           </label>
           <input
@@ -705,20 +725,20 @@ export default function PostJobForm() {
             step='0.1'
             min='0'
             max='4'
-            className='w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+            className='w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700'
           />
         </div>
       </div>
 
       <div className='space-y-4'>
         <div className='flex items-center justify-between'>
-          <label className='block text-sm font-medium text-gray-700'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
             Required Skills <span className='text-red-500'>*</span>
           </label>
           <button
             type='button'
             onClick={() => addArrayField('skill')}
-            className='inline-flex items-center px-3 py-1 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-all duration-200'
+            className='inline-flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-all duration-200'
           >
             <span className='mr-1'>+</span> Add Skill
           </button>
@@ -734,13 +754,13 @@ export default function PostJobForm() {
                   handleArrayInputChange(index, e.target.value, 'skill')
                 }
                 placeholder='e.g., React, TypeScript, Node.js'
-                className='flex-1 border border-gray-300 rounded-lg px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+                className='flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700'
               />
               {formData.skill.length > 1 && (
                 <button
                   type='button'
                   onClick={() => removeArrayField(index, 'skill')}
-                  className='p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-all duration-200'
+                  className='p-2 text-red-500 hover:text-red-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-all duration-200'
                 >
                   ✕
                 </button>
@@ -755,27 +775,31 @@ export default function PostJobForm() {
   const renderBenefits = () => (
     <div className='space-y-6'>
       <div className='flex items-center space-x-3 mb-6'>
-        <div className='w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center'>
-          <span className='text-blue-600 font-semibold'>5</span>
+        <div className='w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center'>
+          <span className='text-blue-600 dark:text-blue-400 font-semibold'>
+            5
+          </span>
         </div>
         <div>
-          <h2 className='text-xl font-semibold text-gray-900'>
+          <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
             Benefits & Responsibilities
           </h2>
-          <p className='text-gray-600'>What will the candidate get and do?</p>
+          <p className='text-gray-600 dark:text-gray-300'>
+            What will the candidate get and do?
+          </p>
         </div>
       </div>
 
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
         <div className='space-y-4'>
           <div className='flex items-center justify-between'>
-            <label className='block text-sm font-medium text-gray-700'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
               Benefits & Perks
             </label>
             <button
               type='button'
               onClick={() => addArrayField('benefits')}
-              className='inline-flex items-center px-3 py-1 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-all duration-200'
+              className='inline-flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-all duration-200'
             >
               <span className='mr-1'>+</span> Add Benefit
             </button>
@@ -791,13 +815,13 @@ export default function PostJobForm() {
                     handleArrayInputChange(index, e.target.value, 'benefits')
                   }
                   placeholder='e.g., Health Insurance, Remote Work'
-                  className='flex-1 border border-gray-300 rounded-lg px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+                  className='flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700'
                 />
                 {formData.benefits.length > 1 && (
                   <button
                     type='button'
                     onClick={() => removeArrayField(index, 'benefits')}
-                    className='p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-all duration-200'
+                    className='p-2 text-red-500 hover:text-red-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-all duration-200'
                   >
                     ✕
                   </button>
@@ -809,13 +833,13 @@ export default function PostJobForm() {
 
         <div className='space-y-4'>
           <div className='flex items-center justify-between'>
-            <label className='block text-sm font-medium text-gray-700'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
               Key Responsibilities
             </label>
             <button
               type='button'
               onClick={() => addArrayField('responsibilities')}
-              className='inline-flex items-center px-3 py-1 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-all duration-200'
+              className='inline-flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-all duration-200'
             >
               <span className='mr-1'>+</span> Add Responsibility
             </button>
@@ -835,13 +859,13 @@ export default function PostJobForm() {
                     )
                   }
                   placeholder='e.g., Lead technical design and implementation'
-                  className='flex-1 border border-gray-300 rounded-lg px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+                  className='flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700'
                 />
                 {formData.responsibilities.length > 1 && (
                   <button
                     type='button'
                     onClick={() => removeArrayField(index, 'responsibilities')}
-                    className='p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-all duration-200'
+                    className='p-2 text-red-500 hover:text-red-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-all duration-200'
                   >
                     ✕
                   </button>
@@ -857,14 +881,16 @@ export default function PostJobForm() {
   const renderReview = () => (
     <div className='space-y-6'>
       <div className='flex items-center space-x-3 mb-6'>
-        <div className='w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center'>
-          <span className='text-blue-600 font-semibold'>6</span>
+        <div className='w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center'>
+          <span className='text-blue-600 dark:text-blue-400 font-semibold'>
+            6
+          </span>
         </div>
         <div>
-          <h2 className='text-xl font-semibold text-gray-900'>
+          <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
             Review & Submit
           </h2>
-          <p className='text-gray-600'>
+          <p className='text-gray-600 dark:text-gray-300'>
             Review your job posting before publishing
           </p>
         </div>
@@ -872,7 +898,7 @@ export default function PostJobForm() {
 
       <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-8'>
         <div className='space-y-2'>
-          <label className='block text-sm font-medium text-gray-700'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
             Application URL
           </label>
           <input
@@ -881,12 +907,12 @@ export default function PostJobForm() {
             value={formData.applicationURL}
             onChange={handleInputChange}
             placeholder='https://company.com/careers'
-            className='w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+            className='w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700'
           />
         </div>
 
         <div className='space-y-2'>
-          <label className='block text-sm font-medium text-gray-700'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
             Number of Positions <span className='text-red-500'>*</span>
           </label>
           <input
@@ -896,12 +922,12 @@ export default function PostJobForm() {
             onChange={handleInputChange}
             placeholder='1'
             min='1'
-            className='w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+            className='w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700'
           />
         </div>
 
         <div className='space-y-2'>
-          <label className='block text-sm font-medium text-gray-700'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
             Application Deadline <span className='text-red-500'>*</span>
           </label>
           <input
@@ -909,28 +935,29 @@ export default function PostJobForm() {
             name='deadline'
             value={formData.deadline}
             onChange={handleInputChange}
-            className='w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+            className='w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700'
           />
         </div>
 
         <div className='space-y-2'>
-          <label className='block text-sm font-medium text-gray-700'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
             Gender Preference
           </label>
           <select
             name='gender'
             value={formData.gender}
             onChange={handleInputChange}
-            className='w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+            className='w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700'
           >
             <option value=''>Select Gender</option>
             <option value='Male'>Male</option>
             <option value='Female'>Female</option>
+            <option value='Any'>Any</option>
           </select>
         </div>
       </div>
       <div className='space-y-2'>
-        <label className='block text-sm font-medium text-gray-700'>
+        <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
           How to Apply <span className='text-red-500'>*</span>
         </label>
         <textarea
@@ -939,23 +966,23 @@ export default function PostJobForm() {
           onChange={handleInputChange}
           placeholder='Enter detailed application instructions...'
           rows={4}
-          className='w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+          className='w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700'
         />
       </div>
 
       {/* Job Preview */}
-      <div className='bg-gray-50 rounded-lg p-6'>
-        <h3 className='text-lg font-semibold text-gray-900 mb-4'>
+      <div className='bg-gray-50 dark:bg-gray-700 rounded-lg p-6'>
+        <h3 className='text-lg font-semibold text-gray-900 dark:text-white mb-4'>
           Job Preview
         </h3>
-        <div className='bg-white rounded-lg p-4 border border-gray-200'>
-          <h4 className='text-xl font-bold text-gray-900 mb-2'>
+        <div className='bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-600'>
+          <h4 className='text-xl font-bold text-gray-900 dark:text-white mb-2'>
             {formData.title}
           </h4>
-          <p className='text-gray-600 mb-2'>
+          <p className='text-gray-600 dark:text-gray-300 mb-2'>
             {formData.position} • {formData.city}
           </p>
-          <p className='text-gray-600 mb-3'>
+          <p className='text-gray-600 dark:text-gray-300 mb-3'>
             ${formData.salaryRange.min} - ${formData.salaryRange.max}{' '}
             {formData.paymentType}
           </p>
@@ -963,64 +990,78 @@ export default function PostJobForm() {
             {formData.skill.slice(0, 3).map((skill, index) => (
               <span
                 key={index}
-                className='px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full'
+                className='px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 text-xs rounded-full'
               >
                 {skill}
               </span>
             ))}
             {formData.skill.length > 3 && (
-              <span className='px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full'>
+              <span className='px-2 py-1 bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 text-xs rounded-full'>
                 +{formData.skill.length - 3} more
               </span>
             )}
           </div>
           <div
-            className='text-sm text-gray-700 line-clamp-3'
+            className='text-sm text-gray-700 dark:text-gray-300 line-clamp-3'
             dangerouslySetInnerHTML={{ __html: formData.description }}
           />
         </div>
       </div>
 
       {/* Form Summary */}
-      <div className='bg-blue-50 rounded-lg p-6 mt-6'>
-        <h3 className='text-lg font-semibold text-blue-900 mb-4'>
+      <div className='bg-blue-50 dark:bg-blue-900/30 rounded-lg p-6 mt-6'>
+        <h3 className='text-lg font-semibold text-blue-900 dark:text-blue-100 mb-4'>
           Form Summary
         </h3>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4 text-sm'>
           <div>
-            <p className='text-blue-700 font-medium'>Basic Information</p>
-            <p className='text-gray-600'>
+            <p className='text-blue-700 dark:text-blue-300 font-medium'>
+              Basic Information
+            </p>
+            <p className='text-gray-600 dark:text-gray-300'>
               ✓ Job title, position, industry, and employment type
             </p>
           </div>
           <div>
-            <p className='text-blue-700 font-medium'>Description</p>
-            <p className='text-gray-600'>✓ Detailed job description added</p>
+            <p className='text-blue-700 dark:text-blue-300 font-medium'>
+              Description
+            </p>
+            <p className='text-gray-600 dark:text-gray-300'>
+              ✓ Detailed job description added
+            </p>
           </div>
           <div>
-            <p className='text-blue-700 font-medium'>Location & Salary</p>
-            <p className='text-gray-600'>
+            <p className='text-blue-700 dark:text-blue-300 font-medium'>
+              Location & Salary
+            </p>
+            <p className='text-gray-600 dark:text-gray-300'>
               ✓ {formData.city}, ${formData.salaryRange.min}-$
               {formData.salaryRange.max} {formData.paymentType}
             </p>
           </div>
           <div>
-            <p className='text-blue-700 font-medium'>Requirements</p>
-            <p className='text-gray-600'>
+            <p className='text-blue-700 dark:text-blue-300 font-medium'>
+              Requirements
+            </p>
+            <p className='text-gray-600 dark:text-gray-300'>
               ✓ {formData.skill.filter((s) => s.trim()).length} skills,{' '}
               {formData.experienceLevel} level
             </p>
           </div>
           <div>
-            <p className='text-blue-700 font-medium'>Benefits</p>
-            <p className='text-gray-600'>
+            <p className='text-blue-700 dark:text-blue-300 font-medium'>
+              Benefits
+            </p>
+            <p className='text-gray-600 dark:text-gray-300'>
               ✓ {formData.benefits.filter((b) => b.trim()).length} benefits
               added
             </p>
           </div>
           <div>
-            <p className='text-blue-700 font-medium'>Responsibilities</p>
-            <p className='text-gray-600'>
+            <p className='text-blue-700 dark:text-blue-300 font-medium'>
+              Responsibilities
+            </p>
+            <p className='text-gray-600 dark:text-gray-300'>
               ✓ {formData.responsibilities.filter((r) => r.trim()).length}{' '}
               responsibilities defined
             </p>
@@ -1050,14 +1091,14 @@ export default function PostJobForm() {
   };
 
   return (
-    <div className='min-h-screen bg-gray-50 py-8'>
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-900 py-8'>
       <div className='max-w-5xl mx-auto px-4'>
         {renderProgressBar()}
 
-        <div className='bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden'>
+        <div className='bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden'>
           <div className='p-8'>{renderCurrentStep()}</div>
 
-          <div className='bg-gray-50 px-8 py-6 border-t border-gray-200'>
+          <div className='bg-gray-50 dark:bg-gray-700 px-8 py-6 border-t border-gray-200 dark:border-gray-600'>
             <div className='flex justify-between items-center'>
               <button
                 type='button'
@@ -1065,8 +1106,8 @@ export default function PostJobForm() {
                 disabled={currentStep === 1}
                 className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
                   currentStep === 1
-                    ? 'text-gray-400 cursor-not-allowed'
-                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200'
+                    ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                    : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
               >
                 Previous
@@ -1077,7 +1118,7 @@ export default function PostJobForm() {
                   <button
                     type='button'
                     onClick={nextStep}
-                    className='px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200'
+                    className='px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200'
                   >
                     Next Step
                   </button>
@@ -1086,7 +1127,7 @@ export default function PostJobForm() {
                     type='button'
                     onClick={handleSubmit}
                     disabled={isSubmitting}
-                    className={`px-8 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 ${
+                    className={`px-8 py-3 bg-green-600 dark:bg-green-500 text-white rounded-lg font-medium hover:bg-green-700 dark:hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200 ${
                       isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                   >

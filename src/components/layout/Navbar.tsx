@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 import { cn } from '@/lib/utils';
 import EmployerSelection from '@/components/EmployerSelection';
@@ -10,6 +11,7 @@ import { EmployerData, Tenant } from '@/types/employer';
 import { API_BASE_URL } from '@/config/api';
 import { employerService } from '@/services/employerService';
 import { notificationService } from '@/services/notificationService';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 // Placeholder icons (replace with Heroicons or similar in real app)
 const BriefcaseIcon = () => (
@@ -84,7 +86,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
     useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
-
+  const { logout } = useAuth();
   const languages = [
     { code: 'en', name: 'English', flag: <FlagUS /> },
     { code: 'am', name: 'አማርኛ', flag: <FlagET /> },
@@ -168,10 +170,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
   const showAuthButtons = !user && page === 'home';
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    setUser(null);
-    setDropdownOpen(false);
-    router.push('/');
+    logout();
   };
 
   // Links for home page (not logged in)
@@ -247,8 +246,8 @@ export function Navbar({ page = 'home' }: NavbarProps) {
   }, [user]);
 
   return (
-    <header className='w-full border-b bg-white sticky top-0 z-50'>
-      <div className='flex items-center justify-between px-4 md:px-6 py-4 text-sm text-gray-800 bg-gray-100'>
+    <header className='w-full border-b bg-white dark:bg-gray-900 sticky top-0 z-50'>
+      <div className='flex items-center justify-between px-4 md:px-6 py-4 text-sm text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-800'>
         <div className='flex-1'>
           <nav className='hidden md:flex items-center gap-6'>
             <div className='flex items-center gap-2 w-52'>
@@ -257,7 +256,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                 className='flex items-center gap-1 hover:opacity-80 transition-opacity'
               >
                 <BriefcaseIcon />
-                <span className='text-2xl text-blue-600 font-bold ml-1'>
+                <span className='text-2xl text-blue-600 dark:text-blue-400 font-bold ml-1'>
                   TalentHub
                 </span>
               </Link>
@@ -273,9 +272,9 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    'hover:text-blue-600 transition-colors px-3 py-1.5 relative',
+                    'hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-3 py-1.5 relative',
                     pathname === link.href &&
-                      'text-blue-600 font-semibold bg-blue-50/50 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-1 before:h-6 before:bg-blue-600 before:rounded-r',
+                      'text-blue-600 dark:text-blue-400 font-semibold bg-blue-50/50 dark:bg-blue-900/20 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-1 before:h-6 before:bg-blue-600 before:rounded-r',
                   )}
                 >
                   {link.label}
@@ -289,10 +288,10 @@ export function Navbar({ page = 'home' }: NavbarProps) {
             <div className='hidden md:flex items-center gap-2'>
               <button
                 onClick={() => setShowEmployerSelection(true)}
-                className='flex items-center justify-between min-w-52 gap-2 px-3 py-1.5 border rounded-md hover:bg-gray-50'
+                className='flex items-center justify-between min-w-52 gap-2 px-3 py-1.5 border dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-700 dark:text-white'
               >
                 <div className='flex items-center gap-2'>
-                  <div className='w-6 h-6 rounded bg-gray-200 flex items-center justify-center text-xs font-semibold'>
+                  <div className='w-6 h-6 rounded bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-xs font-semibold'>
                     {user.selectedEmployer?.tenant.tradeName[0] || '?'}
                   </div>
                   <span className='font-medium'>
@@ -321,7 +320,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                 </button>
               </Link>
               <Link href='/login'>
-                <button className='px-6 py-2 border border-blue-600 text-blue-600 rounded-md font-medium bg-white hover:bg-blue-50 ml-2'>
+                <button className='px-6 py-2 border border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400 rounded-md font-medium bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700 ml-2'>
                   Sign In
                 </button>
               </Link>
@@ -329,6 +328,8 @@ export function Navbar({ page = 'home' }: NavbarProps) {
           ) : user ? (
             <>
               <div className='relative flex items-center gap-3'>
+                <ThemeToggle />
+
                 <div className='relative' ref={notificationDropdownRef}>
                   <button
                     className='relative'
@@ -347,26 +348,26 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                   >
                     <BellIcon />
                     {notificationCount > 0 && (
-                      <span className='absolute top-0 right-0 block h-4 w-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center ring-2 ring-white'>
+                      <span className='absolute top-0 right-0 block h-4 w-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center ring-2 ring-white dark:ring-gray-800'>
                         {notificationCount}
                       </span>
                     )}
                   </button>
                   {notificationDropdownOpen && (
-                    <div className='absolute right-0 mt-2 w-80 max-w-xs bg-white border rounded shadow-lg z-50 overflow-y-auto max-h-96'>
-                      <div className='p-4 border-b font-semibold'>
+                    <div className='absolute right-0 mt-2 w-80 max-w-xs bg-white dark:bg-gray-800 border dark:border-gray-600 rounded shadow-lg z-50 overflow-y-auto max-h-96'>
+                      <div className='p-4 border-b dark:border-gray-600 font-semibold dark:text-white'>
                         Notifications
                       </div>
                       {notifications.length === 0 ? (
-                        <div className='p-4 text-gray-500 text-sm'>
+                        <div className='p-4 text-gray-500 dark:text-gray-400 text-sm'>
                           No new notifications
                         </div>
                       ) : (
-                        <ul className='divide-y'>
+                        <ul className='divide-y dark:divide-gray-600'>
                           {notifications.map((notif, idx) => (
                             <li
                               key={notif.id || idx}
-                              className='p-4 hover:bg-gray-50 text-sm'
+                              className='p-4 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm dark:text-white'
                             >
                               {notif.message ||
                                 notif.title ||
@@ -412,17 +413,17 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                       className='w-10 h-10 rounded-full object-cover'
                     />
                   ) : (
-                    <div className='w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-lg font-bold text-gray-600'>
+                    <div className='w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-lg font-bold text-gray-600 dark:text-gray-300'>
                       {user.firstName ? user.firstName[0] : 'U'}
                     </div>
                   )}
                 </button>
                 {dropdownOpen && (
-                  <div className='absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-50'>
+                  <div className='absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded shadow-lg z-50'>
                     {user.role === 'employee' && (
                       <Link href='/profile'>
                         <button
-                          className='block w-full text-left px-4 py-2 hover:bg-gray-100 text-sky-600'
+                          className='block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sky-600 dark:text-sky-400'
                           onClick={() => setDropdownOpen(false)}
                         >
                           Profile
@@ -431,7 +432,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                     )}
                     <button
                       onClick={handleLogout}
-                      className='block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600'
+                      className='block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 dark:text-red-400'
                     >
                       Logout
                     </button>
@@ -466,19 +467,21 @@ export function Navbar({ page = 'home' }: NavbarProps) {
           } flex`}
         >
           <div
-            className={`fixed right-0 top-0 h-full w-80 max-w-full bg-white shadow-lg flex flex-col transform transition-transform duration-300 ease-in-out ${
+            className={`fixed right-0 top-0 h-full w-80 max-w-full bg-white dark:bg-gray-900 shadow-lg flex flex-col transform transition-transform duration-300 ease-in-out ${
               mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
             }`}
           >
-            <div className='flex items-center justify-between px-4 py-4 border-b'>
+            <div className='flex items-center justify-between px-4 py-4 border-b dark:border-gray-700'>
               <div className='flex items-center gap-2'>
                 <BriefcaseIcon />
-                <span className='text-2xl font-bold ml-2'>TalentHub</span>
+                <span className='text-2xl font-bold ml-2 dark:text-white'>
+                  TalentHub
+                </span>
               </div>
               <button
                 aria-label='Close menu'
                 onClick={() => setMobileMenuOpen(false)}
-                className='p-2 rounded hover:bg-gray-100'
+                className='p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700'
               >
                 <svg
                   width='24'
@@ -502,9 +505,9 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    'py-2 px-3 relative hover:bg-blue-50/50 transition-colors',
+                    'py-2 px-3 relative hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-colors dark:text-white',
                     pathname === link.href &&
-                      'text-blue-600 bg-blue-50/50 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-1 before:h-6 before:bg-blue-600 before:rounded-r',
+                      'text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/20 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-1 before:h-6 before:bg-blue-600 before:rounded-r',
                   )}
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -521,7 +524,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                     </button>
                   </Link>
                   <Link href='/login'>
-                    <button className='w-full px-4 py-2 border border-blue-600 text-blue-600 rounded-md font-medium bg-white'>
+                    <button className='w-full px-4 py-2 border border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400 rounded-md font-medium bg-white dark:bg-gray-800'>
                       Sign In
                     </button>
                   </Link>
@@ -532,7 +535,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                     handleLogout();
                     setMobileMenuOpen(false);
                   }}
-                  className='w-full px-4 py-2 border border-red-600 text-red-600 rounded-md font-medium bg-white mt-2'
+                  className='w-full px-4 py-2 border border-red-600 dark:border-red-400 text-red-600 dark:text-red-400 rounded-md font-medium bg-white dark:bg-gray-800 mt-2'
                 >
                   Logout
                 </button>

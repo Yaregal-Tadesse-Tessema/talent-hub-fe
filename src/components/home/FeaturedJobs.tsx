@@ -19,7 +19,7 @@ const jobs = [
   {
     company: 'Apple',
     logo: (
-      <div className='bg-gray-900 rounded-lg w-12 h-12 flex items-center justify-center'>
+      <div className='bg-gray-900 dark:bg-gray-700 rounded-lg w-12 h-12 flex items-center justify-center'>
         <svg width='28' height='28' fill='white' viewBox='0 0 24 24'>
           <path d='M16.365 1.43c0 1.14-.93 2.07-2.07 2.07-1.14 0-2.07-.93-2.07-2.07 0-1.14.93-2.07 2.07-2.07 1.14 0 2.07.93 2.07 2.07zm-2.07 3.6c2.07 0 3.6 1.53 3.6 3.6 0 2.07-1.53 3.6-3.6 3.6-2.07 0-3.6-1.53-3.6-3.6 0-2.07 1.53-3.6 3.6-3.6zm-6.93 7.2c0-1.14.93-2.07 2.07-2.07 1.14 0 2.07.93 2.07 2.07 0 1.14-.93 2.07-2.07 2.07-1.14 0-2.07-.93-2.07-2.07zm2.07 3.6c2.07 0 3.6 1.53 3.6 3.6 0 2.07-1.53 3.6-3.6 3.6-2.07 0-3.6-1.53-3.6-3.6 0-2.07 1.53-3.6 3.6-3.6zm6.93 7.2c0-1.14.93-2.07 2.07-2.07 1.14 0 2.07.93 2.07 2.07 0 1.14-.93 2.07-2.07 2.07-1.14 0-2.07-.93-2.07-2.07z' />
         </svg>
@@ -35,7 +35,7 @@ const jobs = [
   {
     company: 'Figma',
     logo: (
-      <div className='bg-black rounded-lg w-12 h-12 flex items-center justify-center'>
+      <div className='bg-black dark:bg-gray-800 rounded-lg w-12 h-12 flex items-center justify-center'>
         <svg width='24' height='24' fill='white' viewBox='0 0 24 24'>
           <circle cx='12' cy='12' r='10' />
         </svg>
@@ -79,13 +79,15 @@ const BookmarkIcon = ({ filled = false }: { filled?: boolean }) => (
 
 export default function FeaturedJobs() {
   return (
-    <section className='py-12 sm:py-16 lg:py-20 bg-[#F8F9FB]'>
+    <section className='py-12 sm:py-16 lg:py-20 bg-[#F8F9FB] dark:bg-gray-800'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 sm:mb-10'>
-          <h2 className='text-3xl sm:text-4xl font-bold'>Featured job</h2>
+          <h2 className='text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white'>
+            Featured job
+          </h2>
           <Link
             href='#'
-            className='inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 border border-gray-200 rounded-lg text-blue-600 font-semibold bg-white hover:bg-blue-50 transition w-full sm:w-auto justify-center'
+            className='inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 border border-gray-200 dark:border-gray-600 rounded-lg text-blue-600 dark:text-blue-400 font-semibold bg-white dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-gray-600 transition w-full sm:w-auto justify-center'
           >
             View All
             <svg
@@ -103,20 +105,20 @@ export default function FeaturedJobs() {
           {jobs.map((job, i) => (
             <div
               key={job.title}
-              className='flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 hover:border-blue-300 hover:shadow-lg hover:scale-[1.02] transition'
+              className='flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white dark:bg-gray-700 rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-lg dark:hover:shadow-gray-900/20 hover:scale-[1.02] transition'
             >
               <div className='flex items-start sm:items-center gap-4 w-full sm:w-auto mb-4 sm:mb-0'>
                 {job.logo}
                 <div className='flex-1'>
                   <div className='flex flex-wrap items-center gap-2'>
-                    <span className='font-semibold text-base sm:text-lg'>
+                    <span className='font-semibold text-base sm:text-lg text-gray-900 dark:text-white'>
                       {job.title}
                     </span>
-                    <span className='bg-blue-50 text-blue-600 px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold'>
+                    <span className='bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold'>
                       {job.tag}
                     </span>
                   </div>
-                  <div className='flex flex-wrap items-center gap-3 sm:gap-4 text-gray-400 text-sm mt-2'>
+                  <div className='flex flex-wrap items-center gap-3 sm:gap-4 text-gray-400 dark:text-gray-300 text-sm mt-2'>
                     <span className='flex items-center gap-1'>
                       <svg
                         width='16'
@@ -174,10 +176,10 @@ export default function FeaturedJobs() {
                 </div>
               </div>
               <div className='flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-end'>
-                <button className='bg-blue-50 p-2 rounded-lg hover:bg-blue-100 transition'>
+                <button className='bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition'>
                   <BookmarkIcon />
                 </button>
-                <button className='flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-3 bg-blue-50 text-blue-600 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-blue-100 transition'>
+                <button className='flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition'>
                   Apply Now
                   <svg
                     width='20'

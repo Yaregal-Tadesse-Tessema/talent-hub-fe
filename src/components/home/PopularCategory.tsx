@@ -12,7 +12,7 @@ const categories = [
         fill='none'
         viewBox='0 0 24 24'
         stroke='currentColor'
-        className='text-blue-600'
+        className='text-blue-600 dark:text-blue-400'
       >
         <path d='M12 19l7-7-7-7-7 7 7 7z' strokeWidth='2' />
         <path d='M12 3v16' strokeWidth='2' />
@@ -29,7 +29,7 @@ const categories = [
         fill='none'
         viewBox='0 0 24 24'
         stroke='currentColor'
-        className='text-blue-600'
+        className='text-blue-600 dark:text-blue-400'
       >
         <path d='M16 18l6-6-6-6' strokeWidth='2' />
         <path d='M8 6l-6 6 6 6' strokeWidth='2' />
@@ -46,7 +46,7 @@ const categories = [
         fill='none'
         viewBox='0 0 24 24'
         stroke='currentColor'
-        className='text-blue-600'
+        className='text-blue-600 dark:text-blue-400'
       >
         <rect x='3' y='7' width='18' height='10' rx='2' strokeWidth='2' />
         <path d='M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2' strokeWidth='2' />
@@ -63,7 +63,7 @@ const categories = [
         fill='none'
         viewBox='0 0 24 24'
         stroke='currentColor'
-        className='text-blue-600'
+        className='text-blue-600 dark:text-blue-400'
       >
         <rect x='3' y='5' width='18' height='14' rx='2' strokeWidth='2' />
         <path d='M10 9l5 3-5 3V9z' strokeWidth='2' />
@@ -80,7 +80,7 @@ const categories = [
         fill='none'
         viewBox='0 0 24 24'
         stroke='currentColor'
-        className='text-blue-600'
+        className='text-blue-600 dark:text-blue-400'
       >
         <path d='M9 19V6l12-2v13' strokeWidth='2' />
         <circle cx='6' cy='18' r='3' strokeWidth='2' />
@@ -98,7 +98,7 @@ const categories = [
         fill='none'
         viewBox='0 0 24 24'
         stroke='currentColor'
-        className='text-blue-600'
+        className='text-blue-600 dark:text-blue-400'
       >
         <rect x='3' y='3' width='18' height='18' rx='2' strokeWidth='2' />
         <path d='M9 21V9h6v12' strokeWidth='2' />
@@ -115,7 +115,7 @@ const categories = [
         fill='none'
         viewBox='0 0 24 24'
         stroke='currentColor'
-        className='text-blue-600'
+        className='text-blue-600 dark:text-blue-400'
       >
         <rect x='3' y='3' width='18' height='18' rx='2' strokeWidth='2' />
         <path d='M12 8v8m-4-4h8' strokeWidth='2' />
@@ -132,7 +132,7 @@ const categories = [
         fill='none'
         viewBox='0 0 24 24'
         stroke='currentColor'
-        className='text-blue-600'
+        className='text-blue-600 dark:text-blue-400'
       >
         <path
           d='M9 17v-2m3 2v-4m3 4v-6m2-10H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z'
@@ -145,13 +145,15 @@ const categories = [
 
 export default function PopularCategory() {
   return (
-    <section className='py-20 bg-white'>
+    <section className='py-20 bg-white dark:bg-gray-900'>
       <div className='max-w-7xl mx-auto px-4'>
         <div className='flex items-center justify-between mb-10'>
-          <h2 className='text-4xl font-bold'>Popular category</h2>
+          <h2 className='text-4xl font-bold text-gray-900 dark:text-white'>
+            Popular category
+          </h2>
           <Link
             href='#'
-            className='inline-flex items-center gap-2 px-6 py-3 border border-gray-200 rounded-lg text-blue-600 font-semibold bg-white hover:bg-blue-50 transition'
+            className='inline-flex items-center gap-2 px-6 py-3 border border-gray-200 dark:border-gray-600 rounded-lg text-blue-600 dark:text-blue-400 font-semibold bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700 transition'
           >
             View All
             <svg
@@ -169,16 +171,16 @@ export default function PopularCategory() {
           {categories.map((cat) => (
             <div
               key={cat.name}
-              className='flex items-center gap-4 bg-blue-50 rounded-2xl p-6 text-gray-900 hover:shadow-lg transition group hover:bg-blue-600 hover:text-white hover:scale-105'
+              className='flex items-center gap-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-6 text-gray-900 dark:text-white hover:shadow-lg dark:hover:shadow-gray-900/30 transition group hover:bg-blue-600 hover:text-white hover:scale-105'
             >
-              <div className='bg-white rounded-xl p-3 group-hover:bg-blue-500'>
+              <div className='bg-white dark:bg-gray-800 rounded-xl p-3 group-hover:bg-blue-500'>
                 {cat.icon}
               </div>
               <div>
                 <div className='font-semibold text-lg group-hover:text-white'>
                   {cat.name}
                 </div>
-                <div className='text-gray-400 group-hover:text-blue-100'>
+                <div className='text-gray-400 dark:text-gray-300 group-hover:text-blue-100'>
                   {cat.count} Open position
                 </div>
               </div>

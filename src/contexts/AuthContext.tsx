@@ -5,13 +5,18 @@ import { useRouter } from 'next/navigation';
 import { API_BASE_URL } from '@/config/api';
 import { useToast } from '@/contexts/ToastContext';
 import { EmployerData } from '@/types/employer';
+import { useTheme } from './ThemeContext';
 
 interface User {
   id: string;
   email: string;
   name: string;
+  firstName?: string;
   role: 'employer' | 'employee';
   selectedEmployer?: EmployerData;
+  profile?: {
+    path?: string;
+  };
 }
 
 interface AuthContextType {
@@ -32,6 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { showToast } = useToast();
+  const { setTheme } = useTheme();
 
   useEffect(() => {
     // Only run on client side
@@ -45,11 +51,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.removeItem('user');
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
+          setTheme('light');
         }
+      } else {
+        setTheme('light');
       }
       setLoading(false);
     }
-  }, []);
+  }, [setTheme]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -158,6 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem('user');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      setTheme('light');
     }
     router.push('/login');
   };

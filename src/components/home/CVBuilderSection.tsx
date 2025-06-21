@@ -19,21 +19,21 @@ export default function CVBuilderSection() {
   };
 
   return (
-    <section className='py-16 bg-gradient-to-r from-blue-50 to-indigo-50'>
+    <section className='py-16 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900'>
       <div className='container mx-auto px-4'>
         <div className='flex flex-col lg:flex-row items-center justify-between gap-8'>
           <div className='lg:w-1/2'>
-            <h2 className='text-3xl md:text-4xl font-bold text-gray-900 mb-4'>
+            <h2 className='text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4'>
               Create Your Professional CV in Minutes
             </h2>
-            <p className='text-lg text-gray-600 mb-6'>
+            <p className='text-lg text-gray-600 dark:text-gray-300 mb-6'>
               Stand out from the crowd with a professionally designed CV. Our CV
               builder helps you create an impressive resume that highlights your
               skills and experience.
             </p>
             <button
               onClick={handleCVBuilderClick}
-              className='inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors'
+              className='inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors'
             >
               Create Your CV Now
             </button>

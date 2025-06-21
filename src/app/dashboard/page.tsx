@@ -74,11 +74,11 @@ function DashboardContent() {
 
   // Otherwise, render CandidateDashboard
   return (
-    <div className='flex min-h-screen bg-gray-50'>
+    <div className='flex min-h-screen bg-gray-50 dark:bg-gray-900'>
       {/* Sidebar Navigation (Candidate) */}
-      <aside className='w-64 bg-white border-r p-6 flex flex-col justify-between'>
+      <aside className='w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-6 flex flex-col justify-between'>
         <div>
-          <h2 className='text-xs font-semibold text-gray-400 mb-6'>
+          <h2 className='text-xs font-semibold text-gray-400 dark:text-gray-500 mb-6'>
             CANDIDATE DASHBOARD
           </h2>
           <nav className='flex flex-col gap-2'>
@@ -86,10 +86,10 @@ function DashboardContent() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 ${
+                className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors duration-200 ${
                   activeTab === tab.key
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'hover:bg-gray-100 text-gray-700'
+                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                 }`}
               >
                 <span>{tab.label}</span>
@@ -97,19 +97,27 @@ function DashboardContent() {
             ))}
           </nav>
         </div>
-        <button className='flex items-center gap-2 text-gray-500 hover:text-red-600 text-sm mt-8'>
+        <button className='flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 text-sm mt-8 transition-colors duration-200'>
           <span className='text-lg'>↩</span> Log-out
         </button>
       </aside>
       {/* Main Content */}
-      <main className='flex-1'>{renderTabContent()}</main>
+      <main className='flex-1 bg-gray-50 dark:bg-gray-900'>
+        {renderTabContent()}
+      </main>
     </div>
   );
 }
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className='flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300'>
+          Loading...
+        </div>
+      }
+    >
       <DashboardContent />
     </Suspense>
   );

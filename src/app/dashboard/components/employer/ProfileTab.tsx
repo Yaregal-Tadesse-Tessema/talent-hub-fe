@@ -277,7 +277,7 @@ export default function ProfileTab() {
   if (!companyData) {
     return (
       <div className='flex items-center justify-center h-full'>
-        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400'></div>
       </div>
     );
   }
@@ -294,9 +294,9 @@ export default function ProfileTab() {
 
   return (
     <div className=' w-full max-w-6xl '>
-      <div className='bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100'>
+      <div className='bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700'>
         {/* Header with Logo and Basic Info */}
-        <div className='p-8 bg-gradient-to-r from-blue-300 via-blue-400 to-blue-800 text-white relative'>
+        <div className='p-4 bg-gradient-to-r from-blue-300 via-blue-400 to-blue-800 text-white relative'>
           <div className='absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16'></div>
           <div className='absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12'></div>
 
@@ -391,27 +391,27 @@ export default function ProfileTab() {
             {(hasAddress(companyData.address) ||
               hasValue(companyData.phoneNumber) ||
               hasValue(companyData.email)) && (
-              <div className='bg-gray-50 rounded-xl p-6'>
-                <h2 className='text-xl font-semibold text-gray-800 mb-6 flex items-center gap-3'>
-                  <div className='w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center'>
-                    <FiMail className='w-4 h-4 text-blue-600' />
+              <div className='bg-gray-50 dark:bg-gray-700 rounded-xl p-6'>
+                <h2 className='text-xl font-semibold text-gray-800 dark:text-white mb-6 flex items-center gap-3'>
+                  <div className='w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center'>
+                    <FiMail className='w-4 h-4 text-blue-600 dark:text-blue-400' />
                   </div>
                   Contact Information
                 </h2>
                 <div className='space-y-4'>
                   {hasAddress(companyData.address) && (
-                    <div className='flex items-start gap-4 text-gray-700'>
-                      <FiMapPin className='w-5 h-5 text-blue-600 mt-1 flex-shrink-0' />
+                    <div className='flex items-start gap-4 text-gray-700 dark:text-gray-300'>
+                      <FiMapPin className='w-5 h-5 text-blue-600 dark:text-blue-400 mt-1 flex-shrink-0' />
                       <div>
-                        <p className='font-medium'>Address</p>
-                        <p className='text-gray-600'>{`${companyData.address.street || ''}, ${companyData.address.city || ''}, ${companyData.address.country || ''}`}</p>
+                        <p className='font-medium dark:text-white'>Address</p>
+                        <p className='text-gray-600 dark:text-gray-400'>{`${companyData.address.street || ''}, ${companyData.address.city || ''}, ${companyData.address.country || ''}`}</p>
                         {hasValue(companyData.address.region) && (
-                          <p className='text-gray-500 text-sm'>
+                          <p className='text-gray-500 dark:text-gray-500 text-sm'>
                             {companyData.address.region}
                           </p>
                         )}
                         {hasValue(companyData.address.postalCode) && (
-                          <p className='text-gray-500 text-sm'>
+                          <p className='text-gray-500 dark:text-gray-500 text-sm'>
                             {companyData.address.postalCode}
                           </p>
                         )}
@@ -419,22 +419,24 @@ export default function ProfileTab() {
                     </div>
                   )}
                   {hasValue(companyData.phoneNumber) && (
-                    <div className='flex items-center gap-4 text-gray-700'>
-                      <FiPhone className='w-5 h-5 text-blue-600 flex-shrink-0' />
+                    <div className='flex items-center gap-4 text-gray-700 dark:text-gray-300'>
+                      <FiPhone className='w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0' />
                       <div>
-                        <p className='font-medium'>Phone</p>
-                        <p className='text-gray-600'>
+                        <p className='font-medium dark:text-white'>Phone</p>
+                        <p className='text-gray-600 dark:text-gray-400'>
                           {companyData.phoneNumber}
                         </p>
                       </div>
                     </div>
                   )}
                   {hasValue(companyData.email) && (
-                    <div className='flex items-center gap-4 text-gray-700'>
-                      <FiMail className='w-5 h-5 text-blue-600 flex-shrink-0' />
+                    <div className='flex items-center gap-4 text-gray-700 dark:text-gray-300'>
+                      <FiMail className='w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0' />
                       <div>
-                        <p className='font-medium'>Email</p>
-                        <p className='text-gray-600'>{companyData.email}</p>
+                        <p className='font-medium dark:text-white'>Email</p>
+                        <p className='text-gray-600 dark:text-gray-400'>
+                          {companyData.email}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -447,51 +449,61 @@ export default function ProfileTab() {
               hasValue(companyData.industry) ||
               hasValue(companyData.organizationType) ||
               hasValue(companyData.type)) && (
-              <div className='bg-gray-50 rounded-xl p-6'>
-                <h2 className='text-xl font-semibold text-gray-800 mb-6 flex items-center gap-3'>
-                  <div className='w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center'>
-                    <FiBriefcase className='w-4 h-4 text-green-600' />
+              <div className='bg-gray-50 dark:bg-gray-700 rounded-xl p-6'>
+                <h2 className='text-xl font-semibold text-gray-800 dark:text-white mb-6 flex items-center gap-3'>
+                  <div className='w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center'>
+                    <FiBriefcase className='w-4 h-4 text-green-600 dark:text-green-400' />
                   </div>
                   Company Information
                 </h2>
                 <div className='space-y-4'>
                   {hasValue(companyData.companySize) && (
-                    <div className='flex items-center gap-4 text-gray-700'>
-                      <FiUsers className='w-5 h-5 text-green-600 flex-shrink-0' />
+                    <div className='flex items-center gap-4 text-gray-700 dark:text-gray-300'>
+                      <FiUsers className='w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0' />
                       <div>
-                        <p className='font-medium'>Company Size</p>
-                        <p className='text-gray-600'>
+                        <p className='font-medium dark:text-white'>
+                          Company Size
+                        </p>
+                        <p className='text-gray-600 dark:text-gray-400'>
                           {companyData.companySize}
                         </p>
                       </div>
                     </div>
                   )}
                   {hasValue(companyData.industry) && (
-                    <div className='flex items-center gap-4 text-gray-700'>
-                      <FiBriefcase className='w-5 h-5 text-green-600 flex-shrink-0' />
+                    <div className='flex items-center gap-4 text-gray-700 dark:text-gray-300'>
+                      <FiBriefcase className='w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0' />
                       <div>
-                        <p className='font-medium'>Industry</p>
-                        <p className='text-gray-600'>{companyData.industry}</p>
+                        <p className='font-medium dark:text-white'>Industry</p>
+                        <p className='text-gray-600 dark:text-gray-400'>
+                          {companyData.industry}
+                        </p>
                       </div>
                     </div>
                   )}
                   {hasValue(companyData.organizationType) && (
-                    <div className='flex items-center gap-4 text-gray-700'>
-                      <FiHome className='w-5 h-5 text-green-600 flex-shrink-0' />
+                    <div className='flex items-center gap-4 text-gray-700 dark:text-gray-300'>
+                      <FiHome className='w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0' />
                       <div>
-                        <p className='font-medium'>Organization Type</p>
-                        <p className='text-gray-600'>
+                        <p className='font-medium dark:text-white'>
+                          Organization Type
+                        </p>
+                        <p className='text-gray-600 dark:text-gray-400'>
                           {companyData.organizationType}
                         </p>
                       </div>
                     </div>
                   )}
                   {hasValue(companyData.type) && (
-                    <div className='flex items-center gap-4 text-gray-700'>
-                      <FiGlobe className='w-5 h-5 text-green-600 flex-shrink-0' />
+                    <div className='flex items-center gap-4 text-gray-700 dark:text-gray-300'>
+                      <FiGlobe className='w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0' />
                       <div>
-                        <p className='font-medium'>Company Type</p>
-                        <p className='text-gray-600'>{companyData.type}</p>
+                        <p className='font-medium dark:text-white'>
+                          Company Type
+                        </p>
+                        <p className='text-gray-600 dark:text-gray-400'>
+                          {companyData.type}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -507,83 +519,87 @@ export default function ProfileTab() {
             hasValue(companyData.licenseNumber) ||
             hasValue(companyData.registrationNumber) ||
             hasValue(companyData.selectedCalender)) && (
-            <div className='mt-8 bg-gray-50 rounded-xl p-6'>
-              <h2 className='text-xl font-semibold text-gray-800 mb-6 flex items-center gap-3'>
-                <div className='w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center'>
-                  <FiFileText className='w-4 h-4 text-purple-600' />
+            <div className='mt-8 bg-gray-50 dark:bg-gray-700 rounded-xl p-6'>
+              <h2 className='text-xl font-semibold text-gray-800 dark:text-white mb-6 flex items-center gap-3'>
+                <div className='w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center'>
+                  <FiFileText className='w-4 h-4 text-purple-600 dark:text-purple-400' />
                 </div>
                 Additional Information
               </h2>
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
                 {hasValue(companyData.tin) && (
-                  <div className='flex items-center gap-3 text-gray-700'>
-                    <FiHash className='w-5 h-5 text-purple-600 flex-shrink-0' />
+                  <div className='flex items-center gap-3 text-gray-700 dark:text-gray-300'>
+                    <FiHash className='w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0' />
                     <div>
-                      <p className='font-medium text-sm text-gray-500'>
+                      <p className='font-medium text-sm text-gray-500 dark:text-gray-400'>
                         TIN Number
                       </p>
-                      <p className='text-gray-800'>{companyData.tin}</p>
+                      <p className='text-gray-800 dark:text-white'>
+                        {companyData.tin}
+                      </p>
                     </div>
                   </div>
                 )}
                 {hasValue(companyData.code) && (
-                  <div className='flex items-center gap-3 text-gray-700'>
-                    <FiHash className='w-5 h-5 text-purple-600 flex-shrink-0' />
+                  <div className='flex items-center gap-3 text-gray-700 dark:text-gray-300'>
+                    <FiHash className='w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0' />
                     <div>
-                      <p className='font-medium text-sm text-gray-500'>
+                      <p className='font-medium text-sm text-gray-500 dark:text-gray-400'>
                         Company Code
                       </p>
-                      <p className='text-gray-800'>{companyData.code}</p>
+                      <p className='text-gray-800 dark:text-white'>
+                        {companyData.code}
+                      </p>
                     </div>
                   </div>
                 )}
                 {hasValue(companyData.subscriptionType) && (
-                  <div className='flex items-center gap-3 text-gray-700'>
-                    <FiAward className='w-5 h-5 text-purple-600 flex-shrink-0' />
+                  <div className='flex items-center gap-3 text-gray-700 dark:text-gray-300'>
+                    <FiAward className='w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0' />
                     <div>
-                      <p className='font-medium text-sm text-gray-500'>
+                      <p className='font-medium text-sm text-gray-500 dark:text-gray-400'>
                         Subscription Type
                       </p>
-                      <p className='text-gray-800'>
+                      <p className='text-gray-800 dark:text-white'>
                         {companyData.subscriptionType}
                       </p>
                     </div>
                   </div>
                 )}
                 {hasValue(companyData.licenseNumber) && (
-                  <div className='flex items-center gap-3 text-gray-700'>
-                    <FiFileText className='w-5 h-5 text-purple-600 flex-shrink-0' />
+                  <div className='flex items-center gap-3 text-gray-700 dark:text-gray-300'>
+                    <FiFileText className='w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0' />
                     <div>
-                      <p className='font-medium text-sm text-gray-500'>
+                      <p className='font-medium text-sm text-gray-500 dark:text-gray-400'>
                         License Number
                       </p>
-                      <p className='text-gray-800'>
+                      <p className='text-gray-800 dark:text-white'>
                         {companyData.licenseNumber}
                       </p>
                     </div>
                   </div>
                 )}
                 {hasValue(companyData.registrationNumber) && (
-                  <div className='flex items-center gap-3 text-gray-700'>
-                    <FiFileText className='w-5 h-5 text-purple-600 flex-shrink-0' />
+                  <div className='flex items-center gap-3 text-gray-700 dark:text-gray-300'>
+                    <FiFileText className='w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0' />
                     <div>
-                      <p className='font-medium text-sm text-gray-500'>
+                      <p className='font-medium text-sm text-gray-500 dark:text-gray-400'>
                         Registration Number
                       </p>
-                      <p className='text-gray-800'>
+                      <p className='text-gray-800 dark:text-white'>
                         {companyData.registrationNumber}
                       </p>
                     </div>
                   </div>
                 )}
                 {hasValue(companyData.selectedCalender) && (
-                  <div className='flex items-center gap-3 text-gray-700'>
-                    <FiCalendar className='w-5 h-5 text-purple-600 flex-shrink-0' />
+                  <div className='flex items-center gap-3 text-gray-700 dark:text-gray-300'>
+                    <FiCalendar className='w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0' />
                     <div>
-                      <p className='font-medium text-sm text-gray-500'>
+                      <p className='font-medium text-sm text-gray-500 dark:text-gray-400'>
                         Calendar
                       </p>
-                      <p className='text-gray-800'>
+                      <p className='text-gray-800 dark:text-white'>
                         {companyData.selectedCalender}
                       </p>
                     </div>

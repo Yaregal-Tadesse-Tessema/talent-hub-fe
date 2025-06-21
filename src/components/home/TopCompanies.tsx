@@ -40,7 +40,7 @@ const companies = [
   {
     name: 'Metals and Engineering Corporation (METEC)',
     logo: (
-      <div className='bg-gray-800 rounded-lg w-12 h-12 flex items-center justify-center'>
+      <div className='bg-gray-800 dark:bg-gray-700 rounded-lg w-12 h-12 flex items-center justify-center'>
         <svg width='28' height='28' fill='white' viewBox='0 0 24 24'>
           <circle cx='12' cy='12' r='10' />
         </svg>
@@ -101,7 +101,7 @@ const companies = [
 
 const Arrow = ({ left = false }: { left?: boolean }) => (
   <button
-    className='w-12 h-12 flex items-center justify-center rounded-lg border border-gray-200 bg-white hover:bg-blue-50 transition text-gray-400 hover:text-blue-600 shadow-sm'
+    className='w-12 h-12 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700 transition text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 shadow-sm dark:shadow-gray-900/20'
     aria-label={left ? 'Previous' : 'Next'}
   >
     <svg
@@ -119,10 +119,12 @@ const Arrow = ({ left = false }: { left?: boolean }) => (
 
 export default function TopCompanies() {
   return (
-    <section className='py-12 sm:py-16 lg:py-20 bg-white'>
+    <section className='py-12 sm:py-16 lg:py-20 bg-white dark:bg-gray-900'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 sm:mb-10'>
-          <h2 className='text-3xl sm:text-4xl font-bold'>Top companies</h2>
+          <h2 className='text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white'>
+            Top companies
+          </h2>
           <div className='flex gap-2 w-full sm:w-auto justify-end'>
             <Arrow left />
             <Arrow />
@@ -132,22 +134,22 @@ export default function TopCompanies() {
           {companies.map((company, i) => (
             <div
               key={i}
-              className='bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 flex flex-col items-center transition hover:shadow-lg hover:scale-[1.02] hover:ring-2 hover:ring-blue-200 h-full'
+              className='bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-gray-700 flex flex-col items-center transition hover:shadow-lg dark:hover:shadow-gray-900/30 hover:scale-[1.02] hover:ring-2 hover:ring-blue-200 dark:hover:ring-blue-500 h-full'
             >
               <div className='flex-shrink-0'>{company.logo}</div>
               <div className='w-full mt-4 mb-1'>
                 <div className='flex items-center gap-2 flex-wrap justify-center'>
-                  <span className='font-semibold text-base sm:text-lg text-center line-clamp-1'>
+                  <span className='font-semibold text-base sm:text-lg text-center line-clamp-1 text-gray-900 dark:text-white'>
                     {company.name}
                   </span>
                   {company.featured && (
-                    <span className='bg-red-50 text-red-400 px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap'>
+                    <span className='bg-red-50 dark:bg-red-900/20 text-red-400 dark:text-red-300 px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap'>
                       Featured
                     </span>
                   )}
                 </div>
               </div>
-              <div className='flex items-center gap-1 text-gray-400 text-sm mb-4 sm:mb-6'>
+              <div className='flex items-center gap-1 text-gray-400 dark:text-gray-300 text-sm mb-4 sm:mb-6'>
                 <svg
                   width='16'
                   height='16'
@@ -164,7 +166,7 @@ export default function TopCompanies() {
                 </svg>
                 <span className='line-clamp-1'>{company.location}</span>
               </div>
-              <button className='w-full py-2 sm:py-3 rounded-lg font-semibold transition bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm sm:text-base mt-auto'>
+              <button className='w-full py-2 sm:py-3 rounded-lg font-semibold transition bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-sm sm:text-base mt-auto'>
                 Open Position
               </button>
             </div>

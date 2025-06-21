@@ -6,6 +6,7 @@ import { siteConfig } from '@/constant/config';
 import ClientLayout from './ClientLayout';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ToastProvider } from '@/contexts/ToastContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -35,12 +36,14 @@ export default function RootLayout({
 }) {
   return (
     <html>
-      <body suppressHydrationWarning>
-        <ToastProvider>
-          <AuthProvider>
-            <ClientLayout>{children}</ClientLayout>
-          </AuthProvider>
-        </ToastProvider>
+      <body suppressHydrationWarning className='bg-white dark:bg-gray-800'>
+        <ThemeProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <ClientLayout>{children}</ClientLayout>
+            </AuthProvider>
+          </ToastProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

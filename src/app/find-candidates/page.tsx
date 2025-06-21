@@ -161,17 +161,17 @@ export default function FindCandidatesPage() {
   };
 
   return (
-    <div className='min-h-screen bg-gray-50'>
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-900'>
       {!user ? (
         <>
           {/* Hero Section */}
-          <section className='bg-white py-20'>
+          <section className='bg-white dark:bg-gray-800 py-20'>
             <div className='container mx-auto px-4'>
               <div className='max-w-3xl mx-auto text-center'>
-                <h1 className='text-4xl md:text-5xl font-bold text-gray-900 mb-6'>
+                <h1 className='text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6'>
                   Find Your Perfect Candidates
                 </h1>
-                <p className='text-xl text-gray-600 mb-8'>
+                <p className='text-xl text-gray-600 dark:text-gray-300 mb-8'>
                   Connect with top talent and streamline your hiring process
                   with our powerful recruitment platform
                 </p>
@@ -188,7 +188,7 @@ export default function FindCandidatesPage() {
           {/* Features Section */}
           <section className='py-20'>
             <div className='container mx-auto px-4'>
-              <h2 className='text-3xl font-bold text-center mb-12'>
+              <h2 className='text-3xl font-bold text-center mb-12 dark:text-white'>
                 Why Choose TalentHub?
               </h2>
               <div className='grid md:grid-cols-3 gap-8'>
@@ -212,9 +212,9 @@ export default function FindCandidatesPage() {
           </section>
 
           {/* How It Works Section */}
-          <section className='py-20 bg-white'>
+          <section className='py-20 bg-white dark:bg-gray-800'>
             <div className='container mx-auto px-4'>
-              <h2 className='text-3xl font-bold text-center mb-12'>
+              <h2 className='text-3xl font-bold text-center mb-12 dark:text-white'>
                 How It Works
               </h2>
               <div className='grid md:grid-cols-4 gap-8'>
@@ -245,7 +245,7 @@ export default function FindCandidatesPage() {
           {/* Pricing Section */}
           <section className='py-20'>
             <div className='container mx-auto px-4'>
-              <h2 className='text-3xl font-bold text-center mb-12'>
+              <h2 className='text-3xl font-bold text-center mb-12 dark:text-white'>
                 Simple, Transparent Pricing
               </h2>
               <div className='grid md:grid-cols-3 gap-8 max-w-5xl mx-auto'>
@@ -307,12 +307,18 @@ export default function FindCandidatesPage() {
       ) : (
         <>
           {/* Page title and breadcrumb */}
-          <div className='flex justify-between bg-gray-100 items-center px-4 sm:px-8 md:px-16 py-4'>
-            <h2 className='text-md text-gray-500'>Find Candidates</h2>
-            <nav className='text-gray-400 text-sm flex items-center gap-1'>
-              <span className='hover:text-gray-600 cursor-pointer'>Home</span>
+          <div className='flex justify-between bg-gray-100 dark:bg-gray-800 items-center px-4 sm:px-8 md:px-16 py-4'>
+            <h2 className='text-md text-gray-500 dark:text-gray-400'>
+              Find Candidates
+            </h2>
+            <nav className='text-gray-400 dark:text-gray-500 text-sm flex items-center gap-1'>
+              <span className='hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer'>
+                Home
+              </span>
               <span className='mx-1'>/</span>
-              <span className='text-gray-700 font-medium'>Find Candidates</span>
+              <span className='text-gray-700 dark:text-gray-300 font-medium'>
+                Find Candidates
+              </span>
             </nav>
           </div>
 
@@ -345,14 +351,16 @@ export default function FindCandidatesPage() {
               onClick={toggleMobileFilter}
             >
               <div
-                className='absolute right-0 top-0 h-full w-[280px] bg-white shadow-lg overflow-y-auto transform transition-transform duration-300 ease-in-out'
+                className='absolute right-0 top-0 h-full w-[280px] bg-white dark:bg-gray-800 shadow-lg overflow-y-auto transform transition-transform duration-300 ease-in-out'
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className='p-4 border-b flex justify-between items-center'>
-                  <h3 className='font-semibold text-lg'>Filters</h3>
+                <div className='p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center'>
+                  <h3 className='font-semibold text-lg dark:text-white'>
+                    Filters
+                  </h3>
                   <button
                     onClick={toggleMobileFilter}
-                    className='p-2 hover:bg-gray-100 rounded-full'
+                    className='p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full'
                   >
                     <svg
                       width='24'
@@ -360,6 +368,7 @@ export default function FindCandidatesPage() {
                       fill='none'
                       viewBox='0 0 24 24'
                       stroke='currentColor'
+                      className='dark:text-white'
                     >
                       <path
                         d='M6 18L18 6M6 6l12 12'
@@ -378,9 +387,9 @@ export default function FindCandidatesPage() {
                       className='flex justify-between items-center mb-2 cursor-pointer select-none'
                       onClick={() => toggleSection('location')}
                     >
-                      <span className='font-medium text-sm sm:text-base'>
+                      <span className='font-medium text-sm sm:text-base dark:text-white'>
                         Location Radius:{' '}
-                        <span className='text-blue-600 font-semibold'>
+                        <span className='text-blue-600 dark:text-blue-400 font-semibold'>
                           {radius} miles
                         </span>
                       </span>
@@ -390,7 +399,7 @@ export default function FindCandidatesPage() {
                         fill='none'
                         viewBox='0 0 24 24'
                         stroke='currentColor'
-                        className={`transform transition-transform ${expandedSections.location ? 'rotate-180' : ''}`}
+                        className={`transform transition-transform dark:text-white ${expandedSections.location ? 'rotate-180' : ''}`}
                       >
                         <path
                           d='M19 9l-7 7-7-7'
@@ -419,10 +428,10 @@ export default function FindCandidatesPage() {
           )}
 
           {/* Top search/filter bar */}
-          <div className='bg-gray-100 px-4 sm:px-8 md:px-16 py-4 pb-8 border-b'>
-            <div className='flex flex-col sm:flex-row gap-4 items-stretch sm:items-center shadow rounded-xl px-4 sm:px-6 py-2 bg-white'>
+          <div className='bg-gray-100 dark:bg-gray-800 px-4 sm:px-8 md:px-16 py-4 pb-8 border-b border-gray-200 dark:border-gray-700'>
+            <div className='flex flex-col sm:flex-row gap-4 items-stretch sm:items-center shadow rounded-xl px-4 sm:px-6 py-2 bg-white dark:bg-gray-700'>
               {/* Job title search */}
-              <div className='flex items-center gap-2 flex-1 border-b sm:border-b-0 sm:border-r pb-2 sm:pb-0 pr-0 sm:pr-4'>
+              <div className='flex items-center gap-2 flex-1 border-b sm:border-b-0 sm:border-r border-gray-200 dark:border-gray-600 pb-2 sm:pb-0 pr-0 sm:pr-4'>
                 <svg
                   width='22'
                   height='22'
@@ -435,12 +444,12 @@ export default function FindCandidatesPage() {
                   <path d='M21 21l-4.35-4.35' strokeWidth='2' />
                 </svg>
                 <input
-                  className='flex-1 bg-transparent border-none outline-none text-gray-700 placeholder-gray-400'
+                  className='flex-1 bg-transparent border-none outline-none text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500'
                   placeholder='Job title, Keyword...'
                 />
               </div>
               {/* Location */}
-              <div className='flex items-center gap-2 border-b sm:border-b-0 sm:border-r px-0 sm:px-4 pb-2 sm:pb-0 min-w-[200px]'>
+              <div className='flex items-center gap-2 border-b sm:border-b-0 sm:border-r border-gray-200 dark:border-gray-600 px-0 sm:px-4 pb-2 sm:pb-0 min-w-[200px]'>
                 <svg
                   width='22'
                   height='22'
@@ -456,12 +465,12 @@ export default function FindCandidatesPage() {
                   <circle cx='12' cy='9' r='2.5' strokeWidth='2' />
                 </svg>
                 <input
-                  className='bg-transparent border-none outline-none text-gray-700 placeholder-gray-400 w-full'
+                  className='bg-transparent border-none outline-none text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 w-full'
                   placeholder='Location'
                 />
               </div>
               {/* Category */}
-              <div className='flex items-center gap-2 border-b sm:border-b-0 sm:border-r px-0 sm:px-4 pb-2 sm:pb-0 min-w-[200px]'>
+              <div className='flex items-center gap-2 border-b sm:border-b-0 sm:border-r border-gray-200 dark:border-gray-600 px-0 sm:px-4 pb-2 sm:pb-0 min-w-[200px]'>
                 <svg
                   width='22'
                   height='22'
@@ -476,7 +485,7 @@ export default function FindCandidatesPage() {
                     <rect x='3' y='15' width='18' height='6' rx='2' />
                   </g>
                 </svg>
-                <select className='bg-transparent border-none outline-none text-gray-700 w-full'>
+                <select className='bg-transparent border-none outline-none text-gray-700 dark:text-white w-full'>
                   <option>Select Category</option>
                 </select>
               </div>
@@ -490,8 +499,8 @@ export default function FindCandidatesPage() {
           </div>
 
           {/* Sidebar Filter */}
-          <div className='bg-gray-50 flex flex-col lg:flex-row gap-4 lg:gap-8 px-4 sm:px-8 md:px-16 py-8'>
-            <div className='hidden lg:block w-full lg:w-80 bg-white rounded-lg border border-gray-200 p-4 sm:p-6 shadow-sm h-fit flex flex-col gap-4 sm:gap-6'>
+          <div className='bg-gray-50 dark:bg-gray-900 flex flex-col lg:flex-row gap-4 lg:gap-8 px-4 sm:px-8 md:px-16 py-8'>
+            <div className='hidden lg:block w-full lg:w-80 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 shadow-sm h-fit flex flex-col gap-4 sm:gap-6'>
               <button className='w-full bg-blue-600 text-white py-2 rounded mb-2 font-semibold flex items-center justify-center gap-2'>
                 <svg width='16' height='16' viewBox='0 0 24 24' fill='none'>
                   <path
@@ -567,7 +576,7 @@ export default function FindCandidatesPage() {
                   className='flex justify-between items-center mb-2 cursor-pointer select-none'
                   onClick={() => toggleSection('level')}
                 >
-                  <div className='font-medium text-sm sm:text-base'>
+                  <div className='font-medium text-sm sm:text-base dark:text-white'>
                     Candidate Level
                   </div>
                   <svg
@@ -576,7 +585,7 @@ export default function FindCandidatesPage() {
                     fill='none'
                     viewBox='0 0 24 24'
                     stroke='currentColor'
-                    className={`transform transition-transform ${expandedSections.level ? 'rotate-180' : ''}`}
+                    className={`transform transition-transform dark:text-white ${expandedSections.level ? 'rotate-180' : ''}`}
                   >
                     <path
                       d='M19 9l-7 7-7-7'
@@ -599,7 +608,10 @@ export default function FindCandidatesPage() {
                           onChange={() => setSelectedLevel(level)}
                           className='mr-2 accent-blue-600'
                         />
-                        <label htmlFor={level} className='text-sm sm:text-base'>
+                        <label
+                          htmlFor={level}
+                          className='text-sm sm:text-base dark:text-white'
+                        >
                           {level}
                         </label>
                       </div>
@@ -613,7 +625,7 @@ export default function FindCandidatesPage() {
                   className='flex justify-between items-center mb-2 cursor-pointer select-none'
                   onClick={() => toggleSection('experience')}
                 >
-                  <div className='font-medium text-sm sm:text-base'>
+                  <div className='font-medium text-sm sm:text-base dark:text-white'>
                     Experiences
                   </div>
                   <svg
@@ -622,7 +634,7 @@ export default function FindCandidatesPage() {
                     fill='none'
                     viewBox='0 0 24 24'
                     stroke='currentColor'
-                    className={`transform transition-transform ${expandedSections.experience ? 'rotate-180' : ''}`}
+                    className={`transform transition-transform dark:text-white ${expandedSections.experience ? 'rotate-180' : ''}`}
                   >
                     <path
                       d='M19 9l-7 7-7-7'
@@ -645,7 +657,10 @@ export default function FindCandidatesPage() {
                           onChange={() => setSelectedExperience(exp)}
                           className='mr-2 accent-blue-600'
                         />
-                        <label htmlFor={exp} className='text-sm sm:text-base'>
+                        <label
+                          htmlFor={exp}
+                          className='text-sm sm:text-base dark:text-white'
+                        >
                           {exp}
                         </label>
                       </div>
@@ -659,7 +674,7 @@ export default function FindCandidatesPage() {
                   className='flex justify-between items-center mb-2 cursor-pointer select-none'
                   onClick={() => toggleSection('education')}
                 >
-                  <div className='font-medium text-sm sm:text-base'>
+                  <div className='font-medium text-sm sm:text-base dark:text-white'>
                     Education
                   </div>
                   <svg
@@ -668,7 +683,7 @@ export default function FindCandidatesPage() {
                     fill='none'
                     viewBox='0 0 24 24'
                     stroke='currentColor'
-                    className={`transform transition-transform ${expandedSections.education ? 'rotate-180' : ''}`}
+                    className={`transform transition-transform dark:text-white ${expandedSections.education ? 'rotate-180' : ''}`}
                   >
                     <path
                       d='M19 9l-7 7-7-7'
@@ -697,7 +712,10 @@ export default function FindCandidatesPage() {
                           }
                           className='mr-2 accent-blue-600'
                         />
-                        <label htmlFor={edu} className='text-sm sm:text-base'>
+                        <label
+                          htmlFor={edu}
+                          className='text-sm sm:text-base dark:text-white'
+                        >
                           {edu}
                         </label>
                       </div>
@@ -711,14 +729,16 @@ export default function FindCandidatesPage() {
                   className='flex justify-between items-center mb-2 cursor-pointer select-none'
                   onClick={() => toggleSection('gender')}
                 >
-                  <div className='font-medium text-sm sm:text-base'>Gender</div>
+                  <div className='font-medium text-sm sm:text-base dark:text-white'>
+                    Gender
+                  </div>
                   <svg
                     width='20'
                     height='20'
                     fill='none'
                     viewBox='0 0 24 24'
                     stroke='currentColor'
-                    className={`transform transition-transform ${expandedSections.gender ? 'rotate-180' : ''}`}
+                    className={`transform transition-transform dark:text-white ${expandedSections.gender ? 'rotate-180' : ''}`}
                   >
                     <path
                       d='M19 9l-7 7-7-7'
@@ -743,7 +763,7 @@ export default function FindCandidatesPage() {
                         />
                         <label
                           htmlFor={gender}
-                          className='text-sm sm:text-base'
+                          className='text-sm sm:text-base dark:text-white'
                         >
                           {gender}
                         </label>
@@ -757,18 +777,18 @@ export default function FindCandidatesPage() {
             <div className='flex-1'>
               <div className='flex justify-between items-center mb-6'>
                 <div className='flex gap-2'>
-                  <select className='w-24 border rounded-md px-3 py-2'>
+                  <select className='w-24 border border-gray-200 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-white'>
                     <option>Latest</option>
                     <option>Oldest</option>
                   </select>
-                  <select className='w-36 border rounded-md px-3 py-2'>
+                  <select className='w-36 border border-gray-200 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-white'>
                     <option>12 per page</option>
                     <option>24 per page</option>
                     <option>48 per page</option>
                   </select>
                 </div>
                 <div className='flex gap-2'>
-                  <button className='border rounded p-2 bg-blue-50 text-blue-600'>
+                  <button className='border border-gray-200 dark:border-gray-600 rounded p-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'>
                     <svg
                       width='20'
                       height='20'
@@ -788,7 +808,7 @@ export default function FindCandidatesPage() {
                       <rect x='3' y='14' width='7' height='7' strokeWidth='2' />
                     </svg>
                   </button>
-                  <button className='border rounded p-2'>
+                  <button className='border border-gray-200 dark:border-gray-600 rounded p-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-white'>
                     <svg
                       width='20'
                       height='20'
@@ -812,10 +832,10 @@ export default function FindCandidatesPage() {
                 {mockCandidates.map((candidate, idx) => (
                   <div
                     key={candidate.name}
-                    className='flex items-center bg-white rounded-lg border border-gray-200 shadow-sm px-6 py-4 justify-between hover:ring-2 hover:ring-blue-500'
+                    className='flex items-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm px-6 py-4 justify-between hover:ring-2 hover:ring-blue-500 dark:hover:ring-blue-400'
                   >
                     <div className='flex items-center gap-4'>
-                      <div className='w-16 h-16 rounded-lg bg-gray-200 flex items-center justify-center'>
+                      <div className='w-16 h-16 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center'>
                         {/* Profile image placeholder */}
                         <svg
                           width='32'
@@ -823,25 +843,38 @@ export default function FindCandidatesPage() {
                           fill='none'
                           viewBox='0 0 32 32'
                         >
-                          <rect width='32' height='32' rx='8' fill='#E5E7EB' />
+                          <rect
+                            width='32'
+                            height='32'
+                            rx='8'
+                            fill='#E5E7EB'
+                            className='dark:fill-gray-600'
+                          />
                           <path
                             d='M16 18c-3.314 0-6 2.239-6 5v1h12v-1c0-2.761-2.686-5-6-5z'
                             fill='#D1D5DB'
+                            className='dark:fill-gray-500'
                           />
-                          <circle cx='16' cy='12' r='5' fill='#D1D5DB' />
+                          <circle
+                            cx='16'
+                            cy='12'
+                            r='5'
+                            fill='#D1D5DB'
+                            className='dark:fill-gray-500'
+                          />
                         </svg>
                       </div>
                       <div>
                         <div
-                          className='font-semibold text-base text-gray-800 hover:text-blue-600 hover:cursor-pointer'
+                          className='font-semibold text-base text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:cursor-pointer'
                           onClick={() => handleCandidateClick(candidate)}
                         >
                           {candidate.name}
                         </div>
-                        <div className='text-gray-500 text-sm'>
+                        <div className='text-gray-500 dark:text-gray-400 text-sm'>
                           {candidate.title}
                         </div>
-                        <div className='flex items-center gap-2 text-gray-400 text-xs mt-1'>
+                        <div className='flex items-center gap-2 text-gray-400 dark:text-gray-500 text-xs mt-1'>
                           <svg
                             width='16'
                             height='16'
@@ -861,7 +894,7 @@ export default function FindCandidatesPage() {
                       </div>
                     </div>
                     <div className='flex items-center gap-2'>
-                      <button className='border rounded p-2 hover:bg-blue-600 hover:text-white bg-blue-50 text-blue-600'>
+                      <button className='border border-gray-200 dark:border-gray-600 rounded p-2 hover:bg-blue-600 hover:text-white bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'>
                         <svg
                           width='18'
                           height='18'
@@ -875,7 +908,7 @@ export default function FindCandidatesPage() {
                           />
                         </svg>
                       </button>
-                      <button className='px-6 py-2 rounded-md font-semibold flex items-center gap-2 transition hover:bg-blue-600 hover:text-white bg-blue-100 text-blue-700'>
+                      <button className='px-6 py-2 rounded-md font-semibold flex items-center gap-2 transition hover:bg-blue-600 hover:text-white bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'>
                         View Profile
                         <svg
                           width='18'
@@ -917,10 +950,10 @@ function FeatureCard({
   icon: string;
 }) {
   return (
-    <div className='bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow'>
+    <div className='bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow'>
       <div className='text-4xl mb-4'>{icon}</div>
-      <h3 className='text-xl font-semibold mb-3'>{title}</h3>
-      <p className='text-gray-600'>{description}</p>
+      <h3 className='text-xl font-semibold mb-3 dark:text-white'>{title}</h3>
+      <p className='text-gray-600 dark:text-gray-300'>{description}</p>
     </div>
   );
 }
@@ -939,8 +972,8 @@ function StepCard({
       <div className='w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4'>
         {number}
       </div>
-      <h3 className='text-xl font-semibold mb-2'>{title}</h3>
-      <p className='text-gray-600'>{description}</p>
+      <h3 className='text-xl font-semibold mb-2 dark:text-white'>{title}</h3>
+      <p className='text-gray-600 dark:text-gray-300'>{description}</p>
     </div>
   );
 }
@@ -958,13 +991,13 @@ function PricingCard({
 }) {
   return (
     <div
-      className={`bg-white p-8 rounded-lg ${highlighted ? 'ring-2 ring-blue-600' : 'shadow-sm'}`}
+      className={`bg-white dark:bg-gray-800 p-8 rounded-lg ${highlighted ? 'ring-2 ring-blue-600 dark:ring-blue-400' : 'shadow-sm'}`}
     >
-      <h3 className='text-2xl font-bold mb-2'>{title}</h3>
-      <div className='text-3xl font-bold mb-6'>{price}</div>
+      <h3 className='text-2xl font-bold mb-2 dark:text-white'>{title}</h3>
+      <div className='text-3xl font-bold mb-6 dark:text-white'>{price}</div>
       <ul className='space-y-3'>
         {features.map((feature, index) => (
-          <li key={index} className='flex items-center'>
+          <li key={index} className='flex items-center dark:text-gray-300'>
             <svg
               className='w-5 h-5 text-green-500 mr-2'
               fill='none'
@@ -986,7 +1019,7 @@ function PricingCard({
         className={`w-full mt-8 py-3 rounded-lg font-semibold ${
           highlighted
             ? 'bg-blue-600 text-white hover:bg-blue-700'
-            : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+            : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
         } transition-colors`}
       >
         Get Started

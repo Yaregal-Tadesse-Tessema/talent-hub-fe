@@ -15,6 +15,7 @@ import {
   FiX,
 } from 'react-icons/fi';
 import ProfileTab from './ProfileTab';
+import { useTheme } from '@/contexts/ThemeContext';
 
 type SettingsSection =
   | 'profile'
@@ -54,17 +55,19 @@ export default function SettingsTab() {
 
   return (
     <div className='w-full max-w-6xl'>
-      <div className='bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100'>
+      <div className='bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700'>
         {/* Header */}
-        <div className='p-6 border-b border-gray-200'>
-          <h1 className='text-2xl font-bold text-gray-900'>Settings</h1>
-          <p className='text-gray-600 mt-1'>
+        <div className='p-6 border-b border-gray-200 dark:border-gray-700'>
+          <h1 className='text-2xl font-bold text-gray-900 dark:text-white'>
+            Settings
+          </h1>
+          <p className='text-gray-600 dark:text-gray-300 mt-1'>
             Manage your account settings and preferences
           </p>
         </div>
 
         {/* Horizontal Tabs */}
-        <div className='border-b border-gray-200'>
+        <div className='border-b border-gray-200 dark:border-gray-700'>
           <nav className='flex overflow-x-auto'>
             {SETTINGS_SECTIONS.map((section) => {
               const Icon = section.icon;
@@ -76,8 +79,8 @@ export default function SettingsTab() {
                   }
                   className={`px-6 py-4 font-medium flex items-center gap-2 whitespace-nowrap border-b-2 transition-all duration-200 ${
                     activeSection === section.key
-                      ? 'border-blue-500 text-blue-600 bg-blue-50'
-                      : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'
                   }`}
                 >
                   <Icon className='w-5 h-5' />
@@ -115,7 +118,7 @@ function AccountSettings() {
   return (
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
-        <h2 className='text-xl font-semibold text-gray-900'>
+        <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
           Account Information
         </h2>
         <button
@@ -128,7 +131,7 @@ function AccountSettings() {
 
       <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
         <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
             First Name
           </label>
           <input
@@ -138,11 +141,11 @@ function AccountSettings() {
               setFormData({ ...formData, firstName: e.target.value })
             }
             disabled={!isEditing}
-            className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100'
+            className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-gray-800 dark:bg-gray-700 dark:text-white'
           />
         </div>
         <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
             Last Name
           </label>
           <input
@@ -152,11 +155,11 @@ function AccountSettings() {
               setFormData({ ...formData, lastName: e.target.value })
             }
             disabled={!isEditing}
-            className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100'
+            className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-gray-800 dark:bg-gray-700 dark:text-white'
           />
         </div>
         <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
             Email
           </label>
           <input
@@ -166,11 +169,11 @@ function AccountSettings() {
               setFormData({ ...formData, email: e.target.value })
             }
             disabled={!isEditing}
-            className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100'
+            className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-gray-800 dark:bg-gray-700 dark:text-white'
           />
         </div>
         <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
             Phone
           </label>
           <input
@@ -180,11 +183,11 @@ function AccountSettings() {
               setFormData({ ...formData, phone: e.target.value })
             }
             disabled={!isEditing}
-            className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100'
+            className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-gray-800 dark:bg-gray-700 dark:text-white'
           />
         </div>
         <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
             Timezone
           </label>
           <select
@@ -193,7 +196,7 @@ function AccountSettings() {
               setFormData({ ...formData, timezone: e.target.value })
             }
             disabled={!isEditing}
-            className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100'
+            className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-gray-800 dark:bg-gray-700 dark:text-white'
           >
             <option value='UTC-5'>Eastern Time (UTC-5)</option>
             <option value='UTC-6'>Central Time (UTC-6)</option>
@@ -202,7 +205,7 @@ function AccountSettings() {
           </select>
         </div>
         <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
             Language
           </label>
           <select
@@ -211,7 +214,7 @@ function AccountSettings() {
               setFormData({ ...formData, language: e.target.value })
             }
             disabled={!isEditing}
-            className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100'
+            className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-gray-800 dark:bg-gray-700 dark:text-white'
           >
             <option value='English'>English</option>
             <option value='Spanish'>Spanish</option>
@@ -260,22 +263,26 @@ function NotificationSettings() {
 
   return (
     <div className='space-y-6'>
-      <h2 className='text-xl font-semibold text-gray-900'>
+      <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
         Notification Preferences
       </h2>
 
       <div className='space-y-4'>
-        <div className='flex items-center justify-between p-4 bg-gray-50 rounded-lg'>
+        <div className='flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg'>
           <div>
-            <h3 className='font-medium text-gray-900'>Email Notifications</h3>
-            <p className='text-sm text-gray-600'>
+            <h3 className='font-medium text-gray-900 dark:text-white'>
+              Email Notifications
+            </h3>
+            <p className='text-sm text-gray-600 dark:text-gray-300'>
               Receive notifications via email
             </p>
           </div>
           <button
             onClick={() => handleToggle('emailNotifications')}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              notifications.emailNotifications ? 'bg-blue-600' : 'bg-gray-300'
+              notifications.emailNotifications
+                ? 'bg-blue-600'
+                : 'bg-gray-300 dark:bg-gray-600'
             }`}
           >
             <span
@@ -288,17 +295,21 @@ function NotificationSettings() {
           </button>
         </div>
 
-        <div className='flex items-center justify-between p-4 bg-gray-50 rounded-lg'>
+        <div className='flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg'>
           <div>
-            <h3 className='font-medium text-gray-900'>Push Notifications</h3>
-            <p className='text-sm text-gray-600'>
+            <h3 className='font-medium text-gray-900 dark:text-white'>
+              Push Notifications
+            </h3>
+            <p className='text-sm text-gray-600 dark:text-gray-300'>
               Receive push notifications in browser
             </p>
           </div>
           <button
             onClick={() => handleToggle('pushNotifications')}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              notifications.pushNotifications ? 'bg-blue-600' : 'bg-gray-300'
+              notifications.pushNotifications
+                ? 'bg-blue-600'
+                : 'bg-gray-300 dark:bg-gray-600'
             }`}
           >
             <span
@@ -311,17 +322,21 @@ function NotificationSettings() {
           </button>
         </div>
 
-        <div className='flex items-center justify-between p-4 bg-gray-50 rounded-lg'>
+        <div className='flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg'>
           <div>
-            <h3 className='font-medium text-gray-900'>Job Applications</h3>
-            <p className='text-sm text-gray-600'>
+            <h3 className='font-medium text-gray-900 dark:text-white'>
+              Job Applications
+            </h3>
+            <p className='text-sm text-gray-600 dark:text-gray-300'>
               Notify when new applications are received
             </p>
           </div>
           <button
             onClick={() => handleToggle('jobApplications')}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              notifications.jobApplications ? 'bg-blue-600' : 'bg-gray-300'
+              notifications.jobApplications
+                ? 'bg-blue-600'
+                : 'bg-gray-300 dark:bg-gray-600'
             }`}
           >
             <span
@@ -334,17 +349,21 @@ function NotificationSettings() {
           </button>
         </div>
 
-        <div className='flex items-center justify-between p-4 bg-gray-50 rounded-lg'>
+        <div className='flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg'>
           <div>
-            <h3 className='font-medium text-gray-900'>New Messages</h3>
-            <p className='text-sm text-gray-600'>
+            <h3 className='font-medium text-gray-900 dark:text-white'>
+              New Messages
+            </h3>
+            <p className='text-sm text-gray-600 dark:text-gray-300'>
               Notify when you receive new messages
             </p>
           </div>
           <button
             onClick={() => handleToggle('newMessages')}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              notifications.newMessages ? 'bg-blue-600' : 'bg-gray-300'
+              notifications.newMessages
+                ? 'bg-blue-600'
+                : 'bg-gray-300 dark:bg-gray-600'
             }`}
           >
             <span
@@ -355,17 +374,21 @@ function NotificationSettings() {
           </button>
         </div>
 
-        <div className='flex items-center justify-between p-4 bg-gray-50 rounded-lg'>
+        <div className='flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg'>
           <div>
-            <h3 className='font-medium text-gray-900'>System Updates</h3>
-            <p className='text-sm text-gray-600'>
+            <h3 className='font-medium text-gray-900 dark:text-white'>
+              System Updates
+            </h3>
+            <p className='text-sm text-gray-600 dark:text-gray-300'>
               Receive system and maintenance updates
             </p>
           </div>
           <button
             onClick={() => handleToggle('systemUpdates')}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              notifications.systemUpdates ? 'bg-blue-600' : 'bg-gray-300'
+              notifications.systemUpdates
+                ? 'bg-blue-600'
+                : 'bg-gray-300 dark:bg-gray-600'
             }`}
           >
             <span
@@ -376,17 +399,21 @@ function NotificationSettings() {
           </button>
         </div>
 
-        <div className='flex items-center justify-between p-4 bg-gray-50 rounded-lg'>
+        <div className='flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg'>
           <div>
-            <h3 className='font-medium text-gray-900'>Marketing Emails</h3>
-            <p className='text-sm text-gray-600'>
+            <h3 className='font-medium text-gray-900 dark:text-white'>
+              Marketing Emails
+            </h3>
+            <p className='text-sm text-gray-600 dark:text-gray-300'>
               Receive promotional and marketing emails
             </p>
           </div>
           <button
             onClick={() => handleToggle('marketingEmails')}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              notifications.marketingEmails ? 'bg-blue-600' : 'bg-gray-300'
+              notifications.marketingEmails
+                ? 'bg-blue-600'
+                : 'bg-gray-300 dark:bg-gray-600'
             }`}
           >
             <span
@@ -419,16 +446,18 @@ function SecuritySettings() {
 
   return (
     <div className='space-y-6'>
-      <h2 className='text-xl font-semibold text-gray-900'>Security Settings</h2>
+      <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
+        Security Settings
+      </h2>
 
       {/* Change Password */}
-      <div className='bg-gray-50 rounded-lg p-6'>
-        <h3 className='text-lg font-medium text-gray-900 mb-4'>
+      <div className='bg-gray-50 dark:bg-gray-800 rounded-lg p-6'>
+        <h3 className='text-lg font-medium text-gray-900 dark:text-white mb-4'>
           Change Password
         </h3>
         <div className='space-y-4'>
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
               Current Password
             </label>
             <div className='relative'>
@@ -436,7 +465,7 @@ function SecuritySettings() {
                 type={showPassword ? 'text' : 'password'}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white'
                 placeholder='Enter current password'
               />
               <button
@@ -454,7 +483,7 @@ function SecuritySettings() {
           </div>
 
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
               New Password
             </label>
             <div className='relative'>
@@ -462,7 +491,7 @@ function SecuritySettings() {
                 type={showNewPassword ? 'text' : 'password'}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white'
                 placeholder='Enter new password'
               />
               <button
@@ -480,7 +509,7 @@ function SecuritySettings() {
           </div>
 
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
               Confirm New Password
             </label>
             <div className='relative'>
@@ -488,7 +517,7 @@ function SecuritySettings() {
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white'
                 placeholder='Confirm new password'
               />
               <button
@@ -515,11 +544,11 @@ function SecuritySettings() {
       </div>
 
       {/* Two-Factor Authentication */}
-      <div className='bg-gray-50 rounded-lg p-6'>
-        <h3 className='text-lg font-medium text-gray-900 mb-4'>
+      <div className='bg-gray-50 dark:bg-gray-800 rounded-lg p-6'>
+        <h3 className='text-lg font-medium text-gray-900 dark:text-white mb-4'>
           Two-Factor Authentication
         </h3>
-        <p className='text-gray-600 mb-4'>
+        <p className='text-gray-600 dark:text-gray-300 mb-4'>
           Add an extra layer of security to your account
         </p>
         <button className='px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors'>
@@ -528,24 +557,28 @@ function SecuritySettings() {
       </div>
 
       {/* Login Sessions */}
-      <div className='bg-gray-50 rounded-lg p-6'>
-        <h3 className='text-lg font-medium text-gray-900 mb-4'>
+      <div className='bg-gray-50 dark:bg-gray-800 rounded-lg p-6'>
+        <h3 className='text-lg font-medium text-gray-900 dark:text-white mb-4'>
           Active Sessions
         </h3>
         <div className='space-y-3'>
-          <div className='flex items-center justify-between p-3 bg-white rounded-lg border'>
+          <div className='flex items-center justify-between p-3 bg-white dark:bg-gray-700 rounded-lg border dark:border-gray-600'>
             <div>
-              <p className='font-medium'>Chrome on Windows</p>
-              <p className='text-sm text-gray-600'>Last active: 2 hours ago</p>
+              <p className='font-medium dark:text-white'>Chrome on Windows</p>
+              <p className='text-sm text-gray-600 dark:text-gray-300'>
+                Last active: 2 hours ago
+              </p>
             </div>
             <button className='text-red-600 hover:text-red-700 text-sm font-medium'>
               Revoke
             </button>
           </div>
-          <div className='flex items-center justify-between p-3 bg-white rounded-lg border'>
+          <div className='flex items-center justify-between p-3 bg-white dark:bg-gray-700 rounded-lg border dark:border-gray-600'>
             <div>
-              <p className='font-medium'>Safari on iPhone</p>
-              <p className='text-sm text-gray-600'>Last active: 1 day ago</p>
+              <p className='font-medium dark:text-white'>Safari on iPhone</p>
+              <p className='text-sm text-gray-600 dark:text-gray-300'>
+                Last active: 1 day ago
+              </p>
             </div>
             <button className='text-red-600 hover:text-red-700 text-sm font-medium'>
               Revoke
@@ -559,59 +592,63 @@ function SecuritySettings() {
 
 // Appearance Settings Component
 function AppearanceSettings() {
-  const [theme, setTheme] = useState('light');
+  const { theme, setTheme } = useTheme();
   const [fontSize, setFontSize] = useState('medium');
   const [compactMode, setCompactMode] = useState(false);
 
   return (
     <div className='space-y-6'>
-      <h2 className='text-xl font-semibold text-gray-900'>
+      <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
         Appearance Settings
       </h2>
 
       {/* Theme Selection */}
-      <div className='bg-gray-50 rounded-lg p-6'>
-        <h3 className='text-lg font-medium text-gray-900 mb-4'>Theme</h3>
+      <div className='bg-gray-50 dark:bg-gray-800 rounded-lg p-6'>
+        <h3 className='text-lg font-medium text-gray-900 dark:text-white mb-4'>
+          Theme
+        </h3>
         <div className='grid grid-cols-3 gap-4'>
           <button
             onClick={() => setTheme('light')}
             className={`p-4 rounded-lg border-2 transition-all ${
               theme === 'light'
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 bg-white hover:border-gray-300'
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500'
             }`}
           >
             <FiSun className='w-8 h-8 mx-auto mb-2 text-yellow-500' />
-            <p className='font-medium'>Light</p>
+            <p className='font-medium dark:text-white'>Light</p>
           </button>
           <button
             onClick={() => setTheme('dark')}
             className={`p-4 rounded-lg border-2 transition-all ${
               theme === 'dark'
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 bg-white hover:border-gray-300'
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500'
             }`}
           >
-            <FiMoon className='w-8 h-8 mx-auto mb-2 text-gray-600' />
-            <p className='font-medium'>Dark</p>
+            <FiMoon className='w-8 h-8 mx-auto mb-2 text-gray-600 dark:text-gray-300' />
+            <p className='font-medium dark:text-white'>Dark</p>
           </button>
           <button
             onClick={() => setTheme('auto')}
             className={`p-4 rounded-lg border-2 transition-all ${
               theme === 'auto'
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 bg-white hover:border-gray-300'
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500'
             }`}
           >
             <FiGlobe className='w-8 h-8 mx-auto mb-2 text-blue-500' />
-            <p className='font-medium'>Auto</p>
+            <p className='font-medium dark:text-white'>Auto</p>
           </button>
         </div>
       </div>
 
       {/* Font Size */}
-      <div className='bg-gray-50 rounded-lg p-6'>
-        <h3 className='text-lg font-medium text-gray-900 mb-4'>Font Size</h3>
+      <div className='bg-gray-50 dark:bg-gray-800 rounded-lg p-6'>
+        <h3 className='text-lg font-medium text-gray-900 dark:text-white mb-4'>
+          Font Size
+        </h3>
         <div className='space-y-3'>
           {['small', 'medium', 'large'].map((size) => (
             <label key={size} className='flex items-center'>
@@ -623,25 +660,27 @@ function AppearanceSettings() {
                 onChange={(e) => setFontSize(e.target.value)}
                 className='mr-3'
               />
-              <span className='capitalize'>{size}</span>
+              <span className='capitalize dark:text-white'>{size}</span>
             </label>
           ))}
         </div>
       </div>
 
       {/* Compact Mode */}
-      <div className='bg-gray-50 rounded-lg p-6'>
+      <div className='bg-gray-50 dark:bg-gray-800 rounded-lg p-6'>
         <div className='flex items-center justify-between'>
           <div>
-            <h3 className='text-lg font-medium text-gray-900'>Compact Mode</h3>
-            <p className='text-gray-600'>
+            <h3 className='text-lg font-medium text-gray-900 dark:text-white'>
+              Compact Mode
+            </h3>
+            <p className='text-gray-600 dark:text-gray-300'>
               Reduce spacing for a more compact layout
             </p>
           </div>
           <button
             onClick={() => setCompactMode(!compactMode)}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              compactMode ? 'bg-blue-600' : 'bg-gray-300'
+              compactMode ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
             }`}
           >
             <span

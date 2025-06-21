@@ -30,7 +30,14 @@ const Star = () => (
   </svg>
 );
 const QuoteIcon = () => (
-  <svg width='32' height='32' fill='none' viewBox='0 0 24 24' stroke='#E5E7EB'>
+  <svg
+    width='32'
+    height='32'
+    fill='none'
+    viewBox='0 0 24 24'
+    stroke='#E5E7EB'
+    className='dark:stroke-gray-600'
+  >
     <path
       d='M7 17a4 4 0 0 1 4-4V7a4 4 0 0 0-4 4v6zm10 0a4 4 0 0 1 4-4V7a4 4 0 0 0-4 4v6z'
       strokeWidth='2'
@@ -49,7 +56,7 @@ const ArrowButton = ({
   <button
     onClick={onClick}
     disabled={disabled}
-    className='w-12 h-12 flex items-center justify-center bg-white rounded-lg shadow border border-gray-200 hover:bg-blue-50 transition disabled:opacity-50'
+    className='w-12 h-12 flex items-center justify-center bg-white dark:bg-gray-700 rounded-lg shadow dark:shadow-gray-900/20 border border-gray-200 dark:border-gray-600 hover:bg-blue-50 dark:hover:bg-gray-600 transition disabled:opacity-50'
     aria-label={left ? 'Previous' : 'Next'}
   >
     <svg
@@ -58,6 +65,7 @@ const ArrowButton = ({
       fill='none'
       viewBox='0 0 24 24'
       stroke='#2563eb'
+      className='dark:stroke-blue-400'
       strokeWidth='2'
     >
       {left ? <path d='M15 19l-7-7 7-7' /> : <path d='M9 5l7 7-7 7' />}
@@ -73,9 +81,9 @@ export default function Testimonials() {
     testimonials[(index + 2) % testimonials.length],
   ];
   return (
-    <section className='py-12 sm:py-16 lg:py-20 bg-[#F6F8FA]'>
+    <section className='py-12 sm:py-16 lg:py-20 bg-[#F6F8FA] dark:bg-gray-900'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-        <h2 className='text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 lg:mb-14'>
+        <h2 className='text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 lg:mb-14 text-gray-900 dark:text-white'>
           Clients Testimonial
         </h2>
         <div className='flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6'>
@@ -93,7 +101,7 @@ export default function Testimonials() {
             {visible.map((t, i) => (
               <div
                 key={i}
-                className='bg-white rounded-2xl shadow-lg p-6 sm:p-8 flex-1 flex flex-col justify-between min-h-[280px] sm:min-h-[320px] relative'
+                className='bg-white dark:bg-gray-800 rounded-2xl shadow-lg dark:shadow-gray-900/20 p-6 sm:p-8 flex-1 flex flex-col justify-between min-h-[280px] sm:min-h-[320px] relative'
               >
                 <div>
                   <div className='flex gap-1 mb-4'>
@@ -101,7 +109,7 @@ export default function Testimonials() {
                       <Star key={i} />
                     ))}
                   </div>
-                  <div className='text-gray-600 text-base sm:text-lg mb-6 sm:mb-8'>
+                  <div className='text-gray-600 dark:text-gray-300 text-base sm:text-lg mb-6 sm:mb-8'>
                     "{t.text}"
                   </div>
                 </div>
@@ -109,13 +117,13 @@ export default function Testimonials() {
                   <img
                     src={t.avatar}
                     alt={t.name}
-                    className='w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-white shadow'
+                    className='w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-white dark:border-gray-700 shadow'
                   />
                   <div>
-                    <div className='font-semibold text-gray-900 text-sm sm:text-base'>
+                    <div className='font-semibold text-gray-900 dark:text-white text-sm sm:text-base'>
                       {t.name}
                     </div>
-                    <div className='text-gray-400 text-xs sm:text-sm'>
+                    <div className='text-gray-400 dark:text-gray-400 text-xs sm:text-sm'>
                       {t.role}
                     </div>
                   </div>
@@ -151,8 +159,8 @@ export default function Testimonials() {
               key={i}
               className={
                 i === index
-                  ? 'w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-blue-600 inline-block'
-                  : 'w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-blue-200 inline-block'
+                  ? 'w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-blue-600 dark:bg-blue-400 inline-block'
+                  : 'w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-blue-200 dark:bg-blue-900/30 inline-block'
               }
             />
           ))}

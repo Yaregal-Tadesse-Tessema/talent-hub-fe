@@ -378,13 +378,13 @@ export default function CVBuilderPage() {
   };
 
   return (
-    <div className='min-h-screen bg-gray-50 py-12'>
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-900 py-12'>
       <div className='md:max-w-6xl mx-auto px-4 sm:px-6 lg:px-8'>
         {/* Sample Data Button */}
         <div className='mb-8 flex justify-end'>
           <button
             onClick={handleFillSampleData}
-            className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+            className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-900 transition-colors'
           >
             Fill Sample Data
           </button>
@@ -403,8 +403,8 @@ export default function CVBuilderPage() {
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center ${
                     index <= currentStep
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-600'
+                      ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
                   }`}
                 >
                   {index + 1}
@@ -412,14 +412,16 @@ export default function CVBuilderPage() {
                 {index !== steps.length - 1 && (
                   <div
                     className={`flex-1 h-1 mx-2 ${
-                      index < currentStep ? 'bg-blue-600' : 'bg-gray-200'
+                      index < currentStep
+                        ? 'bg-blue-600 dark:bg-blue-500'
+                        : 'bg-gray-200 dark:bg-gray-700'
                     }`}
                   />
                 )}
               </div>
             ))}
           </div>
-          <div className='flex justify-between text-sm text-gray-600'>
+          <div className='flex justify-between text-sm text-gray-600 dark:text-gray-400'>
             {steps.map((step) => (
               <span key={step.id}>{step.title}</span>
             ))}
@@ -427,7 +429,7 @@ export default function CVBuilderPage() {
         </div>
 
         {/* Form Content */}
-        <div className='bg-white rounded-lg shadow-lg p-6'>
+        <div className='bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700'>
           <AnimatePresence mode='wait'>
             <motion.div
               key={currentStep}
@@ -445,17 +447,17 @@ export default function CVBuilderPage() {
             <button
               onClick={handleBack}
               disabled={currentStep === 0}
-              className={`px-4 py-2 rounded-md ${
+              className={`px-4 py-2 rounded-md transition-colors ${
                 currentStep === 0
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                  : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
               }`}
             >
               Back
             </button>
             <button
               onClick={handleNext}
-              className='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700'
+              className='px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors'
             >
               {currentStep === steps.length - 1 ? 'Finish' : 'Next'}
             </button>
@@ -464,25 +466,25 @@ export default function CVBuilderPage() {
 
         {/* Confirmation Dialog */}
         {showConfirmationDialog && (
-          <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4'>
-            <div className='bg-white rounded-lg p-6 max-w-md w-full'>
-              <h3 className='text-lg font-medium text-gray-900 mb-4'>
+          <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50'>
+            <div className='bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full border border-gray-200 dark:border-gray-700'>
+              <h3 className='text-lg font-medium text-gray-900 dark:text-white mb-4'>
                 Generate Resume
               </h3>
-              <p className='text-gray-600 mb-6'>
+              <p className='text-gray-600 dark:text-gray-300 mb-6'>
                 Are you ready to generate your resume? This will create a PDF
                 file that you can download.
               </p>
               <div className='flex justify-end space-x-3'>
                 <button
                   onClick={() => setShowConfirmationDialog(false)}
-                  className='px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50'
+                  className='px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors'
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleGenerateResume}
-                  className='px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700'
+                  className='px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors'
                 >
                   Generate Resume
                 </button>
@@ -493,18 +495,18 @@ export default function CVBuilderPage() {
 
         {/* Generation Progress */}
         {isGeneratingResume && (
-          <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4'>
-            <div className='bg-white rounded-lg p-6 max-w-md w-full'>
-              <h3 className='text-lg font-medium text-gray-900 mb-4'>
+          <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50'>
+            <div className='bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full border border-gray-200 dark:border-gray-700'>
+              <h3 className='text-lg font-medium text-gray-900 dark:text-white mb-4'>
                 Generating Resume
               </h3>
-              <div className='w-full bg-gray-200 rounded-full h-2.5 mb-4'>
+              <div className='w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-4'>
                 <div
-                  className='bg-blue-600 h-2.5 rounded-full transition-all duration-300'
+                  className='bg-blue-600 dark:bg-blue-500 h-2.5 rounded-full transition-all duration-300'
                   style={{ width: `${resumeGenerationProgress}%` }}
                 />
               </div>
-              <p className='text-sm text-gray-600 text-center'>
+              <p className='text-sm text-gray-600 dark:text-gray-300 text-center'>
                 {resumeGenerationProgress}% Complete
               </p>
             </div>

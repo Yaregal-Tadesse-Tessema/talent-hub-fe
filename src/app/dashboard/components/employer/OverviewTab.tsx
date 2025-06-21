@@ -83,7 +83,7 @@ export default function OverviewTab() {
     return (
       <div className='flex-1 p-6'>
         <div className='flex justify-center items-center h-64'>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400'></div>
         </div>
       </div>
     );
@@ -93,7 +93,7 @@ export default function OverviewTab() {
     return (
       <div className='flex-1 p-6'>
         <div className='flex justify-center items-center h-64'>
-          <div className='text-red-500'>{error}</div>
+          <div className='text-red-500 dark:text-red-400'>{error}</div>
         </div>
       </div>
     );
@@ -112,37 +112,45 @@ export default function OverviewTab() {
         />
       )}
       {/* Header */}
-      <h1 className='text-2xl font-bold mb-1'>Hello, {user?.firstName}</h1>
-      <p className='text-gray-500 mb-8'>
+      <h1 className='text-2xl font-bold mb-1 text-gray-900 dark:text-white'>
+        Hello, {user?.firstName}
+      </h1>
+      <p className='text-gray-500 dark:text-gray-400 mb-8'>
         Here is your daily activities and applications
       </p>
 
       {/* Stats Cards */}
       <div className='grid grid-cols-2 gap-6 mb-10'>
-        <div className='bg-white rounded-lg shadow p-6 flex items-center gap-4'>
+        <div className='bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex items-center gap-4 border border-gray-200 dark:border-gray-700'>
           <span className='text-3xl'>📁</span>
           <div>
-            <div className='text-2xl font-bold'>{jobs.length}</div>
-            <div className='text-gray-500'>Open Jobs</div>
+            <div className='text-2xl font-bold text-gray-900 dark:text-white'>
+              {jobs.length}
+            </div>
+            <div className='text-gray-500 dark:text-gray-400'>Open Jobs</div>
           </div>
         </div>
-        <div className='bg-white rounded-lg shadow p-6 flex items-center gap-4'>
+        <div className='bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex items-center gap-4 border border-gray-200 dark:border-gray-700'>
           <span className='text-3xl'>🗂️</span>
           <div>
-            <div className='text-2xl font-bold'>
+            <div className='text-2xl font-bold text-gray-900 dark:text-white'>
               {jobs.reduce((acc, job) => acc + (job.applicationCount || 0), 0)}
             </div>
-            <div className='text-gray-500'>Total Applications</div>
+            <div className='text-gray-500 dark:text-gray-400'>
+              Total Applications
+            </div>
           </div>
         </div>
       </div>
 
       {/* Recently Posted Jobs Table */}
-      <div className='bg-white rounded-lg shadow p-6'>
+      <div className='bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700'>
         <div className='flex items-center justify-between mb-4'>
-          <div className='font-semibold text-lg'>Recently Posted Jobs</div>
+          <div className='font-semibold text-lg text-gray-900 dark:text-white'>
+            Recently Posted Jobs
+          </div>
           <button
-            className='text-blue-600 hover:underline text-sm'
+            className='text-blue-600 dark:text-blue-400 hover:underline text-sm'
             onClick={() => router.push('/my-jobs')}
           >
             View all →
@@ -151,7 +159,7 @@ export default function OverviewTab() {
         <div className='overflow-x-auto'>
           <table className='min-w-full text-sm'>
             <thead>
-              <tr className='text-gray-400 text-left'>
+              <tr className='text-gray-400 dark:text-gray-500 text-left'>
                 <th className='py-2 px-4'>Job</th>
                 <th className='py-2 px-4'>Status</th>
                 <th className='py-2 px-4'>Applications</th>
@@ -166,10 +174,15 @@ export default function OverviewTab() {
                 );
 
                 return (
-                  <tr key={job.id} className='border-t'>
+                  <tr
+                    key={job.id}
+                    className='border-t border-gray-200 dark:border-gray-700'
+                  >
                     <td className='py-3 px-4'>
-                      <div className='font-medium'>{job.title}</div>
-                      <div className='text-gray-400 text-xs flex gap-2 items-center'>
+                      <div className='font-medium text-gray-900 dark:text-white'>
+                        {job.title}
+                      </div>
+                      <div className='text-gray-400 dark:text-gray-500 text-xs flex gap-2 items-center'>
                         <span>{job.employmentType}</span>
                         <span>•</span>
                         <span>{daysRemaining} days remaining</span>
@@ -179,16 +192,16 @@ export default function OverviewTab() {
                       <span
                         className={`font-medium ${
                           job.status === 'Posted'
-                            ? 'text-green-600'
+                            ? 'text-green-600 dark:text-green-400'
                             : job.status === 'Withdrawn'
-                              ? 'text-red-500'
-                              : 'text-gray-600'
+                              ? 'text-red-500 dark:text-red-400'
+                              : 'text-gray-600 dark:text-gray-400'
                         }`}
                       >
                         {job.status || 'Draft'}
                       </span>
                     </td>
-                    <td className='py-3 px-4'>
+                    <td className='py-3 px-4 text-gray-900 dark:text-white'>
                       {job.applicationCount || 0} Applications
                     </td>
                     <td className='py-3 px-4'>

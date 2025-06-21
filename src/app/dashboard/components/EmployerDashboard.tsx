@@ -65,28 +65,28 @@ function EmployerDashboardContent() {
   }
 
   return (
-    <div className='flex min-h-screen bg-gray-50'>
+    <div className='flex min-h-screen bg-gray-50 dark:bg-gray-900'>
       {/* Mobile Menu Button */}
       <button
-        className='fixed top-4 left-4 z-50 p-2 rounded-lg bg-white shadow-lg md:hidden'
+        className='fixed top-4 left-4 z-50 p-2 rounded-lg bg-white dark:bg-gray-800 shadow-lg md:hidden border border-gray-200 dark:border-gray-700'
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
       >
         {isSidebarOpen ? (
-          <FiX className='w-6 h-6' />
+          <FiX className='w-6 h-6 text-gray-700 dark:text-gray-300' />
         ) : (
-          <FiMenu className='w-6 h-6' />
+          <FiMenu className='w-6 h-6 text-gray-700 dark:text-gray-300' />
         )}
       </button>
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 w-64 pt-20 h-screen bg-white border-r transform transition-transform duration-200 ease-in-out md:translate-x-0 ${
+        className={`fixed top-0 left-0 z-40 w-64 pt-20 h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-200 ease-in-out md:translate-x-0 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className='flex flex-col h-full'>
           <div className='p-6'>
-            <h2 className='text-xs font-semibold text-gray-400 mb-6'>
+            <h2 className='text-xs font-semibold text-gray-400 dark:text-gray-500 mb-6'>
               EMPLOYER DASHBOARD
             </h2>
             <nav className='flex flex-col gap-2 overflow-y-auto'>
@@ -96,10 +96,10 @@ function EmployerDashboardContent() {
                   <button
                     key={tab.key}
                     onClick={() => handleTabChange(tab.key)}
-                    className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 ${
+                    className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors ${
                       activeTab === tab.key
-                        ? 'bg-blue-50 text-blue-600'
-                        : 'hover:bg-gray-100 text-gray-700'
+                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                        : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                     }`}
                   >
                     <Icon className='w-5 h-5' />
@@ -109,7 +109,7 @@ function EmployerDashboardContent() {
               })}
             </nav>
           </div>
-          <div className='mt-auto border-t p-6'></div>
+          <div className='mt-auto border-t border-gray-200 dark:border-gray-700 p-6'></div>
         </div>
       </aside>
 
@@ -127,7 +127,13 @@ function EmployerDashboardContent() {
 
 export default function EmployerDashboard() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className='flex min-h-screen bg-gray-50 dark:bg-gray-900 items-center justify-center'>
+          <div className='text-gray-600 dark:text-gray-300'>Loading...</div>
+        </div>
+      }
+    >
       <EmployerDashboardContent />
     </Suspense>
   );

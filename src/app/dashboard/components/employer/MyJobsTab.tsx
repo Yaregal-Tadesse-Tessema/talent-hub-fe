@@ -173,7 +173,7 @@ export default function MyJobsTab() {
     return (
       <div className='flex-1 p-6'>
         <div className='flex justify-center items-center h-64'>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400'></div>
         </div>
       </div>
     );
@@ -183,7 +183,7 @@ export default function MyJobsTab() {
     return (
       <div className='flex-1 p-6'>
         <div className='flex justify-center items-center h-64'>
-          <div className='text-red-500'>{error}</div>
+          <div className='text-red-500 dark:text-red-400'>{error}</div>
         </div>
       </div>
     );
@@ -202,17 +202,17 @@ export default function MyJobsTab() {
     <div className='flex-1'>
       {showConfirmDialog && pendingStatusChange && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-          <div className='bg-white rounded-lg p-6 max-w-md w-full mx-4'>
-            <h3 className='text-lg font-semibold mb-4'>
+          <div className='bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 border border-gray-200 dark:border-gray-700'>
+            <h3 className='text-lg font-semibold mb-4 text-gray-900 dark:text-white'>
               Confirm Status Change
             </h3>
-            <p className='mb-6'>
+            <p className='mb-6 text-gray-600 dark:text-gray-300'>
               Are you sure you want to change this job's status to{' '}
               {pendingStatusChange.status.toLowerCase()}?
             </p>
             <div className='flex justify-end gap-4'>
               <button
-                className='px-4 py-2 text-gray-600 hover:bg-gray-100 rounded'
+                className='px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded'
                 onClick={() => {
                   setShowConfirmDialog(false);
                   setPendingStatusChange(null);
@@ -240,11 +240,13 @@ export default function MyJobsTab() {
           }}
         />
       )}
-      <div className='bg-white rounded-lg shadow p-6'>
+      <div className='bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700'>
         <div className='flex items-center justify-between mb-4'>
-          <div className='font-semibold text-lg'>Jobs ({jobs.length})</div>
+          <div className='font-semibold text-lg text-gray-900 dark:text-white'>
+            Jobs ({jobs.length})
+          </div>
           <select
-            className='border w-24 rounded px-3 py-1 text-sm text-gray-600'
+            className='border border-gray-300 dark:border-gray-600 w-24 rounded px-3 py-1 text-sm text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700'
             value={filter}
             onChange={(e) => {
               setFilter(e.target.value as 'all' | 'active' | 'expired');
@@ -261,7 +263,7 @@ export default function MyJobsTab() {
         <div className='overflow-x-auto'>
           <table className='min-w-full text-sm'>
             <thead>
-              <tr className='text-gray-400 text-left'>
+              <tr className='text-gray-400 dark:text-gray-500 text-left'>
                 <th className='py-2 px-4'>Job</th>
                 <th className='py-2 px-4'>Status</th>
                 <th className='py-2 px-4'>Applications</th>
@@ -278,11 +280,13 @@ export default function MyJobsTab() {
                 return (
                   <tr
                     key={job.id}
-                    className='border-t transition-colors group hover:border-b hover:border-r hover:border-l hover:bg-blue-50 hover:border-blue-600'
+                    className='border-t border-gray-200 dark:border-gray-700 transition-colors group hover:border-b hover:border-r hover:border-l hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-600 dark:hover:border-blue-400'
                   >
                     <td className='py-3 px-4'>
-                      <div className='font-medium'>{job.title}</div>
-                      <div className='text-gray-400 text-xs flex gap-2 items-center'>
+                      <div className='font-medium text-gray-900 dark:text-white'>
+                        {job.title}
+                      </div>
+                      <div className='text-gray-400 dark:text-gray-500 text-xs flex gap-2 items-center'>
                         <span>{job.employmentType}</span>
                         <span>•</span>
                         <span>
@@ -299,16 +303,16 @@ export default function MyJobsTab() {
                       <span
                         className={`font-medium ${
                           job.status === 'Posted'
-                            ? 'text-green-600'
+                            ? 'text-green-600 dark:text-green-400'
                             : job.status === 'Withdrawn'
-                              ? 'text-red-500'
-                              : 'text-gray-600'
+                              ? 'text-red-500 dark:text-red-400'
+                              : 'text-gray-600 dark:text-gray-400'
                         }`}
                       >
                         {job.status || 'Draft'}
                       </span>
                     </td>
-                    <td className='py-3 px-4'>
+                    <td className='py-3 px-4 text-gray-900 dark:text-white'>
                       {job.applicationCount || 0} Applications
                     </td>
                     <td className='py-3 px-4'>
@@ -327,26 +331,28 @@ export default function MyJobsTab() {
                         }}
                       >
                         <button
-                          className='w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 border border-gray-200'
+                          className='w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
                           onClick={() =>
                             setOpenMenuId(openMenuId === job.id ? null : job.id)
                           }
                           aria-label='Open actions menu'
                           type='button'
                         >
-                          <span className='text-xl'>⋮</span>
+                          <span className='text-xl text-gray-700 dark:text-gray-300'>
+                            ⋮
+                          </span>
                         </button>
                         {openMenuId === job.id && (
-                          <div className='absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-10'>
+                          <div className='absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded shadow-lg z-10'>
                             <button
-                              className='block w-full text-left px-4 py-2 hover:bg-gray-100'
+                              className='block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                               onClick={() => handleViewDetail(job)}
                             >
                               View Detail
                             </button>
                             {job.status === 'Draft' && (
                               <button
-                                className='block w-full text-left px-4 py-2 hover:bg-gray-100'
+                                className='block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                                 onClick={() => handleDeleteJob(job.id)}
                               >
                                 Delete Job
@@ -354,7 +360,7 @@ export default function MyJobsTab() {
                             )}
                             {job.applicationCount === 0 && (
                               <button
-                                className='block w-full text-left px-4 py-2 hover:bg-gray-100'
+                                className='block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                                 onClick={() =>
                                   handleStatusChange(job.id, 'Withdrawn')
                                 }
@@ -364,7 +370,7 @@ export default function MyJobsTab() {
                             )}
                             {(!job.status || job.status === 'Draft') && (
                               <button
-                                className='block w-full text-left px-4 py-2 hover:bg-gray-100'
+                                className='block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                                 onClick={() =>
                                   handleStatusChange(job.id, 'Posted')
                                 }
@@ -385,7 +391,7 @@ export default function MyJobsTab() {
         {/* Pagination */}
         <div className='flex justify-center items-center gap-2 mt-8'>
           <button
-            className='w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 border border-gray-200 disabled:opacity-50'
+            className='w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 disabled:opacity-50 text-gray-700 dark:text-gray-300'
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
           >
@@ -394,14 +400,18 @@ export default function MyJobsTab() {
           {Array.from({ length: totalPages }, (_, i) => (
             <button
               key={i + 1}
-              className={`w-8 h-8 flex items-center justify-center rounded-full border text-sm font-medium ${page === i + 1 ? 'bg-blue-600 text-white' : 'hover:bg-gray-100 border-gray-200 text-gray-700'}`}
+              className={`w-8 h-8 flex items-center justify-center rounded-full border text-sm font-medium ${
+                page === i + 1
+                  ? 'bg-blue-600 text-white'
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+              }`}
               onClick={() => setPage(i + 1)}
             >
               {String(i + 1).padStart(2, '0')}
             </button>
           ))}
           <button
-            className='w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 border border-gray-200 disabled:opacity-50'
+            className='w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 disabled:opacity-50 text-gray-700 dark:text-gray-300'
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
           >

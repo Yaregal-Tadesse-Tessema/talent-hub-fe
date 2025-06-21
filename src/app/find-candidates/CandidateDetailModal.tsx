@@ -12,10 +12,10 @@ const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
   if (!candidate) return null;
   return (
     <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40'>
-      <div className='bg-white rounded-xl shadow-2xl w-full max-w-4xl p-8 relative my-8 overflow-y-auto max-h-[calc(100vh-4rem)]'>
+      <div className='bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl p-8 relative my-8 overflow-y-auto max-h-[calc(100vh-4rem)]'>
         {/* Close Button */}
         <button
-          className='absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl'
+          className='absolute top-4 right-4 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-2xl'
           onClick={onClose}
           aria-label='Close'
         >
@@ -23,25 +23,40 @@ const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
         </button>
         {/* Header */}
         <div className='flex items-center gap-4 mb-6'>
-          <div className='w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center'>
+          <div className='w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center'>
             {/* Profile image placeholder */}
             <svg width='40' height='40' fill='none' viewBox='0 0 32 32'>
-              <rect width='32' height='32' rx='16' fill='#E5E7EB' />
+              <rect
+                width='32'
+                height='32'
+                rx='16'
+                fill='#E5E7EB'
+                className='dark:fill-gray-600'
+              />
               <path
                 d='M16 18c-3.314 0-6 2.239-6 5v1h12v-1c0-2.761-2.686-5-6-5z'
                 fill='#D1D5DB'
+                className='dark:fill-gray-500'
               />
-              <circle cx='16' cy='12' r='5' fill='#D1D5DB' />
+              <circle
+                cx='16'
+                cy='12'
+                r='5'
+                fill='#D1D5DB'
+                className='dark:fill-gray-500'
+              />
             </svg>
           </div>
           <div>
-            <div className='font-semibold text-lg text-gray-800'>
+            <div className='font-semibold text-lg text-gray-800 dark:text-white'>
               {candidate.name}
             </div>
-            <div className='text-gray-500 text-sm'>{candidate.title}</div>
+            <div className='text-gray-500 dark:text-gray-400 text-sm'>
+              {candidate.title}
+            </div>
           </div>
           <div className='ml-auto flex items-center gap-2'>
-            <button className='border rounded p-2 hover:bg-blue-600 hover:text-white bg-blue-50 text-blue-600'>
+            <button className='border border-gray-200 dark:border-gray-600 rounded p-2 hover:bg-blue-600 hover:text-white bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'>
               <svg
                 width='18'
                 height='18'
@@ -65,8 +80,10 @@ const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
           {/* Left: Bio and Cover Letter */}
           <div className='flex-1 min-w-0'>
             <div className='mb-4'>
-              <div className='font-semibold text-gray-700 mb-1'>BIOGRAPHY</div>
-              <div className='text-gray-600 text-sm'>
+              <div className='font-semibold text-gray-700 dark:text-gray-300 mb-1'>
+                BIOGRAPHY
+              </div>
+              <div className='text-gray-600 dark:text-gray-400 text-sm'>
                 {/* Placeholder biography */}
                 I've been passionate about graphic design and digital art from
                 an early age with a keen interest in Website and Mobile
@@ -78,10 +95,10 @@ const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
               </div>
             </div>
             <div className='mb-4'>
-              <div className='font-semibold text-gray-700 mb-1'>
+              <div className='font-semibold text-gray-700 dark:text-gray-300 mb-1'>
                 COVER LETTER
               </div>
-              <div className='text-gray-600 text-sm whitespace-pre-line'>
+              <div className='text-gray-600 dark:text-gray-400 text-sm whitespace-pre-line'>
                 {/* Placeholder cover letter */}
                 Dear Sir,\n\nI am writing to express my interest in the front
                 grade instructional position that is currently available in the
@@ -100,13 +117,13 @@ const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
               </div>
             </div>
             <div className='mt-6'>
-              <div className='font-medium text-gray-600 mb-2'>
+              <div className='font-medium text-gray-600 dark:text-gray-400 mb-2'>
                 Follow me Social Media
               </div>
               <div className='flex gap-2'>
                 <a
                   href='#'
-                  className='bg-blue-100 text-blue-600 rounded p-2 hover:bg-blue-200'
+                  className='bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded p-2 hover:bg-blue-200 dark:hover:bg-blue-900/50'
                 >
                   <svg
                     width='16'
@@ -119,7 +136,7 @@ const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                 </a>
                 <a
                   href='#'
-                  className='bg-blue-100 text-blue-600 rounded p-2 hover:bg-blue-200'
+                  className='bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded p-2 hover:bg-blue-200 dark:hover:bg-blue-900/50'
                 >
                   <svg
                     width='16'
@@ -132,7 +149,7 @@ const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                 </a>
                 <a
                   href='#'
-                  className='bg-blue-100 text-blue-600 rounded p-2 hover:bg-blue-200'
+                  className='bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded p-2 hover:bg-blue-200 dark:hover:bg-blue-900/50'
                 >
                   <svg
                     width='16'
@@ -145,7 +162,7 @@ const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                 </a>
                 <a
                   href='#'
-                  className='bg-blue-100 text-blue-600 rounded p-2 hover:bg-blue-200'
+                  className='bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded p-2 hover:bg-blue-200 dark:hover:bg-blue-900/50'
                 >
                   <svg
                     width='16'
@@ -158,7 +175,7 @@ const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                 </a>
                 <a
                   href='#'
-                  className='bg-blue-100 text-blue-600 rounded p-2 hover:bg-blue-200'
+                  className='bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded p-2 hover:bg-blue-200 dark:hover:bg-blue-900/50'
                 >
                   <svg
                     width='16'
@@ -174,46 +191,60 @@ const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
           </div>
           {/* Right: Info */}
           <div className='w-80 flex flex-col gap-4'>
-            <div className='bg-gray-50 rounded-lg p-4 flex flex-col gap-2'>
-              <div className='flex gap-2 flex-wrap text-xs text-gray-500'>
+            <div className='bg-gray-50 dark:bg-gray-700 rounded-lg p-4 flex flex-col gap-2'>
+              <div className='flex gap-2 flex-wrap text-xs text-gray-500 dark:text-gray-400'>
                 <div className='flex-1 min-w-[120px]'>
-                  <div className='font-semibold text-gray-700'>
+                  <div className='font-semibold text-gray-700 dark:text-gray-300'>
                     DATE OF BIRTH
                   </div>
-                  <div>14 June, 2021</div>
+                  <div className='dark:text-white'>14 June, 2021</div>
                 </div>
                 <div className='flex-1 min-w-[120px]'>
-                  <div className='font-semibold text-gray-700'>NATIONALITY</div>
-                  <div>Bangladesh</div>
+                  <div className='font-semibold text-gray-700 dark:text-gray-300'>
+                    NATIONALITY
+                  </div>
+                  <div className='dark:text-white'>Bangladesh</div>
                 </div>
                 <div className='flex-1 min-w-[120px]'>
-                  <div className='font-semibold text-gray-700'>
+                  <div className='font-semibold text-gray-700 dark:text-gray-300'>
                     MARITAL STATUS
                   </div>
-                  <div>Single</div>
+                  <div className='dark:text-white'>Single</div>
                 </div>
                 <div className='flex-1 min-w-[120px]'>
-                  <div className='font-semibold text-gray-700'>GENDER</div>
-                  <div>{candidate.gender}</div>
+                  <div className='font-semibold text-gray-700 dark:text-gray-300'>
+                    GENDER
+                  </div>
+                  <div className='dark:text-white'>{candidate.gender}</div>
                 </div>
                 <div className='flex-1 min-w-[120px]'>
-                  <div className='font-semibold text-gray-700'>EXPERIENCE</div>
-                  <div>{candidate.experience || '7 Years'}</div>
+                  <div className='font-semibold text-gray-700 dark:text-gray-300'>
+                    EXPERIENCE
+                  </div>
+                  <div className='dark:text-white'>
+                    {candidate.experience || '7 Years'}
+                  </div>
                 </div>
                 <div className='flex-1 min-w-[120px]'>
-                  <div className='font-semibold text-gray-700'>EDUCATIONS</div>
-                  <div>{candidate.education || 'Master Degree'}</div>
+                  <div className='font-semibold text-gray-700 dark:text-gray-300'>
+                    EDUCATIONS
+                  </div>
+                  <div className='dark:text-white'>
+                    {candidate.education || 'Master Degree'}
+                  </div>
                 </div>
               </div>
             </div>
-            <div className='bg-gray-50 rounded-lg p-4 flex items-center gap-2'>
+            <div className='bg-gray-50 dark:bg-gray-700 rounded-lg p-4 flex items-center gap-2'>
               <div className='flex-1'>
-                <div className='font-semibold text-gray-700 text-sm'>
+                <div className='font-semibold text-gray-700 dark:text-gray-300 text-sm'>
                   Download My Resume
                 </div>
-                <div className='text-xs text-gray-500'>Esther Howard PDF</div>
+                <div className='text-xs text-gray-500 dark:text-gray-400'>
+                  Esther Howard PDF
+                </div>
               </div>
-              <button className='bg-blue-100 text-blue-600 rounded p-2 hover:bg-blue-200'>
+              <button className='bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded p-2 hover:bg-blue-200 dark:hover:bg-blue-900/50'>
                 <svg
                   width='20'
                   height='20'
@@ -230,18 +261,18 @@ const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                 </svg>
               </button>
             </div>
-            <div className='bg-gray-50 rounded-lg p-4'>
-              <div className='font-semibold text-gray-700 text-sm mb-2'>
+            <div className='bg-gray-50 dark:bg-gray-700 rounded-lg p-4'>
+              <div className='font-semibold text-gray-700 dark:text-gray-300 text-sm mb-2'>
                 Contact Information
               </div>
-              <div className='text-xs text-gray-500 mb-1 flex items-center gap-2'>
+              <div className='text-xs text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2'>
                 <svg
                   width='14'
                   height='14'
                   viewBox='0 0 24 24'
                   fill='none'
                   stroke='currentColor'
-                  className='text-blue-600'
+                  className='text-blue-600 dark:text-blue-400'
                   strokeWidth='2'
                   strokeLinecap='round'
                   strokeLinejoin='round'
@@ -250,15 +281,15 @@ const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                 </svg>
                 PHONE
               </div>
-              <div className='mb-2'>+1-202-555-0141</div>
-              <div className='text-xs text-gray-500 mb-1 flex items-center gap-2'>
+              <div className='mb-2 dark:text-white'>+1-202-555-0141</div>
+              <div className='text-xs text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2'>
                 <svg
                   width='14'
                   height='14'
                   viewBox='0 0 24 24'
                   fill='none'
                   stroke='currentColor'
-                  className='text-blue-600'
+                  className='text-blue-600 dark:text-blue-400'
                   strokeWidth='2'
                   strokeLinecap='round'
                   strokeLinejoin='round'
@@ -267,15 +298,15 @@ const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                 </svg>
                 SECONDARY PHONE
               </div>
-              <div className='mb-2'>+1-202-555-0189</div>
-              <div className='text-xs text-gray-500 mb-1 flex items-center gap-2'>
+              <div className='mb-2 dark:text-white'>+1-202-555-0189</div>
+              <div className='text-xs text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2'>
                 <svg
                   width='14'
                   height='14'
                   viewBox='0 0 24 24'
                   fill='none'
                   stroke='currentColor'
-                  className='text-blue-600'
+                  className='text-blue-600 dark:text-blue-400'
                   strokeWidth='2'
                   strokeLinecap='round'
                   strokeLinejoin='round'
@@ -285,15 +316,17 @@ const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                 </svg>
                 WEBSITE
               </div>
-              <div className='mb-2 text-blue-600'>www.estherhoward.com</div>
-              <div className='text-xs text-gray-500 mb-1 flex items-center gap-2'>
+              <div className='mb-2 text-blue-600 dark:text-blue-400'>
+                www.estherhoward.com
+              </div>
+              <div className='text-xs text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2'>
                 <svg
                   width='14'
                   height='14'
                   viewBox='0 0 24 24'
                   fill='none'
                   stroke='currentColor'
-                  className='text-blue-600'
+                  className='text-blue-600 dark:text-blue-400'
                   strokeWidth='2'
                   strokeLinecap='round'
                   strokeLinejoin='round'
@@ -303,15 +336,17 @@ const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                 </svg>
                 LOCATION
               </div>
-              <div className='mb-2'>Beverly Hills, California 90202</div>
-              <div className='text-xs text-gray-500 mb-1 flex items-center gap-2'>
+              <div className='mb-2 dark:text-white'>
+                Beverly Hills, California 90202
+              </div>
+              <div className='text-xs text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2'>
                 <svg
                   width='14'
                   height='14'
                   viewBox='0 0 24 24'
                   fill='none'
                   stroke='currentColor'
-                  className='text-blue-600'
+                  className='text-blue-600 dark:text-blue-400'
                   strokeWidth='2'
                   strokeLinecap='round'
                   strokeLinejoin='round'
@@ -321,7 +356,9 @@ const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                 </svg>
                 EMAIL ADDRESS
               </div>
-              <div className='mb-2'>esther.howard@gmail.com</div>
+              <div className='mb-2 dark:text-white'>
+                esther.howard@gmail.com
+              </div>
             </div>
           </div>
         </div>

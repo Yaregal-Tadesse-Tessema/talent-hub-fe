@@ -157,7 +157,7 @@ export default function AdditionalInfoStep({
                   setNewCertificate({ ...newCertificate, name: e.target.value })
                 }
                 placeholder='Certificate Name'
-                className='rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
+                className='rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400'
               />
               <input
                 type='text'
@@ -169,7 +169,7 @@ export default function AdditionalInfoStep({
                   })
                 }
                 placeholder='Issuing Organization'
-                className='rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
+                className='rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400'
               />
               <input
                 type='month'
@@ -177,21 +177,28 @@ export default function AdditionalInfoStep({
                 onChange={(e) =>
                   setNewCertificate({ ...newCertificate, date: e.target.value })
                 }
-                className='rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
+                className='rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white'
               />
             </div>
             <button
               onClick={handleAddCertificate}
-              className='w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700'
+              className='w-full py-2 px-4 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors'
             >
               Add Certificate
             </button>
             <div className='space-y-2'>
               {profile.certificates.map((cert, index) => (
-                <div key={index} className='bg-gray-50 p-3 rounded-md'>
-                  <h4 className='font-medium'>{cert.name}</h4>
-                  <p className='text-sm text-gray-600'>{cert.issuer}</p>
-                  <p className='text-sm text-gray-500'>{cert.date}</p>
+                <div
+                  key={index}
+                  className='bg-gray-50 dark:bg-gray-700 p-3 rounded-md border border-gray-200 dark:border-gray-600'
+                >
+                  <h4 className='font-medium dark:text-white'>{cert.name}</h4>
+                  <p className='text-sm text-gray-600 dark:text-gray-300'>
+                    {cert.issuer}
+                  </p>
+                  <p className='text-sm text-gray-500 dark:text-gray-400'>
+                    {cert.date}
+                  </p>
                 </div>
               ))}
             </div>
@@ -212,7 +219,7 @@ export default function AdditionalInfoStep({
                   })
                 }
                 placeholder='Publication Title'
-                className='rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
+                className='rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400'
               />
               <input
                 type='text'
@@ -224,7 +231,7 @@ export default function AdditionalInfoStep({
                   })
                 }
                 placeholder='Publisher'
-                className='rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
+                className='rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400'
               />
               <div className='grid grid-cols-2 gap-4'>
                 <input
@@ -236,7 +243,7 @@ export default function AdditionalInfoStep({
                       date: e.target.value,
                     })
                   }
-                  className='rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
+                  className='rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white'
                 />
                 <input
                   type='url'
@@ -248,28 +255,35 @@ export default function AdditionalInfoStep({
                     })
                   }
                   placeholder='URL'
-                  className='rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'
+                  className='rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400'
                 />
               </div>
             </div>
             <button
               onClick={handleAddPublication}
-              className='w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700'
+              className='w-full py-2 px-4 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors'
             >
               Add Publication
             </button>
             <div className='space-y-2'>
               {profile.publications.map((pub, index) => (
-                <div key={index} className='bg-gray-50 p-3 rounded-md'>
-                  <h4 className='font-medium'>{pub.title}</h4>
-                  <p className='text-sm text-gray-600'>{pub.publisher}</p>
-                  <p className='text-sm text-gray-500'>{pub.date}</p>
+                <div
+                  key={index}
+                  className='bg-gray-50 dark:bg-gray-700 p-3 rounded-md border border-gray-200 dark:border-gray-600'
+                >
+                  <h4 className='font-medium dark:text-white'>{pub.title}</h4>
+                  <p className='text-sm text-gray-600 dark:text-gray-300'>
+                    {pub.publisher}
+                  </p>
+                  <p className='text-sm text-gray-500 dark:text-gray-400'>
+                    {pub.date}
+                  </p>
                   {pub.url && (
                     <a
                       href={pub.url}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='text-sm text-blue-600 hover:text-blue-800'
+                      className='text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors'
                     >
                       View Publication
                     </a>
@@ -655,16 +669,17 @@ export default function AdditionalInfoStep({
   return (
     <div className='space-y-6'>
       <div>
-        <h2 className='text-2xl font-bold text-gray-900'>
+        <h2 className='text-2xl font-bold text-gray-900 dark:text-white'>
           Additional Information
         </h2>
-        <p className='mt-1 text-sm text-gray-500'>
-          Add any additional information that might strengthen your profile.
+        <p className='mt-1 text-sm text-gray-500 dark:text-gray-400'>
+          Add any additional information that might be relevant to your
+          application.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className='border-b border-gray-200'>
+      <div className='border-b border-gray-200 dark:border-gray-700'>
         <nav className='-mb-px flex space-x-8'>
           {[
             { id: 'certificates', label: 'Certificates' },
@@ -672,17 +687,17 @@ export default function AdditionalInfoStep({
             { id: 'projects', label: 'Projects' },
             { id: 'awards', label: 'Awards' },
             { id: 'interests', label: 'Interests' },
-            { id: 'volunteer', label: 'Volunteer Work' },
+            { id: 'volunteer', label: 'Volunteer' },
             { id: 'references', label: 'References' },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`${
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+              }`}
             >
               {tab.label}
             </button>

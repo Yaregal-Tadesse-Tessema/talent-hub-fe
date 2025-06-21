@@ -15,7 +15,7 @@ import CVBuilderSection from '@/components/home/CVBuilderSection';
 
 export default function HomePage() {
   return (
-    <main className='min-h-screen w-full overflow-x-hidden'>
+    <main className='min-h-screen w-full overflow-x-hidden bg-white dark:bg-gray-900 transition-colors duration-300'>
       <div className='w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8'>
         <HeroSection />
         <CVBuilderSection />

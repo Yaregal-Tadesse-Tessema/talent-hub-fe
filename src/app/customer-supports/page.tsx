@@ -128,39 +128,39 @@ export default function CustomerSupportPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
-    <div className='bg-gradient-to-b from-white to-blue-50'>
+    <div className='bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-800'>
       {/* Hero section */}
       <div className='relative isolate overflow-hidden'>
         <div className='absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80'>
-          <div className='relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-blue-200 to-blue-400 opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]' />
+          <div className='relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-blue-200 to-blue-400 opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem] dark:from-blue-400 dark:to-blue-600' />
         </div>
         <div className='mx-auto max-w-7xl px-6 pb-16 pt-8 sm:pb-24 lg:flex lg:px-8 lg:py-24'>
           <div className='mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0'>
             <div className='mt-8 sm:mt-12 lg:mt-8'>
               <a href='#' className='inline-flex space-x-6'>
-                <span className='rounded-full bg-blue-600/10 px-3 py-1 text-sm font-semibold leading-6 text-blue-600 ring-1 ring-inset ring-blue-600/10'>
+                <span className='rounded-full bg-blue-600/10 dark:bg-blue-400/20 px-3 py-1 text-sm font-semibold leading-6 text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-600/10 dark:ring-blue-400/20'>
                   What's new
                 </span>
-                <span className='inline-flex items-center space-x-2 text-sm font-medium leading-6 text-gray-600'>
+                <span className='inline-flex items-center space-x-2 text-sm font-medium leading-6 text-gray-600 dark:text-gray-300'>
                   <span>Just shipped v1.0</span>
                   <ChevronDownIcon
-                    className='h-5 w-5 text-gray-400'
+                    className='h-5 w-5 text-gray-400 dark:text-gray-500'
                     aria-hidden='true'
                   />
                 </span>
               </a>
             </div>
-            <h1 className='mt-6 text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl'>
+            <h1 className='mt-6 text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl'>
               How can we help you?
             </h1>
-            <p className='mt-4 text-lg leading-8 text-gray-600'>
+            <p className='mt-4 text-lg leading-8 text-gray-600 dark:text-gray-300'>
               We're here to help you make the most of TalentHub. Choose from our
               support channels below or browse our frequently asked questions.
             </p>
           </div>
         </div>
         <div className='absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]'>
-          <div className='relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-blue-200 to-blue-400 opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]' />
+          <div className='relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-blue-200 to-blue-400 opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem] dark:from-blue-400 dark:to-blue-600' />
         </div>
       </div>
 
@@ -170,23 +170,23 @@ export default function CustomerSupportPage() {
           <div className='grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3'>
             {supportChannels.map((channel) => (
               <div key={channel.name} className='group relative'>
-                <div className='flex h-full flex-col justify-between rounded-2xl bg-white p-8 ring-1 ring-gray-200 transition-all duration-300 hover:shadow-lg hover:ring-blue-500'>
+                <div className='flex h-full flex-col justify-between rounded-2xl bg-white dark:bg-gray-800 p-8 ring-1 ring-gray-200 dark:ring-gray-700 transition-all duration-300 hover:shadow-lg hover:ring-blue-500 dark:hover:ring-blue-400'>
                   <div>
-                    <div className='inline-flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white transition-transform duration-300 group-hover:scale-110'>
+                    <div className='inline-flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 dark:bg-blue-500 text-white transition-transform duration-300 group-hover:scale-110'>
                       {channel.icon}
                     </div>
-                    <h3 className='mt-4 text-lg font-semibold leading-8 text-gray-900'>
+                    <h3 className='mt-4 text-lg font-semibold leading-8 text-gray-900 dark:text-white'>
                       {channel.name}
                     </h3>
-                    <p className='mt-2 text-base leading-7 text-gray-600'>
+                    <p className='mt-2 text-base leading-7 text-gray-600 dark:text-gray-300'>
                       {channel.description}
                     </p>
                   </div>
                   <div className='mt-6'>
-                    <p className='text-sm font-semibold text-gray-900'>
+                    <p className='text-sm font-semibold text-gray-900 dark:text-white'>
                       {channel.contact}
                     </p>
-                    <p className='mt-1 text-sm text-gray-600'>
+                    <p className='mt-1 text-sm text-gray-600 dark:text-gray-400'>
                       Response time: {channel.responseTime}
                     </p>
                   </div>
@@ -199,17 +199,17 @@ export default function CustomerSupportPage() {
 
       {/* FAQ section */}
       <div className='mx-auto max-w-7xl px-6 lg:px-8 py-14 sm:py-32'>
-        <div className='mx-auto max-w-4xl divide-y divide-gray-900/10'>
-          <h2 className='text-2xl font-bold leading-10 tracking-tight text-gray-900'>
+        <div className='mx-auto max-w-4xl divide-y divide-gray-900/10 dark:divide-gray-100/10'>
+          <h2 className='text-2xl font-bold leading-10 tracking-tight text-gray-900 dark:text-white'>
             Frequently asked questions
           </h2>
-          <dl className='mt-10 space-y-6 divide-y divide-gray-900/10'>
+          <dl className='mt-10 space-y-6 divide-y divide-gray-900/10 dark:divide-gray-100/10'>
             {faqs.map((faq, index) => (
               <div key={faq.question} className='pt-6'>
                 <dt>
                   <button
                     onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                    className='flex w-full items-start justify-between text-left text-gray-900'
+                    className='flex w-full items-start justify-between text-left text-gray-900 dark:text-white'
                   >
                     <h3 className='text-base font-semibold leading-7'>
                       {faq.question}
@@ -229,7 +229,7 @@ export default function CustomerSupportPage() {
                     openFaq === index ? 'block' : 'hidden'
                   }`}
                 >
-                  <p className='text-base leading-7 text-gray-600'>
+                  <p className='text-base leading-7 text-gray-600 dark:text-gray-300'>
                     {faq.answer}
                   </p>
                 </dd>
@@ -242,25 +242,25 @@ export default function CustomerSupportPage() {
       {/* Resources section */}
       <div className='mx-auto max-w-7xl px-6 lg:px-8 py-24 sm:py-32'>
         <div className='mx-auto max-w-2xl lg:max-w-none'>
-          <h2 className='text-2xl font-bold leading-10 tracking-tight text-gray-900'>
+          <h2 className='text-2xl font-bold leading-10 tracking-tight text-gray-900 dark:text-white'>
             Helpful Resources
           </h2>
           <div className='mt-10 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4'>
             {resources.map((resource) => (
               <div key={resource.title} className='group relative'>
-                <div className='flex h-full flex-col justify-between rounded-2xl bg-white p-8 ring-1 ring-gray-200 transition-all duration-300 hover:shadow-lg hover:ring-blue-500'>
+                <div className='flex h-full flex-col justify-between rounded-2xl bg-white dark:bg-gray-800 p-8 ring-1 ring-gray-200 dark:ring-gray-700 transition-all duration-300 hover:shadow-lg hover:ring-blue-500 dark:hover:ring-blue-400'>
                   <div>
-                    <h3 className='text-lg font-semibold leading-8 text-gray-900'>
+                    <h3 className='text-lg font-semibold leading-8 text-gray-900 dark:text-white'>
                       {resource.title}
                     </h3>
-                    <p className='mt-2 text-base leading-7 text-gray-600'>
+                    <p className='mt-2 text-base leading-7 text-gray-600 dark:text-gray-300'>
                       {resource.description}
                     </p>
                   </div>
                   <div className='mt-6'>
                     <a
                       href={resource.link}
-                      className='inline-flex items-center text-sm font-semibold leading-6 text-blue-600 hover:text-blue-500 transition-colors duration-200'
+                      className='inline-flex items-center text-sm font-semibold leading-6 text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-200'
                     >
                       Learn more
                       <span
