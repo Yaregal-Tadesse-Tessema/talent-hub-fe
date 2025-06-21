@@ -199,9 +199,9 @@ export const jobService = {
     }
   },
 
-  async unfavoriteJob(jobPostId: string, userId: string): Promise<void> {
+  async unfavoriteJob(favouriteId: string): Promise<void> {
     try {
-      await api.delete(`/user-favorite-jobs/${jobPostId}/${userId}`);
+      await api.delete(`/user-favorite-jobs/${favouriteId}`);
     } catch (error) {
       console.error('Error unfavoriting job:', error);
       throw error;
@@ -210,7 +210,8 @@ export const jobService = {
 
   async getFavoriteJobs(): Promise<any> {
     try {
-      const response = await api.get(`/user-favorite-jobs`);
+      const response = await api.get(`/user-favorite-jobs?q=i=jobPost
+`);
       console.log(response);
       return response.data;
     } catch (error) {

@@ -3,7 +3,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import OverviewTab from './employer/OverviewTab';
 import MyJobsTab from './employer/MyJobsTab';
-import ProfileTab from './employer/ProfileTab';
+import SettingsTab from './employer/SettingsTab';
 import {
   FiHome,
   FiUser,
@@ -20,7 +20,6 @@ import {
 
 const TABS = [
   { key: 'overview', label: 'Overview', icon: FiHome },
-  { key: 'profile', label: 'Employers Profile', icon: FiUser },
   { key: 'myjobs', label: 'My Jobs', icon: FiBriefcase },
   { key: 'saved', label: 'Saved Candidate', icon: FiBookmark },
   { key: 'plans', label: 'Plans & Billing', icon: FiCreditCard },
@@ -55,10 +54,10 @@ function EmployerDashboardContent() {
     switch (activeTab) {
       case 'overview':
         return <OverviewTab />;
-      case 'profile':
-        return <ProfileTab />;
       case 'myjobs':
         return <MyJobsTab />;
+      case 'settings':
+        return <SettingsTab />;
       // Add more cases for other tabs as needed
       default:
         return <OverviewTab />;
@@ -110,12 +109,7 @@ function EmployerDashboardContent() {
               })}
             </nav>
           </div>
-          <div className='mt-auto border-t p-6'>
-            <button className='flex items-center gap-2 text-gray-500 hover:text-red-600 text-sm'>
-              <FiLogOut className='w-5 h-5' />
-              <span>Log-out</span>
-            </button>
-          </div>
+          <div className='mt-auto border-t p-6'></div>
         </div>
       </aside>
 

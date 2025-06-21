@@ -199,7 +199,7 @@ export default function MyJobsTab() {
   }
 
   return (
-    <div className='flex-1 md:px-6'>
+    <div className='flex-1'>
       {showConfirmDialog && pendingStatusChange && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
           <div className='bg-white rounded-lg p-6 max-w-md w-full mx-4'>
@@ -240,13 +240,9 @@ export default function MyJobsTab() {
           }}
         />
       )}
-      <h6 className='text-xl font-bold mb-4'>
-        My Jobs{' '}
-        <span className='text-gray-400 font-normal'>({jobs.length})</span>
-      </h6>
       <div className='bg-white rounded-lg shadow p-6'>
         <div className='flex items-center justify-between mb-4'>
-          <div className='font-semibold text-lg'>Jobs</div>
+          <div className='font-semibold text-lg'>Jobs ({jobs.length})</div>
           <select
             className='border w-24 rounded px-3 py-1 text-sm text-gray-600'
             value={filter}
@@ -316,12 +312,14 @@ export default function MyJobsTab() {
                       {job.applicationCount || 0} Applications
                     </td>
                     <td className='py-3 px-4'>
-                      <button
-                        className='px-4 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 mr-2'
-                        onClick={() => setSelectedJobId(job.id)}
-                      >
-                        View Applications
-                      </button>
+                      {job.status !== 'Draft' && (
+                        <button
+                          className='px-4 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 mr-2'
+                          onClick={() => setSelectedJobId(job.id)}
+                        >
+                          View Applications
+                        </button>
+                      )}
                       <div
                         className='inline-block relative'
                         ref={(el) => {

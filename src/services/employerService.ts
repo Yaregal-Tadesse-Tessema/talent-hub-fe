@@ -40,6 +40,24 @@ export interface UpdateTenantPayload {
   archiveReason: string;
 }
 
+export interface ETradeRegistrationPayload {
+  tin: string;
+  licenseNumber: string;
+}
+
+export interface ManualRegistrationPayload {
+  name: string;
+  tradeName: string;
+  email: string;
+  phoneNumber: string;
+  tin: string;
+  licenseNumber: string;
+  registrationNumber: string;
+  companySize: string;
+  industry: string;
+  organizationType: string;
+}
+
 export const employerService = {
   async getTenantsByToken(): Promise<EmployerData[]> {
     try {
@@ -60,6 +78,31 @@ export const employerService = {
       }));
     } catch (error) {
       console.error('Error fetching employers:', error);
+      throw error;
+    }
+  },
+
+  async createAccountFromTrade(
+    payload: ETradeRegistrationPayload,
+  ): Promise<Tenant> {
+    try {
+      const response = await api.post(
+        '/tenants/create-account-from-trade',
+        payload,
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error creating account from ETrade:', error);
+      throw error;
+    }
+  },
+
+  async createTenant(payload: ManualRegistrationPayload): Promise<Tenant> {
+    try {
+      const response = await api.post('/tenants', payload);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating tenant:', error);
       throw error;
     }
   },

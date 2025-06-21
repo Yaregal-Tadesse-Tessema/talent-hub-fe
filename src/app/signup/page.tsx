@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { api } from '@/config/api';
 import { useToast } from '@/contexts/ToastContext';
@@ -44,8 +44,12 @@ interface ValidationErrors {
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { showToast } = useToast();
-  const [userType, setUserType] = useState<UserType>('employee');
+  const [userType, setUserType] = useState<UserType>(() => {
+    const typeParam = searchParams.get('type');
+    return typeParam === 'employer' ? 'employer' : 'employee';
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

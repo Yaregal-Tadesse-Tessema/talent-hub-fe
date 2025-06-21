@@ -176,7 +176,7 @@ export default function FindCandidatesPage() {
                   with our powerful recruitment platform
                 </p>
                 <Link
-                  href='/signup'
+                  href='/signup?type=employer'
                   className='inline-block px-8 py-4 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors'
                 >
                   Get Started - It's Free
@@ -296,7 +296,7 @@ export default function FindCandidatesPage() {
                 Join thousands of companies already using TalentHub
               </p>
               <Link
-                href='/signup'
+                href='/signup?type=employer'
                 className='inline-block px-8 py-4 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors'
               >
                 Start Hiring Today
