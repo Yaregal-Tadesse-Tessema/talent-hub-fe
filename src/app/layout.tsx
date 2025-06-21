@@ -7,8 +7,13 @@ import ClientLayout from './ClientLayout';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { NavigationProvider } from '@/components/navigation/NavigationProvider';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap', // Optimize font loading
+  preload: true,
+});
 
 // !STARTERCONF Change these default meta
 // !STARTERCONF Look at @/constant/config to change them
@@ -35,12 +40,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html>
-      <body suppressHydrationWarning className='bg-white dark:bg-gray-800'>
+    <html lang='en'>
+      <head>
+        {/* Preload critical resources */}
+        <link rel='preconnect' href='https://fonts.googleapis.com' />
+        <link
+          rel='preconnect'
+          href='https://fonts.gstatic.com'
+          crossOrigin='anonymous'
+        />
+        <link rel='dns-prefetch' href='//138.197.105.31' />
+      </head>
+      <body
+        suppressHydrationWarning
+        className={`${inter.className} bg-white dark:bg-gray-800`}
+      >
         <ThemeProvider>
           <ToastProvider>
             <AuthProvider>
-              <ClientLayout>{children}</ClientLayout>
+              <NavigationProvider>
+                <ClientLayout>{children}</ClientLayout>
+              </NavigationProvider>
             </AuthProvider>
           </ToastProvider>
         </ThemeProvider>

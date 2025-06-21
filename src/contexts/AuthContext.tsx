@@ -39,27 +39,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { showToast } = useToast();
   const { setTheme } = useTheme();
 
-  useEffect(() => {
-    // Only run on client side
-    if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        try {
-          setUser(JSON.parse(storedUser));
-        } catch (error) {
-          console.error('Error parsing stored user:', error);
-          localStorage.removeItem('user');
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          setTheme('light');
-        }
-      } else {
-        setTheme('light');
-      }
-      setLoading(false);
-    }
-  }, [setTheme]);
-
   const login = async (email: string, password: string) => {
     try {
       // First try employer login
@@ -186,12 +165,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Memoize user data to prevent unnecessary re-renders
+  const userValue = React.useMemo(
+    () => ({
+      user,
+      setUser,
+      loading,
+      login,
+      logout,
+      selectEmployer,
+    }),
+    [user, loading, login, logout, selectEmployer],
+  );
+
+  useEffect(() => {
+    // Only run on client side
+    if (typeof window !== 'undefined') {
+      const initializeAuth = () => {
+        try {
+          const storedUser = localStorage.getItem('user');
+          if (storedUser) {
+            const parsedUser = JSON.parse(storedUser);
+            setUser(parsedUser);
+          } else {
+            setTheme('light');
+          }
+        } catch (error) {
+          console.error('Error parsing stored user:', error);
+          localStorage.removeItem('user');
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          setTheme('light');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      initializeAuth();
+    }
+  }, [setTheme]);
+
   return (
-    <AuthContext.Provider
-      value={{ user, loading, login, logout, selectEmployer }}
-    >
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={userValue}>{children}</AuthContext.Provider>
   );
 }
 

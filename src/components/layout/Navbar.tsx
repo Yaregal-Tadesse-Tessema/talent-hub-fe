@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import React from 'react';
 
 import { cn } from '@/lib/utils';
 import EmployerSelection from '@/components/EmployerSelection';
@@ -87,6 +88,22 @@ export function Navbar({ page = 'home' }: NavbarProps) {
   const [notifications, setNotifications] = useState<any[]>([]);
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
   const { logout } = useAuth();
+
+  // Memoize user data to prevent unnecessary re-renders
+  const userData = React.useMemo(() => {
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          return JSON.parse(storedUser);
+        } catch {
+          return null;
+        }
+      }
+    }
+    return null;
+  }, []);
+
   const languages = [
     { code: 'en', name: 'English', flag: <FlagUS /> },
     { code: 'am', name: 'አማርኛ', flag: <FlagET /> },
@@ -98,20 +115,8 @@ export function Navbar({ page = 'home' }: NavbarProps) {
   };
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        try {
-          const parsedUser = JSON.parse(storedUser);
-          setUser(parsedUser);
-        } catch {
-          setUser(null);
-        }
-      } else {
-        setUser(null);
-      }
-    }
-  }, []);
+    setUser(userData);
+  }, [userData]);
 
   useEffect(() => {
     if (user?.role === 'employer') {

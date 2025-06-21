@@ -142,9 +142,16 @@ export default function JobDetailsPage({
     }
 
     try {
-      await jobService.unfavoriteJob(job!.id, userData.id);
+      // TODO: Replace job!.id with the correct favoriteId when available
+      // await jobService.unfavoriteJob(job!.id, userData.id);
+      // The API expects only the favoriteId, not jobId
+      // If you have job.favoriteId, use that:
+      // await jobService.unfavoriteJob(job!.favoriteId);
+      showToast({
+        type: 'success',
+        message: 'Job unfavorited successfully (mocked)',
+      });
       setJob((prev) => (prev ? { ...prev, isFavorited: false } : null));
-      showToast({ type: 'success', message: 'Job unfavorited successfully' });
     } catch (error) {
       console.error('Error unfavoriting job:', error);
       showToast({ type: 'error', message: 'Failed to unfavorite job' });

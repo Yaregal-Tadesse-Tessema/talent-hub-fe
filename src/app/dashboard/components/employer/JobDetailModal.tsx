@@ -436,7 +436,9 @@ export default function JobDetailModal({
                               <PencilIcon className='w-4 h-4 text-gray-500 dark:text-gray-400' />
                             </button>
                             <button
-                              onClick={() => handleDeleteQuestion(question.id)}
+                              onClick={() =>
+                                question.id && handleDeleteQuestion(question.id)
+                              }
                               className='p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded'
                             >
                               <TrashIcon className='w-4 h-4 text-red-500 dark:text-red-400' />
@@ -473,17 +475,19 @@ export default function JobDetailModal({
                       <div className='flex items-center justify-between'>
                         <div>
                           <h4 className='font-medium text-gray-900 dark:text-white'>
-                            {application.applicant?.firstName}{' '}
-                            {application.applicant?.lastName}
+                            {application.userInfo?.firstName}{' '}
+                            {application.userInfo?.lastName}
                           </h4>
                           <p className='text-sm text-gray-500 dark:text-gray-400'>
-                            {application.applicant?.email}
+                            {application.userInfo?.email}
                           </p>
                           <p className='text-xs text-gray-400 dark:text-gray-500'>
                             Applied on{' '}
-                            {new Date(
-                              application.createdAt,
-                            ).toLocaleDateString()}
+                            {application.createdAt
+                              ? new Date(
+                                  application.createdAt,
+                                ).toLocaleDateString()
+                              : 'N/A'}
                           </p>
                         </div>
                         <div className='text-right'>
@@ -527,7 +531,10 @@ export default function JobDetailModal({
                         dataKey='value'
                       >
                         {applicationStatusData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                          />
                         ))}
                       </Pie>
                       <Tooltip />
@@ -540,7 +547,7 @@ export default function JobDetailModal({
                     Applications Over Time
                   </h3>
                   <ResponsiveContainer width='100%' height={200}>
-                    <LineChart data={applicationOverTimeData}>
+                    <LineChart data={applicationsOverTimeData}>
                       <CartesianGrid strokeDasharray='3 3' stroke='#e5e7eb' />
                       <XAxis dataKey='date' stroke='#6b7280' />
                       <YAxis stroke='#6b7280' />

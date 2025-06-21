@@ -97,9 +97,6 @@ function DashboardContent() {
             ))}
           </nav>
         </div>
-        <button className='flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 text-sm mt-8 transition-colors duration-200'>
-          <span className='text-lg'>↩</span> Log-out
-        </button>
       </aside>
       {/* Main Content */}
       <main className='flex-1 bg-gray-50 dark:bg-gray-900'>

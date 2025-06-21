@@ -193,8 +193,8 @@ export default function LoginPage() {
         </div>
         {/* Right: Login Form */}
         <div className='flex w-full md:w-1/2 justify-center items-center'>
-          <div className='max-w-md w-full p-8 bg-white rounded shadow-md'>
-            <h2 className='text-2xl font-bold mb-6 text-gray-900'>
+          <div className='max-w-xl w-full p-8 bg-white rounded shadow-md'>
+            <h2 className='text-2xl text-center font-bold mb-6 text-gray-900'>
               Sign in to your{' '}
               <span className='text-blue-600'>
                 <a href='/'>TalentHub</a>

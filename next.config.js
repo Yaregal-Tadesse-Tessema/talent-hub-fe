@@ -6,10 +6,14 @@ const nextConfig = {
 
   reactStrictMode: true,
 
-  // Disable development tools in production
-  devIndicators: {
-    buildActivity: false,
+  // Optimize page loading and navigation
+  experimental: {
+    // Enable optimized navigation
+    optimizePackageImports: ['react-icons', 'lucide-react'],
   },
+
+  // External packages for server components
+  serverExternalPackages: ['@hello-pangea/dnd'],
 
   // Disable development overlay in production
   onDemandEntries: {
@@ -33,8 +37,32 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
-  // Enable SWC minification
-  swcMinify: true,
+  // Add navigation performance headers
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+        ],
+      },
+    ];
+  },
 
   // Optimize webpack configuration
   webpack(config, { dev, isServer }) {
@@ -75,6 +103,22 @@ const nextConfig = {
         'react-dom/test-utils': 'preact/test-utils',
         'react-dom': 'preact/compat',
       });
+
+      // Add bundle analyzer
+      if (process.env.ANALYZE === 'true') {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const { BundleAnalyzerPlugin } = require('@next/bundle-analyzer');
+          config.plugins.push(
+            new BundleAnalyzerPlugin({
+              analyzerMode: 'static',
+              openAnalyzer: false,
+            }),
+          );
+        } catch (error) {
+          console.warn('Bundle analyzer not available:', error.message);
+        }
+      }
     }
 
     return config;
