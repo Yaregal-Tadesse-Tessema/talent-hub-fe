@@ -43,7 +43,10 @@ function EmployerDashboardContent() {
 
   const handleTabChange = (tabKey: string) => {
     setActiveTab(tabKey);
-    router.push(`/dashboard?tab=${tabKey}`);
+    // Clear any job-specific parameters when switching tabs
+    const newSearchParams = new URLSearchParams();
+    newSearchParams.set('tab', tabKey);
+    router.push(`/dashboard?${newSearchParams.toString()}`);
     // Close sidebar on mobile after tab change
     if (window.innerWidth < 768) {
       setIsSidebarOpen(false);

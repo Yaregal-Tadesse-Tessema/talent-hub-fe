@@ -34,8 +34,18 @@ export default function MyJobsTab() {
     const selectedJobParam = searchParams?.get('selectedJob');
     if (selectedJobParam) {
       setSelectedJobId(selectedJobParam);
+    } else {
+      // Clear selectedJobId when no job is selected in URL params
+      setSelectedJobId(null);
     }
   }, [searchParams]);
+
+  // Clear selectedJobId when component mounts and no job is selected
+  useEffect(() => {
+    if (!searchParams?.get('selectedJob')) {
+      setSelectedJobId(null);
+    }
+  }, []);
 
   const fetchJobs = async (
     filterType: 'all' | 'active' | 'expired' = filter,
@@ -193,7 +203,17 @@ export default function MyJobsTab() {
     return (
       <JobApplicationsBoard
         jobId={selectedJobId}
-        onBack={() => setSelectedJobId(null)}
+        onBack={() => {
+          setSelectedJobId(null);
+          // Clear the URL parameter when going back
+          const newSearchParams = new URLSearchParams(
+            searchParams?.toString() || '',
+          );
+          newSearchParams.delete('selectedJob');
+          router.replace(
+            `/dashboard?tab=myjobs${newSearchParams.toString() ? `&${newSearchParams.toString()}` : ''}`,
+          );
+        }}
       />
     );
   }
@@ -319,7 +339,17 @@ export default function MyJobsTab() {
                       {job.status !== 'Draft' && (
                         <button
                           className='px-4 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 mr-2'
-                          onClick={() => setSelectedJobId(job.id)}
+                          onClick={() => {
+                            setSelectedJobId(job.id);
+                            // Set the URL parameter when viewing applications
+                            const newSearchParams = new URLSearchParams(
+                              searchParams?.toString() || '',
+                            );
+                            newSearchParams.set('selectedJob', job.id);
+                            router.replace(
+                              `/dashboard?tab=myjobs&${newSearchParams.toString()}`,
+                            );
+                          }}
                         >
                           View Applications
                         </button>

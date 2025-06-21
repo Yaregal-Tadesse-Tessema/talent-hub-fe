@@ -99,6 +99,20 @@ export default function JobApplicationsBoard({
   ]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
+
+  // Move useEffect to the top to avoid conditional hook calls
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (openActionMenu !== null) setOpenActionMenu(null);
+    }
+    if (openActionMenu !== null) {
+      document.addEventListener('mousedown', handleClick);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+    };
+  }, [openActionMenu]);
+
   const fetchApplications = async () => {
     try {
       setLoading(true);
@@ -241,6 +255,39 @@ export default function JobApplicationsBoard({
 
   // Bulk select logic
   const allAppIds = Object.keys(applications);
+
+  // Check if there are no applications at all
+  if (allAppIds.length === 0) {
+    return (
+      <div className='flex-1 p-6'>
+        <div className='flex flex-col items-center justify-center h-64 text-center'>
+          <div className='w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4'>
+            <svg
+              className='w-12 h-12 text-gray-400'
+              fill='none'
+              stroke='currentColor'
+              viewBox='0 0 24 24'
+            >
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={2}
+                d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'
+              />
+            </svg>
+          </div>
+          <h3 className='text-lg font-medium text-gray-900 mb-2'>
+            No Applications Yet
+          </h3>
+          <p className='text-gray-500 max-w-md'>
+            This job posting hasn't received any applications yet. Applications
+            will appear here once candidates start applying.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   let filteredAppIds = allAppIds.filter((id) => {
     const app = applications[id];
     if (!app.userInfo) return false;
@@ -301,6 +348,54 @@ export default function JobApplicationsBoard({
     filteredAppIds.length > 0 && selectedRows.length === filteredAppIds.length;
   const isIndeterminate =
     selectedRows.length > 0 && selectedRows.length < filteredAppIds.length;
+
+  // Check if there are applications but filters result in no matches
+  const hasActiveFilters = Object.values(filters).some((value) => value !== '');
+  if (allAppIds.length > 0 && filteredAppIds.length === 0 && hasActiveFilters) {
+    return (
+      <div className='flex-1 p-6'>
+        <div className='flex flex-col items-center justify-center h-64 text-center'>
+          <div className='w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4'>
+            <svg
+              className='w-12 h-12 text-gray-400'
+              fill='none'
+              stroke='currentColor'
+              viewBox='0 0 24 24'
+            >
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={2}
+                d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'
+              />
+            </svg>
+          </div>
+          <h3 className='text-lg font-medium text-gray-900 mb-2'>
+            No Matching Applications
+          </h3>
+          <p className='text-gray-500 max-w-md'>
+            No applications match your current filters. Try adjusting your
+            search criteria or clear the filters to see all applications.
+          </p>
+          <button
+            onClick={() =>
+              setFilters({
+                name: '',
+                experience: '',
+                education: '',
+                appliedFrom: '',
+                appliedTo: '',
+              })
+            }
+            className='mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors'
+          >
+            Clear Filters
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   function toggleSelectAll() {
     if (allSelected) setSelectedRows([]);
     else setSelectedRows(filteredAppIds);
@@ -343,17 +438,6 @@ export default function JobApplicationsBoard({
         return 'bg-gray-100 text-gray-700';
     }
   }
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (openActionMenu !== null) setOpenActionMenu(null);
-    }
-    if (openActionMenu !== null) {
-      document.addEventListener('mousedown', handleClick);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClick);
-    };
-  }, [openActionMenu]);
 
   if (loading) {
     return (
