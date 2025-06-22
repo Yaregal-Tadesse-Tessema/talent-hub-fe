@@ -3,8 +3,9 @@
 import PostJobForm from '@/components/forms/PostJobForm';
 import { Navbar } from '@/components/layout/Navbar';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
-export default function PostJobPage() {
+function PostJobPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const jobId = searchParams?.get('jobId');
@@ -34,5 +35,13 @@ export default function PostJobPage() {
         <PostJobForm jobId={jobId || undefined} />
       </div>
     </div>
+  );
+}
+
+export default function PostJobPage() {
+  return (
+    <Suspense>
+      <PostJobPageContent />
+    </Suspense>
   );
 }

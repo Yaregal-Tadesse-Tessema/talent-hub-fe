@@ -39,7 +39,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
   };
 
   const handleArrayChange = (
-    field: string,
+    field: 'technicalSkills' | 'softSkills',
     value: string,
     action: 'add' | 'remove',
   ) => {
@@ -47,8 +47,8 @@ const FilterModal: React.FC<FilterModalProps> = ({
       ...prev,
       [field]:
         action === 'add'
-          ? [...(prev[field] as string[]), value]
-          : (prev[field] as string[]).filter((item) => item !== value),
+          ? [...(prev[field] || []), value]
+          : (prev[field] || []).filter((item) => item !== value),
     }));
   };
 
@@ -482,9 +482,11 @@ const FilterModal: React.FC<FilterModalProps> = ({
                             <label key={skill} className='flex items-center'>
                               <input
                                 type='checkbox'
-                                checked={tempFilters.technicalSkills.includes(
-                                  skill,
-                                )}
+                                checked={
+                                  tempFilters.technicalSkills?.includes(
+                                    skill,
+                                  ) || false
+                                }
                                 onChange={(e) =>
                                   handleArrayChange(
                                     'technicalSkills',
@@ -517,7 +519,10 @@ const FilterModal: React.FC<FilterModalProps> = ({
                             <label key={skill} className='flex items-center'>
                               <input
                                 type='checkbox'
-                                checked={tempFilters.softSkills.includes(skill)}
+                                checked={
+                                  tempFilters.softSkills?.includes(skill) ||
+                                  false
+                                }
                                 onChange={(e) =>
                                   handleArrayChange(
                                     'softSkills',
