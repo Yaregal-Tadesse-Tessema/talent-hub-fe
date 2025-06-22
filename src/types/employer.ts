@@ -39,6 +39,7 @@ export interface Tenant {
   selectedCalender: 'Gregorian' | string;
   address: Address;
   logo: Logo;
+  cover: Logo;
   createdAt: string;
   updatedAt: string;
   createdBy?: string | null;

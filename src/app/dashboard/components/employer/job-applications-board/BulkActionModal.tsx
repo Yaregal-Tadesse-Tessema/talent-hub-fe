@@ -7,8 +7,6 @@ interface BulkActionModalProps {
   selectedRows: string[];
   notifyByEmail: boolean;
   setNotifyByEmail: (val: boolean) => void;
-  remarkText: string;
-  setRemarkText: (val: string) => void;
   mailDraft: string;
   setMailDraft: (val: string) => void;
   availableTags: string[];
@@ -17,6 +15,7 @@ interface BulkActionModalProps {
   setSelectedTags: (tags: string[]) => void;
   newTag: string;
   setNewTag: (tag: string) => void;
+  onConfirmAction: (action: string, data?: any) => Promise<void>;
 }
 
 const BulkActionModal: React.FC<BulkActionModalProps> = ({
@@ -25,8 +24,6 @@ const BulkActionModal: React.FC<BulkActionModalProps> = ({
   selectedRows,
   notifyByEmail,
   setNotifyByEmail,
-  remarkText,
-  setRemarkText,
   mailDraft,
   setMailDraft,
   availableTags,
@@ -35,16 +32,40 @@ const BulkActionModal: React.FC<BulkActionModalProps> = ({
   setSelectedTags,
   newTag,
   setNewTag,
+  onConfirmAction,
 }) => {
+  const [isProcessing, setIsProcessing] = React.useState(false);
+
   if (!bulkActionModal.open) return null;
+
   const resetState = () => {
     setBulkActionModal({ open: false, action: null });
     setNotifyByEmail(false);
-    setRemarkText('');
     setMailDraft('');
     setSelectedTags([]);
     setNewTag('');
+    setIsProcessing(false);
   };
+
+  const handleConfirm = async () => {
+    setIsProcessing(true);
+    try {
+      let actionData = {};
+
+      if (bulkActionModal.action === 'mail') {
+        actionData = { mailDraft };
+      } else if (bulkActionModal.action === 'tag') {
+        actionData = { selectedTags };
+      }
+
+      await onConfirmAction(bulkActionModal.action, actionData);
+      resetState();
+    } catch (error) {
+      console.error('Error processing bulk action:', error);
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/30'>
       <div className='bg-white rounded-lg shadow-lg p-6 min-w-[340px] relative'>
@@ -52,13 +73,13 @@ const BulkActionModal: React.FC<BulkActionModalProps> = ({
           type='button'
           onClick={resetState}
           className='absolute top-2 right-2 text-gray-400 hover:text-gray-600'
+          disabled={isProcessing}
         >
           <XMarkIcon className='w-5 h-5' />
         </button>
         <h2 className='text-lg font-semibold mb-4'>
           {bulkActionModal.action === 'move' && 'Move to column'}
           {bulkActionModal.action === 'shortlist' && 'Shortlist Candidates'}
-          {bulkActionModal.action === 'remark' && 'Add Remark'}
           {bulkActionModal.action === 'mail' && 'Send Mail'}
           {bulkActionModal.action === 'reject' && 'Reject Candidates'}
           {bulkActionModal.action === 'tag' && 'Add Tags'}
@@ -68,17 +89,6 @@ const BulkActionModal: React.FC<BulkActionModalProps> = ({
             This action will affect <b>{selectedRows.length}</b> candidate
             {selectedRows.length > 1 ? 's' : ''}.
           </p>
-          {bulkActionModal.action === 'remark' && (
-            <div className='mt-4'>
-              <label className='block text-sm font-medium mb-1'>Remark</label>
-              <textarea
-                className='border rounded px-3 py-2 w-full min-h-[80px]'
-                value={remarkText}
-                onChange={(e) => setRemarkText(e.target.value)}
-                placeholder='Enter your remark here...'
-              />
-            </div>
-          )}
           {bulkActionModal.action === 'mail' && (
             <div className='mt-4'>
               <label className='block text-sm font-medium mb-1'>
@@ -89,6 +99,7 @@ const BulkActionModal: React.FC<BulkActionModalProps> = ({
                 value={mailDraft}
                 onChange={(e) => setMailDraft(e.target.value)}
                 placeholder='Write your email draft here...'
+                disabled={isProcessing}
               />
             </div>
           )}
@@ -108,6 +119,7 @@ const BulkActionModal: React.FC<BulkActionModalProps> = ({
                         setSelectedTags([...selectedTags, tag]);
                       }
                     }}
+                    disabled={isProcessing}
                   >
                     {tag}
                   </button>
@@ -129,24 +141,26 @@ const BulkActionModal: React.FC<BulkActionModalProps> = ({
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   placeholder='Create new tag'
+                  disabled={isProcessing}
                 />
                 <button
                   type='submit'
-                  className='bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-700'
+                  className='bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-700 disabled:opacity-50'
+                  disabled={isProcessing}
                 >
                   Add
                 </button>
               </form>
             </div>
           )}
-          {bulkActionModal?.action !== 'remark' &&
-            bulkActionModal?.action !== 'mail' &&
+          {bulkActionModal?.action !== 'mail' &&
             bulkActionModal?.action !== 'tag' && (
               <label className='flex items-center gap-2 mt-4'>
                 <input
                   type='checkbox'
                   checked={notifyByEmail}
                   onChange={(e) => setNotifyByEmail(e.target.checked)}
+                  disabled={isProcessing}
                 />
                 <span>
                   Notify candidate{selectedRows.length > 1 ? 's' : ''} by email
@@ -156,14 +170,16 @@ const BulkActionModal: React.FC<BulkActionModalProps> = ({
         </div>
         <div className='flex gap-2 mt-4'>
           <button
-            className='flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-medium'
-            onClick={resetState}
+            className='flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed'
+            onClick={handleConfirm}
+            disabled={isProcessing}
           >
-            Confirm
+            {isProcessing ? 'Processing...' : 'Confirm'}
           </button>
           <button
-            className='flex-1 bg-gray-100 text-gray-700 py-2 rounded hover:bg-gray-200 font-medium'
+            className='flex-1 bg-gray-100 text-gray-700 py-2 rounded hover:bg-gray-200 font-medium disabled:opacity-50'
             onClick={resetState}
+            disabled={isProcessing}
           >
             Cancel
           </button>

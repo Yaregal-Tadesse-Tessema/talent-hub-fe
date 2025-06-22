@@ -11,14 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { BadgeCheckIcon } from 'lucide-react';
 
-type BulkActionType =
-  | 'move'
-  | 'shortlist'
-  | 'remark'
-  | 'mail'
-  | 'reject'
-  | 'tag'
-  | null;
+type BulkActionType = 'move' | 'shortlist' | 'mail' | 'reject' | 'tag' | null;
 
 interface BulkActionsBarProps {
   selectedRows: string[];
@@ -50,33 +43,21 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
       <div className='flex items-center gap-2'>
         <button
           className='flex items-center gap-1 px-2 py-1 rounded hover:bg-blue-100 text-blue-700'
-          onMouseDown={handleBulkAction('move')}
-        >
-          <ArrowPathIcon className='w-4 h-4' /> Move
-        </button>
-        <button
-          className='flex items-center gap-1 px-2 py-1 rounded hover:bg-blue-100 text-blue-700'
           onMouseDown={handleBulkAction('shortlist')}
         >
           <BadgeCheckIcon className='w-4 h-4' /> Shortlist
         </button>
         <button
-          className='flex items-center gap-1 px-2 py-1 rounded hover:bg-blue-100 text-blue-700'
-          onMouseDown={handleBulkAction('remark')}
+          className='flex items-center gap-1 px-2 py-1 rounded hover:bg-blue-100 text-red-700'
+          onMouseDown={handleBulkAction('reject')}
         >
-          <PencilSquareIcon className='w-4 h-4' /> Remark
+          <TrashIcon className='w-4 h-4' /> Reject
         </button>
         <button
           className='flex items-center gap-1 px-2 py-1 rounded hover:bg-blue-100 text-blue-700'
           onMouseDown={handleBulkAction('mail')}
         >
           <EnvelopeIcon className='w-4 h-4' /> Mail
-        </button>
-        <button
-          className='flex items-center gap-1 px-2 py-1 rounded hover:bg-blue-100 text-blue-700'
-          onMouseDown={handleBulkAction('reject')}
-        >
-          <TrashIcon className='w-4 h-4' /> Reject
         </button>
         <button
           className='flex items-center gap-1 px-2 py-1 rounded hover:bg-blue-100 text-blue-700'

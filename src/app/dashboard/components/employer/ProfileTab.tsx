@@ -6,6 +6,7 @@ import {
   UpdateTenantPayload,
 } from '@/services/employerService';
 import { Tenant } from '@/types/employer';
+import { useToast } from '@/contexts/ToastContext';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   FiMapPin,
@@ -24,6 +25,7 @@ import {
   FiAward,
   FiUpload,
   FiCamera,
+  FiCheck,
 } from 'react-icons/fi';
 
 interface CompanyAddress {
@@ -55,6 +57,8 @@ interface CompanyData {
   organizationType: string;
   type: string;
   logo: CompanyLogo;
+  cover?: CompanyLogo;
+  banner?: CompanyLogo;
   tin: string;
   code: string;
   isVerified: boolean;
@@ -82,6 +86,7 @@ export default function ProfileTab() {
   const [isUploadingBanner, setIsUploadingBanner] = useState(false);
   const logoFileInputRef = useRef<HTMLInputElement>(null);
   const bannerFileInputRef = useRef<HTMLInputElement>(null);
+  const { showToast } = useToast();
 
   useEmployerChange((employer) => {
     const userData = localStorage.getItem('user');
@@ -155,14 +160,17 @@ export default function ProfileTab() {
       'image/webp',
     ];
     if (!allowedTypes.includes(file.type)) {
-      alert('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+      showToast({
+        type: 'error',
+        message: 'Please select a valid image file (JPEG, PNG, GIF, or WebP)',
+      });
       return;
     }
 
     // Validate file size (max 5MB)
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
-      alert('File size must be less than 5MB');
+      showToast({ type: 'error', message: 'File size must be less than 5MB' });
       return;
     }
 
@@ -190,10 +198,13 @@ export default function ProfileTab() {
           : null,
       );
 
-      alert('Logo uploaded successfully!');
+      showToast({ type: 'success', message: 'Logo uploaded successfully!' });
     } catch (error) {
       console.error('Error uploading logo:', error);
-      alert('Failed to upload logo. Please try again.');
+      showToast({
+        type: 'error',
+        message: 'Failed to upload logo. Please try again.',
+      });
     } finally {
       setIsUploadingLogo(false);
       // Reset file input
@@ -218,27 +229,31 @@ export default function ProfileTab() {
       'image/webp',
     ];
     if (!allowedTypes.includes(file.type)) {
-      alert('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+      showToast({
+        type: 'error',
+        message: 'Please select a valid image file (JPEG, PNG, GIF, or WebP)',
+      });
       return;
     }
 
     // Validate file size (max 10MB for banner)
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
-      alert('File size must be less than 10MB');
+      showToast({ type: 'error', message: 'File size must be less than 10MB' });
       return;
     }
 
     setIsUploadingBanner(true);
     try {
       const response = await employerService.uploadBanner(companyData.id, file);
+      console.log('response', response);
 
       // Update local storage with new banner data
       const userData = localStorage.getItem('user');
       if (userData) {
         const parsedData = JSON.parse(userData);
         if (parsedData.selectedEmployer?.tenant) {
-          parsedData.selectedEmployer.tenant.banner = response.banner;
+          parsedData.selectedEmployer.tenant.cover = response.cover;
           localStorage.setItem('user', JSON.stringify(parsedData));
         }
       }
@@ -248,15 +263,18 @@ export default function ProfileTab() {
         prev
           ? {
               ...prev,
-              banner: response.banner,
+              cover: response.cover,
             }
           : null,
       );
 
-      alert('Banner uploaded successfully!');
+      showToast({ type: 'success', message: 'Banner uploaded successfully!' });
     } catch (error) {
       console.error('Error uploading banner:', error);
-      alert('Failed to upload banner. Please try again.');
+      showToast({
+        type: 'error',
+        message: 'Failed to upload banner. Please try again.',
+      });
     } finally {
       setIsUploadingBanner(false);
       // Reset file input
@@ -296,14 +314,27 @@ export default function ProfileTab() {
     <div className=' w-full max-w-6xl '>
       <div className='bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700'>
         {/* Header with Logo and Basic Info */}
-        <div className='p-4 bg-gradient-to-r from-blue-300 via-blue-400 to-blue-800 text-white relative'>
+        <div
+          className={`p-4 text-white relative overflow-hidden transition-all duration-500 ${companyData?.cover?.path ? 'min-h-[200px]' : ''}`}
+          style={{
+            backgroundImage: companyData?.cover?.path
+              ? `linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(37, 99, 235, 0.8) 50%, rgba(30, 64, 175, 0.9) 100%), url(${companyData.cover.path})`
+              : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1e40af 100%)',
+            backgroundColor: companyData?.cover?.path
+              ? 'transparent'
+              : undefined,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        >
           <div className='absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16'></div>
           <div className='absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12'></div>
 
-          <div className='flex items-center justify-between relative z-10'>
-            <div className='flex items-center gap-8'>
+          <div className='flex items-center justify-between relative z-10 flex-col lg:flex-row gap-6 lg:gap-0'>
+            <div className='flex items-center gap-4 lg:gap-8 flex-col sm:flex-row text-center sm:text-left'>
               <div className='relative group'>
-                <div className='w-28 h-28 bg-white rounded-xl overflow-hidden shadow-lg border-4 border-white/20'>
+                <div className='w-24 h-24 lg:w-28 lg:h-28 bg-white rounded-xl overflow-hidden shadow-lg border-4 border-white/20'>
                   <img
                     src={companyData?.logo?.path}
                     alt={companyData?.name}
@@ -335,10 +366,10 @@ export default function ProfileTab() {
                 />
               </div>
               <div>
-                <h1 className='text-3xl font-bold mb-2'>
+                <h1 className='text-2xl lg:text-3xl font-bold mb-2'>
                   {companyData.tradeName}
                 </h1>
-                <div className='flex items-center gap-3'>
+                <div className='flex items-center gap-3 flex-wrap justify-center sm:justify-start'>
                   <span className='px-4 py-2 bg-blue-500/80 backdrop-blur-sm rounded-full text-sm font-medium'>
                     {companyData.status}
                   </span>
@@ -351,23 +382,31 @@ export default function ProfileTab() {
                 </div>
               </div>
             </div>
-            <div className='flex gap-3'>
+            <div className='flex gap-3 flex-col sm:flex-row'>
               <button
                 onClick={triggerBannerFileInput}
                 disabled={isUploadingBanner}
-                className='px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2 transition-all duration-200 font-medium backdrop-blur-sm'
-                title='Upload banner'
+                className='px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2 transition-all duration-200 font-medium backdrop-blur-sm justify-center'
+                title={
+                  companyData?.cover?.path ? 'Change banner' : 'Upload banner'
+                }
               >
                 {isUploadingBanner ? (
                   <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
+                ) : companyData?.cover?.path ? (
+                  <FiCheck className='w-4 h-4' />
                 ) : (
                   <FiUpload className='w-4 h-4' />
                 )}
-                {isUploadingBanner ? 'Uploading...' : 'Upload Banner'}
+                {isUploadingBanner
+                  ? 'Uploading...'
+                  : companyData?.cover?.path
+                    ? 'Change Banner'
+                    : 'Upload Banner'}
               </button>
               <button
                 onClick={handleEdit}
-                className='px-6 py-3 bg-white/90 hover:bg-white text-blue-700 rounded-xl flex items-center gap-3 transition-all duration-200 font-medium shadow-lg hover:shadow-xl'
+                className='px-6 py-3 bg-white/90 hover:bg-white text-blue-700 rounded-xl flex items-center gap-3 transition-all duration-200 font-medium shadow-lg hover:shadow-xl justify-center'
               >
                 <FiEdit3 className='w-5 h-5' />
                 Edit Profile

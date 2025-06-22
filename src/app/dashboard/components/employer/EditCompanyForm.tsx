@@ -4,6 +4,7 @@ import {
   UpdateTenantPayload,
 } from '@/services/employerService';
 import { Tenant } from '@/types/employer';
+import { useToast } from '@/contexts/ToastContext';
 import React, { useState } from 'react';
 import {
   FiX,
@@ -85,6 +86,8 @@ export default function EditCompanyForm({
     ...companyData,
     address: { ...companyData.address },
   });
+  const { showToast } = useToast();
+  console.log('companyData', companyData);
 
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({
@@ -148,7 +151,10 @@ export default function EditCompanyForm({
       onSuccess(updatedTenant);
     } catch (error) {
       console.error('Error updating company:', error);
-      alert('Failed to update company information. Please try again.');
+      showToast({
+        type: 'error',
+        message: 'Failed to update company information. Please try again.',
+      });
     } finally {
       setIsLoading(false);
     }

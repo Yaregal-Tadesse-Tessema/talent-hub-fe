@@ -5,6 +5,7 @@ import {
   EllipsisVerticalIcon,
   EnvelopeIcon,
   ArrowDownTrayIcon,
+  ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline';
 
 interface ListViewProps {
@@ -20,6 +21,7 @@ interface ListViewProps {
   openActionMenu: string | null;
   setOpenActionMenu: (id: string | null) => void;
   columns?: { id: string; title: string; appIds: string[] }[];
+  onRemarkAction?: (appId: string) => void;
 }
 
 const ListView: React.FC<ListViewProps> = ({
@@ -40,6 +42,7 @@ const ListView: React.FC<ListViewProps> = ({
     { id: 'REJECTED', title: 'Rejected', appIds: [] },
     { id: 'HIRED', title: 'Hired', appIds: [] },
   ],
+  onRemarkAction,
 }) => {
   function getAppStatus(appId: string) {
     const col = columns.find((c) => c.appIds.includes(appId));
@@ -47,8 +50,8 @@ const ListView: React.FC<ListViewProps> = ({
       ? { id: col.id, title: col.title }
       : { id: 'all', title: 'All Applications' };
   }
-  function getStatusColor(colId: string) {
-    switch (colId) {
+  function getStatusColor(status: string) {
+    switch (status?.toUpperCase()) {
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-700';
       case 'SELECTED':
@@ -104,26 +107,24 @@ const ListView: React.FC<ListViewProps> = ({
                   />
                 </td>
                 <td className='py-3 px-4 font-medium'>
-                  {app.userInfo.firstName} {app.userInfo.lastName}
+                  {app.userInfo?.firstName} {app.userInfo?.lastName}
                 </td>
-                <td className='py-3 px-4'>{app.jobPost.position}</td>
+                <td className='py-3 px-4'>{app.jobPost?.position}</td>
                 <td className='py-3 px-4'>
-                  {app.userInfo.yearOfExperience || 'N/A'} years
-                </td>
-                <td className='py-3 px-4'>
-                  {app.userInfo.highestLevelOfEducation || 'N/A'}
+                  {app.userInfo?.yearOfExperience || 'N/A'} years
                 </td>
                 <td className='py-3 px-4'>
-                  {new Date(app.userInfo.createdAt).toLocaleDateString()}
+                  {app.userInfo?.highestLevelOfEducation || 'N/A'}
+                </td>
+                <td className='py-3 px-4'>
+                  {new Date(app.userInfo?.createdAt)?.toLocaleDateString()}
                 </td>
                 <td className='py-3 px-4'>
                   <span
-                    className={`inline-block px-3 py-1 rounded-full text-xs font-semibold cursor-default ${getStatusColor(status.id)}`}
-                    title={status.title}
+                    className={`inline-block px-3 py-1 rounded-full text-xs font-semibold cursor-default ${getStatusColor(app.status)}`}
+                    title={app?.status}
                   >
-                    {status.title.length > 14
-                      ? status.title.slice(0, 12) + '…'
-                      : status.title}
+                    {app?.status}
                   </span>
                 </td>
                 <td
@@ -164,6 +165,16 @@ const ListView: React.FC<ListViewProps> = ({
                       >
                         <EnvelopeIcon className='w-5 h-5 text-green-500' /> Send
                         Email
+                      </button>
+                      <button
+                        className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
+                        onClick={() => {
+                          onRemarkAction?.(appId);
+                          setOpenActionMenu(null);
+                        }}
+                      >
+                        <ChatBubbleLeftRightIcon className='w-5 h-5 text-purple-500' />{' '}
+                        Add Remark
                       </button>
                       <button
                         className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'

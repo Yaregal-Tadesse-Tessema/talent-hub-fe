@@ -155,18 +155,17 @@ export const jobService = {
     category?: string,
   ): Promise<JobsResponse> {
     try {
-      console.log(title, location, category);
       let queryParams = '';
       const conditions = [];
       if (title) {
-        conditions.push(`title:LIKE:${title}`);
+        conditions.push(`title:ILIKE:${title.toLowerCase()}`);
       }
       if (location) {
-        conditions.push(`location:Like:${location}`);
-        conditions.push(`city:Like:${location}`);
+        conditions.push(`location:ILIKE:${location.toLowerCase()}`);
+        conditions.push(`city:ILIKE:${location.toLowerCase()}`);
       }
       if (category) {
-        conditions.push(`employmentType:LIKE:${category}`);
+        conditions.push(`employmentType:ILIKE:${category.toLowerCase()}`);
       }
       if (conditions.length > 0) {
         queryParams = `q=w=${conditions.join(',')}`;

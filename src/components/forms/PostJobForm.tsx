@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import RichTextEditor from './RichTextEditor';
 import { jobService, JobPosting } from '@/services/jobService';
 import { useToast } from '@/contexts/ToastContext';
@@ -38,7 +38,11 @@ interface FormData {
   paymentType: string;
 }
 
-export default function PostJobForm() {
+interface PostJobFormProps {
+  jobId?: string;
+}
+
+export default function PostJobForm({ jobId }: PostJobFormProps) {
   const [formData, setFormData] = useState<FormData>({
     title: 'Senior Software Engineer',
     description:
@@ -95,12 +99,73 @@ export default function PostJobForm() {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
-  const [draftJobId, setDraftJobId] = useState<string | null>(null);
+  const [draftJobId, setDraftJobId] = useState<string | null>(jobId || null);
   const [showPublishConfirmation, setShowPublishConfirmation] = useState(false);
+  const [isLoadingJob, setIsLoadingJob] = useState(false);
   const { showToast } = useToast();
   const router = useRouter();
 
   const totalSteps = 6;
+
+  // Load existing job data if jobId is provided
+  useEffect(() => {
+    const loadExistingJob = async () => {
+      if (!jobId) return;
+
+      try {
+        setIsLoadingJob(true);
+        const job = await jobService.getJobById(jobId);
+
+        // Convert the job data to form data format
+        setFormData({
+          title: job.title || '',
+          description: job.description || '',
+          position: job.position || '',
+          industry: job.industry || '',
+          type: job.type || '',
+          city: job.city || '',
+          location: job.location || '',
+          employmentType: job.employmentType || '',
+          salaryRange: {
+            min: job.salaryRange?.min?.toString() || '',
+            max: job.salaryRange?.max?.toString() || '',
+          },
+          deadline: job.deadline
+            ? new Date(job.deadline).toISOString().slice(0, 16)
+            : '',
+          requirementId: job.requirementId || '',
+          skill: job.skill || [],
+          benefits: job.benefits || [],
+          responsibilities: job.responsibilities || [],
+          status: job.status || 'Draft',
+          gender: job.gender || '',
+          minimumGPA: job.minimumGPA?.toString() || '',
+          postedDate: job.postedDate || new Date().toISOString(),
+          applicationURL: job.applicationURL || '',
+          experienceLevel: job.experienceLevel || '',
+          fieldOfStudy: job.fieldOfStudy || '',
+          educationLevel: job.educationLevel || '',
+          howToApply: job.howToApply || '',
+          onHoldDate: job.onHoldDate || '',
+          jobPostRequirement: job.jobPostRequirement || [],
+          positionNumbers: job.positionNumbers?.toString() || '',
+          paymentType: job.paymentType || '',
+        });
+
+        setDraftJobId(job.id);
+      } catch (error) {
+        console.error('Error loading existing job:', error);
+        showToast({
+          type: 'error',
+          message: 'Failed to load existing job data. Please try again.',
+        });
+      } finally {
+        setIsLoadingJob(false);
+      }
+    };
+
+    loadExistingJob();
+  }, [jobId, showToast]);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -427,7 +492,12 @@ export default function PostJobForm() {
           <span className='text-sm text-gray-500 dark:text-gray-400'>
             Step {currentStep} of {totalSteps}
           </span>
-          {draftJobId && (
+          {jobId && draftJobId && (
+            <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400'>
+              Editing Draft
+            </span>
+          )}
+          {draftJobId && !jobId && (
             <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400'>
               Draft Saved
             </span>
@@ -1225,44 +1295,98 @@ export default function PostJobForm() {
       <div className='max-w-5xl mx-auto px-4'>
         {renderProgressBar()}
 
-        <div className='bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden'>
-          <div className='p-8'>{renderCurrentStep()}</div>
+        {isLoadingJob ? (
+          <div className='bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden'>
+            <div className='p-8 flex justify-center items-center h-64'>
+              <div className='text-center'>
+                <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4'></div>
+                <p className='text-gray-600 dark:text-gray-300'>
+                  Loading job data...
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className='bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden'>
+            <div className='p-8'>{renderCurrentStep()}</div>
 
-          <div className='bg-gray-50 dark:bg-gray-700 px-8 py-6 border-t border-gray-200 dark:border-gray-600'>
-            <div className='flex justify-between items-center'>
-              <button
-                type='button'
-                onClick={prevStep}
-                disabled={currentStep === 1}
-                className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-                  currentStep === 1
-                    ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                    : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
-              >
-                Previous
-              </button>
+            <div className='bg-gray-50 dark:bg-gray-700 px-8 py-6 border-t border-gray-200 dark:border-gray-600'>
+              <div className='flex justify-between items-center'>
+                <button
+                  type='button'
+                  onClick={prevStep}
+                  disabled={currentStep === 1 || isLoadingJob}
+                  className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
+                    currentStep === 1 || isLoadingJob
+                      ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                      : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  Previous
+                </button>
 
-              <div className='flex gap-3'>
-                {draftJobId && currentStep > 1 && (
-                  <button
-                    type='button'
-                    onClick={saveDraft}
-                    disabled={isSubmitting}
-                    className='px-4 py-3 bg-gray-600 dark:bg-gray-500 text-white rounded-lg font-medium hover:bg-gray-700 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200'
-                  >
-                    {isSubmitting ? 'Saving...' : 'Save Draft'}
-                  </button>
-                )}
-                {currentStep < totalSteps ? (
-                  <button
-                    type='button'
-                    onClick={nextStep}
-                    disabled={isSubmitting}
-                    className='px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200'
-                  >
-                    {currentStep === 1 ? (
-                      isSubmitting ? (
+                <div className='flex gap-3'>
+                  {draftJobId && currentStep > 1 && (
+                    <button
+                      type='button'
+                      onClick={saveDraft}
+                      disabled={isSubmitting || isLoadingJob}
+                      className='px-4 py-3 bg-gray-600 dark:bg-gray-500 text-white rounded-lg font-medium hover:bg-gray-700 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200'
+                    >
+                      {isSubmitting ? 'Saving...' : 'Save Draft'}
+                    </button>
+                  )}
+                  {currentStep < totalSteps ? (
+                    <button
+                      type='button'
+                      onClick={nextStep}
+                      disabled={isSubmitting || isLoadingJob}
+                      className='px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200'
+                    >
+                      {currentStep === 1 ? (
+                        isSubmitting ? (
+                          <span className='flex items-center'>
+                            <svg
+                              className='animate-spin -ml-1 mr-3 h-5 w-5 text-white'
+                              xmlns='http://www.w3.org/2000/svg'
+                              fill='none'
+                              viewBox='0 0 24 24'
+                            >
+                              <circle
+                                className='opacity-25'
+                                cx='12'
+                                cy='12'
+                                r='10'
+                                stroke='currentColor'
+                                strokeWidth='4'
+                              ></circle>
+                              <path
+                                className='opacity-75'
+                                fill='currentColor'
+                                d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                              ></path>
+                            </svg>
+                            Saving Draft...
+                          </span>
+                        ) : (
+                          'Save As Draft and Continue'
+                        )
+                      ) : (
+                        'Next Step'
+                      )}
+                    </button>
+                  ) : (
+                    <button
+                      type='button'
+                      onClick={handleSubmit}
+                      disabled={isSubmitting || isLoadingJob}
+                      className={`px-8 py-3 bg-green-600 dark:bg-green-500 text-white rounded-lg font-medium hover:bg-green-700 dark:hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200 ${
+                        isSubmitting || isLoadingJob
+                          ? 'opacity-50 cursor-not-allowed'
+                          : ''
+                      }`}
+                    >
+                      {isSubmitting ? (
                         <span className='flex items-center'>
                           <svg
                             className='animate-spin -ml-1 mr-3 h-5 w-5 text-white'
@@ -1284,57 +1408,18 @@ export default function PostJobForm() {
                               d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
                             ></path>
                           </svg>
-                          Saving Draft...
+                          Publishing...
                         </span>
                       ) : (
-                        'Save As Draft and Continue'
-                      )
-                    ) : (
-                      'Next Step'
-                    )}
-                  </button>
-                ) : (
-                  <button
-                    type='button'
-                    onClick={handleSubmit}
-                    disabled={isSubmitting}
-                    className={`px-8 py-3 bg-green-600 dark:bg-green-500 text-white rounded-lg font-medium hover:bg-green-700 dark:hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200 ${
-                      isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    {isSubmitting ? (
-                      <span className='flex items-center'>
-                        <svg
-                          className='animate-spin -ml-1 mr-3 h-5 w-5 text-white'
-                          xmlns='http://www.w3.org/2000/svg'
-                          fill='none'
-                          viewBox='0 0 24 24'
-                        >
-                          <circle
-                            className='opacity-25'
-                            cx='12'
-                            cy='12'
-                            r='10'
-                            stroke='currentColor'
-                            strokeWidth='4'
-                          ></circle>
-                          <path
-                            className='opacity-75'
-                            fill='currentColor'
-                            d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                          ></path>
-                        </svg>
-                        Publishing...
-                      </span>
-                    ) : (
-                      'Publish Job'
-                    )}
-                  </button>
-                )}
+                        'Publish Job'
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Confirmation Dialog */}

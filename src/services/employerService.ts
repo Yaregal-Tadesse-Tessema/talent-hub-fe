@@ -166,7 +166,7 @@ export const employerService = {
     tenantId: string,
     file: File,
   ): Promise<{
-    banner: {
+    cover: {
       filename: string;
       path: string;
       originalname: string;

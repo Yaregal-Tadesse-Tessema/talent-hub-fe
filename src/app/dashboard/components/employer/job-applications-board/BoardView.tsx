@@ -91,14 +91,14 @@ const BoardView: React.FC<BoardViewProps> = ({
                                         <span className='inline-block w-8 h-8 rounded-full overflow-hidden border border-gray-200 bg-gray-100'>
                                           <img
                                             src={
-                                              app.userInfo.profile?.path ||
+                                              app.userInfo?.profile?.path ||
                                               'https://ui-avatars.com/api/?name=' +
                                                 encodeURIComponent(
-                                                  `${app.userInfo.firstName} ${app.userInfo.lastName}`,
+                                                  `${app.userInfo?.firstName} ${app.userInfo?.lastName}`,
                                                 ) +
                                                 '&background=random'
                                             }
-                                            alt={`${app.userInfo.firstName} ${app.userInfo.lastName}`}
+                                            alt={`${app.userInfo?.firstName} ${app.userInfo?.lastName}`}
                                             className='w-full h-full object-cover'
                                           />
                                         </span>
@@ -112,13 +112,13 @@ const BoardView: React.FC<BoardViewProps> = ({
                                     </div>
                                   </div>
                                   <div className='flex items-center gap-2 pb-2'>
-                                    {app.userInfo.highestLevelOfEducation && (
+                                    {app.userInfo?.highestLevelOfEducation && (
                                       <span className='text-gray-500 text-xs'>
                                         {app.userInfo.highestLevelOfEducation ||
                                           'N/A'}
                                       </span>
                                     )}
-                                    {app.userInfo.profileHeadLine && (
+                                    {app.userInfo?.profileHeadLine && (
                                       <>
                                         <span
                                           className='h-4 border-l border-gray-300 mx-1'
@@ -126,13 +126,13 @@ const BoardView: React.FC<BoardViewProps> = ({
                                         ></span>
                                         <span
                                           className='text-gray-500 text-xs truncate max-w-[100px]'
-                                          title={app.userInfo.profileHeadLine}
+                                          title={app.userInfo?.profileHeadLine}
                                         >
-                                          {app.userInfo.profileHeadLine}
+                                          {app.userInfo?.profileHeadLine}
                                         </span>
                                       </>
                                     )}
-                                    {app.userInfo.yearOfExperience && (
+                                    {app.userInfo?.yearOfExperience && (
                                       <>
                                         <span
                                           className='h-4 border-l border-gray-300 mx-1'
@@ -140,19 +140,19 @@ const BoardView: React.FC<BoardViewProps> = ({
                                         ></span>
                                         <span
                                           className='bg-blue-100 text-blue-700 rounded-full px-2 py-0.5 text-xs font-medium truncate max-w-[60px]'
-                                          title={`${app.userInfo.yearOfExperience} years experience`}
+                                          title={`${app.userInfo?.yearOfExperience} years experience`}
                                         >
-                                          {app.userInfo.yearOfExperience} yrs
+                                          {app.userInfo?.yearOfExperience} yrs
                                         </span>
                                       </>
                                     )}
                                   </div>
                                   {/* Skills Section */}
-                                  {(app.userInfo.technicalSkills ||
-                                    app.userInfo.softSkills) && (
+                                  {(app.userInfo?.technicalSkills ||
+                                    app.userInfo?.softSkills) && (
                                     <div className='mb-2'>
                                       <div className='flex flex-wrap gap-1'>
-                                        {app.userInfo.technicalSkills
+                                        {app.userInfo?.technicalSkills
                                           ?.slice(0, 4)
                                           .map((skill, index) => (
                                             <span
@@ -164,7 +164,7 @@ const BoardView: React.FC<BoardViewProps> = ({
                                           ))}
                                       </div>
                                       <div className='flex flex-wrap gap-1 pt-1'>
-                                        {app.userInfo.softSkills
+                                        {app.userInfo?.softSkills
                                           ?.slice(0, 3)
                                           .map((skill, index) => (
                                             <span
@@ -180,9 +180,9 @@ const BoardView: React.FC<BoardViewProps> = ({
                                   {/* Social Links and CV Download */}
                                   <div className='flex items-center justify-between mt-2 pt-2 border-t border-gray-100'>
                                     <div className='flex gap-2'>
-                                      {app.userInfo.linkedinUrl && (
+                                      {app.userInfo?.linkedinUrl && (
                                         <a
-                                          href={app.userInfo.linkedinUrl}
+                                          href={app.userInfo?.linkedinUrl}
                                           target='_blank'
                                           rel='noopener noreferrer'
                                           className='text-gray-500 hover:text-blue-600'
@@ -198,9 +198,9 @@ const BoardView: React.FC<BoardViewProps> = ({
                                           </svg>
                                         </a>
                                       )}
-                                      {app.userInfo.portfolioUrl && (
+                                      {app.userInfo?.portfolioUrl && (
                                         <a
-                                          href={app.userInfo.portfolioUrl}
+                                          href={app.userInfo?.portfolioUrl}
                                           target='_blank'
                                           rel='noopener noreferrer'
                                           className='text-gray-500 hover:text-purple-600'
@@ -216,9 +216,9 @@ const BoardView: React.FC<BoardViewProps> = ({
                                           </svg>
                                         </a>
                                       )}
-                                      {app.userInfo.telegramUserId && (
+                                      {app.userInfo?.telegramUserId && (
                                         <a
-                                          href={`https://t.me/${app.userInfo.telegramUserId}`}
+                                          href={`https://t.me/${app.userInfo?.telegramUserId}`}
                                           target='_blank'
                                           rel='noopener noreferrer'
                                           className='text-gray-500 hover:text-blue-400'
@@ -263,13 +263,13 @@ const BoardView: React.FC<BoardViewProps> = ({
                                           />
                                         </svg>
                                       </button>
-                                      {(app.cv || app.userInfo.resume) && (
+                                      {(app.cv || app.userInfo?.resume) && (
                                         <button
                                           className='text-gray-500 pl-2 hover:text-blue-600'
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             const cvData =
-                                              app.cv || app.userInfo.resume;
+                                              app.cv || app.userInfo?.resume;
                                             if (cvData && cvData.path) {
                                               window.open(
                                                 cvData.path,

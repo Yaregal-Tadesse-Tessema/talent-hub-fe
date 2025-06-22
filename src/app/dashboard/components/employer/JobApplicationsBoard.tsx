@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { DropResult } from '@hello-pangea/dnd';
 import {
   Squares2X2Icon,
   ListBulletIcon,
   FunnelIcon,
   ChevronDownIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import ApplicationDetailModal, {
   ApplicationDetail,
@@ -14,6 +15,7 @@ import {
   Application,
   Column,
   ApplicationStatus,
+  ApplicationFilters,
 } from '@/services/applicationService';
 import { useToast } from '@/contexts/ToastContext';
 import { useEmployerChange } from '@/hooks/useEmployerChange';
@@ -69,12 +71,44 @@ export default function JobApplicationsBoard({
   const [view, setView] = useState<'board' | 'list'>('list');
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<ApplicationFilters>({
+    // Basic Info
     name: '',
-    experience: '',
+    email: '',
+    phone: '',
+
+    // Status & Application
+    status: '',
+    hasCV: null,
+    hasCoverLetter: null,
+    isViewed: null,
+    hasRemark: null,
+
+    // Experience & Education
+    experienceMin: '',
+    experienceMax: '',
     education: '',
+    gpaMin: '',
+    gpaMax: '',
+
+    // Skills & Industry
+    technicalSkills: [],
+    softSkills: [],
+    industry: '',
+
+    // Location & Preferences
+    location: '',
+    salaryExpectations: '',
+
+    // Application Date
     appliedFrom: '',
     appliedTo: '',
+
+    // Score & Assessment
+    questionaryScoreMin: '',
+    questionaryScoreMax: '',
+    aiJobFitScoreMin: '',
+    aiJobFitScoreMax: '',
   });
   const [sort, setSort] = useState<'newest' | 'oldest' | 'az' | 'za'>('newest');
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
@@ -85,10 +119,9 @@ export default function JobApplicationsBoard({
   const [job, setJob] = useState<Job | null>(null);
   const [bulkActionModal, setBulkActionModal] = useState<{
     open: boolean;
-    action: null | 'move' | 'shortlist' | 'remark' | 'mail' | 'reject' | 'tag';
+    action: null | 'move' | 'shortlist' | 'mail' | 'reject' | 'tag';
   }>({ open: false, action: null });
   const [notifyByEmail, setNotifyByEmail] = useState(false);
-  const [remarkText, setRemarkText] = useState('');
   const [mailDraft, setMailDraft] = useState('');
   const [availableTags, setAvailableTags] = useState([
     'Top Talent',
@@ -99,6 +132,48 @@ export default function JobApplicationsBoard({
   ]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
+  const [remarkModal, setRemarkModal] = useState<{
+    open: boolean;
+    appId: string | null;
+    remarkText: string;
+  }>({ open: false, appId: null, remarkText: '' });
+
+  // Check if there are active filters
+  const hasActiveFilters = useMemo(() => {
+    return Object.values(filters).some(
+      (value) =>
+        value !== '' &&
+        value !== null &&
+        (Array.isArray(value) ? value.length > 0 : true),
+    );
+  }, [filters]);
+
+  // Count active filters
+  const activeFilterCount = useMemo(() => {
+    return Object.values(filters).filter(
+      (value) =>
+        value !== '' &&
+        value !== null &&
+        (Array.isArray(value) ? value.length > 0 : true),
+    ).length;
+  }, [filters]);
+
+  // Filter applications based on current filters
+  const filteredAppIds = useMemo(() => {
+    // If there are no active filters, show all applications
+    if (!hasActiveFilters) {
+      return Object.keys(applications);
+    }
+
+    // If there are active filters, the backend already returned filtered results
+    // So we just return all the applications we have (they're already filtered)
+    return Object.keys(applications);
+  }, [applications, hasActiveFilters]);
+
+  const allSelected =
+    filteredAppIds.length > 0 && selectedRows.length === filteredAppIds.length;
+  const isIndeterminate =
+    selectedRows.length > 0 && selectedRows.length < filteredAppIds.length;
 
   // Move useEffect to the top to avoid conditional hook calls
   useEffect(() => {
@@ -113,11 +188,29 @@ export default function JobApplicationsBoard({
     };
   }, [openActionMenu]);
 
-  const fetchApplications = async () => {
+  const fetchApplications = async (filters?: ApplicationFilters) => {
     try {
       setLoading(true);
 
-      const response = await applicationService.getApplicationsByJobId(jobId);
+      let response;
+
+      // Check if the provided filters have any active values
+      const hasActiveFilterValues =
+        filters &&
+        Object.values(filters).some(
+          (value) =>
+            value !== '' &&
+            value !== null &&
+            (Array.isArray(value) ? value.length > 0 : true),
+        );
+
+      if (filters && hasActiveFilterValues) {
+        // Use searchApplications for filtered results
+        response = await applicationService.searchApplications(jobId, filters);
+      } else {
+        // Use regular getApplicationsByJobId for unfiltered results
+        response = await applicationService.getApplicationsByJobId(jobId);
+      }
 
       // Convert applications array to record
       const applicationsRecord: Record<string, Application> = {};
@@ -158,6 +251,45 @@ export default function JobApplicationsBoard({
     } finally {
       setLoading(false);
     }
+  };
+
+  // Function to handle filter application
+  const handleApplyFilters = async (newFilters: ApplicationFilters) => {
+    setFilters(newFilters);
+    await fetchApplications(newFilters);
+  };
+
+  // Function to clear filters and refetch
+  const handleClearFilters = async () => {
+    const emptyFilters: ApplicationFilters = {
+      name: '',
+      email: '',
+      phone: '',
+      status: '',
+      hasCV: null,
+      hasCoverLetter: null,
+      isViewed: null,
+      hasRemark: null,
+      experienceMin: '',
+      experienceMax: '',
+      education: '',
+      gpaMin: '',
+      gpaMax: '',
+      salaryExpectations: '',
+      technicalSkills: [],
+      softSkills: [],
+      industry: '',
+      location: '',
+      appliedFrom: '',
+      appliedTo: '',
+      questionaryScoreMin: '',
+      questionaryScoreMax: '',
+      aiJobFitScoreMin: '',
+      aiJobFitScoreMax: '',
+    };
+
+    setFilters(emptyFilters);
+    await fetchApplications();
   };
 
   // Add employer change handler
@@ -288,69 +420,7 @@ export default function JobApplicationsBoard({
     );
   }
 
-  let filteredAppIds = allAppIds.filter((id) => {
-    const app = applications[id];
-    if (!app.userInfo) return false;
-
-    if (
-      filters.name &&
-      !`${app.userInfo.firstName || ''} ${app.userInfo.lastName || ''}`
-        .toLowerCase()
-        .includes(filters.name.toLowerCase())
-    )
-      return false;
-    if (
-      filters.experience &&
-      !String(app.userInfo.yearOfExperience || '')
-        .toLowerCase()
-        .includes(filters.experience.toLowerCase())
-    )
-      return false;
-    if (
-      filters.education &&
-      !String(app.userInfo.highestLevelOfEducation || '')
-        .toLowerCase()
-        .includes(filters.education.toLowerCase())
-    )
-      return false;
-    if (
-      filters.appliedFrom &&
-      new Date(app.userInfo.createdAt) < new Date(filters.appliedFrom)
-    )
-      return false;
-    if (
-      filters.appliedTo &&
-      new Date(app.userInfo.createdAt) > new Date(filters.appliedTo)
-    )
-      return false;
-    return true;
-  });
-  filteredAppIds = filteredAppIds.sort((a, b) => {
-    const appA = applications[a];
-    const appB = applications[b];
-    if (sort === 'newest')
-      return (
-        new Date(appB.userInfo.createdAt).getTime() -
-        new Date(appA.userInfo.createdAt).getTime()
-      );
-    if (sort === 'oldest')
-      return (
-        new Date(appA.userInfo.createdAt).getTime() -
-        new Date(appB.userInfo.createdAt).getTime()
-      );
-    if (sort === 'az')
-      return appA.userInfo.firstName.localeCompare(appB.userInfo.firstName);
-    if (sort === 'za')
-      return appB.userInfo.firstName.localeCompare(appA.userInfo.firstName);
-    return 0;
-  });
-  const allSelected =
-    filteredAppIds.length > 0 && selectedRows.length === filteredAppIds.length;
-  const isIndeterminate =
-    selectedRows.length > 0 && selectedRows.length < filteredAppIds.length;
-
   // Check if there are applications but filters result in no matches
-  const hasActiveFilters = Object.values(filters).some((value) => value !== '');
   if (allAppIds.length > 0 && filteredAppIds.length === 0 && hasActiveFilters) {
     return (
       <div className='flex-1 p-6'>
@@ -381,10 +451,29 @@ export default function JobApplicationsBoard({
             onClick={() =>
               setFilters({
                 name: '',
-                experience: '',
+                email: '',
+                phone: '',
+                status: '',
+                hasCV: null,
+                hasCoverLetter: null,
+                isViewed: null,
+                hasRemark: null,
+                experienceMin: '',
+                experienceMax: '',
                 education: '',
+                gpaMin: '',
+                gpaMax: '',
+                technicalSkills: [],
+                softSkills: [],
+                industry: '',
+                location: '',
+                salaryExpectations: '',
                 appliedFrom: '',
                 appliedTo: '',
+                questionaryScoreMin: '',
+                questionaryScoreMax: '',
+                aiJobFitScoreMin: '',
+                aiJobFitScoreMax: '',
               })
             }
             className='mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors'
@@ -410,33 +499,120 @@ export default function JobApplicationsBoard({
   }
 
   function openBulkModal(
-    action: 'move' | 'shortlist' | 'remark' | 'mail' | 'reject' | 'tag',
+    action: 'move' | 'shortlist' | 'mail' | 'reject' | 'tag',
   ) {
     setBulkActionModal({ open: true, action });
     console.log('openBulkModal', bulkActionModal);
     setOpenActionMenu(null);
   }
+
+  // Handle individual remark action
+  const handleRemarkAction = (appId: string) => {
+    setRemarkModal({ open: true, appId, remarkText: '' });
+  };
+
+  // Process bulk actions
+  const handleBulkAction = async (action: string, data?: any) => {
+    try {
+      switch (action) {
+        case 'shortlist':
+          await updateBulkApplicationStatus('SELECTED');
+          break;
+        case 'reject':
+          await updateBulkApplicationStatus('REJECTED');
+          break;
+        case 'move':
+          // This would need a target column selection - for now, default to SELECTED
+          await updateBulkApplicationStatus('SELECTED');
+          break;
+        case 'mail':
+          // Handle bulk email sending
+          await sendBulkEmail(data?.mailDraft);
+          break;
+        case 'tag':
+          // Handle bulk tagging
+          await addBulkTags(data?.selectedTags);
+          break;
+        default:
+          throw new Error(`Unknown action: ${action}`);
+      }
+
+      showToast({
+        type: 'success',
+        message: `Successfully processed ${action} for ${selectedRows.length} application(s)`,
+      });
+
+      // Refresh applications after bulk action
+      await fetchApplications();
+      clearSelection();
+    } catch (error) {
+      console.error('Error processing bulk action:', error);
+      showToast({
+        type: 'error',
+        message: `Failed to process ${action} action`,
+      });
+      throw error;
+    }
+  };
+
+  // Update application status for multiple applications
+  const updateBulkApplicationStatus = async (status: ApplicationStatus) => {
+    const promises = selectedRows.map((appId) =>
+      applicationService.changeApplicationStatus({
+        id: appId,
+        status,
+      }),
+    );
+
+    await Promise.all(promises);
+  };
+
+  // Send bulk email (placeholder implementation)
+  const sendBulkEmail = async (mailDraft: string) => {
+    // TODO: Implement bulk email sending
+    console.log('Sending bulk email:', mailDraft);
+    // This would typically call an email service
+  };
+
+  // Add bulk tags (placeholder implementation)
+  const addBulkTags = async (tags: string[]) => {
+    // TODO: Implement bulk tagging
+    console.log('Adding bulk tags:', tags);
+    // This would typically update application metadata
+  };
+
+  // Handle individual remark submission
+  const handleRemarkSubmit = async () => {
+    if (!remarkModal.appId || !remarkModal.remarkText.trim()) return;
+
+    try {
+      await applicationService.updateApplicationRemark(
+        remarkModal.appId,
+        remarkModal.remarkText,
+      );
+
+      showToast({
+        type: 'success',
+        message: 'Remark added successfully',
+      });
+
+      setRemarkModal({ open: false, appId: null, remarkText: '' });
+      await fetchApplications();
+    } catch (error) {
+      console.error('Error adding remark:', error);
+      showToast({
+        type: 'error',
+        message: 'Failed to add remark',
+      });
+    }
+  };
+
   // Helper to get status/column for an application
   function getAppStatus(appId: string) {
     const col = columns.find((c) => c.appIds.includes(appId));
     return col
       ? { id: col.id, title: col.title }
       : { id: 'all', title: 'All Applications' };
-  }
-  // Helper to get color for a status/column
-  function getStatusColor(colId: string) {
-    switch (colId) {
-      case 'PENDING':
-        return 'bg-yellow-100 text-yellow-700';
-      case 'SELECTED':
-        return 'bg-blue-100 text-blue-700';
-      case 'REJECTED':
-        return 'bg-red-100 text-red-700';
-      case 'HIRED':
-        return 'bg-green-100 text-green-700';
-      default:
-        return 'bg-gray-100 text-gray-700';
-    }
   }
 
   if (loading) {
@@ -484,10 +660,15 @@ export default function JobApplicationsBoard({
           </div>
           <button
             onClick={() => setFilterOpen(true)}
-            className='flex items-center gap-1 px-3 py-2 bg-white border border-gray-200 rounded font-medium text-gray-700 hover:bg-blue-50'
+            className='flex items-center gap-1 px-3 py-2 bg-white border border-gray-200 rounded font-medium text-gray-700 hover:bg-blue-50 relative'
             title='Filter'
           >
             <FunnelIcon className='w-5 h-5' />
+            {hasActiveFilters && (
+              <span className='absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center'>
+                {activeFilterCount}
+              </span>
+            )}
           </button>
           <button
             onClick={() => setSortOpen(true)}
@@ -504,6 +685,8 @@ export default function JobApplicationsBoard({
         setFilters={setFilters}
         filterOpen={filterOpen}
         setFilterOpen={setFilterOpen}
+        onApplyFilters={handleApplyFilters}
+        onClearFilters={handleClearFilters}
       />
       {/* Sort Modal */}
       <SortModal
@@ -539,8 +722,6 @@ export default function JobApplicationsBoard({
               selectedRows={selectedRows}
               notifyByEmail={notifyByEmail}
               setNotifyByEmail={setNotifyByEmail}
-              remarkText={remarkText}
-              setRemarkText={setRemarkText}
               mailDraft={mailDraft}
               setMailDraft={setMailDraft}
               availableTags={availableTags}
@@ -549,6 +730,7 @@ export default function JobApplicationsBoard({
               setSelectedTags={setSelectedTags}
               newTag={newTag}
               setNewTag={setNewTag}
+              onConfirmAction={handleBulkAction}
             />
           )}
           <ListView
@@ -563,6 +745,7 @@ export default function JobApplicationsBoard({
             setSelectedApplicationId={setSelectedApplicationId}
             openActionMenu={openActionMenu}
             setOpenActionMenu={setOpenActionMenu}
+            onRemarkAction={handleRemarkAction}
           />
         </>
       )}
@@ -576,6 +759,54 @@ export default function JobApplicationsBoard({
             : mockApplicationDetail
         }
       />
+      {/* Remark Modal */}
+      {remarkModal.open && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/30'>
+          <div className='bg-white rounded-lg shadow-lg p-6 min-w-[400px] relative'>
+            <button
+              type='button'
+              onClick={() =>
+                setRemarkModal({ open: false, appId: null, remarkText: '' })
+              }
+              className='absolute top-2 right-2 text-gray-400 hover:text-gray-600'
+            >
+              <XMarkIcon className='w-5 h-5' />
+            </button>
+            <h2 className='text-lg font-semibold mb-4'>Add Remark</h2>
+            <div className='mb-4'>
+              <label className='block text-sm font-medium mb-1'>Remark</label>
+              <textarea
+                className='border rounded px-3 py-2 w-full min-h-[120px]'
+                value={remarkModal.remarkText}
+                onChange={(e) =>
+                  setRemarkModal((prev) => ({
+                    ...prev,
+                    remarkText: e.target.value,
+                  }))
+                }
+                placeholder='Enter your remark here...'
+              />
+            </div>
+            <div className='flex gap-2 mt-4'>
+              <button
+                className='flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-medium'
+                onClick={handleRemarkSubmit}
+                disabled={!remarkModal.remarkText.trim()}
+              >
+                Add Remark
+              </button>
+              <button
+                className='flex-1 bg-gray-100 text-gray-700 py-2 rounded hover:bg-gray-200 font-medium'
+                onClick={() =>
+                  setRemarkModal({ open: false, appId: null, remarkText: '' })
+                }
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

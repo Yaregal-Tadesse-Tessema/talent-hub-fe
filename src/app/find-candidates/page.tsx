@@ -1,124 +1,36 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import CandidateDetailModal from './CandidateDetailModal';
-import Image from 'next/image';
 import Link from 'next/link';
-import { employeeService } from '@/services/employee.service';
-
-const candidateLevels = ['Entry Level', 'Mid Level', 'Expert Level'];
-const experiences = [
-  'Freshers',
-  '1 - 2 Years',
-  '2 - 4 Years',
-  '4 - 6 Years',
-  '6 - 8 Years',
-  '8 - 10 Years',
-  '10 - 15 Years',
-  '15+ Years',
-];
-const educations = [
-  'All',
-  'High School',
-  'Intermediate',
-  'Graduation',
-  'Master Degree',
-  'Bachelor Degree',
-];
-const genders = ['Male', 'Female', 'Others'];
-
-const mockCandidates = [
-  {
-    name: 'Cody Fisher',
-    title: 'Marketing Officer',
-    location: 'New York',
-    experience: '3 Years experience',
-    gender: 'Male',
-    education: 'Graduation',
-    level: 'Mid Level',
-  },
-  {
-    name: 'Darrell Steward',
-    title: 'Interaction Designer',
-    location: 'New York',
-    experience: '3 Years experience',
-    gender: 'Male',
-    education: 'Graduation',
-    level: 'Mid Level',
-  },
-  {
-    name: 'Guy Hawkins',
-    title: 'Junior Graphic Designer',
-    location: 'New York',
-    experience: '3 Years experience',
-    gender: 'Male',
-    education: 'Graduation',
-    level: 'Mid Level',
-  },
-  {
-    name: 'Jane Cooper',
-    title: 'Senior UX Designer',
-    location: 'New York',
-    experience: '3 Years experience',
-    gender: 'Female',
-    education: 'Graduation',
-    level: 'Mid Level',
-    selected: true,
-  },
-  {
-    name: 'Theresa Webb',
-    title: 'Front End Developer',
-    location: 'New York',
-    experience: '3 Years experience',
-    gender: 'Female',
-    education: 'Graduation',
-    level: 'Mid Level',
-  },
-  {
-    name: 'Kathryn Murphy',
-    title: 'Technical Support Specialist',
-    location: 'New York',
-    experience: '3 Years experience',
-    gender: 'Female',
-    education: 'Graduation',
-    level: 'Mid Level',
-  },
-  {
-    name: 'Marvin McKinney',
-    title: 'UI/UX Designer',
-    location: 'New York',
-    experience: '3 Years experience',
-    gender: 'Male',
-    education: 'Graduation',
-    level: 'Mid Level',
-  },
-  {
-    name: 'Jenny Wilson',
-    title: 'Marketing Manager',
-    location: 'New York',
-    experience: '3 Years experience',
-    gender: 'Female',
-    education: 'Graduation',
-    level: 'Mid Level',
-  },
-];
+import { employeeService, JobSeekerProfile } from '@/services/employee.service';
+import CandidateFilters, { FilterState } from '@/components/CandidateFilters';
 
 export default function FindCandidatesPage() {
   const [user, setUser] = useState<any>(null);
-  const [radius, setRadius] = useState(32);
-  const [selectedLevel, setSelectedLevel] = useState('Mid Level');
-  const [selectedExperience, setSelectedExperience] = useState('4 - 6 Years');
-  const [selectedEducations, setSelectedEducations] = useState(['Graduation']);
-  const [selectedGender, setSelectedGender] = useState('Male');
-  const [expandedSections, setExpandedSections] = useState({
-    location: true,
-    level: true,
-    experience: true,
-    education: true,
-    gender: true,
-  });
+  const [candidates, setCandidates] = useState<JobSeekerProfile[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [filterLoading, setFilterLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
+  const [selectedCandidate, setSelectedCandidate] =
+    useState<JobSeekerProfile | null>(null);
   const [showMobileFilter, setShowMobileFilter] = useState(false);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
+  const [totalCandidates, setTotalCandidates] = useState(0);
+
+  // Filter state
+  const [filters, setFilters] = useState<FilterState>({
+    experience: 'All',
+    education: ['All'],
+    gender: 'All',
+    salaryRange: 'All',
+    jobFitScore: 'All',
+    industries: ['All'],
+    radius: 32,
+  });
 
   useEffect(() => {
     employeeService.getEmployers().then((res) => {
@@ -139,14 +51,121 @@ export default function FindCandidatesPage() {
     }
   }, []);
 
-  const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
+  // Fetch candidates when user is logged in
+  useEffect(() => {
+    if (user) {
+      fetchCandidates();
+    }
+  }, [user]);
+
+  const fetchCandidates = async () => {
+    setLoading(true);
+    try {
+      const response = await employeeService.searchCandidates(
+        '', // no search query
+        'All', // all experience levels
+        ['All'], // all education levels
+        'All', // all genders
+        32, // default radius
+        'All', // all salary ranges
+        'All', // all job fit scores
+        ['All'], // all industries
+        pageSize,
+        (currentPage - 1) * pageSize,
+      );
+
+      // The service now returns a properly typed response with items
+      const candidatesData = response.items || [];
+      console.log('Processed candidates data:', candidatesData);
+      setCandidates(candidatesData);
+
+      // Update total count if available in response
+      if (response.total !== undefined) {
+        setTotalCandidates(response.total);
+      }
+    } catch (error) {
+      console.error('Error fetching candidates:', error);
+      setCandidates([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleCandidateClick = (candidate: any) => {
+  const handleSearch = async (isFilterSearch = false) => {
+    if (isFilterSearch) {
+      setFilterLoading(true);
+    } else {
+      setLoading(true);
+    }
+
+    // Debug: Log the filter values being passed
+    console.log('Filter values being passed:', {
+      searchQuery,
+      experience: filters.experience,
+      education: filters.education,
+      gender: filters.gender,
+      radius: filters.radius,
+      salaryRange: filters.salaryRange,
+      jobFitScore: filters.jobFitScore,
+      industries: filters.industries,
+      top: pageSize,
+      skip: (currentPage - 1) * pageSize,
+    });
+
+    try {
+      const response = await employeeService.searchCandidates(
+        searchQuery,
+        filters.experience,
+        filters.education,
+        filters.gender,
+        filters.radius,
+        filters.salaryRange,
+        filters.jobFitScore,
+        filters.industries,
+        pageSize,
+        (currentPage - 1) * pageSize,
+      );
+
+      // The service now returns a properly typed response with items
+      const candidatesData = response.items || [];
+      console.log('Search results:', candidatesData);
+      setCandidates(candidatesData);
+
+      // Update total count if available in response
+      if (response.total !== undefined) {
+        setTotalCandidates(response.total);
+      }
+    } catch (error) {
+      console.error('Error searching candidates:', error);
+      setCandidates([]);
+    } finally {
+      if (isFilterSearch) {
+        setFilterLoading(false);
+      } else {
+        setLoading(false);
+      }
+    }
+  };
+
+  // Manual search function for when users want to search with default values
+  const handleManualSearch = () => {
+    if (user) {
+      handleSearch(true);
+    }
+  };
+
+  // Handle filter changes
+  const handleFiltersChange = (newFilters: FilterState) => {
+    console.log('Filters changed:', newFilters);
+    setFilters(newFilters);
+    // Reset to first page when filters change
+    setCurrentPage(1);
+    if (user) {
+      handleSearch(true);
+    }
+  };
+
+  const handleCandidateClick = (candidate: JobSeekerProfile) => {
     setSelectedCandidate(candidate);
     setShowModal(true);
   };
@@ -158,6 +177,24 @@ export default function FindCandidatesPage() {
 
   const toggleMobileFilter = () => {
     setShowMobileFilter(!showMobileFilter);
+  };
+
+  // Get active filters summary
+  const getActiveFilters = () => {
+    const activeFilters = [];
+
+    if (filters.experience !== 'All') activeFilters.push(filters.experience);
+    if (filters.education.length > 0 && !filters.education.includes('All')) {
+      activeFilters.push(`${filters.education.length} education level(s)`);
+    }
+    if (filters.gender !== 'All') activeFilters.push(filters.gender);
+    if (filters.salaryRange !== 'All') activeFilters.push(filters.salaryRange);
+    if (filters.jobFitScore !== 'All') activeFilters.push(filters.jobFitScore);
+    if (filters.industries.length > 0 && !filters.industries.includes('All')) {
+      activeFilters.push(`${filters.industries.length} industry(ies)`);
+    }
+
+    return activeFilters;
   };
 
   return (
@@ -380,48 +417,11 @@ export default function FindCandidatesPage() {
                   </button>
                 </div>
                 <div className='p-4'>
-                  {/* Filter content will be rendered here */}
-                  {/* Location Radius */}
-                  <div>
-                    <div
-                      className='flex justify-between items-center mb-2 cursor-pointer select-none'
-                      onClick={() => toggleSection('location')}
-                    >
-                      <span className='font-medium text-sm sm:text-base dark:text-white'>
-                        Location Radius:{' '}
-                        <span className='text-blue-600 dark:text-blue-400 font-semibold'>
-                          {radius} miles
-                        </span>
-                      </span>
-                      <svg
-                        width='20'
-                        height='20'
-                        fill='none'
-                        viewBox='0 0 24 24'
-                        stroke='currentColor'
-                        className={`transform transition-transform dark:text-white ${expandedSections.location ? 'rotate-180' : ''}`}
-                      >
-                        <path
-                          d='M19 9l-7 7-7-7'
-                          strokeWidth='2'
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                        />
-                      </svg>
-                    </div>
-                    {expandedSections.location && (
-                      <input
-                        type='range'
-                        min={0}
-                        max={100}
-                        value={radius}
-                        onChange={(e) => setRadius(Number(e.target.value))}
-                        className='w-full accent-blue-600 mt-4'
-                      />
-                    )}
-                  </div>
-                  {/* Rest of the filter sections */}
-                  {/* ... Copy the rest of the filter sections here ... */}
+                  <CandidateFilters
+                    filters={filters}
+                    onFiltersChange={handleFiltersChange}
+                    loading={filterLoading}
+                  />
                 </div>
               </div>
             </div>
@@ -430,7 +430,7 @@ export default function FindCandidatesPage() {
           {/* Top search/filter bar */}
           <div className='bg-gray-100 dark:bg-gray-800 px-4 sm:px-8 md:px-16 py-4 pb-8 border-b border-gray-200 dark:border-gray-700'>
             <div className='flex flex-col sm:flex-row gap-4 items-stretch sm:items-center shadow rounded-xl px-4 sm:px-6 py-2 bg-white dark:bg-gray-700'>
-              {/* Job title search */}
+              {/* Candidate search */}
               <div className='flex items-center gap-2 flex-1 border-b sm:border-b-0 sm:border-r border-gray-200 dark:border-gray-600 pb-2 sm:pb-0 pr-0 sm:pr-4'>
                 <svg
                   width='22'
@@ -445,54 +445,24 @@ export default function FindCandidatesPage() {
                 </svg>
                 <input
                   className='flex-1 bg-transparent border-none outline-none text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500'
-                  placeholder='Job title, Keyword...'
+                  placeholder='Search by name, job title, or professional summary...'
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
                 />
               </div>
-              {/* Location */}
-              <div className='flex items-center gap-2 border-b sm:border-b-0 sm:border-r border-gray-200 dark:border-gray-600 px-0 sm:px-4 pb-2 sm:pb-0 min-w-[200px]'>
-                <svg
-                  width='22'
-                  height='22'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                  stroke='#2563eb'
-                  className='flex-shrink-0'
-                >
-                  <path
-                    d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z'
-                    strokeWidth='2'
-                  />
-                  <circle cx='12' cy='9' r='2.5' strokeWidth='2' />
-                </svg>
-                <input
-                  className='bg-transparent border-none outline-none text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 w-full'
-                  placeholder='Location'
-                />
-              </div>
-              {/* Category */}
-              <div className='flex items-center gap-2 border-b sm:border-b-0 sm:border-r border-gray-200 dark:border-gray-600 px-0 sm:px-4 pb-2 sm:pb-0 min-w-[200px]'>
-                <svg
-                  width='22'
-                  height='22'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                  stroke='#2563eb'
-                  className='flex-shrink-0'
-                >
-                  <g strokeWidth='2'>
-                    <rect x='3' y='3' width='18' height='6' rx='2' />
-                    <rect x='3' y='9' width='18' height='6' rx='2' />
-                    <rect x='3' y='15' width='18' height='6' rx='2' />
-                  </g>
-                </svg>
-                <select className='bg-transparent border-none outline-none text-gray-700 dark:text-white w-full'>
-                  <option>Select Category</option>
-                </select>
-              </div>
-              {/* Find Job button */}
+              {/* Find Candidates button */}
               <div className='flex items-center gap-2 pl-0 sm:pl-2 pt-2 sm:pt-0'>
-                <button className='w-full sm:w-auto bg-blue-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-blue-700 transition'>
-                  Find Job
+                <button
+                  className='w-full sm:w-auto bg-blue-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-blue-700 transition'
+                  onClick={handleManualSearch}
+                  disabled={loading}
+                >
+                  {loading ? 'Searching...' : 'Find Candidates'}
                 </button>
               </div>
             </div>
@@ -500,430 +470,388 @@ export default function FindCandidatesPage() {
 
           {/* Sidebar Filter */}
           <div className='bg-gray-50 dark:bg-gray-900 flex flex-col lg:flex-row gap-4 lg:gap-8 px-4 sm:px-8 md:px-16 py-8'>
-            <div className='hidden lg:block w-full lg:w-80 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 shadow-sm h-fit flex flex-col gap-4 sm:gap-6'>
-              <button className='w-full bg-blue-600 text-white py-2 rounded mb-2 font-semibold flex items-center justify-center gap-2'>
-                <svg width='16' height='16' viewBox='0 0 24 24' fill='none'>
-                  <path
-                    d='M20 21V16'
-                    stroke='#ffffff'
-                    strokeWidth='1.5'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                  />
-                  <path
-                    d='M17 16H23'
-                    stroke='#ffffff'
-                    strokeWidth='1.5'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                  />
-                  <path
-                    d='M4 21V14'
-                    stroke='#ffffff'
-                    strokeWidth='1.5'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                  />
-                  <path
-                    d='M1 14H7'
-                    stroke='#ffffff'
-                    strokeWidth='1.5'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                  />
-                  <path
-                    d='M12 21V12'
-                    stroke='#ffffff'
-                    strokeWidth='1.5'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                  />
-                  <path
-                    d='M9 8H15'
-                    stroke='#ffffff'
-                    strokeWidth='1.5'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                  />
-                  <path
-                    d='M20 12V3'
-                    stroke='#ffffff'
-                    strokeWidth='1.5'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                  />
-                  <path
-                    d='M12 8V3'
-                    stroke='#ffffff'
-                    strokeWidth='1.5'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                  />
-                  <path
-                    d='M4 10V3'
-                    stroke='#ffffff'
-                    strokeWidth='1.5'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                  />
-                </svg>
-                Filter
-              </button>
-
-              {/* Candidate Level */}
-              <div>
-                <div
-                  className='flex justify-between items-center mb-2 cursor-pointer select-none'
-                  onClick={() => toggleSection('level')}
-                >
-                  <div className='font-medium text-sm sm:text-base dark:text-white'>
-                    Candidate Level
-                  </div>
-                  <svg
-                    width='20'
-                    height='20'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                    className={`transform transition-transform dark:text-white ${expandedSections.level ? 'rotate-180' : ''}`}
-                  >
-                    <path
-                      d='M19 9l-7 7-7-7'
-                      strokeWidth='2'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    />
-                  </svg>
-                </div>
-                {expandedSections.level && (
-                  <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2'>
-                    {candidateLevels.map((level) => (
-                      <div key={level} className='flex items-center'>
-                        <input
-                          type='radio'
-                          id={level}
-                          name='level'
-                          value={level}
-                          checked={selectedLevel === level}
-                          onChange={() => setSelectedLevel(level)}
-                          className='mr-2 accent-blue-600'
-                        />
-                        <label
-                          htmlFor={level}
-                          className='text-sm sm:text-base dark:text-white'
-                        >
-                          {level}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              {/* Experiences */}
-              <div className='pt-4'>
-                <div
-                  className='flex justify-between items-center mb-2 cursor-pointer select-none'
-                  onClick={() => toggleSection('experience')}
-                >
-                  <div className='font-medium text-sm sm:text-base dark:text-white'>
-                    Experiences
-                  </div>
-                  <svg
-                    width='20'
-                    height='20'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                    className={`transform transition-transform dark:text-white ${expandedSections.experience ? 'rotate-180' : ''}`}
-                  >
-                    <path
-                      d='M19 9l-7 7-7-7'
-                      strokeWidth='2'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    />
-                  </svg>
-                </div>
-                {expandedSections.experience && (
-                  <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2'>
-                    {experiences.map((exp) => (
-                      <div key={exp} className='flex items-center'>
-                        <input
-                          type='radio'
-                          id={exp}
-                          name='experience'
-                          value={exp}
-                          checked={selectedExperience === exp}
-                          onChange={() => setSelectedExperience(exp)}
-                          className='mr-2 accent-blue-600'
-                        />
-                        <label
-                          htmlFor={exp}
-                          className='text-sm sm:text-base dark:text-white'
-                        >
-                          {exp}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              {/* Education */}
-              <div>
-                <div
-                  className='flex justify-between items-center mb-2 cursor-pointer select-none'
-                  onClick={() => toggleSection('education')}
-                >
-                  <div className='font-medium text-sm sm:text-base dark:text-white'>
-                    Education
-                  </div>
-                  <svg
-                    width='20'
-                    height='20'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                    className={`transform transition-transform dark:text-white ${expandedSections.education ? 'rotate-180' : ''}`}
-                  >
-                    <path
-                      d='M19 9l-7 7-7-7'
-                      strokeWidth='2'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    />
-                  </svg>
-                </div>
-                {expandedSections.education && (
-                  <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2'>
-                    {educations.map((edu) => (
-                      <div key={edu} className='flex items-center'>
-                        <input
-                          type='checkbox'
-                          id={edu}
-                          name='education'
-                          value={edu}
-                          checked={selectedEducations.includes(edu)}
-                          onChange={() =>
-                            setSelectedEducations((prev) =>
-                              prev.includes(edu)
-                                ? prev.filter((e) => e !== edu)
-                                : [...prev, edu],
-                            )
-                          }
-                          className='mr-2 accent-blue-600'
-                        />
-                        <label
-                          htmlFor={edu}
-                          className='text-sm sm:text-base dark:text-white'
-                        >
-                          {edu}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              {/* Gender */}
-              <div>
-                <div
-                  className='flex justify-between items-center mb-2 cursor-pointer select-none'
-                  onClick={() => toggleSection('gender')}
-                >
-                  <div className='font-medium text-sm sm:text-base dark:text-white'>
-                    Gender
-                  </div>
-                  <svg
-                    width='20'
-                    height='20'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                    className={`transform transition-transform dark:text-white ${expandedSections.gender ? 'rotate-180' : ''}`}
-                  >
-                    <path
-                      d='M19 9l-7 7-7-7'
-                      strokeWidth='2'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    />
-                  </svg>
-                </div>
-                {expandedSections.gender && (
-                  <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2'>
-                    {genders.map((gender) => (
-                      <div key={gender} className='flex items-center'>
-                        <input
-                          type='radio'
-                          id={gender}
-                          name='gender'
-                          value={gender}
-                          checked={selectedGender === gender}
-                          onChange={() => setSelectedGender(gender)}
-                          className='mr-2 accent-blue-600'
-                        />
-                        <label
-                          htmlFor={gender}
-                          className='text-sm sm:text-base dark:text-white'
-                        >
-                          {gender}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+            <div className='hidden lg:block w-full lg:w-80'>
+              <CandidateFilters
+                filters={filters}
+                onFiltersChange={handleFiltersChange}
+                loading={filterLoading}
+              />
             </div>
             {/* Main Content */}
             <div className='flex-1'>
               <div className='flex justify-between items-center mb-6'>
                 <div className='flex gap-2'>
-                  <select className='w-24 border border-gray-200 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-white'>
-                    <option>Latest</option>
-                    <option>Oldest</option>
-                  </select>
-                  <select className='w-36 border border-gray-200 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-white'>
-                    <option>12 per page</option>
-                    <option>24 per page</option>
-                    <option>48 per page</option>
-                  </select>
+                  <button
+                    onClick={handleManualSearch}
+                    disabled={loading}
+                    className='px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2'
+                  >
+                    <svg
+                      width='16'
+                      height='16'
+                      fill='none'
+                      viewBox='0 0 24 24'
+                      stroke='currentColor'
+                      className={loading ? 'animate-spin' : ''}
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'
+                      />
+                    </svg>
+                    Refresh
+                  </button>
                 </div>
                 <div className='flex gap-2'>
-                  <button className='border border-gray-200 dark:border-gray-600 rounded p-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'>
-                    <svg
-                      width='20'
-                      height='20'
-                      fill='none'
-                      viewBox='0 0 24 24'
-                      stroke='currentColor'
-                    >
-                      <rect x='3' y='3' width='7' height='7' strokeWidth='2' />
-                      <rect x='14' y='3' width='7' height='7' strokeWidth='2' />
-                      <rect
-                        x='14'
-                        y='14'
-                        width='7'
-                        height='7'
-                        strokeWidth='2'
-                      />
-                      <rect x='3' y='14' width='7' height='7' strokeWidth='2' />
-                    </svg>
-                  </button>
-                  <button className='border border-gray-200 dark:border-gray-600 rounded p-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-white'>
-                    <svg
-                      width='20'
-                      height='20'
-                      fill='none'
-                      viewBox='0 0 24 24'
-                      stroke='currentColor'
-                    >
-                      <rect x='3' y='3' width='18' height='7' strokeWidth='2' />
-                      <rect
-                        x='3'
-                        y='14'
-                        width='18'
-                        height='7'
-                        strokeWidth='2'
-                      />
-                    </svg>
-                  </button>
+                  <span className='text-sm text-gray-600 dark:text-gray-400 self-center'>
+                    {loading
+                      ? 'Loading...'
+                      : `${candidates.length} candidate ${candidates.length !== 1 ? 's' : ''} found`}
+                  </span>
+                  {getActiveFilters().length > 0 && (
+                    <div className='flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400'>
+                      <svg
+                        width='14'
+                        height='14'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                      >
+                        <path
+                          d='M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z'
+                          strokeWidth='2'
+                        />
+                      </svg>
+                      <span>{getActiveFilters().join(', ')}</span>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className='flex flex-col gap-4'>
-                {mockCandidates.map((candidate, idx) => (
-                  <div
-                    key={candidate.name}
-                    className='flex items-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm px-6 py-4 justify-between hover:ring-2 hover:ring-blue-500 dark:hover:ring-blue-400'
-                  >
-                    <div className='flex items-center gap-4'>
-                      <div className='w-16 h-16 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center'>
-                        {/* Profile image placeholder */}
-                        <svg
-                          width='32'
-                          height='32'
-                          fill='none'
-                          viewBox='0 0 32 32'
-                        >
-                          <rect
+                {loading ? (
+                  <div className='flex justify-center items-center py-12'>
+                    <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+                    <span className='ml-2 text-gray-600 dark:text-gray-400'>
+                      Loading candidates...
+                    </span>
+                  </div>
+                ) : !Array.isArray(candidates) || candidates.length === 0 ? (
+                  <div className='text-center py-12'>
+                    <div className='text-gray-500 dark:text-gray-400 mb-4'>
+                      <svg
+                        className='mx-auto h-12 w-12'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                      >
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'
+                        />
+                      </svg>
+                    </div>
+                    <h3 className='text-lg font-medium text-gray-900 dark:text-white mb-2'>
+                      {Array.isArray(candidates) && candidates.length > 0
+                        ? 'No candidates match your filters'
+                        : 'No candidates found'}
+                    </h3>
+                    <p className='text-gray-500 dark:text-gray-400'>
+                      {Array.isArray(candidates) && candidates.length > 0
+                        ? 'Try adjusting your search criteria.'
+                        : 'Try adjusting your search criteria or check back later.'}
+                    </p>
+                  </div>
+                ) : (
+                  candidates.map((candidate, idx) => (
+                    <div
+                      key={candidate.id || candidate.email || idx}
+                      className='flex items-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm px-6 py-4 justify-between hover:ring-2 hover:ring-blue-500 dark:hover:ring-blue-400'
+                    >
+                      <div className='flex items-center gap-4'>
+                        <div className='w-16 h-16 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center'>
+                          {/* Profile image placeholder */}
+                          <svg
                             width='32'
                             height='32'
-                            rx='8'
-                            fill='#E5E7EB'
-                            className='dark:fill-gray-600'
-                          />
-                          <path
-                            d='M16 18c-3.314 0-6 2.239-6 5v1h12v-1c0-2.761-2.686-5-6-5z'
-                            fill='#D1D5DB'
-                            className='dark:fill-gray-500'
-                          />
-                          <circle
-                            cx='16'
-                            cy='12'
-                            r='5'
-                            fill='#D1D5DB'
-                            className='dark:fill-gray-500'
-                          />
-                        </svg>
+                            fill='none'
+                            viewBox='0 0 32 32'
+                          >
+                            <rect
+                              width='32'
+                              height='32'
+                              rx='8'
+                              fill='#E5E7EB'
+                              className='dark:fill-gray-600'
+                            />
+                            <path
+                              d='M16 18c-3.314 0-6 2.239-6 5v1h12v-1c0-2.761-2.686-5-6-5z'
+                              fill='#D1D5DB'
+                              className='dark:fill-gray-500'
+                            />
+                            <circle
+                              cx='16'
+                              cy='12'
+                              r='5'
+                              fill='#D1D5DB'
+                              className='dark:fill-gray-500'
+                            />
+                          </svg>
+                        </div>
+                        <div className='flex-1'>
+                          <div
+                            className='font-semibold text-base text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:cursor-pointer'
+                            onClick={() => handleCandidateClick(candidate)}
+                          >
+                            {candidate.firstName && candidate.lastName
+                              ? `${candidate.firstName} ${candidate.middleName ? candidate.middleName + ' ' : ''}${candidate.lastName}`
+                              : candidate.email || 'Unknown Candidate'}
+                          </div>
+                          <div className='text-gray-500 dark:text-gray-400 text-sm'>
+                            {candidate.profileHeadLine ||
+                              candidate.alertConfiguration?.jobTitle ||
+                              'No title specified'}
+                          </div>
+                          <div className='flex items-center gap-2 text-gray-400 dark:text-gray-500 text-xs mt-1'>
+                            <svg
+                              width='16'
+                              height='16'
+                              fill='none'
+                              viewBox='0 0 24 24'
+                              stroke='currentColor'
+                            >
+                              <path
+                                d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z'
+                                strokeWidth='2'
+                              />
+                            </svg>
+                            {candidate.preferredJobLocation &&
+                            candidate.preferredJobLocation.length > 0
+                              ? candidate.preferredJobLocation.join(', ')
+                              : candidate.address?.city ||
+                                candidate.address?.state ||
+                                'Location not specified'}
+                            {candidate.yearOfExperience !== undefined && (
+                              <>
+                                <span>•</span>
+                                {candidate.yearOfExperience}{' '}
+                                {parseInt(candidate.yearOfExperience) === 1
+                                  ? 'year'
+                                  : 'years'}{' '}
+                                experience
+                              </>
+                            )}
+                          </div>
+                          <div className='flex items-center gap-2 text-gray-400 dark:text-gray-500 text-xs mt-1'>
+                            {candidate.highestLevelOfEducation && (
+                              <>
+                                <svg
+                                  width='16'
+                                  height='16'
+                                  fill='none'
+                                  viewBox='0 0 24 24'
+                                  stroke='currentColor'
+                                >
+                                  <path
+                                    d='M12 14l9-5-9-5-9 5 9 5z'
+                                    strokeWidth='2'
+                                  />
+                                  <path
+                                    d='M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z'
+                                    strokeWidth='2'
+                                  />
+                                </svg>
+                                {candidate.highestLevelOfEducation}
+                              </>
+                            )}
+                            {candidate.salaryExpectations && (
+                              <>
+                                <span>•</span>$
+                                {candidate.salaryExpectations.toLocaleString()}
+                                /year
+                              </>
+                            )}
+                            {candidate.aiGeneratedJobFitScore && (
+                              <>
+                                <span>•</span>
+                                <span className='flex items-center gap-1'>
+                                  <svg
+                                    width='14'
+                                    height='14'
+                                    fill='none'
+                                    viewBox='0 0 24 24'
+                                    stroke='currentColor'
+                                  >
+                                    <path
+                                      strokeLinecap='round'
+                                      strokeLinejoin='round'
+                                      strokeWidth={2}
+                                      d='M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z'
+                                    />
+                                  </svg>
+                                  {candidate.aiGeneratedJobFitScore}% match
+                                </span>
+                              </>
+                            )}
+                          </div>
+                          {candidate.technicalSkills &&
+                            candidate.technicalSkills.length > 0 && (
+                              <div className='flex flex-wrap gap-1 mt-2'>
+                                {candidate.technicalSkills
+                                  .slice(0, 3)
+                                  .map((skill: string, skillIdx: number) => (
+                                    <span
+                                      key={skillIdx}
+                                      className='px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs rounded-full'
+                                    >
+                                      {skill}
+                                    </span>
+                                  ))}
+                                {candidate.technicalSkills.length > 3 && (
+                                  <span className='px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs rounded-full'>
+                                    +{candidate.technicalSkills.length - 3} more
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                        </div>
                       </div>
-                      <div>
-                        <div
-                          className='font-semibold text-base text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:cursor-pointer'
-                          onClick={() => handleCandidateClick(candidate)}
-                        >
-                          {candidate.name}
-                        </div>
-                        <div className='text-gray-500 dark:text-gray-400 text-sm'>
-                          {candidate.title}
-                        </div>
-                        <div className='flex items-center gap-2 text-gray-400 dark:text-gray-500 text-xs mt-1'>
+                      <div className='flex items-center gap-2'>
+                        <button className='border border-gray-200 dark:border-gray-600 rounded p-2 hover:bg-blue-600 hover:text-white bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'>
                           <svg
-                            width='16'
-                            height='16'
+                            width='18'
+                            height='18'
                             fill='none'
                             viewBox='0 0 24 24'
                             stroke='currentColor'
                           >
                             <path
-                              d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z'
+                              d='M5 5v14l7-7 7 7V5a2 2 0 00-2-2H7a2 2 0 00-2 2z'
                               strokeWidth='2'
                             />
                           </svg>
-                          {candidate.location}
-                          <span>•</span>
-                          {candidate.experience}
-                        </div>
+                        </button>
+                        <button
+                          className='px-6 py-2 rounded-md font-semibold flex items-center gap-2 transition hover:bg-blue-600 hover:text-white bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                          onClick={() => handleCandidateClick(candidate)}
+                        >
+                          View Profile
+                          <svg
+                            width='18'
+                            height='18'
+                            fill='none'
+                            viewBox='0 0 24 24'
+                            stroke='currentColor'
+                          >
+                            <path d='M9 5l7 7-7 7' strokeWidth='2' />
+                          </svg>
+                        </button>
                       </div>
                     </div>
-                    <div className='flex items-center gap-2'>
-                      <button className='border border-gray-200 dark:border-gray-600 rounded p-2 hover:bg-blue-600 hover:text-white bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'>
-                        <svg
-                          width='18'
-                          height='18'
-                          fill='none'
-                          viewBox='0 0 24 24'
-                          stroke='currentColor'
-                        >
-                          <path
-                            d='M5 5v14l7-7 7 7V5a2 2 0 00-2-2H7a2 2 0 00-2 2z'
-                            strokeWidth='2'
-                          />
-                        </svg>
-                      </button>
-                      <button className='px-6 py-2 rounded-md font-semibold flex items-center gap-2 transition hover:bg-blue-600 hover:text-white bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'>
-                        View Profile
-                        <svg
-                          width='18'
-                          height='18'
-                          fill='none'
-                          viewBox='0 0 24 24'
-                          stroke='currentColor'
-                        >
-                          <path d='M9 5l7 7-7 7' strokeWidth='2' />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
+
+              {/* Pagination Controls */}
+              {!loading && candidates.length > 0 && (
+                <div className='flex justify-between items-center mt-8 px-4 py-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700'>
+                  <div className='flex items-center gap-4'>
+                    <span className='text-sm text-gray-600 dark:text-gray-400'>
+                      Showing {(currentPage - 1) * pageSize + 1} to{' '}
+                      {Math.min(
+                        currentPage * pageSize,
+                        totalCandidates || candidates.length,
+                      )}{' '}
+                      of {totalCandidates || candidates.length} candidates
+                    </span>
+                    <select
+                      value={pageSize}
+                      onChange={(e) => {
+                        setPageSize(Number(e.target.value));
+                        setCurrentPage(1);
+                        if (user) handleSearch(true);
+                      }}
+                      className='border border-gray-200 dark:border-gray-600 rounded-md w-36 px-3 py-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-white text-sm'
+                    >
+                      <option value={6}>6 per page</option>
+                      <option value={12}>12 per page</option>
+                      <option value={24}>24 per page</option>
+                      <option value={48}>48 per page</option>
+                    </select>
+                  </div>
+
+                  <div className='flex items-center gap-2'>
+                    <button
+                      onClick={() => {
+                        if (currentPage > 1) {
+                          setCurrentPage(currentPage - 1);
+                          if (user) handleSearch(true);
+                        }
+                      }}
+                      disabled={currentPage === 1}
+                      className='px-3 py-1 border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm'
+                    >
+                      Previous
+                    </button>
+
+                    <div className='flex items-center gap-1'>
+                      {Array.from(
+                        {
+                          length: Math.min(
+                            5,
+                            Math.ceil(
+                              (totalCandidates || candidates.length) / pageSize,
+                            ),
+                          ),
+                        },
+                        (_, i) => {
+                          const pageNum = i + 1;
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => {
+                                setCurrentPage(pageNum);
+                                if (user) handleSearch(true);
+                              }}
+                              className={`px-3 py-1 rounded-md text-sm ${
+                                currentPage === pageNum
+                                  ? 'bg-blue-600 text-white'
+                                  : 'border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600'
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        },
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        const maxPage = Math.ceil(
+                          (totalCandidates || candidates.length) / pageSize,
+                        );
+                        if (currentPage < maxPage) {
+                          setCurrentPage(currentPage + 1);
+                          if (user) handleSearch(true);
+                        }
+                      }}
+                      disabled={
+                        currentPage >=
+                        Math.ceil(
+                          (totalCandidates || candidates.length) / pageSize,
+                        )
+                      }
+                      className='px-3 py-1 border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm'
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </>
