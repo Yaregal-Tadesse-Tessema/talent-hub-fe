@@ -173,7 +173,7 @@ export default function OverviewTab() {
   }
 
   return (
-    <div className='flex-1 px-6 space-y-8'>
+    <div className='flex-1 px-10 py-4 space-y-8'>
       {selectedJob && (
         <JobDetailModal
           job={selectedJob}
@@ -187,7 +187,7 @@ export default function OverviewTab() {
 
       {/* Header Section */}
       <div className='space-y-2'>
-        <h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
+        <h1 className='text-2xl font-semibold mb-1 text-gray-900 dark:text-white'>
           Welcome back, {user?.firstName}! 👋
         </h1>
         <p className='text-gray-600 dark:text-gray-400 text-lg'>
