@@ -16,9 +16,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('light');
   const [isDark, setIsDark] = useState(false);
 
-  // Initialize theme from localStorage or default to 'light'
+  // Initialize theme from localStorage on the client side
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as Theme;
+    const savedTheme = localStorage.getItem('theme') as Theme | null;
     if (savedTheme && ['light', 'dark', 'auto'].includes(savedTheme)) {
       setThemeState(savedTheme);
     }

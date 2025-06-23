@@ -10,6 +10,8 @@ import SkillsStep from '@/components/cv-builder/steps/SkillsStep';
 import AdditionalInfoStep from '@/components/cv-builder/steps/AdditionalInfoStep';
 import { cvService } from '@/services/cv.service';
 
+export const dynamic = 'force-dynamic';
+
 export type Profile = {
   fullName: string;
   title: string;
@@ -297,48 +299,51 @@ export default function CVBuilderPage() {
   };
 
   const handleGenerateResume = async () => {
-    try {
-      setIsGeneratingResume(true);
-      setResumeGenerationProgress(0);
-      setShowConfirmationDialog(false);
+    // Ensure this code only runs on the client
+    if (typeof window !== 'undefined') {
+      try {
+        setIsGeneratingResume(true);
+        setResumeGenerationProgress(0);
+        setShowConfirmationDialog(false);
 
-      // Simulate progress updates
-      const progressInterval = setInterval(() => {
-        setResumeGenerationProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 500);
+        // Simulate progress updates
+        const progressInterval = setInterval(() => {
+          setResumeGenerationProgress((prev) => {
+            if (prev >= 90) {
+              clearInterval(progressInterval);
+              return 90;
+            }
+            return prev + 10;
+          });
+        }, 500);
 
-      // Generate resume using the service
-      const pdfBlob = await cvService.generateResume(profile);
+        // Generate resume using the service
+        const pdfBlob = await cvService.generateResume(profile);
 
-      clearInterval(progressInterval);
-      setResumeGenerationProgress(100);
+        clearInterval(progressInterval);
+        setResumeGenerationProgress(100);
 
-      // Create a download link for the PDF
-      const url = window.URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute(
-        'download',
-        `${profile.fullName.toLowerCase().replace(/\s+/g, '-')}-resume.pdf`,
-      );
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+        // Create a download link for the PDF
+        const url = window.URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute(
+          'download',
+          `${profile.fullName.toLowerCase().replace(/\s+/g, '-')}-resume.pdf`,
+        );
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
 
-      // Show success message
-      alert('Resume generated successfully!');
-    } catch (error) {
-      console.error('Error generating resume:', error);
-      alert('Failed to generate resume. Please try again.');
-    } finally {
-      setIsGeneratingResume(false);
-      setResumeGenerationProgress(0);
+        // Show success message
+        alert('Resume generated successfully!');
+      } catch (error) {
+        console.error('Error generating resume:', error);
+        alert('Failed to generate resume. Please try again.');
+      } finally {
+        setIsGeneratingResume(false);
+        setResumeGenerationProgress(0);
+      }
     }
   };
 

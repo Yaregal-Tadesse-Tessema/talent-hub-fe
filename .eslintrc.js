@@ -39,6 +39,14 @@ module.exports = {
     '@next/next/no-img-element': 'off',
     //#endregion  //*======== Import Sort ===========
   },
+  overrides: [
+    {
+      files: ['*.js'],
+      rules: {
+        '@typescript-eslint/no-var-requires': 'off',
+      },
+    },
+  ],
   globals: {
     React: true,
     JSX: true,

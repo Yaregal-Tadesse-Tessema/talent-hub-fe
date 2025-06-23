@@ -13,13 +13,15 @@ export const api = axios.create({
 // Add request interceptor for authentication
 api.interceptors.request.use(
   (config) => {
-    // Get token from localStorage
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      // Ensure headers object exists
-      config.headers = config.headers || {};
-      // Set the Authorization header
-      config.headers.Authorization = `Bearer ${token}`;
+    // Only access localStorage on the client side
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        // Ensure headers object exists
+        config.headers = config.headers || {};
+        // Set the Authorization header
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -70,6 +72,29 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) {
+          // Clear all stored values and redirect to login
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+
+          // Get current path
+          const currentPath = window.location.pathname;
+          // List of public routes that don't require authentication
+          const publicRoutes = [
+            '/find-job',
+            '/',
+            '/login',
+            '/signup',
+            '/forgot-password',
+            '/verify-email',
+            '/reset-password',
+          ];
+
+          // Only redirect to login if not on a public route
+          if (!publicRoutes.some((route) => currentPath.startsWith(route))) {
+            window.location.href = '/login';
+          }
+
           throw new Error('No refresh token available');
         }
 

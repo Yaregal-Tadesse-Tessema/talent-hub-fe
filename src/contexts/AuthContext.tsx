@@ -39,6 +39,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { showToast } = useToast();
   const { setTheme } = useTheme();
 
+  useEffect(() => {
+    // This effect runs only on the client
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+      }
+    } catch (error) {
+      console.error('Failed to parse user from localStorage', error);
+      // Clear potentially corrupted data
+      localStorage.removeItem('user');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const login = async (email: string, password: string) => {
     try {
       // First try employer login
@@ -142,12 +159,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setUser(null);
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('user');
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      setTheme('light');
-    }
+    localStorage.removeItem('user');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    setTheme('light');
     router.push('/login');
   };
 
@@ -169,41 +184,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const userValue = React.useMemo(
     () => ({
       user,
-      setUser,
       loading,
       login,
       logout,
       selectEmployer,
     }),
-    [user, loading, login, logout, selectEmployer],
+    [user, loading],
   );
-
-  useEffect(() => {
-    // Only run on client side
-    if (typeof window !== 'undefined') {
-      const initializeAuth = () => {
-        try {
-          const storedUser = localStorage.getItem('user');
-          if (storedUser) {
-            const parsedUser = JSON.parse(storedUser);
-            setUser(parsedUser);
-          } else {
-            setTheme('light');
-          }
-        } catch (error) {
-          console.error('Error parsing stored user:', error);
-          localStorage.removeItem('user');
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          setTheme('light');
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      initializeAuth();
-    }
-  }, [setTheme]);
 
   return (
     <AuthContext.Provider value={userValue}>{children}</AuthContext.Provider>

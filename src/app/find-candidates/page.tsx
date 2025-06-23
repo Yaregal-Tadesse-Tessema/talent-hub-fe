@@ -4,9 +4,10 @@ import CandidateDetailModal from './CandidateDetailModal';
 import Link from 'next/link';
 import { employeeService, JobSeekerProfile } from '@/services/employee.service';
 import CandidateFilters, { FilterState } from '@/components/CandidateFilters';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function FindCandidatesPage() {
-  const [user, setUser] = useState<any>(null);
+  const { user } = useAuth();
   const [candidates, setCandidates] = useState<JobSeekerProfile[]>([]);
   const [loading, setLoading] = useState(false);
   const [filterLoading, setFilterLoading] = useState(false);
@@ -31,25 +32,6 @@ export default function FindCandidatesPage() {
     industries: ['All'],
     radius: 32,
   });
-
-  useEffect(() => {
-    employeeService.getEmployers().then((res) => {
-      console.log(res);
-    });
-    if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        try {
-          const parsedUser = JSON.parse(storedUser);
-          setUser(parsedUser);
-        } catch {
-          setUser(null);
-        }
-      } else {
-        setUser(null);
-      }
-    }
-  }, []);
 
   // Fetch candidates when user is logged in
   useEffect(() => {

@@ -2,6 +2,8 @@
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 
+export const dynamic = 'force-static';
+
 const faqs = [
   {
     question: 'How do I post a job?',

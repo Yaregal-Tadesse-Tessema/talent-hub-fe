@@ -4,10 +4,6 @@ import { Inter } from 'next/font/google';
 import '@/styles/globals.css';
 import { siteConfig } from '@/constant/config';
 import ClientLayout from './ClientLayout';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { ToastProvider } from '@/contexts/ToastContext';
-import { ThemeProvider } from '@/contexts/ThemeContext';
-import { NavigationProvider } from '@/components/navigation/NavigationProvider';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -55,15 +51,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${inter.className} bg-white dark:bg-gray-800`}
       >
-        <ThemeProvider>
-          <ToastProvider>
-            <AuthProvider>
-              <NavigationProvider>
-                <ClientLayout>{children}</ClientLayout>
-              </NavigationProvider>
-            </AuthProvider>
-          </ToastProvider>
-        </ThemeProvider>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );

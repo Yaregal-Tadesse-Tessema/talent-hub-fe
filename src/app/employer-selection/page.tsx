@@ -11,13 +11,16 @@ export default function EmployerSelectionPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    // Only show modal if user is logged in as employer and doesn't have a selected employer
-    if (user?.role === 'employer' && !user.selectedEmployer) {
-      // Fetch employers data from localStorage or API
-      const storedEmployers = localStorage.getItem('employers');
-      if (storedEmployers) {
-        setEmployers(JSON.parse(storedEmployers));
-        setIsModalOpen(true);
+    // Check if running on the client side before accessing localStorage
+    if (typeof window !== 'undefined') {
+      // Only show modal if user is logged in as employer and doesn't have a selected employer
+      if (user?.role === 'employer' && !user.selectedEmployer) {
+        // Fetch employers data from localStorage or API
+        const storedEmployers = localStorage.getItem('employers');
+        if (storedEmployers) {
+          setEmployers(JSON.parse(storedEmployers));
+          setIsModalOpen(true);
+        }
       }
     }
   }, [user]);

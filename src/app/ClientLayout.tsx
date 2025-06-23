@@ -4,6 +4,10 @@ import * as React from 'react';
 import { usePathname } from 'next/navigation';
 import { Footer } from '@/components/layout/Footer';
 import { Navbar } from '@/components/layout/Navbar';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { ToastProvider } from '@/contexts/ToastContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
+import { NavigationProvider } from '@/components/navigation/NavigationProvider';
 
 // Memoized component to prevent unnecessary re-renders
 const MemoizedNavbar = React.memo(Navbar);
@@ -39,10 +43,16 @@ export default function ClientLayout({
   }, [pathname]);
 
   return (
-    <>
-      {layoutConfig.shouldShowNavbar && <MemoizedNavbar page='home' />}
-      {children}
-      {layoutConfig.isHomePage && <MemoizedFooter />}
-    </>
+    <ThemeProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <NavigationProvider>
+            {layoutConfig.shouldShowNavbar && <MemoizedNavbar page='home' />}
+            {children}
+            {layoutConfig.isHomePage && <MemoizedFooter />}
+          </NavigationProvider>
+        </AuthProvider>
+      </ToastProvider>
+    </ThemeProvider>
   );
 }

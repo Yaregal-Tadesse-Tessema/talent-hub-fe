@@ -6,6 +6,9 @@ const nextConfig = {
 
   reactStrictMode: true,
 
+  // Hide the DevTools indicator
+  devIndicators: false,
+
   // Optimize page loading and navigation
   experimental: {
     // Enable optimized navigation
@@ -97,12 +100,12 @@ const nextConfig = {
     // Production optimizations
     if (!dev && !isServer) {
       // Replace React with Preact in production
-      Object.assign(config.resolve.alias, {
+      /* Object.assign(config.resolve.alias, {
         'react/jsx-runtime.js': 'preact/compat/jsx-runtime',
         react: 'preact/compat',
         'react-dom/test-utils': 'preact/test-utils',
         'react-dom': 'preact/compat',
-      });
+      }); */
 
       // Add bundle analyzer
       if (process.env.ANALYZE === 'true') {

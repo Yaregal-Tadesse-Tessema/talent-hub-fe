@@ -145,155 +145,335 @@ export default function LoginPage() {
   };
 
   return (
-    <div className='min-h-screen flex flex-col justify-between'>
+    <div className='min-h-screen flex flex-col justify-between bg-gradient-to-br from-blue-50 via-white to-indigo-50'>
       <div className='flex flex-1'>
-        {/* Left: What's the latest */}
-        <div className='hidden md:flex w-1/2 bg-gray-50 justify-center items-center border-r border-gray-50'>
-          <div className='max-w-md w-full p-8 bg-white rounded-lg shadow-md'>
-            <img
-              src='/images/job-news.avif'
-              alt='Bird'
-              className='w-full h-48 mr-2'
-            />
-            <div className='flex items-center my-4'>
-              <span className='text-lg font-semibold text-blue-700'>
-                Latest Updates
-              </span>
-            </div>
+        {/* Left: Hero Section */}
+        <div className='hidden md:flex w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 justify-center items-center relative overflow-hidden'>
+          {/* Background Pattern */}
+          <div className='absolute inset-0 opacity-10'>
+            <div className='absolute top-10 left-10 w-32 h-32 bg-white rounded-full'></div>
+            <div className='absolute bottom-20 right-20 w-24 h-24 bg-white rounded-full'></div>
+            <div className='absolute top-1/2 left-1/4 w-16 h-16 bg-white rounded-full'></div>
+          </div>
+
+          <div className='max-w-lg w-full p-12 text-white relative z-10'>
             <div className='mb-8'>
-              <h3 className='text-xl font-bold text-gray-900 mb-1'>
-                New Resume Builder Launched!
-              </h3>
-              <div className='text-xs text-gray-500 mb-2'>Mon May 26 2025</div>
-              <div className='text-gray-700 text-sm mb-2'>
-                Create a professional resume in minutes with our new Resume
-                Builder. Stand out to top employers and land your dream job
-                faster. Try it now in your dashboard!
+              <div className='w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6'>
+                <svg
+                  className='w-8 h-8 text-white'
+                  fill='none'
+                  stroke='currentColor'
+                  viewBox='0 0 24 24'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6'
+                  />
+                </svg>
               </div>
-              <a href='#' className='text-blue-700 text-sm hover:underline'>
-                Learn more
-              </a>
+              <h1 className='text-4xl font-bold mb-4 leading-tight'>
+                Welcome to <span className='text-blue-200'>TalentHub</span>
+              </h1>
+              <p className='text-xl text-blue-100 mb-8 leading-relaxed'>
+                Connect with top talent and opportunities. Your gateway to
+                professional success starts here.
+              </p>
             </div>
-            <div>
-              <h3 className='text-lg font-bold text-gray-900 mb-1'>
-                Find Top Talent with AI Matchmaking
-              </h3>
-              <div className='text-xs text-gray-500 mb-2'>Fri Mar 07 2025</div>
-              <div className='text-gray-700 text-sm mb-2'>
-                Our new AI-powered matchmaking system connects you instantly
-                with the most suitable candidates for your open positions. Save
-                time and hire smarter with intelligent recommendations.
+
+            {/* Feature Cards */}
+            <div className='space-y-4'>
+              <div className='flex items-center space-x-4 p-4 bg-white/10 rounded-xl backdrop-blur-sm'>
+                <div className='w-10 h-10 bg-green-400 rounded-lg flex items-center justify-center'>
+                  <svg
+                    className='w-5 h-5 text-white'
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className='font-semibold text-white'>
+                    AI-Powered Matching
+                  </h3>
+                  <p className='text-blue-100 text-sm'>
+                    Find the perfect job or candidate with intelligent
+                    recommendations
+                  </p>
+                </div>
               </div>
-              <a href='#' className='text-blue-700 text-sm hover:underline'>
-                Learn more
-              </a>
+
+              <div className='flex items-center space-x-4 p-4 bg-white/10 rounded-xl backdrop-blur-sm'>
+                <div className='w-10 h-10 bg-purple-400 rounded-lg flex items-center justify-center'>
+                  <svg
+                    className='w-5 h-5 text-white'
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className='font-semibold text-white'>
+                    Smart Resume Builder
+                  </h3>
+                  <p className='text-blue-100 text-sm'>
+                    Create professional resumes that stand out to employers
+                  </p>
+                </div>
+              </div>
+
+              <div className='flex items-center space-x-4 p-4 bg-white/10 rounded-xl backdrop-blur-sm'>
+                <div className='w-10 h-10 bg-orange-400 rounded-lg flex items-center justify-center'>
+                  <svg
+                    className='w-5 h-5 text-white'
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className='font-semibold text-white'>Global Network</h3>
+                  <p className='text-blue-100 text-sm'>
+                    Connect with professionals and companies worldwide
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+
         {/* Right: Login Form */}
-        <div className='flex w-full md:w-1/2 justify-center items-center'>
-          <div className='max-w-xl w-full p-8 bg-white rounded shadow-md'>
-            <h2 className='text-2xl text-center font-bold mb-6 text-gray-900'>
-              Sign in to your{' '}
-              <span className='text-blue-600'>
-                <a href='/'>TalentHub</a>
-              </span>{' '}
-              account
-            </h2>
-            <form onSubmit={handleSubmit} className='space-y-4'>
-              <input
-                type='text'
-                placeholder='Enter your email or phone number'
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className='w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200'
-                required
-              />
-              <div className='relative'>
+        <div className='flex w-full md:w-1/2 justify-center items-center p-8'>
+          <div className='max-w-md w-full'>
+            {/* Header */}
+            <div className='text-center mb-8'>
+              <div className='w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4'>
+                <svg
+                  className='w-8 h-8 text-blue-600'
+                  fill='none'
+                  stroke='currentColor'
+                  viewBox='0 0 24 24'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
+                  />
+                </svg>
+              </div>
+              <h2 className='text-3xl font-bold text-gray-900 mb-2'>
+                Welcome back
+              </h2>
+              <p className='text-gray-600'>
+                Sign in to your{' '}
+                <span className='text-blue-600 font-semibold'>
+                  <a href='/'>TalentHub</a>
+                </span>{' '}
+                account
+              </p>
+            </div>
+
+            {/* Login Form */}
+            <form onSubmit={handleSubmit} className='space-y-6'>
+              <div>
+                <label
+                  htmlFor='email'
+                  className='block text-sm font-medium text-gray-700 mb-2'
+                >
+                  Email or Phone Number
+                </label>
                 <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder='Enter your password'
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className='w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200'
+                  id='email'
+                  type='text'
+                  placeholder='Enter your email or phone number'
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
                   required
                 />
-                <button
-                  type='button'
-                  className='absolute right-2 top-2 text-gray-400'
-                  onClick={() => setShowPassword((v) => !v)}
-                  tabIndex={-1}
-                >
-                  <svg width='20' height='20' fill='none' viewBox='0 0 20 20'>
-                    <path
-                      d='M10 4.167c-4.167 0-7.5 3.333-7.5 5.833s3.333 5.833 7.5 5.833 7.5-3.333 7.5-5.833-3.333-5.833-7.5-5.833Zm0 9.166a3.333 3.333 0 1 1 0-6.666 3.333 3.333 0 0 1 0 6.666Z'
-                      stroke='#9CA3AF'
-                      strokeWidth='1.5'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    />
-                  </svg>
-                </button>
               </div>
-              <Button
-                type='submit'
-                className='w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold'
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className='flex items-center justify-center gap-2'>
-                    <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
-                    Signing In...
-                  </div>
-                ) : (
-                  'Sign In'
-                )}
-              </Button>
-              <div className='flex items-center justify-between text-sm mt-2'>
-                <div className='flex items-center gap-2'>
+
+              <div>
+                <label
+                  htmlFor='password'
+                  className='block text-sm font-medium text-gray-700 mb-2'
+                >
+                  Password
+                </label>
+                <div className='relative'>
+                  <input
+                    id='password'
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder='Enter your password'
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 pr-12'
+                    required
+                  />
+                  <button
+                    type='button'
+                    className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors'
+                    onClick={() => setShowPassword((v) => !v)}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <svg
+                        className='w-5 h-5'
+                        fill='none'
+                        stroke='currentColor'
+                        viewBox='0 0 24 24'
+                      >
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21'
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        className='w-5 h-5'
+                        fill='none'
+                        stroke='currentColor'
+                        viewBox='0 0 24 24'
+                      >
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M15 12a3 3 0 11-6 0 3 3 0 016 0z'
+                        />
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'
+                        />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className='flex items-center justify-between'>
+                <div className='flex items-center'>
                   <input
                     id='remember'
                     type='checkbox'
                     checked={remember}
                     onChange={(e) => setRemember(e.target.checked)}
-                    className='h-4 w-4 border rounded'
+                    className='h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'
                   />
-                  <label htmlFor='remember' className='text-gray-600'>
-                    Remember Me
+                  <label
+                    htmlFor='remember'
+                    className='ml-2 block text-sm text-gray-700'
+                  >
+                    Remember me
                   </label>
                 </div>
                 <Link
                   href='/forgot-password'
-                  className='text-blue-700 hover:underline font-medium'
+                  className='text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors'
                 >
-                  Forgot Password?
+                  Forgot password?
                 </Link>
               </div>
-            </form>
-            <div className='text-center mt-6 text-sm text-gray-700'>
-              Don't have an account?{' '}
-              <Link
-                href='/signup'
-                className='text-blue-700 hover:underline font-medium'
+
+              <Button
+                type='submit'
+                className='w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-[1.02] focus:ring-4 focus:ring-blue-200'
+                disabled={isLoading}
               >
-                Create free account
-              </Link>
+                {isLoading ? (
+                  <div className='flex items-center justify-center gap-2'>
+                    <div className='animate-spin rounded-full h-5 w-5 border-b-2 border-white'></div>
+                    Signing in...
+                  </div>
+                ) : (
+                  'Sign in'
+                )}
+              </Button>
+            </form>
+
+            {/* Sign up link */}
+            <div className='text-center mt-8'>
+              <p className='text-gray-600'>
+                Don't have an account?{' '}
+                <Link
+                  href='/signup'
+                  className='text-blue-600 hover:text-blue-700 font-semibold transition-colors'
+                >
+                  Create free account
+                </Link>
+              </p>
             </div>
           </div>
         </div>
       </div>
+
       {/* Footer */}
-      <footer className='w-full py-4 px-4 flex flex-col md:flex-row items-center justify-center md:justify-between bg-white border-t border-gray-200 text-xs text-gray-500'>
-        <div className='flex gap-4 mb-2 md:mb-0'>
-          <a href='#' className='hover:underline'>
+      <footer className='w-full py-6 px-8 flex flex-col md:flex-row items-center justify-center md:justify-between bg-white/80 backdrop-blur-sm border-t border-gray-200/50'>
+        <div className='flex gap-6 mb-4 md:mb-0'>
+          <a
+            href='#'
+            className='text-gray-500 hover:text-gray-700 transition-colors text-sm'
+          >
             Privacy & Terms
           </a>
-          <a href='#' className='hover:underline'>
+          <a
+            href='#'
+            className='text-gray-500 hover:text-gray-700 transition-colors text-sm'
+          >
             Contact Us
           </a>
+          <a
+            href='#'
+            className='text-gray-500 hover:text-gray-700 transition-colors text-sm'
+          >
+            Help Center
+          </a>
         </div>
-        <div>English</div>
+        <div className='flex items-center space-x-2 text-gray-500 text-sm'>
+          <svg
+            className='w-4 h-4'
+            fill='none'
+            stroke='currentColor'
+            viewBox='0 0 24 24'
+          >
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth={2}
+              d='M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129'
+            />
+          </svg>
+          <span>English</span>
+        </div>
       </footer>
+
       {/* Employer Selection Modal */}
       {showEmployerSelection && (
         <EmployerSelection

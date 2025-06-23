@@ -4,8 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:local": "cp env.development .env.local && NODE_ENV=development next dev",
+    "dev:staging": "cp env.staging .env.local && NODE_ENV=production next dev",
+    "dev:production": "cp env.production .env.local && NODE_ENV=production next dev",
     "build": "NODE_ENV=production ANALYZE=true next build",
+    "build:staging": "cp env.staging .env.local && NODE_ENV=production next build",
+    "build:production": "cp env.production .env.local && NODE_ENV=production next build",
+    "build:analyze": "cp env.development .env.local && NODE_ENV=development ANALYZE=true next build",
     "start": "NODE_ENV=production next start",
+    "start:staging": "cp env.staging .env.local && NODE_ENV=production next start",
+    "start:production": "cp env.production .env.local && NODE_ENV=production next start",
     "lint": "next lint",
     "lint:fix": "eslint src --fix && pnpm format",
     "lint:strict": "eslint --max-warnings-0 src",
@@ -15,7 +23,15 @@
     "format": "prettier -w .",
     "format:check": "prettier -c .",
     "postbuild": "next-sitemap --config next-sitemap.config.js",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "env:dev": "cp env.development .env.local",
+    "env:staging": "cp env.staging .env.local",
+    "env:production": "cp env.production .env.local",
+    "env:clean": "rm -f .env.local",
+    "env:switch": "node scripts/switch-env.js",
+    "env:current": "node scripts/switch-env.js",
+    "env:validate": "node scripts/env-setup.js validate",
+    "env:list": "node scripts/env-setup.js list"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
