@@ -3,12 +3,18 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import AddResumeModal from '@/components/ui/AddResumeModal';
+import ContactTab from './ContactTab';
+import PersonalTab from './PersonalTab';
+import ProfessionalTab from './ProfessionalTab';
 
 const TABS = [
   { key: 'personal', label: 'Personal' },
-  { key: 'profile', label: 'Profile' },
-  { key: 'social', label: 'Social Links' },
-  { key: 'account', label: 'Account Setting' },
+  { key: 'contact', label: 'Contact' },
+  { key: 'professional', label: 'Professional' },
+  { key: 'social', label: 'Social' },
+  { key: 'resume', label: 'Resume' },
+  { key: 'jobAlerts', label: 'Job Alerts' },
+  { key: 'security', label: 'Security' },
 ];
 
 const experienceOptions = [
@@ -98,8 +104,51 @@ const socialPlatforms = [
   },
 ];
 
+const initialProfile = {
+  phone: '',
+  email: '',
+  firstName: '',
+  middleName: '',
+  lastName: '',
+  gender: '',
+  status: 'Active',
+  password: '',
+  address: {},
+  birthDate: '',
+  linkedinUrl: '',
+  portfolioUrl: '',
+  yearOfExperience: 0,
+  industry: [],
+  telegramUserId: '',
+  preferredJobLocation: [],
+  highestLevelOfEducation: '',
+  salaryExpectations: 0,
+  aiGeneratedJobFitScore: 0,
+  technicalSkills: [],
+  softSkills: [],
+  profile: { path: '' },
+  resume: {},
+  educations: {},
+  experiences: {},
+  socialMediaLinks: {},
+  profileHeadLine: '',
+  coverLetter: '',
+  professionalSummery: '',
+  phoneCountryCode: '+251',
+  alertConfiguration: {
+    id: '',
+    salary: '',
+    jobTitle: '',
+    Position: '',
+    address: '',
+    tenantsId: [],
+    industry: '',
+  },
+};
+
 export default function SettingsTab() {
   const [activeTab, setActiveTab] = useState('personal');
+  const [userProfile, setUserProfile] = useState(initialProfile);
   const [resumes, setResumes] = useState(mockResumes);
   const [resumeMenu, setResumeMenu] = useState<number | null>(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -224,142 +273,64 @@ export default function SettingsTab() {
   }
 
   function renderTabContent() {
-    if (activeTab === 'personal') {
-      return (
-        <div className='mt-8'>
-          {/* Basic Information */}
-          <div className='grid grid-cols-3 gap-8 mb-10'>
-            {/* Profile Picture */}
-            <div>
-              <div className='mb-2 font-medium text-gray-900 dark:text-white'>
-                Profile Picture
-              </div>
-              <div className='border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex flex-col items-center justify-center h-48 w-48 text-center p-4 text-gray-400 dark:text-gray-500 bg-white dark:bg-gray-800'>
-                <div className='text-4xl mb-2'>
-                  <svg
-                    width='40'
-                    height='40'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                  >
-                    <path
-                      d='M12 16v-4m0 0V8m0 4h4m-4 0H8'
-                      strokeWidth='2'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    />
-                    <circle cx='12' cy='12' r='10' strokeWidth='2' />
-                  </svg>
-                </div>
-                <div className='font-medium text-gray-600 dark:text-gray-300'>
-                  Browse photo{' '}
-                  <span className='text-gray-400 dark:text-gray-500'>
-                    or drop here
-                  </span>
-                </div>
-                <div className='text-xs mt-2 text-gray-500 dark:text-gray-400'>
-                  A photo larger than 400 pixels work best. Max photo size 5 MB.
-                </div>
-              </div>
+    switch (activeTab) {
+      case 'personal':
+        return (
+          <PersonalTab
+            userProfile={userProfile}
+            setUserProfile={setUserProfile}
+          />
+        );
+      case 'contact':
+        return (
+          <ContactTab
+            userProfile={userProfile}
+            setUserProfile={setUserProfile}
+          />
+        );
+      case 'professional':
+        return (
+          <ProfessionalTab
+            userProfile={userProfile}
+            setUserProfile={setUserProfile}
+          />
+        );
+      case 'social':
+        return (
+          <div className='mt-8'>
+            <div className='font-medium mb-4 text-gray-900 dark:text-white'>
+              Social Links
             </div>
-            {/* Form Fields */}
-            <div className='grid grid-cols-2 gap-4'>
-              <div>
-                <div className='mb-1 text-sm font-medium text-gray-900 dark:text-white'>
-                  Full name
-                </div>
-                <Input placeholder='Enter your full name' />
-              </div>
-              <div>
-                <div className='mb-1 text-sm font-medium text-gray-900 dark:text-white'>
-                  Tittle/headline
-                </div>
-                <Input placeholder='Enter your headline' />
-              </div>
-              <div>
-                <div className='mb-1 text-sm font-medium text-gray-900 dark:text-white'>
-                  Experience
-                </div>
-                <Select defaultValue=''>
-                  <option value='' disabled>
-                    Select...
-                  </option>
-                  {experienceOptions.map((exp) => (
-                    <option key={exp} value={exp}>
-                      {exp}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-              <div>
-                <div className='mb-1 text-sm font-medium text-gray-900 dark:text-white'>
-                  Educations
-                </div>
-                <Select defaultValue=''>
-                  <option value='' disabled>
-                    Select...
-                  </option>
-                  {educationOptions.map((edu) => (
-                    <option key={edu} value={edu}>
-                      {edu}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-              <div className='col-span-2'>
-                <div className='mb-1 text-sm font-medium text-gray-900 dark:text-white'>
-                  Personal Website
-                </div>
-                <Input placeholder='Website url...' />
-              </div>
-            </div>
-          </div>
-          <Button className='mb-10'>Save Changes</Button>
-
-          {/* CV/Resume Section */}
-          <div>
-            <div className='font-semibold mb-4 text-gray-900 dark:text-white'>
-              Your Cv/Resume
-            </div>
-            <div className='flex gap-4 mb-4'>
-              {resumes.map((resume) => (
-                <div
-                  key={resume.id}
-                  className='bg-gray-50 dark:bg-gray-800 rounded-lg p-4 flex flex-col min-w-[180px] relative border border-gray-200 dark:border-gray-700'
-                >
-                  <div className='flex items-center gap-2 mb-2'>
-                    <span className='text-blue-600 dark:text-blue-400'>
-                      <svg
-                        width='24'
-                        height='24'
-                        fill='none'
-                        viewBox='0 0 24 24'
-                        stroke='currentColor'
-                      >
-                        <rect
-                          x='4'
-                          y='4'
-                          width='16'
-                          height='16'
-                          rx='2'
-                          strokeWidth='2'
-                        />
-                        <path d='M8 8h8M8 12h8M8 16h4' strokeWidth='2' />
-                      </svg>
-                    </span>
-                    <span className='font-medium text-gray-900 dark:text-white'>
-                      {resume.name}
-                    </span>
+            {socialLinks.map((link, idx) => (
+              <div key={idx} className='mb-4'>
+                <div className='flex items-center gap-4'>
+                  <div className='w-32'>
+                    <Select
+                      value={link.platform}
+                      onChange={(e) =>
+                        handleSocialLinkChange(idx, 'platform', e.target.value)
+                      }
+                    >
+                      {socialPlatforms.map((platform) => (
+                        <option key={platform.key} value={platform.key}>
+                          {platform.label}
+                        </option>
+                      ))}
+                    </Select>
                   </div>
-                  <div className='text-xs text-gray-400 dark:text-gray-500 mb-2'>
-                    {resume.size}
-                  </div>
-                  <button
-                    className='absolute top-2 right-2 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400'
-                    onClick={() =>
-                      setResumeMenu(resume.id === resumeMenu ? null : resume.id)
+                  <Input
+                    className='flex-1'
+                    placeholder='Profile link/url...'
+                    value={link.url}
+                    onChange={(e) =>
+                      handleSocialLinkChange(idx, 'url', e.target.value)
                     }
+                  />
+                  <button
+                    type='button'
+                    className='ml-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors'
+                    onClick={() => handleRemoveSocialLink(idx)}
+                    aria-label='Remove social link'
                   >
                     <svg
                       width='18'
@@ -368,610 +339,22 @@ export default function SettingsTab() {
                       viewBox='0 0 24 24'
                       stroke='currentColor'
                     >
-                      <circle cx='12' cy='6' r='1.5' />
-                      <circle cx='12' cy='12' r='1.5' />
-                      <circle cx='12' cy='18' r='1.5' />
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth='2'
+                        d='M6 18L18 6M6 6l12 12'
+                      />
                     </svg>
                   </button>
-                  {resumeMenu === resume.id && (
-                    <div className='absolute right-2 top-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg z-10 w-32'>
-                      <button
-                        className='block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white'
-                        onClick={() => setResumeMenu(null)}
-                      >
-                        Edit Resume
-                      </button>
-                      <button
-                        className='block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 dark:text-red-400'
-                        onClick={() => handleDeleteResume(resume.id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
                 </div>
-              ))}
-            </div>
-            {/* Add Resume */}
+              </div>
+            ))}
             <button
               type='button'
-              className='border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex flex-col items-center justify-center min-w-[180px] p-4 text-center text-gray-400 dark:text-gray-500 cursor-pointer bg-white dark:bg-gray-800 hover:border-blue-400 dark:hover:border-blue-500 transition-colors'
-              onClick={() => setAddModalOpen(true)}
+              className='w-full flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-800 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mb-8 mt-2 transition-colors'
+              onClick={handleAddSocialLink}
             >
-              <div className='text-2xl mb-2'>+</div>
-              <div className='font-medium text-gray-600 dark:text-gray-300'>
-                Add Cv/Resume
-              </div>
-              <div className='text-xs mt-2 text-gray-500 dark:text-gray-400'>
-                Browse file or drop here. only pdf
-              </div>
-            </button>
-          </div>
-        </div>
-      );
-    }
-    if (activeTab === 'profile') {
-      return (
-        <div className='mt-8'>
-          <form className='grid grid-cols-2 gap-8 mb-10'>
-            {/* Nationality */}
-            <div>
-              <div className='mb-1 text-sm font-medium text-gray-900 dark:text-white'>
-                Nationality
-              </div>
-              <Select
-                value={profile.nationality}
-                onChange={(e) =>
-                  setProfile({ ...profile, nationality: e.target.value })
-                }
-              >
-                <option value='' disabled>
-                  Select...
-                </option>
-                <option value='Nigeria'>Nigeria</option>
-                <option value='United States'>United States</option>
-                <option value='United Kingdom'>United Kingdom</option>
-                <option value='Canada'>Canada</option>
-                <option value='India'>India</option>
-                <option value='Other'>Other</option>
-              </Select>
-            </div>
-            {/* Date of Birth */}
-            <div>
-              <div className='mb-1 text-sm font-medium text-gray-900 dark:text-white'>
-                Date of Birth
-              </div>
-              <Input
-                type='date'
-                value={profile.dob}
-                onChange={(e) =>
-                  setProfile({ ...profile, dob: e.target.value })
-                }
-                placeholder='dd/mm/yyyy'
-              />
-            </div>
-            {/* Gender */}
-            <div>
-              <div className='mb-1 text-sm font-medium text-gray-900 dark:text-white'>
-                Gender
-              </div>
-              <Select
-                value={profile.gender}
-                onChange={(e) =>
-                  setProfile({ ...profile, gender: e.target.value })
-                }
-              >
-                <option value='' disabled>
-                  Select...
-                </option>
-                <option value='Male'>Male</option>
-                <option value='Female'>Female</option>
-                <option value='Other'>Other</option>
-                <option value='Prefer not to say'>Prefer not to say</option>
-              </Select>
-            </div>
-            {/* Marital Status */}
-            <div>
-              <div className='mb-1 text-sm font-medium text-gray-900 dark:text-white'>
-                Marital Status
-              </div>
-              <Select
-                value={profile.maritalStatus}
-                onChange={(e) =>
-                  setProfile({ ...profile, maritalStatus: e.target.value })
-                }
-              >
-                <option value='' disabled>
-                  Select...
-                </option>
-                <option value='Single'>Single</option>
-                <option value='Married'>Married</option>
-                <option value='Divorced'>Divorced</option>
-                <option value='Widowed'>Widowed</option>
-                <option value='Other'>Other</option>
-              </Select>
-            </div>
-            {/* Education */}
-            <div>
-              <div className='mb-1 text-sm font-medium text-gray-900 dark:text-white'>
-                Education
-              </div>
-              <Select
-                value={profile.education}
-                onChange={(e) =>
-                  setProfile({ ...profile, education: e.target.value })
-                }
-              >
-                <option value='' disabled>
-                  Select...
-                </option>
-                {educationOptions.map((edu) => (
-                  <option key={edu} value={edu}>
-                    {edu}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            {/* Experience */}
-            <div>
-              <div className='mb-1 text-sm font-medium text-gray-900 dark:text-white'>
-                Experience
-              </div>
-              <Select
-                value={profile.experience}
-                onChange={(e) =>
-                  setProfile({ ...profile, experience: e.target.value })
-                }
-              >
-                <option value='' disabled>
-                  Select...
-                </option>
-                {experienceOptions.map((exp) => (
-                  <option key={exp} value={exp}>
-                    {exp}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            {/* Biography */}
-            <div className='col-span-2'>
-              <div className='mb-1 text-sm font-medium text-gray-900 dark:text-white'>
-                Biography
-              </div>
-              <textarea
-                className='w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent'
-                rows={4}
-                placeholder='Tell us about yourself...'
-                value={profile.biography}
-                onChange={(e) =>
-                  setProfile({ ...profile, biography: e.target.value })
-                }
-              />
-            </div>
-          </form>
-          <Button onClick={handleProfileSave}>Save Changes</Button>
-        </div>
-      );
-    }
-    if (activeTab === 'social') {
-      return (
-        <div className='mt-8'>
-          <div className='font-medium mb-4 text-gray-900 dark:text-white'>
-            Social Links
-          </div>
-          {socialLinks.map((link, idx) => (
-            <div key={idx} className='mb-4'>
-              <div className='flex items-center gap-4'>
-                <div className='w-32'>
-                  <Select
-                    value={link.platform}
-                    onChange={(e) =>
-                      handleSocialLinkChange(idx, 'platform', e.target.value)
-                    }
-                  >
-                    {socialPlatforms.map((platform) => (
-                      <option key={platform.key} value={platform.key}>
-                        {platform.label}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-                <Input
-                  className='flex-1'
-                  placeholder='Profile link/url...'
-                  value={link.url}
-                  onChange={(e) =>
-                    handleSocialLinkChange(idx, 'url', e.target.value)
-                  }
-                />
-                <button
-                  type='button'
-                  className='ml-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors'
-                  onClick={() => handleRemoveSocialLink(idx)}
-                  aria-label='Remove social link'
-                >
-                  <svg
-                    width='18'
-                    height='18'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth='2'
-                      d='M6 18L18 6M6 6l12 12'
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          ))}
-          <button
-            type='button'
-            className='w-full flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-800 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mb-8 mt-2 transition-colors'
-            onClick={handleAddSocialLink}
-          >
-            <svg
-              width='18'
-              height='18'
-              fill='none'
-              viewBox='0 0 24 24'
-              stroke='currentColor'
-            >
-              <circle cx='12' cy='12' r='10' strokeWidth='2' />
-              <path d='M12 8v8M8 12h8' strokeWidth='2' strokeLinecap='round' />
-            </svg>
-            Add New Social Link
-          </button>
-          <Button onClick={handleSocialLinksSave}>Save Changes</Button>
-        </div>
-      );
-    }
-    if (activeTab === 'account') {
-      return (
-        <div className='mt-8 flex flex-col gap-10'>
-          {/* Map Location, Phone, Email */}
-          <div>
-            <div className='mb-4'>
-              <Input
-                placeholder='Map Location'
-                value={account.mapLocation}
-                onChange={(e) =>
-                  handleAccountChange('mapLocation', e.target.value)
-                }
-              />
-            </div>
-            <div className='mb-4 flex gap-2'>
-              <Select
-                value={account.phoneCountry}
-                onChange={(e) =>
-                  handleAccountChange('phoneCountry', e.target.value)
-                }
-                className='w-24'
-              >
-                <option value='+880'>🇧🇩 +880</option>
-                <option value='+234'>🇳🇬 +234</option>
-                <option value='+1'>🇺🇸 +1</option>
-                <option value='+44'>🇬🇧 +44</option>
-                <option value='+91'>🇮🇳 +91</option>
-              </Select>
-              <Input
-                placeholder='Phone number..'
-                value={account.phone}
-                onChange={(e) => handleAccountChange('phone', e.target.value)}
-              />
-            </div>
-            <div className='mb-4'>
-              <div className='flex items-center gap-2'>
-                <span className='text-gray-400 dark:text-gray-500'>
-                  <svg
-                    width='18'
-                    height='18'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                  >
-                    <path
-                      d='M3 8l7.89 5.26a2 2 0 0 0 2.22 0L21 8M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z'
-                      strokeWidth='2'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    />
-                  </svg>
-                </span>
-                <Input
-                  type='email'
-                  placeholder='Email address'
-                  value={account.email}
-                  onChange={(e) => handleAccountChange('email', e.target.value)}
-                />
-              </div>
-            </div>
-            <Button onClick={handleAccountSave}>Save Changes</Button>
-          </div>
-
-          {/* Notification Preferences */}
-          <div className='border-t border-gray-200 dark:border-gray-700 pt-8'>
-            <div className='font-medium mb-4 text-gray-900 dark:text-white'>
-              Notification
-            </div>
-            <div className='grid grid-cols-2 gap-4 mb-4'>
-              <label className='flex items-center gap-2 text-gray-900 dark:text-white'>
-                <input
-                  type='checkbox'
-                  checked={account.notifications.shortlisted}
-                  onChange={(e) =>
-                    handleNotificationChange('shortlisted', e.target.checked)
-                  }
-                  className='rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400'
-                />
-                Notify me when employers shortlisted me
-              </label>
-              <label className='flex items-center gap-2 text-gray-900 dark:text-white'>
-                <input
-                  type='checkbox'
-                  checked={account.notifications.saved}
-                  onChange={(e) =>
-                    handleNotificationChange('saved', e.target.checked)
-                  }
-                  className='rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400'
-                />
-                Notify me when employers saved my profile
-              </label>
-              <label className='flex items-center gap-2 text-gray-900 dark:text-white'>
-                <input
-                  type='checkbox'
-                  checked={account.notifications.appliedExpire}
-                  onChange={(e) =>
-                    handleNotificationChange('appliedExpire', e.target.checked)
-                  }
-                  className='rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400'
-                />
-                Notify me when my applied jobs are expire
-              </label>
-              <label className='flex items-center gap-2 text-gray-900 dark:text-white'>
-                <input
-                  type='checkbox'
-                  checked={account.notifications.rejected}
-                  onChange={(e) =>
-                    handleNotificationChange('rejected', e.target.checked)
-                  }
-                  className='rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400'
-                />
-                Notify me when employers rejected me
-              </label>
-              <label className='flex items-center gap-2 col-span-2 text-gray-900 dark:text-white'>
-                <input
-                  type='checkbox'
-                  checked={account.notifications.jobAlerts}
-                  onChange={(e) =>
-                    handleNotificationChange('jobAlerts', e.target.checked)
-                  }
-                  className='rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400'
-                />
-                Notify me when i have up to 5 job alerts
-              </label>
-            </div>
-            <Button onClick={handleAccountSave}>Save Changes</Button>
-          </div>
-
-          {/* Job Alerts */}
-          <div className='border-t border-gray-200 dark:border-gray-700 pt-8'>
-            <div className='font-medium mb-4 text-gray-900 dark:text-white'>
-              Job Alerts
-            </div>
-            <div className='flex gap-4 mb-4'>
-              <div className='flex items-center gap-2 flex-1'>
-                <span className='text-gray-400 dark:text-gray-500'>
-                  <svg
-                    width='18'
-                    height='18'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                  >
-                    <path
-                      d='M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'
-                      strokeWidth='2'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    />
-                    <circle
-                      cx='12'
-                      cy='7'
-                      r='4'
-                      strokeWidth='2'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    />
-                  </svg>
-                </span>
-                <Input
-                  placeholder='Your job roles'
-                  value={account.jobAlertRole}
-                  onChange={(e) =>
-                    handleAccountChange('jobAlertRole', e.target.value)
-                  }
-                />
-              </div>
-              <div className='flex items-center gap-2 flex-1'>
-                <span className='text-gray-400 dark:text-gray-500'>
-                  <svg
-                    width='18'
-                    height='18'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                  >
-                    <path
-                      d='M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 1 1 18 0z'
-                      strokeWidth='2'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    />
-                    <circle
-                      cx='12'
-                      cy='10'
-                      r='3'
-                      strokeWidth='2'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    />
-                  </svg>
-                </span>
-                <Input
-                  placeholder='City, state, country name'
-                  value={account.jobAlertLocation}
-                  onChange={(e) =>
-                    handleAccountChange('jobAlertLocation', e.target.value)
-                  }
-                />
-              </div>
-            </div>
-            <Button onClick={handleJobAlertSave}>Save Changes</Button>
-          </div>
-
-          {/* Profile & Resume Privacy */}
-          <div className='border-t border-gray-200 dark:border-gray-700 pt-8 flex gap-8'>
-            <div className='flex items-center gap-4'>
-              <span className='font-medium text-gray-900 dark:text-white'>
-                Profile Privacy
-              </span>
-              <button
-                type='button'
-                onClick={() => handlePrivacyToggle('profilePublic')}
-                className={`w-12 h-6 rounded-full flex items-center transition-colors ${account.profilePublic ? 'bg-blue-600 dark:bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}
-              >
-                <span
-                  className={`inline-block w-6 h-6 bg-white dark:bg-gray-200 rounded-full shadow transform transition-transform ${account.profilePublic ? 'translate-x-6' : ''}`}
-                ></span>
-              </button>
-              <span className='ml-2 text-sm text-gray-900 dark:text-white'>
-                {account.profilePublic ? 'YES' : 'NO'}{' '}
-                <span className='text-gray-400 dark:text-gray-500'>
-                  {account.profilePublic
-                    ? 'Your profile is public now'
-                    : 'Your profile is private now'}
-                </span>
-              </span>
-            </div>
-            <div className='flex items-center gap-4'>
-              <span className='font-medium text-gray-900 dark:text-white'>
-                Resume Privacy
-              </span>
-              <button
-                type='button'
-                onClick={() => handlePrivacyToggle('resumePrivate')}
-                className={`w-12 h-6 rounded-full flex items-center transition-colors ${account.resumePrivate ? 'bg-blue-600 dark:bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}
-              >
-                <span
-                  className={`inline-block w-6 h-6 bg-white dark:bg-gray-200 rounded-full shadow transform transition-transform ${account.resumePrivate ? 'translate-x-6' : ''}`}
-                ></span>
-              </button>
-              <span className='ml-2 text-sm text-gray-900 dark:text-white'>
-                {account.resumePrivate ? 'YES' : 'NO'}{' '}
-                <span className='text-gray-400 dark:text-gray-500'>
-                  {account.resumePrivate
-                    ? 'Your resume is private now'
-                    : 'Your resume is public now'}
-                </span>
-              </span>
-            </div>
-          </div>
-
-          {/* Change Password */}
-          <div className='border-t border-gray-200 dark:border-gray-700 pt-8'>
-            <div className='font-medium mb-4 text-gray-900 dark:text-white'>
-              Change Password
-            </div>
-            <div className='grid grid-cols-3 gap-4 mb-4'>
-              <div className='relative'>
-                <Input
-                  type={showPassword.password ? 'text' : 'password'}
-                  placeholder='Password'
-                  value={account.password}
-                  onChange={(e) =>
-                    handleAccountChange('password', e.target.value)
-                  }
-                />
-                <button
-                  type='button'
-                  className='absolute right-2 top-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                  onClick={() => handlePasswordVisibility('password')}
-                >
-                  <svg
-                    width='18'
-                    height='18'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                  >
-                    <path d='M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z' />
-                    <path d='M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' />
-                  </svg>
-                </button>
-              </div>
-              <div className='relative'>
-                <Input
-                  type={showPassword.newPassword ? 'text' : 'password'}
-                  placeholder='New Password'
-                  value={account.newPassword}
-                  onChange={(e) =>
-                    handleAccountChange('newPassword', e.target.value)
-                  }
-                />
-                <button
-                  type='button'
-                  className='absolute right-2 top-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                  onClick={() => handlePasswordVisibility('newPassword')}
-                >
-                  <svg
-                    width='18'
-                    height='18'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                  >
-                    <path d='M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z' />
-                    <path d='M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' />
-                  </svg>
-                </button>
-              </div>
-              <div className='relative'>
-                <Input
-                  type={showPassword.confirmPassword ? 'text' : 'password'}
-                  placeholder='Confirm Password'
-                  value={account.confirmPassword}
-                  onChange={(e) =>
-                    handleAccountChange('confirmPassword', e.target.value)
-                  }
-                />
-                <button
-                  type='button'
-                  className='absolute right-2 top-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                  onClick={() => handlePasswordVisibility('confirmPassword')}
-                >
-                  <svg
-                    width='18'
-                    height='18'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                  >
-                    <path d='M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z' />
-                    <path d='M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <Button onClick={handlePasswordSave}>Save Changes</Button>
-          </div>
-
-          {/* Delete Account */}
-          <div className='border-t border-gray-200 dark:border-gray-700 pt-8'>
-            <div className='font-medium mb-2 text-red-600 dark:text-red-400 flex items-center gap-2'>
               <svg
                 width='18'
                 height='18'
@@ -981,43 +364,411 @@ export default function SettingsTab() {
               >
                 <circle cx='12' cy='12' r='10' strokeWidth='2' />
                 <path
-                  d='M15 9l-6 6M9 9l6 6'
+                  d='M12 8v8M8 12h8'
                   strokeWidth='2'
                   strokeLinecap='round'
                 />
               </svg>
-              Close Account
-            </div>
-            <div className='text-gray-500 dark:text-gray-400 text-sm mb-4'>
-              If you delete your account, you will no longer be able to get
-              information about the matched jobs, following employers, and job
-              alert, shortlisted jobs and more. You will be abandoned from all
-              the services.
-            </div>
-            <Button
-              onClick={handleDeleteAccount}
-              className='bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 border border-red-200 dark:border-red-700'
-            >
-              Close Account
-            </Button>
+              Add New Social Link
+            </button>
+            <Button onClick={handleSocialLinksSave}>Save Changes</Button>
           </div>
-        </div>
-      );
+        );
+      case 'resume':
+        return <div className='py-8'>Resume Tab (to be implemented)</div>;
+      case 'jobAlerts':
+        return <div className='py-8'>Job Alerts Tab (to be implemented)</div>;
+      case 'security':
+        return (
+          <div className='mt-8 flex flex-col gap-10'>
+            {/* Map Location, Phone, Email */}
+            <div>
+              <div className='mb-4'>
+                <Input
+                  placeholder='Map Location'
+                  value={account.mapLocation}
+                  onChange={(e) =>
+                    handleAccountChange('mapLocation', e.target.value)
+                  }
+                />
+              </div>
+              <div className='mb-4 flex gap-2'>
+                <Select
+                  value={account.phoneCountry}
+                  onChange={(e) =>
+                    handleAccountChange('phoneCountry', e.target.value)
+                  }
+                  className='w-24'
+                >
+                  <option value='+880'>🇧🇩 +880</option>
+                  <option value='+234'>🇳🇬 +234</option>
+                  <option value='+1'>🇺🇸 +1</option>
+                  <option value='+44'>🇬🇧 +44</option>
+                  <option value='+91'>🇮🇳 +91</option>
+                </Select>
+                <Input
+                  placeholder='Phone number..'
+                  value={account.phone}
+                  onChange={(e) => handleAccountChange('phone', e.target.value)}
+                />
+              </div>
+              <div className='mb-4'>
+                <div className='flex items-center gap-2'>
+                  <span className='text-gray-400 dark:text-gray-500'>
+                    <svg
+                      width='18'
+                      height='18'
+                      fill='none'
+                      viewBox='0 0 24 24'
+                      stroke='currentColor'
+                    >
+                      <path
+                        d='M3 8l7.89 5.26a2 2 0 0 0 2.22 0L21 8M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z'
+                        strokeWidth='2'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                    </svg>
+                  </span>
+                  <Input
+                    type='email'
+                    placeholder='Email address'
+                    value={account.email}
+                    onChange={(e) =>
+                      handleAccountChange('email', e.target.value)
+                    }
+                  />
+                </div>
+              </div>
+              <Button onClick={handleAccountSave}>Save Changes</Button>
+            </div>
+
+            {/* Notification Preferences */}
+            <div className='border-t border-gray-200 dark:border-gray-700 pt-8'>
+              <div className='font-medium mb-4 text-gray-900 dark:text-white'>
+                Notification
+              </div>
+              <div className='grid grid-cols-2 gap-4 mb-4'>
+                <label className='flex items-center gap-2 text-gray-900 dark:text-white'>
+                  <input
+                    type='checkbox'
+                    checked={account.notifications.shortlisted}
+                    onChange={(e) =>
+                      handleNotificationChange('shortlisted', e.target.checked)
+                    }
+                    className='rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400'
+                  />
+                  Notify me when employers shortlisted me
+                </label>
+                <label className='flex items-center gap-2 text-gray-900 dark:text-white'>
+                  <input
+                    type='checkbox'
+                    checked={account.notifications.saved}
+                    onChange={(e) =>
+                      handleNotificationChange('saved', e.target.checked)
+                    }
+                    className='rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400'
+                  />
+                  Notify me when employers saved my profile
+                </label>
+                <label className='flex items-center gap-2 text-gray-900 dark:text-white'>
+                  <input
+                    type='checkbox'
+                    checked={account.notifications.appliedExpire}
+                    onChange={(e) =>
+                      handleNotificationChange(
+                        'appliedExpire',
+                        e.target.checked,
+                      )
+                    }
+                    className='rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400'
+                  />
+                  Notify me when my applied jobs are expire
+                </label>
+                <label className='flex items-center gap-2 text-gray-900 dark:text-white'>
+                  <input
+                    type='checkbox'
+                    checked={account.notifications.rejected}
+                    onChange={(e) =>
+                      handleNotificationChange('rejected', e.target.checked)
+                    }
+                    className='rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400'
+                  />
+                  Notify me when employers rejected me
+                </label>
+                <label className='flex items-center gap-2 col-span-2 text-gray-900 dark:text-white'>
+                  <input
+                    type='checkbox'
+                    checked={account.notifications.jobAlerts}
+                    onChange={(e) =>
+                      handleNotificationChange('jobAlerts', e.target.checked)
+                    }
+                    className='rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400'
+                  />
+                  Notify me when i have up to 5 job alerts
+                </label>
+              </div>
+              <Button onClick={handleAccountSave}>Save Changes</Button>
+            </div>
+
+            {/* Job Alerts */}
+            <div className='border-t border-gray-200 dark:border-gray-700 pt-8'>
+              <div className='font-medium mb-4 text-gray-900 dark:text-white'>
+                Job Alerts
+              </div>
+              <div className='flex gap-4 mb-4'>
+                <div className='flex items-center gap-2 flex-1'>
+                  <span className='text-gray-400 dark:text-gray-500'>
+                    <svg
+                      width='18'
+                      height='18'
+                      fill='none'
+                      viewBox='0 0 24 24'
+                      stroke='currentColor'
+                    >
+                      <path
+                        d='M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'
+                        strokeWidth='2'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                      <circle
+                        cx='12'
+                        cy='7'
+                        r='4'
+                        strokeWidth='2'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                    </svg>
+                  </span>
+                  <Input
+                    placeholder='Your job roles'
+                    value={account.jobAlertRole}
+                    onChange={(e) =>
+                      handleAccountChange('jobAlertRole', e.target.value)
+                    }
+                  />
+                </div>
+                <div className='flex items-center gap-2 flex-1'>
+                  <span className='text-gray-400 dark:text-gray-500'>
+                    <svg
+                      width='18'
+                      height='18'
+                      fill='none'
+                      viewBox='0 0 24 24'
+                      stroke='currentColor'
+                    >
+                      <path
+                        d='M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 1 1 18 0z'
+                        strokeWidth='2'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                      <circle
+                        cx='12'
+                        cy='10'
+                        r='3'
+                        strokeWidth='2'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                    </svg>
+                  </span>
+                  <Input
+                    placeholder='City, state, country name'
+                    value={account.jobAlertLocation}
+                    onChange={(e) =>
+                      handleAccountChange('jobAlertLocation', e.target.value)
+                    }
+                  />
+                </div>
+              </div>
+              <Button onClick={handleJobAlertSave}>Save Changes</Button>
+            </div>
+
+            {/* Profile & Resume Privacy */}
+            <div className='border-t border-gray-200 dark:border-gray-700 pt-8 flex gap-8'>
+              <div className='flex items-center gap-4'>
+                <span className='font-medium text-gray-900 dark:text-white'>
+                  Profile Privacy
+                </span>
+                <button
+                  type='button'
+                  onClick={() => handlePrivacyToggle('profilePublic')}
+                  className={`w-12 h-6 rounded-full flex items-center transition-colors ${account.profilePublic ? 'bg-blue-600 dark:bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                >
+                  <span
+                    className={`inline-block w-6 h-6 bg-white dark:bg-gray-200 rounded-full shadow transform transition-transform ${account.profilePublic ? 'translate-x-6' : ''}`}
+                  ></span>
+                </button>
+                <span className='ml-2 text-sm text-gray-900 dark:text-white'>
+                  {account.profilePublic ? 'YES' : 'NO'}{' '}
+                  <span className='text-gray-400 dark:text-gray-500'>
+                    {account.profilePublic
+                      ? 'Your profile is public now'
+                      : 'Your profile is private now'}
+                  </span>
+                </span>
+              </div>
+              <div className='flex items-center gap-4'>
+                <span className='font-medium text-gray-900 dark:text-white'>
+                  Resume Privacy
+                </span>
+                <button
+                  type='button'
+                  onClick={() => handlePrivacyToggle('resumePrivate')}
+                  className={`w-12 h-6 rounded-full flex items-center transition-colors ${account.resumePrivate ? 'bg-blue-600 dark:bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                >
+                  <span
+                    className={`inline-block w-6 h-6 bg-white dark:bg-gray-200 rounded-full shadow transform transition-transform ${account.resumePrivate ? 'translate-x-6' : ''}`}
+                  ></span>
+                </button>
+                <span className='ml-2 text-sm text-gray-900 dark:text-white'>
+                  {account.resumePrivate ? 'YES' : 'NO'}{' '}
+                  <span className='text-gray-400 dark:text-gray-500'>
+                    {account.resumePrivate
+                      ? 'Your resume is private now'
+                      : 'Your resume is public now'}
+                  </span>
+                </span>
+              </div>
+            </div>
+
+            {/* Change Password */}
+            <div className='border-t border-gray-200 dark:border-gray-700 pt-8'>
+              <div className='font-medium mb-4 text-gray-900 dark:text-white'>
+                Change Password
+              </div>
+              <div className='grid grid-cols-3 gap-4 mb-4'>
+                <div className='relative'>
+                  <Input
+                    type={showPassword.password ? 'text' : 'password'}
+                    placeholder='Password'
+                    value={account.password}
+                    onChange={(e) =>
+                      handleAccountChange('password', e.target.value)
+                    }
+                  />
+                  <button
+                    type='button'
+                    className='absolute right-2 top-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                    onClick={() => handlePasswordVisibility('password')}
+                  >
+                    <svg
+                      width='18'
+                      height='18'
+                      fill='none'
+                      viewBox='0 0 24 24'
+                      stroke='currentColor'
+                    >
+                      <path d='M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z' />
+                      <path d='M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' />
+                    </svg>
+                  </button>
+                </div>
+                <div className='relative'>
+                  <Input
+                    type={showPassword.newPassword ? 'text' : 'password'}
+                    placeholder='New Password'
+                    value={account.newPassword}
+                    onChange={(e) =>
+                      handleAccountChange('newPassword', e.target.value)
+                    }
+                  />
+                  <button
+                    type='button'
+                    className='absolute right-2 top-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                    onClick={() => handlePasswordVisibility('newPassword')}
+                  >
+                    <svg
+                      width='18'
+                      height='18'
+                      fill='none'
+                      viewBox='0 0 24 24'
+                      stroke='currentColor'
+                    >
+                      <path d='M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z' />
+                      <path d='M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' />
+                    </svg>
+                  </button>
+                </div>
+                <div className='relative'>
+                  <Input
+                    type={showPassword.confirmPassword ? 'text' : 'password'}
+                    placeholder='Confirm Password'
+                    value={account.confirmPassword}
+                    onChange={(e) =>
+                      handleAccountChange('confirmPassword', e.target.value)
+                    }
+                  />
+                  <button
+                    type='button'
+                    className='absolute right-2 top-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                    onClick={() => handlePasswordVisibility('confirmPassword')}
+                  >
+                    <svg
+                      width='18'
+                      height='18'
+                      fill='none'
+                      viewBox='0 0 24 24'
+                      stroke='currentColor'
+                    >
+                      <path d='M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z' />
+                      <path d='M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <Button onClick={handlePasswordSave}>Save Changes</Button>
+            </div>
+
+            {/* Delete Account */}
+            <div className='border-t border-gray-200 dark:border-gray-700 pt-8'>
+              <div className='font-medium mb-2 text-red-600 dark:text-red-400 flex items-center gap-2'>
+                <svg
+                  width='18'
+                  height='18'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                >
+                  <circle cx='12' cy='12' r='10' strokeWidth='2' />
+                  <path
+                    d='M15 9l-6 6M9 9l6 6'
+                    strokeWidth='2'
+                    strokeLinecap='round'
+                  />
+                </svg>
+                Close Account
+              </div>
+              <div className='text-gray-500 dark:text-gray-400 text-sm mb-4'>
+                If you delete your account, you will no longer be able to get
+                information about the matched jobs, following employers, and job
+                alert, shortlisted jobs and more. You will be abandoned from all
+                the services.
+              </div>
+              <Button
+                onClick={handleDeleteAccount}
+                className='bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 border border-red-200 dark:border-red-700'
+              >
+                Close Account
+              </Button>
+            </div>
+          </div>
+        );
+      default:
+        return null;
     }
-    return (
-      <div className='mt-8 text-gray-400 dark:text-gray-500 text-center'>
-        {activeTab === 'account' && 'Account Setting tab content coming soon.'}
-      </div>
-    );
   }
 
   return (
-    <div className='flex-1 px-10 py-4 bg-gray-50 dark:bg-gray-900'>
+    <div className='flex-1 px-4 md:px-10 py-4 bg-gray-50 dark:bg-gray-900 min-h-screen'>
       <h1 className='text-xl font-semibold mb-6 text-gray-900 dark:text-white'>
         Settings
       </h1>
       {/* Horizontal Tabs */}
-      <div className='flex gap-8 border-b border-gray-200 dark:border-gray-700 mb-2'>
+      <div className='flex flex-wrap gap-4 border-b border-gray-200 dark:border-gray-700 mb-2'>
         {TABS.map((tab) => (
           <button
             key={tab.key}
@@ -1028,7 +779,7 @@ export default function SettingsTab() {
           </button>
         ))}
       </div>
-      {renderTabContent()}
+      <div className='w-full max-w-5xl mx-auto'>{renderTabContent()}</div>
       <AddResumeModal
         isOpen={addModalOpen}
         onClose={() => setAddModalOpen(false)}

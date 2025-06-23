@@ -1134,7 +1134,10 @@ export default function HeroSection() {
         {/* Left: Text and Search */}
         <div className='flex-1 max-w-xl'>
           <h1 className='text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 leading-tight'>
-            Find a job that suits your interest & skills.
+            Find a <span className='text-blue-600 dark:text-blue-400'>job</span>{' '}
+            that suits your{' '}
+            <span className='text-blue-600 dark:text-blue-400'>interest</span> &{' '}
+            <span className='text-blue-600 dark:text-blue-400'>skills</span>.
           </h1>
           <p className='text-lg text-gray-500 dark:text-gray-300 mb-8'>
             Discover thousands of opportunities tailored to your expertise and
