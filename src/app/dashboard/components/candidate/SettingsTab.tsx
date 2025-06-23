@@ -17,22 +17,6 @@ const TABS = [
   { key: 'security', label: 'Security' },
 ];
 
-const experienceOptions = [
-  'Intern',
-  'Junior',
-  'Mid',
-  'Senior',
-  'Lead',
-  'Manager',
-];
-const educationOptions = [
-  'High School',
-  'Associate Degree',
-  "Bachelor's Degree",
-  "Master's Degree",
-  'PhD',
-];
-
 const mockResumes = [
   { id: 1, name: 'Professional Resume', size: '3.5 MB' },
   { id: 2, name: 'Product Designer', size: '4.7 MB' },
@@ -297,14 +281,14 @@ export default function SettingsTab() {
         );
       case 'social':
         return (
-          <div className='mt-8'>
-            <div className='font-medium mb-4 text-gray-900 dark:text-white'>
+          <div className='mt-4 sm:mt-8'>
+            <div className='font-medium mb-4 text-gray-900 dark:text-white text-base sm:text-lg'>
               Social Links
             </div>
             {socialLinks.map((link, idx) => (
               <div key={idx} className='mb-4'>
-                <div className='flex items-center gap-4'>
-                  <div className='w-32'>
+                <div className='flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4'>
+                  <div className='w-full sm:w-32'>
                     <Select
                       value={link.platform}
                       onChange={(e) =>
@@ -328,7 +312,7 @@ export default function SettingsTab() {
                   />
                   <button
                     type='button'
-                    className='ml-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors'
+                    className='self-start sm:self-auto ml-0 sm:ml-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors'
                     onClick={() => handleRemoveSocialLink(idx)}
                     aria-label='Remove social link'
                   >
@@ -352,7 +336,7 @@ export default function SettingsTab() {
             ))}
             <button
               type='button'
-              className='w-full flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-800 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mb-8 mt-2 transition-colors'
+              className='w-full flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-800 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mb-6 sm:mb-8 mt-2 transition-colors text-sm sm:text-base'
               onClick={handleAddSocialLink}
             >
               <svg
@@ -380,7 +364,7 @@ export default function SettingsTab() {
         return <div className='py-8'>Job Alerts Tab (to be implemented)</div>;
       case 'security':
         return (
-          <div className='mt-8 flex flex-col gap-10'>
+          <div className='mt-4 sm:mt-8 flex flex-col gap-6 sm:gap-10'>
             {/* Map Location, Phone, Email */}
             <div>
               <div className='mb-4'>
@@ -392,13 +376,13 @@ export default function SettingsTab() {
                   }
                 />
               </div>
-              <div className='mb-4 flex gap-2'>
+              <div className='mb-4 flex flex-col sm:flex-row gap-2'>
                 <Select
                   value={account.phoneCountry}
                   onChange={(e) =>
                     handleAccountChange('phoneCountry', e.target.value)
                   }
-                  className='w-24'
+                  className='w-full sm:w-24'
                 >
                   <option value='+880'>🇧🇩 +880</option>
                   <option value='+234'>🇳🇬 +234</option>
@@ -444,12 +428,12 @@ export default function SettingsTab() {
             </div>
 
             {/* Notification Preferences */}
-            <div className='border-t border-gray-200 dark:border-gray-700 pt-8'>
-              <div className='font-medium mb-4 text-gray-900 dark:text-white'>
+            <div className='border-t border-gray-200 dark:border-gray-700 pt-6 sm:pt-8'>
+              <div className='font-medium mb-4 text-gray-900 dark:text-white text-base sm:text-lg'>
                 Notification
               </div>
-              <div className='grid grid-cols-2 gap-4 mb-4'>
-                <label className='flex items-center gap-2 text-gray-900 dark:text-white'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4'>
+                <label className='flex items-center gap-2 text-sm sm:text-base text-gray-900 dark:text-white'>
                   <input
                     type='checkbox'
                     checked={account.notifications.shortlisted}
@@ -460,7 +444,7 @@ export default function SettingsTab() {
                   />
                   Notify me when employers shortlisted me
                 </label>
-                <label className='flex items-center gap-2 text-gray-900 dark:text-white'>
+                <label className='flex items-center gap-2 text-sm sm:text-base text-gray-900 dark:text-white'>
                   <input
                     type='checkbox'
                     checked={account.notifications.saved}
@@ -471,7 +455,7 @@ export default function SettingsTab() {
                   />
                   Notify me when employers saved my profile
                 </label>
-                <label className='flex items-center gap-2 text-gray-900 dark:text-white'>
+                <label className='flex items-center gap-2 text-sm sm:text-base text-gray-900 dark:text-white'>
                   <input
                     type='checkbox'
                     checked={account.notifications.appliedExpire}
@@ -485,7 +469,7 @@ export default function SettingsTab() {
                   />
                   Notify me when my applied jobs are expire
                 </label>
-                <label className='flex items-center gap-2 text-gray-900 dark:text-white'>
+                <label className='flex items-center gap-2 text-sm sm:text-base text-gray-900 dark:text-white'>
                   <input
                     type='checkbox'
                     checked={account.notifications.rejected}
@@ -496,7 +480,7 @@ export default function SettingsTab() {
                   />
                   Notify me when employers rejected me
                 </label>
-                <label className='flex items-center gap-2 col-span-2 text-gray-900 dark:text-white'>
+                <label className='flex items-center gap-2 col-span-1 sm:col-span-2 text-sm sm:text-base text-gray-900 dark:text-white'>
                   <input
                     type='checkbox'
                     checked={account.notifications.jobAlerts}
@@ -512,11 +496,11 @@ export default function SettingsTab() {
             </div>
 
             {/* Job Alerts */}
-            <div className='border-t border-gray-200 dark:border-gray-700 pt-8'>
-              <div className='font-medium mb-4 text-gray-900 dark:text-white'>
+            <div className='border-t border-gray-200 dark:border-gray-700 pt-6 sm:pt-8'>
+              <div className='font-medium mb-4 text-gray-900 dark:text-white text-base sm:text-lg'>
                 Job Alerts
               </div>
-              <div className='flex gap-4 mb-4'>
+              <div className='flex flex-col sm:flex-row gap-4 mb-4'>
                 <div className='flex items-center gap-2 flex-1'>
                   <span className='text-gray-400 dark:text-gray-500'>
                     <svg
@@ -588,9 +572,9 @@ export default function SettingsTab() {
             </div>
 
             {/* Profile & Resume Privacy */}
-            <div className='border-t border-gray-200 dark:border-gray-700 pt-8 flex gap-8'>
-              <div className='flex items-center gap-4'>
-                <span className='font-medium text-gray-900 dark:text-white'>
+            <div className='border-t border-gray-200 dark:border-gray-700 pt-6 sm:pt-8 flex flex-col sm:flex-row gap-6 sm:gap-8'>
+              <div className='flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4'>
+                <span className='font-medium text-sm sm:text-base text-gray-900 dark:text-white'>
                   Profile Privacy
                 </span>
                 <button
@@ -602,7 +586,7 @@ export default function SettingsTab() {
                     className={`inline-block w-6 h-6 bg-white dark:bg-gray-200 rounded-full shadow transform transition-transform ${account.profilePublic ? 'translate-x-6' : ''}`}
                   ></span>
                 </button>
-                <span className='ml-2 text-sm text-gray-900 dark:text-white'>
+                <span className='text-xs sm:text-sm text-gray-900 dark:text-white'>
                   {account.profilePublic ? 'YES' : 'NO'}{' '}
                   <span className='text-gray-400 dark:text-gray-500'>
                     {account.profilePublic
@@ -611,8 +595,8 @@ export default function SettingsTab() {
                   </span>
                 </span>
               </div>
-              <div className='flex items-center gap-4'>
-                <span className='font-medium text-gray-900 dark:text-white'>
+              <div className='flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4'>
+                <span className='font-medium text-sm sm:text-base text-gray-900 dark:text-white'>
                   Resume Privacy
                 </span>
                 <button
@@ -624,7 +608,7 @@ export default function SettingsTab() {
                     className={`inline-block w-6 h-6 bg-white dark:bg-gray-200 rounded-full shadow transform transition-transform ${account.resumePrivate ? 'translate-x-6' : ''}`}
                   ></span>
                 </button>
-                <span className='ml-2 text-sm text-gray-900 dark:text-white'>
+                <span className='text-xs sm:text-sm text-gray-900 dark:text-white'>
                   {account.resumePrivate ? 'YES' : 'NO'}{' '}
                   <span className='text-gray-400 dark:text-gray-500'>
                     {account.resumePrivate
@@ -636,11 +620,11 @@ export default function SettingsTab() {
             </div>
 
             {/* Change Password */}
-            <div className='border-t border-gray-200 dark:border-gray-700 pt-8'>
-              <div className='font-medium mb-4 text-gray-900 dark:text-white'>
+            <div className='border-t border-gray-200 dark:border-gray-700 pt-6 sm:pt-8'>
+              <div className='font-medium mb-4 text-gray-900 dark:text-white text-base sm:text-lg'>
                 Change Password
               </div>
-              <div className='grid grid-cols-3 gap-4 mb-4'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4'>
                 <div className='relative'>
                   <Input
                     type={showPassword.password ? 'text' : 'password'}
@@ -693,7 +677,7 @@ export default function SettingsTab() {
                     </svg>
                   </button>
                 </div>
-                <div className='relative'>
+                <div className='relative sm:col-span-2 lg:col-span-1'>
                   <Input
                     type={showPassword.confirmPassword ? 'text' : 'password'}
                     placeholder='Confirm Password'
@@ -724,8 +708,8 @@ export default function SettingsTab() {
             </div>
 
             {/* Delete Account */}
-            <div className='border-t border-gray-200 dark:border-gray-700 pt-8'>
-              <div className='font-medium mb-2 text-red-600 dark:text-red-400 flex items-center gap-2'>
+            <div className='border-t border-gray-200 dark:border-gray-700 pt-6 sm:pt-8'>
+              <div className='font-medium mb-2 text-red-600 dark:text-red-400 flex items-center gap-2 text-base sm:text-lg'>
                 <svg
                   width='18'
                   height='18'
@@ -763,22 +747,30 @@ export default function SettingsTab() {
   }
 
   return (
-    <div className='flex-1 px-4 md:px-10 py-4 bg-gray-50 dark:bg-gray-900 min-h-screen'>
-      <h1 className='text-xl font-semibold mb-6 text-gray-900 dark:text-white'>
-        Settings
-      </h1>
+    <div className='flex-1 p-4 sm:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen'>
+      {/* Header */}
+      <div className='mb-6 lg:mb-8'>
+        <h1 className='text-xl sm:text-2xl lg:text-3xl font-semibold mb-2 text-gray-900 dark:text-white'>
+          Settings
+        </h1>
+        <p className='text-sm sm:text-base text-gray-500 dark:text-gray-400'>
+          Manage your account settings and preferences
+        </p>
+      </div>
+
       {/* Horizontal Tabs */}
-      <div className='flex flex-wrap gap-4 border-b border-gray-200 dark:border-gray-700 mb-2'>
+      <div className='flex flex-wrap gap-2 sm:gap-4 border-b border-gray-200 dark:border-gray-700 mb-4 sm:mb-6 overflow-x-auto'>
         {TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`pb-3 px-1 font-medium transition-colors border-b-2 -mb-px ${activeTab === tab.key ? 'border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400'}`}
+            className={`pb-3 px-1 sm:px-2 font-medium transition-colors border-b-2 -mb-px text-sm sm:text-base whitespace-nowrap ${activeTab === tab.key ? 'border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400'}`}
           >
             {tab.label}
           </button>
         ))}
       </div>
+
       <div className='w-full max-w-5xl mx-auto'>{renderTabContent()}</div>
       <AddResumeModal
         isOpen={addModalOpen}

@@ -189,9 +189,14 @@ export default function FavoriteJobsTab() {
 
   if (loading) {
     return (
-      <div className='flex-1 p-10 bg-gray-50 dark:bg-gray-900'>
+      <div className='flex-1 p-4 sm:p-6 bg-gray-50 dark:bg-gray-900'>
         <div className='flex justify-center items-center h-64'>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400'></div>
+          <div className='text-center'>
+            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4'></div>
+            <p className='text-gray-600 dark:text-gray-400'>
+              Loading favorite jobs...
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -199,9 +204,14 @@ export default function FavoriteJobsTab() {
 
   if (error) {
     return (
-      <div className='flex-1 p-10 bg-gray-50 dark:bg-gray-900'>
+      <div className='flex-1 p-4 sm:p-6 bg-gray-50 dark:bg-gray-900'>
         <div className='flex justify-center items-center h-64'>
-          <div className='text-red-500 dark:text-red-400'>{error}</div>
+          <div className='text-center'>
+            <div className='text-red-500 dark:text-red-400 text-lg mb-2'>
+              ⚠️
+            </div>
+            <div className='text-red-500 dark:text-red-400'>{error}</div>
+          </div>
         </div>
       </div>
     );
@@ -212,22 +222,38 @@ export default function FavoriteJobsTab() {
   const currentJobs = jobs.slice(startIndex, endIndex);
 
   return (
-    <div className='flex-1 px-10 py-4 bg-gray-50 dark:bg-gray-900'>
-      <h1 className='text-xl font-semibold mb-6 text-gray-900 dark:text-white'>
-        Favorite Jobs{' '}
-        <span className='text-gray-400 dark:text-gray-500 font-normal'>
-          ({jobs.length})
-        </span>
-      </h1>
-      <div className='space-y-6'>
+    <div className='flex-1 p-4 sm:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900'>
+      {/* Header */}
+      <div className='mb-6 lg:mb-8'>
+        <h1 className='text-xl sm:text-2xl lg:text-3xl font-semibold mb-2 text-gray-900 dark:text-white'>
+          Favorite Jobs{' '}
+          <span className='text-gray-400 dark:text-gray-500 font-normal text-lg sm:text-xl lg:text-2xl'>
+            ({jobs.length})
+          </span>
+        </h1>
+        <p className='text-sm sm:text-base text-gray-500 dark:text-gray-400'>
+          Track and manage your favorite job opportunities
+        </p>
+      </div>
+
+      <div className='space-y-4 sm:space-y-6'>
         {currentJobs.length === 0 ? (
-          <div className='text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-700'>
-            <h2 className='text-2xl font-semibold text-gray-700 dark:text-gray-300 mb-2'>
+          <div className='text-center py-8 sm:py-12 bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-700'>
+            <div className='text-gray-400 dark:text-gray-500 text-4xl mb-4'>
+              ❤️
+            </div>
+            <h2 className='text-lg sm:text-2xl font-semibold text-gray-700 dark:text-gray-300 mb-2'>
               No favorite jobs yet
             </h2>
-            <p className='text-gray-500 dark:text-gray-400'>
+            <p className='text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-6'>
               Start favoriting jobs to see them here.
             </p>
+            <button
+              onClick={() => (window.location.href = '/jobs')}
+              className='px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm sm:text-base'
+            >
+              Browse Jobs
+            </button>
           </div>
         ) : (
           currentJobs.map((favourite) => {
@@ -242,15 +268,15 @@ export default function FavoriteJobsTab() {
                 className='bg-white dark:bg-gray-800 rounded-lg shadow-lg dark:shadow-gray-700/50 overflow-hidden border border-gray-200 dark:border-gray-700'
               >
                 {/* Job Header */}
-                <div className='p-6 border-b border-gray-100 dark:border-gray-700'>
-                  <div className='flex items-start justify-between'>
-                    <div className='flex items-start gap-4 flex-1'>
-                      <div className='w-12 h-12 rounded-lg flex items-center justify-center font-bold text-lg bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 flex-shrink-0'>
+                <div className='p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700'>
+                  <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
+                    <div className='flex items-start gap-3 sm:gap-4 flex-1 min-w-0'>
+                      <div className='w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center font-bold text-base sm:text-lg bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 flex-shrink-0'>
                         {job.companyLogo ? (
                           <img
                             src={job.companyLogo}
                             alt={job.companyName || 'Company'}
-                            className='w-8 h-8 rounded'
+                            className='w-6 h-6 sm:w-8 sm:h-8 rounded'
                           />
                         ) : (
                           job.companyName?.[0] || 'C'
@@ -258,52 +284,52 @@ export default function FavoriteJobsTab() {
                       </div>
                       <div className='flex-1 min-w-0'>
                         <div className='flex items-center gap-2 mb-1'>
-                          <h3 className='text-lg font-semibold text-gray-900 dark:text-white truncate'>
+                          <h3 className='text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate'>
                             {job.title}
                           </h3>
                           {job.isFeatured && (
-                            <Star className='w-4 h-4 text-yellow-500 dark:text-yellow-400 fill-current' />
+                            <Star className='w-3 h-3 sm:w-4 sm:h-4 text-yellow-500 dark:text-yellow-400 fill-current' />
                           )}
                         </div>
-                        <p className='text-gray-600 dark:text-gray-300 mb-2'>
+                        <p className='text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-2'>
                           {job.companyName}
                         </p>
-                        <div className='flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400'>
+                        <div className='flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400'>
                           <div className='flex items-center gap-1'>
-                            <MapPin className='w-4 h-4' />
-                            <span>
+                            <MapPin className='w-3 h-3 sm:w-4 sm:h-4' />
+                            <span className='truncate'>
                               {job.location}, {job.city}
                             </span>
                           </div>
                           <div className='flex items-center gap-1'>
-                            <DollarSign className='w-4 h-4' />
+                            <DollarSign className='w-3 h-3 sm:w-4 sm:h-4' />
                             <span>
                               ${job.salaryRange.min} - ${job.salaryRange.max}
                             </span>
                           </div>
                           <div className='flex items-center gap-1'>
-                            <Clock className='w-4 h-4' />
+                            <Clock className='w-3 h-3 sm:w-4 sm:h-4' />
                             <span>{job.employmentType}</span>
                           </div>
                           <div className='flex items-center gap-1'>
-                            <Users className='w-4 h-4' />
+                            <Users className='w-3 h-3 sm:w-4 sm:h-4' />
                             <span>{job.positionNumbers} position(s)</span>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div className='flex items-center gap-2 ml-4'>
+                    <div className='flex items-center gap-2 sm:ml-4'>
                       <button
                         onClick={() => toggleExpanded(favourite.id)}
-                        className='text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium transition-colors'
+                        className='text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-xs sm:text-sm font-medium transition-colors'
                       >
                         {isExpanded ? 'Show Less' : 'Show Details'}
                       </button>
                       <button
                         onClick={() => handleUnfavoriteJob(favourite)}
-                        className='text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors p-2'
+                        className='text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors p-1 sm:p-2'
                       >
-                        <Heart className='w-5 h-5 fill-current' />
+                        <Heart className='w-4 h-4 sm:w-5 sm:h-5 fill-current' />
                       </button>
                     </div>
                   </div>
@@ -311,18 +337,18 @@ export default function FavoriteJobsTab() {
 
                 {/* Expanded Job Details */}
                 {isExpanded && (
-                  <div className='p-6 bg-gray-50 dark:bg-gray-700/50'>
-                    <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+                  <div className='p-4 sm:p-6 bg-gray-50 dark:bg-gray-700/50'>
+                    <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6'>
                       {/* Left Column */}
-                      <div className='space-y-6'>
+                      <div className='space-y-4 sm:space-y-6'>
                         {/* Job Description */}
                         <div>
-                          <h4 className='text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2'>
-                            <FileText className='w-5 h-5' />
+                          <h4 className='text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2'>
+                            <FileText className='w-4 h-4 sm:w-5 sm:h-5' />
                             Job Description
                           </h4>
                           <div
-                            className='text-gray-700 dark:text-gray-300 leading-relaxed prose prose-sm max-w-none dark:prose-invert'
+                            className='text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed prose prose-sm max-w-none dark:prose-invert'
                             dangerouslySetInnerHTML={{
                               __html: job.description,
                             }}
@@ -333,8 +359,8 @@ export default function FavoriteJobsTab() {
                         {job.responsibilities &&
                           job.responsibilities.length > 0 && (
                             <div>
-                              <h4 className='text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2'>
-                                <CheckCircle className='w-5 h-5' />
+                              <h4 className='text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2'>
+                                <CheckCircle className='w-4 h-4 sm:w-5 sm:h-5' />
                                 Responsibilities
                               </h4>
                               <ul className='space-y-2'>
@@ -342,7 +368,7 @@ export default function FavoriteJobsTab() {
                                   (responsibility, index) => (
                                     <li
                                       key={index}
-                                      className='flex items-start gap-2 text-gray-700 dark:text-gray-300'
+                                      className='flex items-start gap-2 text-sm sm:text-base text-gray-700 dark:text-gray-300'
                                     >
                                       <span className='w-1.5 h-1.5 bg-blue-500 dark:bg-blue-400 rounded-full mt-2 flex-shrink-0'></span>
                                       <span>{responsibility}</span>
@@ -357,8 +383,8 @@ export default function FavoriteJobsTab() {
                         {job.jobPostRequirement &&
                           job.jobPostRequirement.length > 0 && (
                             <div>
-                              <h4 className='text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2'>
-                                <CheckCircle className='w-5 h-5' />
+                              <h4 className='text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2'>
+                                <CheckCircle className='w-4 h-4 sm:w-5 sm:h-5' />
                                 Requirements
                               </h4>
                               <ul className='space-y-2'>
@@ -366,7 +392,7 @@ export default function FavoriteJobsTab() {
                                   (requirement, index) => (
                                     <li
                                       key={index}
-                                      className='flex items-start gap-2 text-gray-700 dark:text-gray-300'
+                                      className='flex items-start gap-2 text-sm sm:text-base text-gray-700 dark:text-gray-300'
                                     >
                                       <span className='w-1.5 h-1.5 bg-blue-500 dark:bg-blue-400 rounded-full mt-2 flex-shrink-0'></span>
                                       <span>{requirement}</span>
@@ -379,13 +405,13 @@ export default function FavoriteJobsTab() {
                       </div>
 
                       {/* Right Column */}
-                      <div className='space-y-6'>
+                      <div className='space-y-4 sm:space-y-6'>
                         {/* Job Details */}
-                        <div className='bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700'>
-                          <h4 className='text-lg font-semibold text-gray-900 dark:text-white mb-3'>
+                        <div className='bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg border border-gray-200 dark:border-gray-700'>
+                          <h4 className='text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3'>
                             Job Details
                           </h4>
-                          <div className='space-y-3'>
+                          <div className='space-y-2 sm:space-y-3 text-xs sm:text-sm'>
                             <div className='flex justify-between'>
                               <span className='text-gray-600 dark:text-gray-400'>
                                 Industry:
@@ -448,15 +474,15 @@ export default function FavoriteJobsTab() {
                         {/* Skills */}
                         {job.skill && job.skill.length > 0 && (
                           <div>
-                            <h4 className='text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2'>
-                              <Briefcase className='w-5 h-5' />
+                            <h4 className='text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2'>
+                              <Briefcase className='w-4 h-4 sm:w-5 sm:h-5' />
                               Required Skills
                             </h4>
                             <div className='flex flex-wrap gap-2'>
                               {job.skill.map((skill, index) => (
                                 <span
                                   key={index}
-                                  className='px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium'
+                                  className='px-2 sm:px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs sm:text-sm font-medium'
                                 >
                                   {skill}
                                 </span>
@@ -468,15 +494,15 @@ export default function FavoriteJobsTab() {
                         {/* Benefits */}
                         {job.benefits && job.benefits.length > 0 && (
                           <div>
-                            <h4 className='text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2'>
-                              <Star className='w-5 h-5' />
+                            <h4 className='text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2'>
+                              <Star className='w-4 h-4 sm:w-5 sm:h-5' />
                               Benefits
                             </h4>
                             <ul className='space-y-2'>
                               {job.benefits.map((benefit, index) => (
                                 <li
                                   key={index}
-                                  className='flex items-start gap-2 text-gray-700 dark:text-gray-300'
+                                  className='flex items-start gap-2 text-sm sm:text-base text-gray-700 dark:text-gray-300'
                                 >
                                   <span className='w-1.5 h-1.5 bg-green-500 dark:bg-green-400 rounded-full mt-2 flex-shrink-0'></span>
                                   <span>{benefit}</span>
@@ -487,11 +513,11 @@ export default function FavoriteJobsTab() {
                         )}
 
                         {/* Application Info */}
-                        <div className='bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700'>
-                          <h4 className='text-lg font-semibold text-gray-900 dark:text-white mb-3'>
+                        <div className='bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg border border-gray-200 dark:border-gray-700'>
+                          <h4 className='text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3'>
                             Application Info
                           </h4>
-                          <div className='space-y-3'>
+                          <div className='space-y-2 sm:space-y-3 text-xs sm:text-sm'>
                             <div className='flex justify-between'>
                               <span className='text-gray-600 dark:text-gray-400'>
                                 Posted:
@@ -544,11 +570,11 @@ export default function FavoriteJobsTab() {
 
                     {/* How to Apply */}
                     {job.howToApply && (
-                      <div className='mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700'>
-                        <h4 className='text-lg font-semibold text-gray-900 dark:text-white mb-3'>
+                      <div className='mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700'>
+                        <h4 className='text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3'>
                           How to Apply
                         </h4>
-                        <p className='text-gray-700 dark:text-gray-300 mb-3'>
+                        <p className='text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-3'>
                           {job.howToApply}
                         </p>
                         {job.applicationURL && (
@@ -556,9 +582,9 @@ export default function FavoriteJobsTab() {
                             href={job.applicationURL}
                             target='_blank'
                             rel='noopener noreferrer'
-                            className='inline-flex items-center gap-2 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors'
+                            className='inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm'
                           >
-                            <Globe className='w-4 h-4' />
+                            <Globe className='w-3 h-3 sm:w-4 sm:h-4' />
                             Apply via External Link
                           </a>
                         )}
@@ -566,17 +592,18 @@ export default function FavoriteJobsTab() {
                     )}
 
                     {/* Action Buttons */}
-                    <div className='mt-6 flex justify-end gap-3'>
+                    <div className='mt-4 sm:mt-6 flex flex-col sm:flex-row sm:justify-end gap-3'>
                       {isExpired ? (
-                        <button className='px-6 py-2 rounded-lg font-medium bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'>
+                        <button className='w-full sm:w-auto px-4 py-2 rounded-lg font-medium bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed text-sm'>
                           Deadline Expired
                         </button>
                       ) : (
                         <button
                           onClick={() => handleApplyClick(job.id)}
-                          className='px-6 py-2 rounded-lg font-medium bg-blue-600 dark:bg-blue-500 text-white flex items-center gap-2 hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors'
+                          className='w-full sm:w-auto px-4 py-2 rounded-lg font-medium bg-blue-600 dark:bg-blue-500 text-white flex items-center justify-center gap-2 hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm'
                         >
-                          Apply Now <ArrowRight size={16} />
+                          Apply Now{' '}
+                          <ArrowRight size={14} className='sm:w-4 sm:h-4' />
                         </button>
                       )}
                     </div>
@@ -585,10 +612,10 @@ export default function FavoriteJobsTab() {
 
                 {/* Collapsed View Actions */}
                 {!isExpanded && (
-                  <div className='p-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center'>
-                    <div className='flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400'>
+                  <div className='p-3 sm:p-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0'>
+                    <div className='flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400'>
                       <span>Posted: {formatDate(job.postedDate)}</span>
-                      <span>•</span>
+                      <span className='hidden sm:inline'>•</span>
                       <span
                         className={
                           isExpired
@@ -601,7 +628,7 @@ export default function FavoriteJobsTab() {
                       </span>
                       {job.status && (
                         <>
-                          <span>•</span>
+                          <span className='hidden sm:inline'>•</span>
                           <span
                             className={`px-2 py-1 rounded text-xs ${
                               job.status === 'Active'
@@ -618,15 +645,16 @@ export default function FavoriteJobsTab() {
                     </div>
                     <div className='flex items-center gap-2'>
                       {isExpired ? (
-                        <button className='px-4 py-2 rounded font-medium bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'>
+                        <button className='w-full sm:w-auto px-3 sm:px-4 py-2 rounded font-medium bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed text-xs sm:text-sm'>
                           Deadline Expired
                         </button>
                       ) : (
                         <button
                           onClick={() => handleApplyClick(job.id)}
-                          className='px-4 py-2 rounded font-medium bg-blue-600 dark:bg-blue-500 text-white flex items-center gap-2 hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors'
+                          className='w-full sm:w-auto px-3 sm:px-4 py-2 rounded font-medium bg-blue-600 dark:bg-blue-500 text-white flex items-center justify-center gap-2 hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-xs sm:text-sm'
                         >
-                          Apply Now <ArrowRight size={16} />
+                          Apply Now{' '}
+                          <ArrowRight size={14} className='sm:w-4 sm:h-4' />
                         </button>
                       )}
                     </div>
@@ -640,10 +668,10 @@ export default function FavoriteJobsTab() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className='flex justify-center mt-8'>
-          <div className='flex items-center gap-2'>
+        <div className='flex justify-center mt-6 sm:mt-8'>
+          <div className='flex items-center gap-1 sm:gap-2'>
             <button
-              className='w-10 h-10 flex items-center justify-center rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+              className='w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm'
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             >
@@ -652,7 +680,7 @@ export default function FavoriteJobsTab() {
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <button
                 key={page}
-                className={`w-10 h-10 flex items-center justify-center rounded-lg font-semibold transition-colors ${
+                className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg font-semibold transition-colors text-sm ${
                   page === currentPage
                     ? 'bg-blue-600 dark:bg-blue-500 text-white'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -663,7 +691,7 @@ export default function FavoriteJobsTab() {
               </button>
             ))}
             <button
-              className='w-10 h-10 flex items-center justify-center rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+              className='w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm'
               disabled={currentPage === totalPages}
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
@@ -677,25 +705,25 @@ export default function FavoriteJobsTab() {
 
       {/* Confirmation Dialog */}
       {showConfirmDialog && (
-        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-          <div className='bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl dark:shadow-gray-900/50 max-w-md w-full mx-4 border border-gray-200 dark:border-gray-700'>
-            <h2 className='text-xl font-semibold mb-4 text-gray-900 dark:text-white'>
+        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
+          <div className='bg-white dark:bg-gray-800 p-4 sm:p-6 lg:p-8 rounded-lg shadow-xl dark:shadow-gray-900/50 max-w-md w-full mx-4 border border-gray-200 dark:border-gray-700'>
+            <h2 className='text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white'>
               Remove from Favorites
             </h2>
-            <p className='text-gray-700 dark:text-gray-300 mb-6'>
+            <p className='text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-4 sm:mb-6'>
               Are you sure you want to remove "{jobToUnfavorite?.jobPost.title}"
               from your favorites?
             </p>
-            <div className='flex justify-end gap-3'>
+            <div className='flex flex-col sm:flex-row justify-end gap-2 sm:gap-3'>
               <button
                 onClick={cancelUnfavorite}
-                className='px-4 py-2 rounded-lg font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors'
+                className='w-full sm:w-auto px-4 py-2 rounded-lg font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm'
               >
                 Cancel
               </button>
               <button
                 onClick={confirmUnfavorite}
-                className='px-4 py-2 rounded-lg font-medium bg-red-600 dark:bg-red-500 text-white hover:bg-red-700 dark:hover:bg-red-600 transition-colors'
+                className='w-full sm:w-auto px-4 py-2 rounded-lg font-medium bg-red-600 dark:bg-red-500 text-white hover:bg-red-700 dark:hover:bg-red-600 transition-colors text-sm'
               >
                 Remove
               </button>
