@@ -212,7 +212,7 @@ export default function FavoriteJobsTab() {
   const currentJobs = jobs.slice(startIndex, endIndex);
 
   return (
-    <div className='flex-1 p-10 bg-gray-50 dark:bg-gray-900'>
+    <div className='flex-1 px-10 py-4 bg-gray-50 dark:bg-gray-900'>
       <h1 className='text-xl font-semibold mb-6 text-gray-900 dark:text-white'>
         Favorite Jobs{' '}
         <span className='text-gray-400 dark:text-gray-500 font-normal'>

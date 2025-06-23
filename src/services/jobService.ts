@@ -50,6 +50,18 @@ export const jobService = {
     }
   },
 
+  async getJobsByTenant(tenantId: string): Promise<JobsResponse> {
+    try {
+      const response = await api.get(
+        `/jobs/get-all-tenant-job-postings?tenantId=${tenantId}&status=Posted`,
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching jobs by tenant:', error);
+      throw error;
+    }
+  },
+
   async getJobById(id: string): Promise<Job> {
     try {
       const response = await api.get(`/jobs/${id}`);

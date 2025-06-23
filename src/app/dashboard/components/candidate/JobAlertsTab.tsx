@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FaRegBookmark } from 'react-icons/fa';
 import { FiArrowRight } from 'react-icons/fi';
 import { FiEdit2 } from 'react-icons/fi';
+import AlertConfigurationModal from '@/components/ui/AlertConfigurationModal';
 
 const jobs = [
   {
@@ -167,9 +168,21 @@ const newJobs = 9;
 
 export default function JobAlertsTab() {
   const [selectedJobId, setSelectedJobId] = useState(6); // Example: Senior UX Designer selected
+  const [showAlertModal, setShowAlertModal] = useState(false);
+
+  const handleAlertSuccess = () => {
+    // You can add a toast notification here
+    console.log('Alert configuration added successfully');
+    // Optionally refresh the job alerts data
+  };
+
+  const handleAlertError = (error: string) => {
+    // You can add a toast notification here
+    console.error('Alert configuration error:', error);
+  };
 
   return (
-    <div className='flex-1 p-10 bg-gray-50 dark:bg-gray-900'>
+    <div className='flex-1 px-10 py-4 bg-gray-50 dark:bg-gray-900'>
       <div className='flex items-center justify-between mb-6'>
         <h1 className='text-xl font-semibold text-gray-900 dark:text-white'>
           Job Alerts{' '}
@@ -177,7 +190,10 @@ export default function JobAlertsTab() {
             ({newJobs} new jobs)
           </span>
         </h1>
-        <button className='flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium transition-colors'>
+        <button
+          className='flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium transition-colors'
+          onClick={() => setShowAlertModal(true)}
+        >
           <FiEdit2 className='text-base' /> Edit Job Alerts
         </button>
       </div>
@@ -239,6 +255,14 @@ export default function JobAlertsTab() {
           </div>
         ))}
       </div>
+
+      {/* Alert Configuration Modal */}
+      <AlertConfigurationModal
+        open={showAlertModal}
+        onClose={() => setShowAlertModal(false)}
+        onSuccess={handleAlertSuccess}
+        onError={handleAlertError}
+      />
     </div>
   );
 }

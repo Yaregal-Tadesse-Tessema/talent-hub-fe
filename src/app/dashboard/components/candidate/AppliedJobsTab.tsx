@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaCheckCircle } from 'react-icons/fa';
 import type { IconType } from 'react-icons';
+import { useSearchParams } from 'next/navigation';
 import { applicationService } from '@/services/applicationService';
 import type { Application } from '@/services/applicationService';
 import ApplicationDetailModal from './ApplicationDetailModal';
@@ -13,6 +14,7 @@ export default function AppliedJobsTab() {
   const [selectedApplication, setSelectedApplication] =
     useState<Application | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     const fetchApplications = async () => {
@@ -24,6 +26,18 @@ export default function AppliedJobsTab() {
           const applicationsData =
             await applicationService.getApplicationsByUserId(userData.id);
           setApplications(applicationsData.items);
+
+          // Check if there's an applicationId in URL params to auto-open modal
+          const applicationId = searchParams?.get('applicationId');
+          if (applicationId) {
+            const application = applicationsData.items.find(
+              (app) => app.id === applicationId,
+            );
+            if (application) {
+              setSelectedApplication(application);
+              setIsModalOpen(true);
+            }
+          }
         }
       } catch (error) {
         setError('Failed to fetch applications. Please try again later.');
@@ -33,7 +47,7 @@ export default function AppliedJobsTab() {
     };
 
     fetchApplications();
-  }, []);
+  }, [searchParams]);
 
   const handleViewDetails = (application: Application) => {
     setSelectedApplication(application);

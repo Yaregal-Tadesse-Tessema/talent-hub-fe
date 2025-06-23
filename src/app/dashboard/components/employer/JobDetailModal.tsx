@@ -367,9 +367,14 @@ export default function JobDetailModal({
                 <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
                   Job Description
                 </h3>
-                <p className='text-gray-700 dark:text-gray-300 text-sm leading-relaxed'>
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: job.description || 'No description available.',
+                  }}
+                  className='text-gray-700 dark:text-gray-300 text-sm leading-relaxed'
+                >
                   {job.description || 'No description available.'}
-                </p>
+                </div>
               </div>
 
               {/* Screening Questions Section */}

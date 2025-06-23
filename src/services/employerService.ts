@@ -82,6 +82,16 @@ export const employerService = {
     }
   },
 
+  async getTenantById(id: string): Promise<Tenant> {
+    try {
+      const response = await api.get(`/tenants/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching tenant:', error);
+      throw error;
+    }
+  },
+
   async createAccountFromTrade(
     payload: ETradeRegistrationPayload,
   ): Promise<Tenant> {

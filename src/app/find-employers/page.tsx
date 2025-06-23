@@ -6,6 +6,7 @@ import {
   Employer,
   EmployersResponse,
 } from '@/services/employer.service';
+import router from 'next/router';
 
 const orgTypes = [
   'Government',
@@ -119,7 +120,10 @@ export default function FindEmployersPage() {
           Find Employers
         </h2>
         <nav className='text-gray-400 dark:text-gray-500 text-sm flex items-center gap-1'>
-          <span className='hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer'>
+          <span
+            onClick={() => router.push('/')}
+            className='hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer'
+          >
             Home
           </span>
           <span className='mx-1'>/</span>
@@ -145,52 +149,13 @@ export default function FindEmployersPage() {
             </svg>
             <input
               className='flex-1 bg-transparent border-none outline-none text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500'
-              placeholder='Job tittle, Keyword...'
+              placeholder='Employer name, Keyword...'
             />
-          </div>
-          {/* Location */}
-          <div className='flex items-center gap-2 border-r border-gray-200 dark:border-gray-600 px-4 min-w-[200px]'>
-            <svg
-              width='22'
-              height='22'
-              fill='none'
-              viewBox='0 0 24 24'
-              stroke='#2563eb'
-            >
-              <path
-                d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z'
-                strokeWidth='2'
-              />
-              <circle cx='12' cy='9' r='2.5' strokeWidth='2' />
-            </svg>
-            <input
-              className='bg-transparent border-none outline-none text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 w-full'
-              placeholder='Location'
-            />
-          </div>
-          {/* Category */}
-          <div className='flex items-center gap-2 border-r border-gray-200 dark:border-gray-600 px-4 min-w-[200px]'>
-            <svg
-              width='22'
-              height='22'
-              fill='none'
-              viewBox='0 0 24 24'
-              stroke='#2563eb'
-            >
-              <g strokeWidth='2'>
-                <rect x='3' y='3' width='18' height='6' rx='2' />
-                <rect x='3' y='9' width='18' height='6' rx='2' />
-                <rect x='3' y='15' width='18' height='6' rx='2' />
-              </g>
-            </svg>
-            <select className='bg-transparent border-none outline-none text-gray-700 dark:text-gray-300 w-full'>
-              <option>Select Category</option>
-            </select>
           </div>
           {/* Chevron and Find Job button */}
           <div className='flex items-center gap-2 pl-2'>
             <button className='bg-blue-600 dark:bg-blue-500 text-white px-8 py-3 rounded-md font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition'>
-              Find Job
+              Find Employer
             </button>
           </div>
         </div>
@@ -273,40 +238,6 @@ export default function FindEmployersPage() {
             </svg>
             Filter
           </button>
-          {/* Location Radius */}
-          <div className='mb-8'>
-            <div
-              className='flex justify-between items-center mb-2 cursor-pointer select-none'
-              onClick={() => setShowRadius((v) => !v)}
-            >
-              <span className='font-medium text-gray-900 dark:text-white'>
-                Location Radius:{' '}
-                <span className='text-blue-600 dark:text-blue-400 font-semibold'>
-                  {radius} miles
-                </span>
-              </span>
-              <svg
-                width='18'
-                height='18'
-                fill='none'
-                viewBox='0 0 20 20'
-                stroke='currentColor'
-                className={`transition-transform text-gray-600 dark:text-gray-400 ${showRadius ? '' : 'rotate-180'}`}
-              >
-                <path d='M6 8l4 4 4-4' strokeWidth='2' />
-              </svg>
-            </div>
-            {showRadius && (
-              <input
-                type='range'
-                min={0}
-                max={100}
-                value={radius}
-                onChange={(e) => setRadius(Number(e.target.value))}
-                className='w-full accent-blue-600 dark:accent-blue-400 mt-4'
-              />
-            )}
-          </div>
           {/* Organization Type */}
           <div>
             <div
@@ -351,47 +282,6 @@ export default function FindEmployersPage() {
         </div>
         {/* Main content */}
         <div className='flex-1 rounded-lg'>
-          <div className='flex justify-between items-center mb-6'>
-            <div className='flex gap-2'>
-              <select className='w-24 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white'>
-                <option>Latest</option>
-                <option>Oldest</option>
-              </select>
-              <select className='w-36 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white'>
-                <option>12 per page</option>
-                <option>24 per page</option>
-                <option>48 per page</option>
-              </select>
-            </div>
-            <div className='flex gap-2'>
-              <button className='border border-gray-300 dark:border-gray-600 rounded p-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors'>
-                <svg
-                  width='20'
-                  height='20'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                  stroke='currentColor'
-                >
-                  <rect x='3' y='3' width='7' height='7' strokeWidth='2' />
-                  <rect x='14' y='3' width='7' height='7' strokeWidth='2' />
-                  <rect x='14' y='14' width='7' height='7' strokeWidth='2' />
-                  <rect x='3' y='14' width='7' height='7' strokeWidth='2' />
-                </svg>
-              </button>
-              <button className='border border-gray-300 dark:border-gray-600 rounded p-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors'>
-                <svg
-                  width='20'
-                  height='20'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                  stroke='currentColor'
-                >
-                  <rect x='3' y='3' width='18' height='7' strokeWidth='2' />
-                  <rect x='3' y='14' width='18' height='7' strokeWidth='2' />
-                </svg>
-              </button>
-            </div>
-          </div>
           <div className='flex flex-col gap-6'>
             {paginatedEmployers.map((employer, idx) => (
               <div
@@ -407,7 +297,7 @@ export default function FindEmployersPage() {
                   <div>
                     <div className='font-semibold text-lg'>
                       <Link
-                        href={`/find-employers/${encodeURIComponent(employer.tradeName.toLowerCase().replace(/\s+/g, '-'))}`}
+                        href={`/find-employers/${employer.id}`}
                         className='hover:underline text-blue-700 dark:text-blue-400'
                       >
                         {employer.tradeName}
@@ -476,18 +366,6 @@ export default function FindEmployersPage() {
                     </div>
                   </div>
                 </div>
-                <button className='bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-6 py-2 rounded-md font-semibold flex items-center gap-2 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors border border-blue-200 dark:border-blue-700'>
-                  View Details
-                  <svg
-                    width='18'
-                    height='18'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                  >
-                    <path d='M9 5l7 7-7 7' strokeWidth='2' />
-                  </svg>
-                </button>
               </div>
             ))}
           </div>

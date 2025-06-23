@@ -63,7 +63,7 @@ export default function OverviewTab() {
   };
 
   return (
-    <div className='flex-1 p-10 bg-gray-50 dark:bg-gray-900'>
+    <div className='flex-1 px-10 py-4 bg-gray-50 dark:bg-gray-900'>
       <h1 className='text-xl font-semibold mb-1 text-gray-900 dark:text-white'>
         Hello, {userName}
       </h1>
@@ -164,11 +164,16 @@ export default function OverviewTab() {
                     </span>
                   </td>
                   <td className='py-3 px-4'>
-                    <Link href={`/jobs/${application.JobPostId}`}>
-                      <button className='px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded font-medium hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-700 transition-colors'>
-                        View Details
-                      </button>
-                    </Link>
+                    <button
+                      onClick={() =>
+                        router.push(
+                          `/dashboard?tab=applied&applicationId=${application.id}`,
+                        )
+                      }
+                      className='px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded font-medium hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-700 transition-colors'
+                    >
+                      View Details
+                    </button>
                   </td>
                 </tr>
               ))}
