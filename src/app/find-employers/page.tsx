@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import {
   employerService,
@@ -84,7 +84,7 @@ function Pagination({
   );
 }
 
-export default function FindEmployersPage() {
+function FindEmployersPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showOrgType, setShowOrgType] = useState(true);
@@ -656,3 +656,22 @@ export default function FindEmployersPage() {
     </div>
   );
 }
+
+function FindEmployersPageWrapper() {
+  return (
+    <Suspense
+      fallback={
+        <div className='flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300'>
+          <div className='text-center'>
+            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4'></div>
+            <p className='text-lg'>Loading employers...</p>
+          </div>
+        </div>
+      }
+    >
+      <FindEmployersPage />
+    </Suspense>
+  );
+}
+
+export default FindEmployersPageWrapper;

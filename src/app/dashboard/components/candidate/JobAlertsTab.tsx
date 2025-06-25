@@ -50,7 +50,9 @@ export default function JobAlertsTab({
         ? userProfile.alertConfiguration
         : [userProfile.alertConfiguration];
       setAlertConfigurations(
-        configs.filter((config) => config && Object.keys(config).length > 0),
+        configs.filter(
+          (config: any) => config && Object.keys(config).length > 0,
+        ),
       );
     }
   }, [userProfile]);

@@ -32,18 +32,23 @@ function DashboardContent() {
   const [activeTab, setActiveTab] = useState('overview');
   const [userType, setUserType] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
 
   useEffect(() => {
     // Get user type from localStorage
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       try {
-        setUserType(JSON.parse(storedUser)?.role);
+        const userData = JSON.parse(storedUser);
+        setUserType(userData?.role);
+        setUserProfile(userData);
       } catch {
         setUserType(null);
+        setUserProfile(null);
       }
     } else {
       setUserType(null);
+      setUserProfile(null);
     }
   }, []);
 
@@ -83,7 +88,12 @@ function DashboardContent() {
       case 'favorite':
         return <FavoriteJobsTab />;
       case 'alerts':
-        return <JobAlertsTab />;
+        return (
+          <JobAlertsTab
+            userProfile={userProfile}
+            setUserProfile={setUserProfile}
+          />
+        );
       case 'settings':
         return <SettingsTab />;
       default:
