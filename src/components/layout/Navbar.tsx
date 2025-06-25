@@ -358,7 +358,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                     )}
                   </button>
                   {notificationDropdownOpen && (
-                    <div className='absolute right-0 mt-2 w-80 max-w-xs bg-white dark:bg-gray-800 border dark:border-gray-600 rounded shadow-lg z-50 overflow-y-auto max-h-96'>
+                    <div className='fixed sm:absolute right-4 sm:right-0 top-20 sm:top-full mt-0 sm:mt-2 w-[calc(100vw-2rem)] sm:w-80 md:w-80 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded shadow-lg z-50 overflow-y-auto max-h-96'>
                       <div className='p-4 border-b dark:border-gray-600 font-semibold dark:text-white'>
                         Notifications
                       </div>
@@ -476,12 +476,14 @@ export function Navbar({ page = 'home' }: NavbarProps) {
             }`}
           >
             <div className='flex items-center justify-between px-4 py-4 border-b dark:border-gray-700'>
-              <div className='flex items-center gap-2'>
-                <BriefcaseIcon />
-                <span className='text-2xl font-bold ml-2 dark:text-white'>
-                  TalentHub
-                </span>
-              </div>
+              <Link href='/'>
+                <div className='flex items-center gap-2'>
+                  <BriefcaseIcon />
+                  <span className='text-2xl font-bold ml-2 dark:text-white'>
+                    TalentHub
+                  </span>
+                </div>
+              </Link>
               <button
                 aria-label='Close menu'
                 onClick={() => setMobileMenuOpen(false)}

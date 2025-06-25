@@ -1,268 +1,547 @@
-import React, { useState } from 'react';
-import { FaRegBookmark } from 'react-icons/fa';
-import { FiArrowRight } from 'react-icons/fi';
-import { FiEdit2 } from 'react-icons/fi';
-import AlertConfigurationModal from '@/components/ui/AlertConfigurationModal';
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
+import { profileService } from '@/services/profileService';
+import { useToast } from '@/contexts/ToastContext';
 
-const jobs = [
-  {
-    id: 1,
-    title: 'Technical Support Specialist',
-    company: 'Google',
-    companyLogo: '/google.svg',
-    companyColor: 'bg-blue-100 dark:bg-blue-900/30',
-    location: 'Idaho, USA',
-    salary: '$15K-$20K',
-    type: 'Full Time',
-    typeColor:
-      'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-    daysRemaining: 4,
-  },
-  {
-    id: 2,
-    title: 'UI/UX Designer',
-    company: 'YouTube',
-    companyLogo: '/youtube.svg',
-    companyColor: 'bg-red-100 dark:bg-red-900/30',
-    location: 'Minnesota, USA',
-    salary: '$10K-$15K',
-    type: 'Full Time',
-    typeColor:
-      'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-    daysRemaining: 4,
-  },
-  {
-    id: 3,
-    title: 'Front End Developer',
-    company: 'Reddit',
-    companyLogo: '/reddit.svg',
-    companyColor: 'bg-orange-100 dark:bg-orange-900/30',
-    location: 'Mymensingh, Bangladesh',
-    salary: '$10K-$15K',
-    type: 'Internship',
-    typeColor:
-      'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-    daysRemaining: 4,
-  },
-  {
-    id: 4,
-    title: 'Marketing Officer',
-    company: 'Facebook',
-    companyLogo: '/facebook.svg',
-    companyColor: 'bg-blue-200 dark:bg-blue-800/30',
-    location: 'Montana, USA',
-    salary: '$50K-$60K',
-    type: 'Full Time',
-    typeColor:
-      'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-    daysRemaining: 4,
-  },
-  {
-    id: 5,
-    title: 'Networking Engineer',
-    company: 'Instagram',
-    companyLogo: '/instagram.svg',
-    companyColor: 'bg-pink-100 dark:bg-pink-900/30',
-    location: 'Michigan, USA',
-    salary: '$5K-$10K',
-    type: 'Full Time',
-    typeColor:
-      'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-    daysRemaining: 4,
-  },
-  {
-    id: 6,
-    title: 'Senior UX Designer',
-    company: 'Slack',
-    companyLogo: '/slack.svg',
-    companyColor: 'bg-gray-100 dark:bg-gray-700',
-    location: 'United Kingdom of Great Britain',
-    salary: '$30K-$35K',
-    type: 'Full Time',
-    typeColor:
-      'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-    daysRemaining: 4,
-  },
-  {
-    id: 7,
-    title: 'Junior Graphic Designer',
-    company: 'Facebook',
-    companyLogo: '/facebook.svg',
-    companyColor: 'bg-blue-600 dark:bg-blue-500',
-    location: 'Mymensingh, Bangladesh',
-    salary: '$40K-$50K',
-    type: 'Full Time',
-    typeColor:
-      'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-    daysRemaining: 4,
-  },
-  {
-    id: 8,
-    title: 'Product Designer',
-    company: 'Twitter',
-    companyLogo: '/twitter.svg',
-    companyColor: 'bg-blue-300 dark:bg-blue-600',
-    location: 'Sivas, Turkey',
-    salary: '$50K-$70K',
-    type: 'Full Time',
-    typeColor:
-      'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-    daysRemaining: 4,
-  },
-  {
-    id: 9,
-    title: 'Project Manager',
-    company: 'Upwork',
-    companyLogo: '/upwork.svg',
-    companyColor: 'bg-green-100 dark:bg-green-900/30',
-    location: 'Ohio, USA',
-    salary: '$50K-$80K',
-    type: 'Full Time',
-    typeColor:
-      'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-    daysRemaining: 4,
-  },
-  {
-    id: 10,
-    title: 'Marketing Manager',
-    company: 'Microsoft',
-    companyLogo: '/microsoft.svg',
-    companyColor: 'bg-yellow-100 dark:bg-yellow-900/30',
-    location: 'Konya, Turkey',
-    salary: '$20K-$25K',
-    type: 'Temporary',
-    typeColor:
-      'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-    daysRemaining: 4,
-  },
-  {
-    id: 11,
-    title: 'Visual Designer',
-    company: 'Apple',
-    companyLogo: '/apple.svg',
-    companyColor: 'bg-black dark:bg-gray-800',
-    location: 'Washington, USA',
-    salary: '$10K-$15K',
-    type: 'Part Time',
-    typeColor:
-      'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-    daysRemaining: 4,
-  },
-  {
-    id: 12,
-    title: 'Interaction Designer',
-    company: 'Figma',
-    companyLogo: '/figma.svg',
-    companyColor: 'bg-black dark:bg-gray-800',
-    location: 'Penn, USA',
-    salary: '$35K-$40K',
-    type: 'Remote',
-    typeColor:
-      'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-    daysRemaining: 4,
-  },
-];
+interface AlertConfiguration {
+  id?: string;
+  salary: string;
+  jobTitle: string;
+  Position: string;
+  address: string;
+  tenantsId: string[];
+  industry: string;
+}
 
-const totalJobs = 12;
-const newJobs = 9;
+interface JobAlertsTabProps {
+  userProfile: any;
+  setUserProfile: React.Dispatch<React.SetStateAction<any>>;
+}
 
-export default function JobAlertsTab() {
-  const [selectedJobId, setSelectedJobId] = useState(6); // Example: Senior UX Designer selected
-  const [showAlertModal, setShowAlertModal] = useState(false);
+export default function JobAlertsTab({
+  userProfile,
+  setUserProfile,
+}: JobAlertsTabProps) {
+  const [alertConfigurations, setAlertConfigurations] = useState<
+    AlertConfiguration[]
+  >([]);
+  const [showModal, setShowModal] = useState(false);
+  const [editingAlert, setEditingAlert] = useState<AlertConfiguration | null>(
+    null,
+  );
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState<AlertConfiguration>({
+    salary: '',
+    jobTitle: '',
+    Position: '',
+    address: '',
+    tenantsId: [],
+    industry: '',
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { showToast } = useToast();
 
-  const handleAlertSuccess = () => {
-    // You can add a toast notification here
-    console.log('Alert configuration added successfully');
-    // Optionally refresh the job alerts data
+  // Initialize alert configurations from user profile
+  useEffect(() => {
+    if (userProfile?.alertConfiguration) {
+      const configs = Array.isArray(userProfile.alertConfiguration)
+        ? userProfile.alertConfiguration
+        : [userProfile.alertConfiguration];
+      setAlertConfigurations(
+        configs.filter((config) => config && Object.keys(config).length > 0),
+      );
+    }
+  }, [userProfile]);
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.jobTitle.trim()) {
+      newErrors.jobTitle = 'Job title is required';
+    }
+
+    if (!formData.Position.trim()) {
+      newErrors.Position = 'Position is required';
+    }
+
+    if (!formData.address.trim()) {
+      newErrors.address = 'Address is required';
+    }
+
+    if (!formData.industry.trim()) {
+      newErrors.industry = 'Industry is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleAlertError = (error: string) => {
-    // You can add a toast notification here
-    console.error('Alert configuration error:', error);
+  const handleInputChange = (
+    field: keyof AlertConfiguration,
+    value: string | string[],
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      salary: '',
+      jobTitle: '',
+      Position: '',
+      address: '',
+      tenantsId: [],
+      industry: '',
+    });
+    setErrors({});
+    setEditingAlert(null);
+  };
+
+  const handleAddNew = () => {
+    resetForm();
+    setShowModal(true);
+  };
+
+  const handleEdit = (alert: AlertConfiguration) => {
+    setFormData(alert);
+    setEditingAlert(alert);
+    setShowModal(true);
+  };
+
+  const handleDelete = async (alertToDelete: AlertConfiguration) => {
+    if (!confirm('Are you sure you want to delete this job alert?')) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const updatedConfigs = alertConfigurations.filter(
+        (config) => config !== alertToDelete,
+      );
+
+      const updatedUserProfile = {
+        ...userProfile,
+        alertConfiguration: updatedConfigs,
+      };
+
+      await profileService.updateProfile(updatedUserProfile);
+
+      setUserProfile(updatedUserProfile);
+      setAlertConfigurations(updatedConfigs);
+
+      // Update localStorage
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        localStorage.setItem(
+          'user',
+          JSON.stringify({ ...userData, ...updatedUserProfile }),
+        );
+      }
+
+      showToast({ type: 'success', message: 'Job alert deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting job alert:', error);
+      showToast({
+        type: 'error',
+        message:
+          error instanceof Error ? error.message : 'Failed to delete job alert',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('formData', formData);
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      let updatedConfigs: AlertConfiguration[];
+
+      if (editingAlert) {
+        // Update existing alert
+        updatedConfigs = alertConfigurations.map((config) =>
+          config === editingAlert ? { ...formData, id: config.id } : config,
+        );
+      } else {
+        // Add new alert
+        const newAlert = { ...formData, id: Date.now().toString() };
+        updatedConfigs = [...alertConfigurations, newAlert];
+      }
+
+      const updatedUserProfile = {
+        ...userProfile,
+        alertConfiguration: updatedConfigs,
+      };
+      console.log('updatedUserProfile', updatedUserProfile);
+      await profileService.updateProfile(updatedUserProfile);
+
+      setUserProfile(updatedUserProfile);
+      setAlertConfigurations(updatedConfigs);
+
+      // Update localStorage
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        localStorage.setItem(
+          'user',
+          JSON.stringify({ ...userData, ...updatedUserProfile }),
+        );
+      }
+
+      showToast({
+        type: 'success',
+        message: editingAlert
+          ? 'Job alert updated successfully'
+          : 'Job alert added successfully',
+      });
+
+      setShowModal(false);
+      resetForm();
+    } catch (error) {
+      console.error('Error saving job alert:', error);
+      showToast({
+        type: 'error',
+        message:
+          error instanceof Error ? error.message : 'Failed to save job alert',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    resetForm();
   };
 
   return (
-    <div className='flex-1 px-10 py-4 bg-gray-50 dark:bg-gray-900'>
+    <div className='mt-4 sm:mt-8'>
       <div className='flex items-center justify-between mb-6'>
-        <h1 className='text-xl font-semibold text-gray-900 dark:text-white'>
-          Job Alerts{' '}
-          <span className='text-gray-400 dark:text-gray-500 font-normal'>
-            ({newJobs} new jobs)
-          </span>
-        </h1>
-        <button
-          className='flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium transition-colors'
-          onClick={() => setShowAlertModal(true)}
-        >
-          <FiEdit2 className='text-base' /> Edit Job Alerts
-        </button>
-      </div>
-      <div className='bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-0 border border-gray-200 dark:border-gray-700'>
-        {jobs.map((job) => (
-          <div
-            key={job.id}
-            className='grid grid-cols-12 items-center px-8 py-4 border-b border-gray-200 dark:border-gray-700 mb-1 last:border-b-0 transition-all hover:ring-2 hover:ring-blue-400 dark:hover:ring-blue-500 bg-blue-50 dark:bg-blue-900/20'
-            onClick={() => setSelectedJobId(job.id)}
-            style={{ cursor: 'pointer' }}
-          >
-            {/* Job Info */}
-            <div className='col-span-5 flex items-center gap-4'>
-              <span
-                className={`w-10 h-10 rounded flex items-center justify-center font-bold text-lg ${job.companyColor} text-gray-700 dark:text-gray-300`}
-              >
-                {job.companyLogo ? (
-                  <img
-                    src={job.companyLogo}
-                    alt={job.company}
-                    className='w-6 h-6'
-                  />
-                ) : (
-                  job.company[0]
-                )}
-              </span>
-              <div>
-                <div className='font-medium text-base text-gray-900 dark:text-white'>
-                  {job.title}
-                </div>
-                <div className='text-gray-400 dark:text-gray-500 text-xs flex gap-2 items-center'>
-                  <span>{job.location}</span>
-                  <span>•</span>
-                  <span>{job.salary}</span>
-                </div>
-                <span
-                  className={`inline-block ${job.typeColor} text-xs px-2 py-0.5 rounded mt-1`}
-                >
-                  {job.type}
-                </span>
-              </div>
-            </div>
-            {/* Days Remaining */}
-            <div className='col-span-3 text-xs flex items-center gap-2'>
-              <span className='bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded text-gray-500 dark:text-gray-400'>
-                {job.daysRemaining} Days Remaining
-              </span>
-            </div>
-            {/* Bookmark */}
-            <div className='col-span-1 flex justify-center'>
-              <FaRegBookmark className='text-gray-500 dark:text-gray-400 text-xl' />
-            </div>
-            {/* Action */}
-            <div className='col-span-3 flex justify-end'>
-              <button className='px-4 py-2 rounded font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center gap-2 hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white transition-all border border-blue-200 dark:border-blue-700'>
-                Apply Now <FiArrowRight />
-              </button>
-            </div>
-          </div>
-        ))}
+        <div className='font-medium text-gray-900 dark:text-white text-base sm:text-lg'>
+          Job Alerts
+        </div>
+        <Button onClick={handleAddNew} disabled={loading}>
+          Add New Alert
+        </Button>
       </div>
 
-      {/* Alert Configuration Modal */}
-      <AlertConfigurationModal
-        open={showAlertModal}
-        onClose={() => setShowAlertModal(false)}
-        onSuccess={handleAlertSuccess}
-        onError={handleAlertError}
-      />
+      {/* Table */}
+      <div className='bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden'>
+        {alertConfigurations.length === 0 ? (
+          <div className='p-8 text-center'>
+            <div className='text-gray-400 dark:text-gray-500 mb-4'>
+              <svg
+                className='w-12 h-12 mx-auto'
+                fill='none'
+                viewBox='0 0 24 24'
+                stroke='currentColor'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth='2'
+                  d='M15 17h5l-5 5v-5z'
+                />
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth='2'
+                  d='M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z'
+                />
+              </svg>
+            </div>
+            <h3 className='text-lg font-medium text-gray-900 dark:text-white mb-2'>
+              No job alerts yet
+            </h3>
+            <p className='text-gray-500 dark:text-gray-400 mb-4'>
+              Create your first job alert to get notified about relevant
+              opportunities
+            </p>
+            <Button onClick={handleAddNew}>Create First Alert</Button>
+          </div>
+        ) : (
+          <div className='overflow-x-auto'>
+            <table className='w-full'>
+              <thead className='bg-gray-50 dark:bg-gray-700'>
+                <tr>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider'>
+                    Job Title
+                  </th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider'>
+                    Position
+                  </th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider'>
+                    Location
+                  </th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider'>
+                    Industry
+                  </th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider'>
+                    Salary
+                  </th>
+                  <th className='px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider'>
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className='bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700'>
+                {alertConfigurations.map((alert, index) => (
+                  <tr
+                    key={alert.id || index}
+                    className='hover:bg-gray-50 dark:hover:bg-gray-700'
+                  >
+                    <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white'>
+                      {alert.jobTitle}
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300'>
+                      {alert.Position}
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300'>
+                      {alert.address}
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300'>
+                      {alert.industry}
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300'>
+                      {alert.salary || 'Not specified'}
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-right text-sm font-medium'>
+                      <div className='flex items-center justify-end gap-2'>
+                        <button
+                          onClick={() => handleEdit(alert)}
+                          className='text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors'
+                          disabled={loading}
+                        >
+                          <svg
+                            className='w-4 h-4'
+                            fill='none'
+                            viewBox='0 0 24 24'
+                            stroke='currentColor'
+                          >
+                            <path
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              strokeWidth='2'
+                              d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleDelete(alert)}
+                          className='text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors'
+                          disabled={loading}
+                        >
+                          <svg
+                            className='w-4 h-4'
+                            fill='none'
+                            viewBox='0 0 24 24'
+                            stroke='currentColor'
+                          >
+                            <path
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              strokeWidth='2'
+                              d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'>
+          <div className='bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto'>
+            {/* Header */}
+            <div className='flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700'>
+              <div className='flex items-center gap-3'>
+                <svg
+                  className='w-6 h-6 text-blue-600'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth='2'
+                    d='M15 17h5l-5 5v-5z'
+                  />
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth='2'
+                    d='M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z'
+                  />
+                </svg>
+                <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
+                  {editingAlert ? 'Edit Job Alert' : 'Add Job Alert'}
+                </h2>
+              </div>
+              <button
+                onClick={handleCloseModal}
+                className='text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors'
+                disabled={loading}
+              >
+                <svg
+                  className='w-6 h-6'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth='2'
+                    d='M6 18L18 6M6 6l12 12'
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className='p-6 space-y-4'>
+              {/* Job Title */}
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Job Title *
+                </label>
+                <Input
+                  type='text'
+                  value={formData.jobTitle}
+                  onChange={(e) =>
+                    handleInputChange('jobTitle', e.target.value)
+                  }
+                  placeholder='e.g., Software Engineer, Marketing Manager'
+                  className={errors.jobTitle ? 'border-red-500' : ''}
+                  disabled={loading}
+                />
+                {errors.jobTitle && (
+                  <p className='mt-1 text-sm text-red-600 dark:text-red-400'>
+                    {errors.jobTitle}
+                  </p>
+                )}
+              </div>
+
+              {/* Position */}
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Position *
+                </label>
+                <Input
+                  type='text'
+                  value={formData.Position}
+                  onChange={(e) =>
+                    handleInputChange('Position', e.target.value)
+                  }
+                  placeholder='e.g., Senior, Junior, Lead'
+                  className={errors.Position ? 'border-red-500' : ''}
+                  disabled={loading}
+                />
+                {errors.Position && (
+                  <p className='mt-1 text-sm text-red-600 dark:text-red-400'>
+                    {errors.Position}
+                  </p>
+                )}
+              </div>
+
+              {/* Address */}
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Location *
+                </label>
+                <Input
+                  type='text'
+                  value={formData.address}
+                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  placeholder='e.g., New York, NY'
+                  className={errors.address ? 'border-red-500' : ''}
+                  disabled={loading}
+                />
+                {errors.address && (
+                  <p className='mt-1 text-sm text-red-600 dark:text-red-400'>
+                    {errors.address}
+                  </p>
+                )}
+              </div>
+
+              {/* Industry */}
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Industry *
+                </label>
+                <Input
+                  type='text'
+                  value={formData.industry}
+                  onChange={(e) =>
+                    handleInputChange('industry', e.target.value)
+                  }
+                  placeholder='e.g., Technology, Healthcare, Finance'
+                  className={errors.industry ? 'border-red-500' : ''}
+                  disabled={loading}
+                />
+                {errors.industry && (
+                  <p className='mt-1 text-sm text-red-600 dark:text-red-400'>
+                    {errors.industry}
+                  </p>
+                )}
+              </div>
+
+              {/* Salary */}
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Salary Range
+                </label>
+                <Input
+                  type='text'
+                  value={formData.salary}
+                  onChange={(e) => handleInputChange('salary', e.target.value)}
+                  placeholder='e.g., $50,000 - $80,000'
+                  disabled={loading}
+                />
+              </div>
+
+              {/* Actions */}
+              <div className='flex gap-3 pt-4'>
+                <Button
+                  type='button'
+                  onClick={handleCloseModal}
+                  variant='outline'
+                  className='flex-1'
+                  disabled={loading}
+                >
+                  Cancel
+                </Button>
+                <Button type='submit' className='flex-1' disabled={loading}>
+                  {loading
+                    ? 'Saving...'
+                    : editingAlert
+                      ? 'Update Alert'
+                      : 'Add Alert'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

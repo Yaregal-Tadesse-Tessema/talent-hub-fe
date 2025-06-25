@@ -127,10 +127,7 @@ export default function ProfilePage() {
 
     setSaving(true);
     try {
-      const updatedProfile = await profileService.updateProfile(
-        profile.id,
-        profile,
-      );
+      const updatedProfile = await profileService.updateProfile(profile);
       localStorage.setItem(
         'user',
         JSON.stringify({ ...updatedProfile, role: 'employee' }),
@@ -288,7 +285,7 @@ export default function ProfilePage() {
           ) : (
             <>
               <Edit3 size={16} />
-              Edit Profile
+              Edit
             </>
           )}
         </Button>
@@ -1002,15 +999,7 @@ export default function ProfilePage() {
                       <FileText className='w-8 h-8 text-gray-400 dark:text-gray-500' />
                       <div>
                         <p className='text-sm font-medium text-gray-900 dark:text-white'>
-                          {profile.resume.filename || 'Resume.pdf'}
-                        </p>
-                        <p className='text-sm text-gray-500 dark:text-gray-400'>
-                          Last updated:{' '}
-                          {profile.resume.updatedAt
-                            ? new Date(
-                                profile.resume.updatedAt,
-                              ).toLocaleDateString()
-                            : 'N/A'}
+                          {profile.resume.originalname || 'Resume.pdf'}
                         </p>
                       </div>
                     </div>

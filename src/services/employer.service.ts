@@ -55,6 +55,50 @@ export const employerService = {
     }
   },
 
+  async searchEmployers(
+    name?: string,
+    location?: string,
+    organizationType?: string,
+    page?: number,
+    limit?: number,
+  ): Promise<EmployersResponse> {
+    try {
+      let queryParams = '';
+      const conditions = [];
+
+      if (name) {
+        conditions.push(`tradeName:ILIKE:${name.toLowerCase()}`);
+        conditions.push(`name:ILIKE:${name.toLowerCase()}`);
+      }
+      if (location) {
+        conditions.push(`address.subcity:ILIKE:${location.toLowerCase()}`);
+      }
+      if (organizationType) {
+        conditions.push(
+          `organizationType:ILIKE:${organizationType.toLowerCase()}`,
+        );
+      }
+
+      if (conditions.length > 0) {
+        queryParams = `q=w=${conditions.join(',')}`;
+      }
+
+      // Add pagination parameters
+      if (page && limit) {
+        const skip = (page - 1) * limit;
+        queryParams += queryParams
+          ? `&t=${limit}&sk=${skip}`
+          : `t=${limit}&sk=${skip}`;
+      }
+
+      const response = await api.get(`/tenants?${queryParams}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error searching employers:', error);
+      throw error;
+    }
+  },
+
   async getTenantAndCandidateCount(): Promise<TenantAndCandidateCount> {
     try {
       const response = await api.get(

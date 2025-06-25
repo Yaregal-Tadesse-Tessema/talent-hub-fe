@@ -50,8 +50,7 @@ export default function OverviewTab() {
         setLoading(true);
         const response = await jobService.getJobs();
         const sortedJobs = response.items.sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+          (a, b) => (b.applicationCount || 0) - (a.applicationCount || 0),
         );
         setJobs(sortedJobs);
 
@@ -253,26 +252,6 @@ export default function OverviewTab() {
             </div>
             <div className='w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center'>
               <ClockIcon className='w-6 h-6 text-white' />
-            </div>
-          </div>
-        </div>
-
-        {/* High Application Jobs Card */}
-        <div className='bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl p-6 border border-purple-200 dark:border-purple-700 shadow-sm hover:shadow-md transition-all duration-200'>
-          <div className='flex items-center justify-between'>
-            <div className='space-y-2'>
-              <p className='text-purple-600 dark:text-purple-400 text-sm font-medium'>
-                Popular Jobs
-              </p>
-              <p className='text-3xl font-bold text-purple-900 dark:text-purple-100'>
-                {stats.jobsWithHighApplications}
-              </p>
-              <p className='text-purple-700 dark:text-purple-300 text-sm'>
-                10+ applications
-              </p>
-            </div>
-            <div className='w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center'>
-              <ChartBarIcon className='w-6 h-6 text-white' />
             </div>
           </div>
         </div>

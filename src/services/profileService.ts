@@ -6,10 +6,7 @@ interface ProfileCompleteness {
 }
 
 class ProfileService {
-  async updateProfile(
-    userId: string,
-    profile: UserProfile,
-  ): Promise<UserProfile> {
+  async updateProfile(profile: UserProfile): Promise<UserProfile> {
     const response = await api.put(`/users`, profile);
     return response.data;
   }

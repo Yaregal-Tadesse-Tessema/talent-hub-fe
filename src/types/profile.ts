@@ -1,6 +1,7 @@
 export interface FileInfo {
   path: string;
   filename?: string;
+  originalname?: string;
   updatedAt?: string;
 }
 

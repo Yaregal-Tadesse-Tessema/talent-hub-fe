@@ -214,19 +214,6 @@ export default function JobDetailModal({
     },
   ];
 
-  const experienceLevelData = [
-    { name: 'Entry Level', value: 30 },
-    { name: 'Mid Level', value: 45 },
-    { name: 'Senior Level', value: 25 },
-  ];
-
-  const educationLevelData = [
-    { name: "Bachelor's", value: 40 },
-    { name: "Master's", value: 35 },
-    { name: 'PhD', value: 15 },
-    { name: 'Other', value: 10 },
-  ];
-
   const applicationsOverTimeData = [
     { date: '2024-01', applications: 5 },
     { date: '2024-02', applications: 8 },
@@ -369,12 +356,10 @@ export default function JobDetailModal({
                 </h3>
                 <div
                   dangerouslySetInnerHTML={{
-                    __html: job.description || 'No description available.',
+                    __html: job?.description || 'No description available.',
                   }}
                   className='text-gray-700 dark:text-gray-300 text-sm leading-relaxed'
-                >
-                  {job.description || 'No description available.'}
-                </div>
+                />
               </div>
 
               {/* Screening Questions Section */}

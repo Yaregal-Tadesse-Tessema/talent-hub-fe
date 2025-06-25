@@ -63,6 +63,8 @@ export const ApplyJobModal: React.FC<ApplyJobModalProps> = ({
     // Set default resume if available
     if (userData?.profile?.cv || userData?.resume?.path) {
       setSelectedResume('profile');
+    } else {
+      setSelectedResume('new');
     }
 
     const fetchScreeningQuestions = async () => {
@@ -313,11 +315,15 @@ export const ApplyJobModal: React.FC<ApplyJobModalProps> = ({
             value={selectedResume}
             onChange={(e) => setSelectedResume(e.target.value)}
           >
-            <option value=''>Select...</option>
-            {(userData?.profile?.cv || userData?.resume?.path) && (
-              <option value='profile'>Use Profile Resume</option>
+            {userData?.profile?.cv || userData?.resume?.path ? (
+              <>
+                <option value=''>Select...</option>
+                <option value='profile'>Use Profile Resume</option>
+                <option value='new'>Upload New Resume</option>
+              </>
+            ) : (
+              <option value='new'>Upload New Resume</option>
             )}
-            <option value='new'>Upload New Resume</option>
           </select>
         </div>
 

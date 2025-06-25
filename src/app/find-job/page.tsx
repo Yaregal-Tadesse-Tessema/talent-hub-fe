@@ -11,6 +11,118 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/contexts/ToastContext';
 import { useAuth } from '@/contexts/AuthContext';
 
+// Helper function to check if a job is expired
+const isJobExpired = (deadline: string): boolean => {
+  const deadlineDate = new Date(deadline);
+  const currentDate = new Date();
+  return deadlineDate < currentDate;
+};
+
+// Pagination component
+function Pagination({
+  current,
+  total,
+  onChange,
+}: {
+  current: number;
+  total: number;
+  onChange: (page: number) => void;
+}) {
+  // Show only a limited number of pages for better UX
+  const getVisiblePages = () => {
+    const delta = 2; // Number of pages to show on each side of current page
+    const range = [];
+    const rangeWithDots = [];
+
+    for (
+      let i = Math.max(2, current - delta);
+      i <= Math.min(total - 1, current + delta);
+      i++
+    ) {
+      range.push(i);
+    }
+
+    if (current - delta > 2) {
+      rangeWithDots.push(1, '...');
+    } else {
+      rangeWithDots.push(1);
+    }
+
+    rangeWithDots.push(...range);
+
+    if (current + delta < total - 1) {
+      rangeWithDots.push('...', total);
+    } else if (total > 1) {
+      rangeWithDots.push(total);
+    }
+
+    return rangeWithDots;
+  };
+
+  const visiblePages = getVisiblePages();
+
+  return (
+    <div className='flex justify-center items-center gap-1 sm:gap-2 mt-8 sm:mt-10'>
+      <button
+        className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full transition-colors text-sm ${
+          current === 1
+            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-300 dark:text-blue-400 cursor-not-allowed'
+            : 'hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+        }`}
+        onClick={() => onChange(current - 1)}
+        disabled={current === 1}
+      >
+        <svg
+          width='16'
+          height='16'
+          fill='none'
+          viewBox='0 0 24 24'
+          stroke='currentColor'
+        >
+          <path d='M15 19l-7-7 7-7' strokeWidth='2' />
+        </svg>
+      </button>
+
+      {visiblePages.map((page, index) => (
+        <button
+          key={index}
+          className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full font-medium transition-colors text-sm ${
+            page === current
+              ? 'bg-blue-600 dark:bg-blue-500 text-white'
+              : page === '...'
+                ? 'text-gray-400 dark:text-gray-500 cursor-default'
+                : 'hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+          }`}
+          onClick={() => typeof page === 'number' && onChange(page)}
+          disabled={page === '...'}
+        >
+          {page}
+        </button>
+      ))}
+
+      <button
+        className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full transition-colors text-sm ${
+          current === total
+            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-300 dark:text-blue-400 cursor-not-allowed'
+            : 'hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+        }`}
+        onClick={() => onChange(current + 1)}
+        disabled={current === total}
+      >
+        <svg
+          width='16'
+          height='16'
+          fill='none'
+          viewBox='0 0 24 24'
+          stroke='currentColor'
+        >
+          <path d='M9 5l7 7-7 7' strokeWidth='2' />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 export default function FindJobPage() {
   return (
     <Suspense
@@ -33,7 +145,7 @@ function FindJobContent() {
   const searchParams = useSearchParams();
   const { showToast } = useToast();
   const [user, setUser] = useState<any | null>(null);
-  const [selectedPage, setSelectedPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('list');
   const [hoveredJobId, setHoveredJobId] = useState<string | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -45,8 +157,12 @@ function FindJobContent() {
     location: '',
     category: '',
   });
-  const jobsPerPage = 12;
-  const totalPages = 5;
+  const [pagination, setPagination] = useState({
+    total: 0,
+    totalPages: 0,
+    currentPage: 1,
+    limit: 12,
+  });
 
   // Update searchFilters when searchParams change
   useEffect(() => {
@@ -57,6 +173,10 @@ function FindJobContent() {
       location: searchParams.get('location') || '',
       category: searchParams.get('category') || '',
     });
+
+    // Reset to page 1 when search params change
+    setCurrentPage(1);
+    setPagination((prev) => ({ ...prev, currentPage: 1 }));
   }, [searchParams]);
 
   // Combined effect for fetching jobs
@@ -76,16 +196,24 @@ function FindJobContent() {
             searchParams.get('title') || '',
             searchParams.get('location') || '',
             searchParams.get('category') || '',
+            currentPage,
+            pagination.limit,
           );
         } else {
           // Otherwise, use getPublicJobs or getJobs based on user role
           response =
             !user || user?.role === 'employee'
-              ? await jobService.getPublicJobs()
+              ? await jobService.getPublicJobs(currentPage, pagination.limit)
               : await jobService.getJobs();
         }
 
         setJobs(response.items);
+        setPagination({
+          total: response.total,
+          totalPages: Math.ceil(response.total / pagination.limit),
+          currentPage: currentPage,
+          limit: pagination.limit,
+        });
       } catch (err) {
         console.error('Error fetching jobs:', err);
         setError('Failed to fetch jobs. Please try again later.');
@@ -95,7 +223,7 @@ function FindJobContent() {
     };
 
     fetchJobs();
-  }, [searchParams, user]); // Dependencies include both searchParams and user
+  }, [searchParams, user, currentPage, pagination.limit]); // Dependencies include pagination
 
   const handleSearch = () => {
     const queryParams = new URLSearchParams();
@@ -104,6 +232,9 @@ function FindJobContent() {
       queryParams.set('location', searchFilters.location);
     if (searchFilters.category)
       queryParams.set('category', searchFilters.category);
+
+    // Reset to page 1 when searching
+    setCurrentPage(1);
     router.push(`/find-job?${queryParams.toString()}`);
   };
 
@@ -163,6 +294,16 @@ function FindJobContent() {
   };
 
   const handleApplyClick = (jobId: string) => {
+    // Find the job to check if it's expired
+    const job = jobs.find((j) => j.id === jobId);
+    if (job && isJobExpired(job.deadline)) {
+      showToast({
+        type: 'error',
+        message: 'This job has expired and is no longer accepting applications',
+      });
+      return;
+    }
+
     // Check if user is logged in
     if (!user) {
       // Store the job ID in localStorage to redirect after login
@@ -301,7 +442,7 @@ function FindJobContent() {
         {/* View Mode Toggle */}
         <div className='flex justify-between items-center mb-6'>
           <div className='text-sm sm:text-base text-gray-600 dark:text-gray-400'>
-            {jobs.length} jobs found
+            {pagination.total} jobs found
           </div>
           <div className='flex items-center gap-2'>
             <button
@@ -379,6 +520,11 @@ function FindJobContent() {
                         Saved
                       </span>
                     )}
+                    {isJobExpired(job.deadline) && (
+                      <span className='inline-block mt-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs px-2 py-0.5 rounded-full font-medium'>
+                        Expired
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className='text-xs text-gray-400 dark:text-gray-500 mb-2'>
@@ -402,8 +548,15 @@ function FindJobContent() {
                   <div className='mb-1'>
                     Posted: {new Date(job.postedDate).toLocaleDateString()}
                   </div>
-                  <div>
-                    Deadline: {new Date(job.deadline).toLocaleDateString()}
+                  <div
+                    className={`${
+                      isJobExpired(job.deadline)
+                        ? 'text-red-500 dark:text-red-400 font-semibold'
+                        : ''
+                    }`}
+                  >
+                    {isJobExpired(job.deadline) ? 'Expired: ' : 'Deadline: '}
+                    {new Date(job.deadline).toLocaleDateString()}
                   </div>
                 </div>
                 <div className='flex items-center justify-between'>
@@ -420,11 +573,18 @@ function FindJobContent() {
                     />
                   </button>
                   <button
-                    className='bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-semibold px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white flex items-center gap-1 sm:gap-2 transition border border-blue-200 dark:border-blue-700 text-xs sm:text-sm'
+                    className={`${
+                      isJobExpired(job.deadline)
+                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed border border-gray-200 dark:border-gray-600'
+                        : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white border border-blue-200 dark:border-blue-700'
+                    } font-semibold px-3 sm:px-4 py-2 rounded-lg flex items-center gap-1 sm:gap-2 transition text-xs sm:text-sm`}
                     onClick={() => handleApplyClick(job.id)}
+                    disabled={isJobExpired(job.deadline)}
                   >
-                    Apply
-                    <ArrowRight className='w-3 h-3 sm:w-4 sm:h-4' />
+                    {isJobExpired(job.deadline) ? 'Expired' : 'Apply'}
+                    {!isJobExpired(job.deadline) && (
+                      <ArrowRight className='w-3 h-3 sm:w-4 sm:h-4' />
+                    )}
                   </button>
                 </div>
               </div>
@@ -476,6 +636,11 @@ function FindJobContent() {
                           {job.isSaved && (
                             <span className='bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 text-xs px-2 py-0.5 rounded-full font-medium'>
                               Saved
+                            </span>
+                          )}
+                          {isJobExpired(job.deadline) && (
+                            <span className='bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs px-2 py-0.5 rounded-full font-medium'>
+                              Expired
                             </span>
                           )}
                           {job.employmentType && (
@@ -536,6 +701,32 @@ function FindJobContent() {
                           Posted:{' '}
                           {new Date(job.postedDate).toLocaleDateString()}
                         </span>
+                        <span
+                          className={`flex items-center gap-1 ${
+                            isJobExpired(job.deadline)
+                              ? 'text-red-500 dark:text-red-400 font-semibold'
+                              : ''
+                          }`}
+                        >
+                          <svg
+                            width='16'
+                            height='16'
+                            fill='none'
+                            viewBox='0 0 24 24'
+                            stroke='currentColor'
+                            className='w-3 h-3 sm:w-4 sm:h-4'
+                          >
+                            <circle cx='12' cy='12' r='10' strokeWidth='2' />
+                            <polyline
+                              points='12,6 12,12 16,14'
+                              strokeWidth='2'
+                            />
+                          </svg>
+                          {isJobExpired(job.deadline)
+                            ? 'Expired: '
+                            : 'Deadline: '}
+                          {new Date(job.deadline).toLocaleDateString()}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -555,11 +746,18 @@ function FindJobContent() {
                       />
                     </button>
                     <button
-                      className='bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-semibold px-4 sm:px-5 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white flex items-center gap-2 transition border border-blue-200 dark:border-blue-700 text-sm'
+                      className={`${
+                        isJobExpired(job.deadline)
+                          ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed border border-gray-200 dark:border-gray-600'
+                          : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white border border-blue-200 dark:border-blue-700'
+                      } font-semibold px-4 sm:px-5 py-2 rounded-lg flex items-center gap-2 transition text-sm`}
                       onClick={() => handleApplyClick(job.id)}
+                      disabled={isJobExpired(job.deadline)}
                     >
-                      Apply Now
-                      <ArrowRight className='w-4 h-4' />
+                      {isJobExpired(job.deadline) ? 'Expired' : 'Apply Now'}
+                      {!isJobExpired(job.deadline) && (
+                        <ArrowRight className='w-4 h-4' />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -569,7 +767,7 @@ function FindJobContent() {
         )}
 
         {/* Empty State */}
-        {!loading && jobs.length === 0 && (
+        {!loading && pagination.total === 0 && (
           <div className='text-center py-12'>
             <div className='text-gray-400 dark:text-gray-500 text-4xl mb-4'>
               🔍
@@ -584,6 +782,7 @@ function FindJobContent() {
             <button
               onClick={() => {
                 setSearchFilters({ keyword: '', location: '', category: '' });
+                setCurrentPage(1);
                 router.push('/find-job');
               }}
               className='px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm sm:text-base'
@@ -594,42 +793,12 @@ function FindJobContent() {
         )}
 
         {/* Pagination */}
-        {jobs.length > 0 && (
-          <div className='flex justify-center items-center gap-1 sm:gap-2 mt-8 sm:mt-10'>
-            <button
-              className='p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors'
-              disabled={selectedPage === 1}
-              onClick={() => setSelectedPage((p) => Math.max(1, p - 1))}
-            >
-              <span className='text-lg text-gray-700 dark:text-gray-300'>
-                &larr;
-              </span>
-            </button>
-            {[1, 2, 3, 4, 5].map((page) => (
-              <button
-                key={page}
-                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-medium transition-colors text-sm ${
-                  selectedPage === page
-                    ? 'bg-blue-600 dark:bg-blue-500 text-white'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-                onClick={() => setSelectedPage(page)}
-              >
-                {page}
-              </button>
-            ))}
-            <button
-              className='p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors'
-              disabled={selectedPage === totalPages}
-              onClick={() =>
-                setSelectedPage((p) => Math.min(totalPages, p + 1))
-              }
-            >
-              <span className='text-lg text-gray-700 dark:text-gray-300'>
-                &rarr;
-              </span>
-            </button>
-          </div>
+        {pagination.total > 0 && (
+          <Pagination
+            current={currentPage}
+            total={pagination.totalPages}
+            onChange={(page) => setCurrentPage(page)}
+          />
         )}
       </div>
 

@@ -70,6 +70,7 @@ export interface Application {
   referenceReason: string | null;
   referralInformation: any | null;
   remark: string | null;
+  tags?: string[];
   jobPost: JobPost;
   userInfo: UserInfo;
   createdAt?: string;
@@ -120,7 +121,6 @@ export interface ApplicationFilters {
 
 class ApplicationService {
   async getApplicationsByJobId(jobId: string): Promise<ApplicationsResponse> {
-    console.log(jobId);
     try {
       const response = await api.get(
         `/applications?q=i=JobPost%26%26w=JobPostId:=:${jobId}`,
@@ -283,8 +283,6 @@ class ApplicationService {
         queryParams += `&limit=${limit}`;
       }
 
-      console.log('Search applications query:', queryParams);
-
       const response = await api.get(`/applications?${queryParams}`);
 
       if (!response.data) {
@@ -382,6 +380,15 @@ class ApplicationService {
       await api.put(`/applications/${applicationId}/remark`, { remark });
     } catch (error) {
       console.error('Error updating application remark:', error);
+      throw error;
+    }
+  }
+
+  async updateApplicationTags(application: Application): Promise<void> {
+    try {
+      await api.put(`/applications/update`, application);
+    } catch (error) {
+      console.error('Error updating application tags:', error);
       throw error;
     }
   }

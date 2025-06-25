@@ -6,7 +6,7 @@ import {
   Employer,
   EmployersResponse,
 } from '@/services/employer.service';
-import router from 'next/router';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const orgTypes = [
   'Government',
@@ -85,37 +85,113 @@ function Pagination({
 }
 
 export default function FindEmployersPage() {
-  const [radius, setRadius] = useState(32);
-  const [selectedOrg, setSelectedOrg] = useState('');
-  const [showRadius, setShowRadius] = useState(true);
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [showOrgType, setShowOrgType] = useState(true);
   const [page, setPage] = useState(1);
   const [employers, setEmployers] = useState<Employer[]>([]);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchFilters, setSearchFilters] = useState({
+    keyword: '',
+    location: '',
+    organizationType: '',
+  });
+  const [pagination, setPagination] = useState({
+    total: 0,
+    totalPages: 0,
+    currentPage: 1,
+    limit: 3,
+  });
   const perPage = 3;
+
+  // Update searchFilters when searchParams change
+  useEffect(() => {
+    if (!searchParams) return;
+
+    setSearchFilters({
+      keyword: searchParams.get('name') || '',
+      location: searchParams.get('location') || '',
+      organizationType: searchParams.get('organizationType') || '',
+    });
+
+    // Reset to page 1 when search params change
+    setPage(1);
+    setPagination((prev) => ({ ...prev, currentPage: 1 }));
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchEmployers = async () => {
       try {
-        const response = await employerService.getEmployers();
+        setLoading(true);
+        let response;
+
+        // If we have search params, use searchEmployers
+        if (
+          searchParams?.get('name') ||
+          searchParams?.get('location') ||
+          searchParams?.get('organizationType')
+        ) {
+          response = await employerService.searchEmployers(
+            searchParams.get('name') || '',
+            searchParams.get('location') || '',
+            searchParams.get('organizationType') || '',
+            page,
+            perPage,
+          );
+        } else {
+          // Otherwise, use getEmployers
+          response = await employerService.getEmployers();
+        }
+
         setEmployers(response.items || []);
+        setPagination({
+          total: response.total || response.items?.length || 0,
+          totalPages: Math.ceil(
+            (response.total || response.items?.length || 0) / perPage,
+          ),
+          currentPage: page,
+          limit: perPage,
+        });
       } catch (error) {
         console.error('Failed to fetch employers:', error);
         setEmployers([]);
+        setPagination({
+          total: 0,
+          totalPages: 0,
+          currentPage: page,
+          limit: perPage,
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchEmployers();
-  }, []);
+  }, [searchParams, page, perPage]);
 
-  const totalPages = Math.ceil(employers.length / perPage);
-  const paginatedEmployers = employers.slice(
-    (page - 1) * perPage,
-    page * perPage,
-  );
+  const handleSearch = () => {
+    const queryParams = new URLSearchParams();
+    if (searchFilters.keyword) queryParams.set('name', searchFilters.keyword);
+    if (searchFilters.location)
+      queryParams.set('location', searchFilters.location);
+    if (searchFilters.organizationType)
+      queryParams.set('organizationType', searchFilters.organizationType);
+
+    // Reset to page 1 when searching
+    setPage(1);
+    router.push(`/find-employers?${queryParams.toString()}`);
+  };
+
+  // Add keyboard event handler for search
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  const totalPages = pagination.totalPages;
+  const paginatedEmployers = employers;
 
   if (loading) {
     return (
@@ -170,11 +246,44 @@ export default function FindEmployersPage() {
             <input
               className='flex-1 bg-transparent border-none outline-none text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 text-sm sm:text-base'
               placeholder='Employer name, Keyword...'
+              value={searchFilters.keyword}
+              onChange={(e) =>
+                setSearchFilters({ ...searchFilters, keyword: e.target.value })
+              }
+              onKeyDown={handleKeyPress}
+            />
+          </div>
+          {/* Location */}
+          <div className='flex items-center gap-2 flex-1 border-b border-gray-200 dark:border-gray-600 lg:border-b-0 lg:border-r lg:border-gray-200 dark:lg:border-gray-600 pb-4 lg:pb-0 pr-0 lg:pr-4'>
+            <svg
+              width='20'
+              height='20'
+              fill='none'
+              viewBox='0 0 24 24'
+              stroke='#2563eb'
+              className='mr-2 flex-shrink-0'
+            >
+              <path
+                d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z'
+                strokeWidth='2'
+              />
+            </svg>
+            <input
+              className='flex-1 bg-transparent border-none outline-none text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 text-sm sm:text-base'
+              placeholder='Location'
+              value={searchFilters.location}
+              onChange={(e) =>
+                setSearchFilters({ ...searchFilters, location: e.target.value })
+              }
+              onKeyDown={handleKeyPress}
             />
           </div>
           {/* Find Employer button */}
           <div className='flex items-center pl-0 lg:pl-4 w-full lg:w-auto'>
-            <button className='bg-blue-600 dark:bg-blue-500 text-white px-6 sm:px-8 py-3 rounded-md font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition w-full lg:w-auto text-sm sm:text-base'>
+            <button
+              className='bg-blue-600 dark:bg-blue-500 text-white px-6 sm:px-8 py-3 rounded-md font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition w-full lg:w-auto text-sm sm:text-base'
+              onClick={handleSearch}
+            >
               Find Employer
             </button>
           </div>
@@ -376,8 +485,33 @@ export default function FindEmployersPage() {
                       id={type}
                       name='orgType'
                       value={type}
-                      checked={selectedOrg === type}
-                      onChange={() => setSelectedOrg(type)}
+                      checked={searchFilters.organizationType === type}
+                      onChange={() => {
+                        setSearchFilters({
+                          ...searchFilters,
+                          organizationType: type,
+                        });
+                        // Trigger search when organization type changes
+                        const newFilters = {
+                          ...searchFilters,
+                          organizationType: type,
+                        };
+                        const queryParams = new URLSearchParams();
+                        if (newFilters.keyword)
+                          queryParams.set('name', newFilters.keyword);
+                        if (newFilters.location)
+                          queryParams.set('location', newFilters.location);
+                        if (newFilters.organizationType)
+                          queryParams.set(
+                            'organizationType',
+                            newFilters.organizationType,
+                          );
+
+                        setPage(1);
+                        router.push(
+                          `/find-employers?${queryParams.toString()}`,
+                        );
+                      }}
                       className='mr-3 accent-blue-600 dark:accent-blue-400'
                     />
                     <label
@@ -398,7 +532,7 @@ export default function FindEmployersPage() {
           {/* Results count */}
           <div className='mb-4 sm:mb-6'>
             <p className='text-sm sm:text-base text-gray-600 dark:text-gray-400'>
-              {employers.length} employers found
+              {pagination.total} employers found
             </p>
           </div>
 
@@ -494,7 +628,7 @@ export default function FindEmployersPage() {
           </div>
 
           {/* Empty State */}
-          {employers.length === 0 && (
+          {pagination.total === 0 && (
             <div className='text-center py-12'>
               <div className='text-gray-400 dark:text-gray-500 text-4xl mb-4'>
                 🏢
@@ -510,8 +644,12 @@ export default function FindEmployersPage() {
           )}
 
           {/* Pagination */}
-          {employers.length > 0 && (
-            <Pagination current={page} total={totalPages} onChange={setPage} />
+          {pagination.total > 0 && (
+            <Pagination
+              current={pagination.currentPage}
+              total={totalPages}
+              onChange={setPage}
+            />
           )}
         </div>
       </div>

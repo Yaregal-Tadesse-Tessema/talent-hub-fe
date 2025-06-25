@@ -50,10 +50,20 @@ export const jobService = {
     }
   },
 
-  async getJobsByTenant(tenantId: string): Promise<JobsResponse> {
+  async getJobsByTenant(
+    tenantId: string,
+    page?: number,
+    limit?: number,
+  ): Promise<JobsResponse> {
     try {
+      let queryParams = `tenantId=${tenantId}&status=Posted`;
+      if (page && limit) {
+        const skip = (page - 1) * limit;
+        queryParams += `&t=${limit}&sk=${skip}`;
+      }
+
       const response = await api.get(
-        `/jobs/get-all-tenant-job-postings?tenantId=${tenantId}&status=Posted`,
+        `/jobs/get-all-tenant-job-postings?${queryParams}`,
       );
       return response.data;
     } catch (error) {
@@ -149,10 +159,16 @@ export const jobService = {
     }
   },
 
-  async getPublicJobs(): Promise<JobsResponse> {
+  async getPublicJobs(page?: number, limit?: number): Promise<JobsResponse> {
     try {
+      let queryParams = 'status=Posted';
+      if (page && limit) {
+        const skip = (page - 1) * limit;
+        queryParams += `&t=${limit}&sk=${skip}`;
+      }
+
       const response = await api.get(
-        '/jobs/get-all-public-job-postings?status=Posted',
+        `/jobs/get-all-public-job-postings?${queryParams}`,
       );
       return response.data;
     } catch (error) {
@@ -165,6 +181,8 @@ export const jobService = {
     title?: string,
     location?: string,
     category?: string,
+    page?: number,
+    limit?: number,
   ): Promise<JobsResponse> {
     try {
       let queryParams = '';
@@ -181,6 +199,14 @@ export const jobService = {
       }
       if (conditions.length > 0) {
         queryParams = `q=w=${conditions.join(',')}`;
+      }
+
+      // Add pagination parameters
+      if (page && limit) {
+        const skip = (page - 1) * limit;
+        queryParams += queryParams
+          ? `&t=${limit}&sk=${skip}`
+          : `t=${limit}&sk=${skip}`;
       }
 
       const response = await api.get(

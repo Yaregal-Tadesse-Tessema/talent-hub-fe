@@ -6,6 +6,7 @@ import AddResumeModal from '@/components/ui/AddResumeModal';
 import ContactTab from './ContactTab';
 import PersonalTab from './PersonalTab';
 import ProfessionalTab from './ProfessionalTab';
+import JobAlertsTab from './JobAlertsTab';
 
 const TABS = [
   { key: 'personal', label: 'Personal' },
@@ -361,7 +362,12 @@ export default function SettingsTab() {
       case 'resume':
         return <div className='py-8'>Resume Tab (to be implemented)</div>;
       case 'jobAlerts':
-        return <div className='py-8'>Job Alerts Tab (to be implemented)</div>;
+        return (
+          <JobAlertsTab
+            userProfile={userProfile}
+            setUserProfile={setUserProfile}
+          />
+        );
       case 'security':
         return (
           <div className='mt-4 sm:mt-8 flex flex-col gap-6 sm:gap-10'>
@@ -384,11 +390,7 @@ export default function SettingsTab() {
                   }
                   className='w-full sm:w-24'
                 >
-                  <option value='+880'>🇧🇩 +880</option>
-                  <option value='+234'>🇳🇬 +234</option>
-                  <option value='+1'>🇺🇸 +1</option>
-                  <option value='+44'>🇬🇧 +44</option>
-                  <option value='+91'>🇮🇳 +91</option>
+                  <option value='+251'>🇪🇹 +251</option>
                 </Select>
                 <Input
                   placeholder='Phone number..'

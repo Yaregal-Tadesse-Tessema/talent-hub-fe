@@ -6,6 +6,7 @@ import {
   EnvelopeIcon,
   ArrowDownTrayIcon,
   ChatBubbleLeftRightIcon,
+  TagIcon,
 } from '@heroicons/react/24/outline';
 
 interface ListViewProps {
@@ -22,6 +23,7 @@ interface ListViewProps {
   setOpenActionMenu: (id: string | null) => void;
   columns?: { id: string; title: string; appIds: string[] }[];
   onRemarkAction?: (appId: string) => void;
+  onTagAction?: (appId: string) => void;
 }
 
 const ListView: React.FC<ListViewProps> = ({
@@ -43,6 +45,7 @@ const ListView: React.FC<ListViewProps> = ({
     { id: 'HIRED', title: 'Hired', appIds: [] },
   ],
   onRemarkAction,
+  onTagAction,
 }) => {
   function getAppStatus(appId: string) {
     const col = columns.find((c) => c.appIds.includes(appId));
@@ -86,6 +89,7 @@ const ListView: React.FC<ListViewProps> = ({
             <th className='py-2 px-4'>Education</th>
             <th className='py-2 px-4'>Applied</th>
             <th className='py-2 px-4'>Status</th>
+            <th className='py-2 px-4'>Tags</th>
             <th className='py-2 px-4'>Actions</th>
           </tr>
         </thead>
@@ -127,6 +131,22 @@ const ListView: React.FC<ListViewProps> = ({
                     {app?.status}
                   </span>
                 </td>
+                <td className='py-3 px-4'>
+                  <div className='flex flex-wrap gap-1'>
+                    {app.tags && app.tags.length > 0 ? (
+                      app.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className='inline-block px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium'
+                        >
+                          {tag}
+                        </span>
+                      ))
+                    ) : (
+                      <span className='text-gray-400 text-xs'>No tags</span>
+                    )}
+                  </div>
+                </td>
                 <td
                   className='py-3 px-4 relative'
                   onClick={(e) => e.stopPropagation()}
@@ -145,7 +165,7 @@ const ListView: React.FC<ListViewProps> = ({
                     <EllipsisVerticalIcon className='w-5 h-5' />
                   </button>
                   {openActionMenu === appId && (
-                    <div className='absolute right-0 mt-2 w-44 bg-white border rounded shadow-lg z-10'>
+                    <div className='absolute right-0 mt-2 w-44 bg-white border rounded shadow-lg z-10 dropdown-menu'>
                       <button
                         className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
                         onClick={() => {
@@ -175,6 +195,16 @@ const ListView: React.FC<ListViewProps> = ({
                       >
                         <ChatBubbleLeftRightIcon className='w-5 h-5 text-purple-500' />{' '}
                         Add Remark
+                      </button>
+                      <button
+                        className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'
+                        onClick={() => {
+                          onTagAction?.(appId);
+                          setOpenActionMenu(null);
+                        }}
+                      >
+                        <TagIcon className='w-5 h-5 text-orange-500' /> Add/Edit
+                        Tags
                       </button>
                       <button
                         className='flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100'

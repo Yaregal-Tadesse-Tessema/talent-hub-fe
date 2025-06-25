@@ -9,6 +9,7 @@ import EducationStep from '@/components/cv-builder/steps/EducationStep';
 import SkillsStep from '@/components/cv-builder/steps/SkillsStep';
 import AdditionalInfoStep from '@/components/cv-builder/steps/AdditionalInfoStep';
 import { cvService } from '@/services/cv.service';
+import { useToast } from '@/contexts/ToastContext';
 
 export const dynamic = 'force-dynamic';
 
@@ -275,6 +276,8 @@ export default function CVBuilderPage() {
   const [isGeneratingResume, setIsGeneratingResume] = useState(false);
   const [resumeGenerationProgress, setResumeGenerationProgress] = useState(0);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
+  const [isSavingAsDefault, setIsSavingAsDefault] = useState(false);
+  const { showToast } = useToast();
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -336,12 +339,107 @@ export default function CVBuilderPage() {
         link.remove();
 
         // Show success message
-        alert('Resume generated successfully!');
+        showToast({
+          type: 'success',
+          message: 'Resume generated and downloaded successfully!',
+        });
       } catch (error) {
         console.error('Error generating resume:', error);
-        alert('Failed to generate resume. Please try again.');
+        showToast({
+          type: 'error',
+          message: 'Failed to generate resume. Please try again.',
+        });
       } finally {
         setIsGeneratingResume(false);
+        setResumeGenerationProgress(0);
+      }
+    }
+  };
+
+  const handleSaveAsDefaultResume = async () => {
+    // Ensure this code only runs on the client
+    if (typeof window !== 'undefined') {
+      try {
+        setIsGeneratingResume(true);
+        setIsSavingAsDefault(true);
+        setResumeGenerationProgress(0);
+        setShowConfirmationDialog(false);
+
+        // Get user ID from localStorage
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) {
+          showToast({
+            type: 'error',
+            message: 'User not found. Please log in again.',
+          });
+          return;
+        }
+
+        const userData = JSON.parse(storedUser);
+        const userId = userData.id;
+
+        if (!userId) {
+          showToast({
+            type: 'error',
+            message: 'User ID not found. Please log in again.',
+          });
+          return;
+        }
+
+        // Simulate progress updates
+        const progressInterval = setInterval(() => {
+          setResumeGenerationProgress((prev) => {
+            if (prev >= 90) {
+              clearInterval(progressInterval);
+              return 90;
+            }
+            return prev + 10;
+          });
+        }, 500);
+
+        // Save the generated resume as default
+        const result = await cvService.saveGeneratedResumeAsDefault(
+          userId,
+          profile,
+        );
+
+        clearInterval(progressInterval);
+        setResumeGenerationProgress(100);
+
+        // Update localStorage with the new resume info
+        const updatedUserData = {
+          ...userData,
+          resume: result.resume,
+        };
+        localStorage.setItem('user', JSON.stringify(updatedUserData));
+
+        // Also download the file
+        const pdfBlob = await cvService.generateResume(profile);
+        const url = window.URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute(
+          'download',
+          `${profile.fullName.toLowerCase().replace(/\s+/g, '-')}-resume.pdf`,
+        );
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        // Show success message
+        showToast({
+          type: 'success',
+          message: 'Resume saved as default and downloaded successfully!',
+        });
+      } catch (error) {
+        console.error('Error saving resume as default:', error);
+        showToast({
+          type: 'error',
+          message: 'Failed to save resume as default. Please try again.',
+        });
+      } finally {
+        setIsGeneratingResume(false);
+        setIsSavingAsDefault(false);
         setResumeGenerationProgress(0);
       }
     }
@@ -428,7 +526,9 @@ export default function CVBuilderPage() {
           </div>
           <div className='flex justify-between text-sm text-gray-600 dark:text-gray-400'>
             {steps.map((step) => (
-              <span key={step.id}>{step.title}</span>
+              <span key={step.id} className='hidden sm:block'>
+                {step.title}
+              </span>
             ))}
           </div>
         </div>
@@ -477,21 +577,58 @@ export default function CVBuilderPage() {
                 Generate Resume
               </h3>
               <p className='text-gray-600 dark:text-gray-300 mb-6'>
-                Are you ready to generate your resume? This will create a PDF
-                file that you can download.
+                Choose how you'd like to handle your generated resume:
               </p>
-              <div className='flex justify-end space-x-3'>
+
+              <div className='space-y-3 mb-6'>
+                <button
+                  onClick={handleSaveAsDefaultResume}
+                  className='w-full p-4 border-2 border-blue-500 dark:border-blue-400 rounded-lg text-left hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group'
+                >
+                  <div className='flex items-start justify-between'>
+                    <div className='flex-1'>
+                      <div className='flex items-center gap-2 mb-1'>
+                        <span className='text-sm font-medium text-blue-600 dark:text-blue-400'>
+                          Save as Default Resume
+                        </span>
+                        <span className='px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full'>
+                          Recommended
+                        </span>
+                      </div>
+                      <p className='text-sm text-gray-600 dark:text-gray-300'>
+                        Save this CV as your default resume and download it.
+                        This will replace your current resume in your profile.
+                      </p>
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={handleGenerateResume}
+                  className='w-full p-4 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors'
+                >
+                  <div className='flex items-start justify-between'>
+                    <div className='flex-1'>
+                      <div className='flex items-center gap-2 mb-1'>
+                        <span className='text-sm font-medium text-gray-700 dark:text-gray-300'>
+                          Download Only
+                        </span>
+                      </div>
+                      <p className='text-sm text-gray-600 dark:text-gray-300'>
+                        Just download the PDF file without saving it to your
+                        profile.
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              <div className='flex justify-end'>
                 <button
                   onClick={() => setShowConfirmationDialog(false)}
                   className='px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors'
                 >
                   Cancel
-                </button>
-                <button
-                  onClick={handleGenerateResume}
-                  className='px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors'
-                >
-                  Generate Resume
                 </button>
               </div>
             </div>
@@ -503,7 +640,9 @@ export default function CVBuilderPage() {
           <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50'>
             <div className='bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full border border-gray-200 dark:border-gray-700'>
               <h3 className='text-lg font-medium text-gray-900 dark:text-white mb-4'>
-                Generating Resume
+                {isSavingAsDefault
+                  ? 'Saving Resume as Default'
+                  : 'Generating Resume'}
               </h3>
               <div className='w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-4'>
                 <div
@@ -512,7 +651,9 @@ export default function CVBuilderPage() {
                 />
               </div>
               <p className='text-sm text-gray-600 dark:text-gray-300 text-center'>
-                {resumeGenerationProgress}% Complete
+                {isSavingAsDefault
+                  ? `${resumeGenerationProgress}% Complete - Saving to your profile...`
+                  : `${resumeGenerationProgress}% Complete`}
               </p>
             </div>
           </div>

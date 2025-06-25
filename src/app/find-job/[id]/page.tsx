@@ -21,6 +21,13 @@ import { Job } from '@/types/job';
 import { sanitizeHtml } from '@/utils/sanitize';
 import { useToast } from '@/contexts/ToastContext';
 
+// Helper function to check if a job is expired
+const isJobExpired = (deadline: string): boolean => {
+  const deadlineDate = new Date(deadline);
+  const currentDate = new Date();
+  return deadlineDate < currentDate;
+};
+
 interface UserData {
   id: string;
   profile?: {
@@ -211,6 +218,14 @@ export default function JobDetailsPage({
                     >
                       {job.employmentType}
                     </Badge>
+                    {isJobExpired(job.deadline) && (
+                      <Badge
+                        variant='outline'
+                        className='text-red-600 border-red-200 bg-red-50'
+                      >
+                        Expired
+                      </Badge>
+                    )}
                   </div>
                   <div className='flex flex-wrap gap-4 text-gray-500 text-sm items-center'>
                     <span className='flex items-center gap-1'>
@@ -249,14 +264,37 @@ export default function JobDetailsPage({
                     <Bookmark className='w-5 h-5' />
                   </Button>
                   <Button
-                    className='text-base font-semibold'
-                    onClick={() => setIsApplyOpen(true)}
+                    className={`text-base font-semibold ${
+                      isJobExpired(job.deadline)
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                        : ''
+                    }`}
+                    onClick={() => {
+                      if (isJobExpired(job.deadline)) {
+                        showToast({
+                          type: 'error',
+                          message:
+                            'This job has expired and is no longer accepting applications',
+                        });
+                        return;
+                      }
+                      setIsApplyOpen(true);
+                    }}
+                    disabled={isJobExpired(job.deadline)}
                   >
-                    Apply Now
+                    {isJobExpired(job.deadline) ? 'Job Expired' : 'Apply Now'}
                   </Button>
                 </div>
-                <span className='text-xs text-red-500'>
-                  Job expires in:{' '}
+                <span
+                  className={`text-xs ${
+                    isJobExpired(job.deadline)
+                      ? 'text-red-500 font-semibold'
+                      : 'text-red-500'
+                  }`}
+                >
+                  {isJobExpired(job.deadline)
+                    ? 'Job expired on: '
+                    : 'Job expires in: '}
                   <span className='font-semibold'>
                     {new Date(job.deadline).toLocaleDateString()}
                   </span>
@@ -332,8 +370,20 @@ export default function JobDetailsPage({
                 <div className='flex items-center gap-2'>
                   <span className='text-blue-500'>⏰</span>{' '}
                   <div>
-                    <div className='text-xs text-gray-400'>JOB EXPIRE IN:</div>
-                    <div>{new Date(job.deadline).toLocaleDateString()}</div>
+                    <div className='text-xs text-gray-400'>
+                      {isJobExpired(job.deadline)
+                        ? 'JOB EXPIRED ON:'
+                        : 'JOB EXPIRE IN:'}
+                    </div>
+                    <div
+                      className={`${
+                        isJobExpired(job.deadline)
+                          ? 'text-red-500 font-semibold'
+                          : ''
+                      }`}
+                    >
+                      {new Date(job.deadline).toLocaleDateString()}
+                    </div>
                   </div>
                 </div>
                 <div className='flex items-center gap-2'>

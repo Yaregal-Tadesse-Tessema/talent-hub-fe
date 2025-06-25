@@ -28,6 +28,7 @@ import SortModal from './job-applications-board/SortModal';
 import BulkActionsBar from './job-applications-board/BulkActionsBar';
 import BulkActionModal from './job-applications-board/BulkActionModal';
 import Breadcrumb from './job-applications-board/Breadcrumb';
+import TagModal from './job-applications-board/TagModal';
 
 // Accept props: jobId, onBack
 export default function JobApplicationsBoard({
@@ -137,6 +138,10 @@ export default function JobApplicationsBoard({
     appId: string | null;
     remarkText: string;
   }>({ open: false, appId: null, remarkText: '' });
+  const [tagModal, setTagModal] = useState<{
+    open: boolean;
+    application: Application | null;
+  }>({ open: false, application: null });
 
   // Check if there are active filters
   const hasActiveFilters = useMemo(() => {
@@ -178,7 +183,16 @@ export default function JobApplicationsBoard({
   // Move useEffect to the top to avoid conditional hook calls
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (openActionMenu !== null) setOpenActionMenu(null);
+      // Check if the click target is within a dropdown menu
+      const target = e.target as Element;
+      const isDropdownButton = target.closest(
+        '[aria-label="Open actions menu"]',
+      );
+      const isDropdownMenu = target.closest('.dropdown-menu');
+
+      if (!isDropdownButton && !isDropdownMenu && openActionMenu !== null) {
+        setOpenActionMenu(null);
+      }
     }
     if (openActionMenu !== null) {
       document.addEventListener('mousedown', handleClick);
@@ -388,7 +402,27 @@ export default function JobApplicationsBoard({
   // Bulk select logic
   const allAppIds = Object.keys(applications);
 
-  // Check if there are no applications at all
+  if (loading) {
+    return (
+      <div className='flex-1 p-6'>
+        <div className='flex justify-center items-center h-64'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='flex-1 p-6'>
+        <div className='flex justify-center items-center h-64'>
+          <div className='text-red-500'>{error}</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if there are no applications at all (only after loading is complete)
   if (allAppIds.length === 0) {
     return (
       <div className='flex-1 p-6'>
@@ -511,6 +545,20 @@ export default function JobApplicationsBoard({
     setRemarkModal({ open: true, appId, remarkText: '' });
   };
 
+  const handleTagAction = (appId: string) => {
+    const application = applications[appId];
+    if (application) {
+      // Merge application's tags into availableTags
+      const newTags = (application.tags || []).filter(
+        (tag) => !availableTags.includes(tag),
+      );
+      if (newTags.length > 0) {
+        setAvailableTags([...availableTags, ...newTags]);
+      }
+      setTagModal({ open: true, application });
+    }
+  };
+
   // Process bulk actions
   const handleBulkAction = async (action: string, data?: any) => {
     try {
@@ -607,32 +655,46 @@ export default function JobApplicationsBoard({
     }
   };
 
+  // Handle individual tag submission
+  const handleTagSave = async (appId: string, tags: string[]) => {
+    try {
+      const application = applications[appId];
+      console.log('application', application);
+      if (!application) {
+        throw new Error('Application not found');
+      }
+
+      // Create a new object without the jobPost property
+      const { jobPost, ...applicationWithoutJobPost } = application;
+      const updatedApplication = {
+        ...applicationWithoutJobPost,
+        tags,
+      };
+
+      await applicationService.updateApplicationTags(updatedApplication as any);
+
+      showToast({
+        type: 'success',
+        message: 'Tags updated successfully',
+      });
+
+      setTagModal({ open: false, application: null });
+      await fetchApplications();
+    } catch (error) {
+      console.error('Error updating tags:', error);
+      showToast({
+        type: 'error',
+        message: 'Failed to update tags',
+      });
+    }
+  };
+
   // Helper to get status/column for an application
   function getAppStatus(appId: string) {
     const col = columns.find((c) => c.appIds.includes(appId));
     return col
       ? { id: col.id, title: col.title }
       : { id: 'all', title: 'All Applications' };
-  }
-
-  if (loading) {
-    return (
-      <div className='flex-1 p-6'>
-        <div className='flex justify-center items-center h-64'>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className='flex-1 p-6'>
-        <div className='flex justify-center items-center h-64'>
-          <div className='text-red-500'>{error}</div>
-        </div>
-      </div>
-    );
   }
 
   // --- UI ---
@@ -746,6 +808,7 @@ export default function JobApplicationsBoard({
             openActionMenu={openActionMenu}
             setOpenActionMenu={setOpenActionMenu}
             onRemarkAction={handleRemarkAction}
+            onTagAction={handleTagAction}
           />
         </>
       )}
@@ -807,6 +870,15 @@ export default function JobApplicationsBoard({
           </div>
         </div>
       )}
+      {/* Tag Modal */}
+      <TagModal
+        isOpen={tagModal.open}
+        onClose={() => setTagModal({ open: false, application: null })}
+        application={tagModal.application}
+        onSave={handleTagSave}
+        availableTags={availableTags}
+        setAvailableTags={setAvailableTags}
+      />
     </div>
   );
 }
