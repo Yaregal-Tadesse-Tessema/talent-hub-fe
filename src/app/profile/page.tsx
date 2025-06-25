@@ -30,7 +30,9 @@ import {
   Phone,
   Calendar,
   Users,
+  Monitor,
 } from 'lucide-react';
+import { frontendCVService } from '@/services/frontendCV.service';
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
@@ -40,6 +42,8 @@ export default function ProfilePage() {
   const [activeResumeTab, setActiveResumeTab] = useState<'view' | 'upload'>(
     'view',
   );
+  const [isGeneratingCV, setIsGeneratingCV] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('modern');
   const router = useRouter();
   const { showToast } = useToast();
 
@@ -245,6 +249,177 @@ export default function ProfilePage() {
         message:
           error instanceof Error ? error.message : 'Failed to upload resume',
       });
+    }
+  };
+
+  const handleFrontendCVGeneration = async () => {
+    if (!profile) return;
+
+    setIsGeneratingCV(true);
+    try {
+      // Debug: Log profile structure to understand data format
+      console.log('Profile data:', {
+        experiences: profile.experiences,
+        educations: profile.educations,
+        experiencesType: typeof profile.experiences,
+        educationsType: typeof profile.educations,
+        isExperiencesArray: Array.isArray(profile.experiences),
+        isEducationsArray: Array.isArray(profile.educations),
+      });
+
+      // Helper function to convert object to array
+      const convertObjectToArray = (obj: any): any[] => {
+        if (Array.isArray(obj)) return obj;
+        if (obj && typeof obj === 'object') {
+          return Object.values(obj).filter(
+            (item) => item && typeof item === 'object',
+          );
+        }
+        return [];
+      };
+
+      // Check if we have enough data for a meaningful CV
+      const hasExperiences =
+        convertObjectToArray(profile.experiences).length > 0;
+      const hasEducations = convertObjectToArray(profile.educations).length > 0;
+      const hasSkills =
+        (profile.technicalSkills || []).length > 0 ||
+        (profile.softSkills || []).length > 0;
+
+      // If no meaningful data, use sample data
+      if (!hasExperiences && !hasEducations && !hasSkills) {
+        console.log(
+          'No profile data found, using sample data for CV generation',
+        );
+
+        const sampleProfile = {
+          fullName: `${profile.firstName} ${profile.lastName}`,
+          title: profile.profileHeadLine || 'Professional',
+          slogan:
+            profile.professionalSummery ||
+            'Experienced professional with a passion for excellence.',
+          email: profile.email,
+          phone: profile.phone,
+          address: Array.isArray(profile.preferredJobLocation)
+            ? profile.preferredJobLocation.join(', ')
+            : profile.preferredJobLocation || 'Your Location',
+          profilePicture: profile.profile?.path || '',
+          linkedin: profile.linkedinUrl || '',
+          github: '',
+          twitter: '',
+          website: profile.portfolioUrl || '',
+          skills: [
+            'Professional Skills',
+            'Communication',
+            'Problem Solving',
+            'Teamwork',
+          ],
+          experience: [
+            {
+              position: 'Professional',
+              company: 'Your Company',
+              startDate: '2020-01',
+              endDate: '2023-12',
+              current: false,
+              description: 'Add your professional experience here.',
+              location: 'Your Location',
+            },
+          ],
+          education: [
+            {
+              degree: 'Your Degree',
+              institution: 'Your University',
+              field: 'Your Field of Study',
+              startDate: '2016-09',
+              endDate: '2020-05',
+              current: false,
+              description: 'Add your educational background here.',
+              location: 'Your Location',
+            },
+          ],
+          certificates: [],
+          publications: [],
+          projects: [],
+          awards: [],
+          interests: [],
+          volunteer: [],
+          references: [],
+        };
+
+        await frontendCVService.downloadCV(sampleProfile, selectedTemplate);
+
+        showToast({
+          type: 'success',
+          message: `Sample CV generated! Please update your profile with your actual information for a personalized CV.`,
+        });
+        return;
+      }
+
+      // Convert profile data to CV format
+      const cvProfile = {
+        fullName: `${profile.firstName} ${profile.lastName}`,
+        title: profile.profileHeadLine || 'Professional',
+        slogan: profile.professionalSummery || '',
+        email: profile.email,
+        phone: profile.phone,
+        address: Array.isArray(profile.preferredJobLocation)
+          ? profile.preferredJobLocation.join(', ')
+          : profile.preferredJobLocation || '',
+        profilePicture: profile.profile?.path || '',
+        linkedin: profile.linkedinUrl || '',
+        github: '',
+        twitter: '',
+        website: profile.portfolioUrl || '',
+        skills: [
+          ...(profile.technicalSkills || []),
+          ...(profile.softSkills || []),
+        ],
+        experience: convertObjectToArray(profile.experiences).map(
+          (exp: any) => ({
+            position: exp.position || exp.title || '',
+            company: exp.company || exp.employer || '',
+            startDate: exp.startDate || exp.startDate || '',
+            endDate: exp.endDate || exp.endDate || '',
+            current: exp.current || false,
+            description: exp.description || exp.summary || '',
+            location: exp.location || exp.city || '',
+          }),
+        ),
+        education: convertObjectToArray(profile.educations).map((edu: any) => ({
+          degree: edu.degree || edu.title || '',
+          institution: edu.institution || edu.school || edu.university || '',
+          field: edu.field || edu.major || edu.studyField || '',
+          startDate: edu.startDate || edu.startDate || '',
+          endDate: edu.endDate || edu.endDate || edu.graduationDate || '',
+          current: edu.current || false,
+          description: edu.description || edu.summary || '',
+          location: edu.location || edu.city || '',
+        })),
+        certificates: [],
+        publications: [],
+        projects: [],
+        awards: [],
+        interests: [],
+        volunteer: [],
+        references: [],
+      };
+
+      console.log('Generated CV profile:', cvProfile);
+
+      await frontendCVService.downloadCV(cvProfile, selectedTemplate);
+
+      showToast({
+        type: 'success',
+        message: `CV generated successfully with ${selectedTemplate} template!`,
+      });
+    } catch (error) {
+      console.error('Error generating CV:', error);
+      showToast({
+        type: 'error',
+        message: 'Failed to generate CV. Please try again.',
+      });
+    } finally {
+      setIsGeneratingCV(false);
     }
   };
 
@@ -1018,6 +1193,23 @@ export default function ProfilePage() {
                       >
                         Generate CV
                       </button>
+                      <button
+                        onClick={handleFrontendCVGeneration}
+                        disabled={isGeneratingCV}
+                        className='px-4 py-2 text-sm font-medium text-white bg-green-600 dark:bg-green-500 rounded-md hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center gap-2'
+                      >
+                        {isGeneratingCV ? (
+                          <>
+                            <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <Monitor className='w-4 h-4' />
+                            Generate Instantly
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
                 ) : (
@@ -1037,6 +1229,23 @@ export default function ProfilePage() {
                         className='px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors'
                       >
                         Generate CV with AI
+                      </button>
+                      <button
+                        onClick={handleFrontendCVGeneration}
+                        disabled={isGeneratingCV}
+                        className='px-4 py-2 text-sm font-medium text-white bg-green-600 dark:bg-green-500 rounded-md hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center gap-2'
+                      >
+                        {isGeneratingCV ? (
+                          <>
+                            <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <Monitor className='w-4 h-4' />
+                            Generate Instantly
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>

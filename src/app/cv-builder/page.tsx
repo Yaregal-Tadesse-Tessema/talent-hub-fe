@@ -9,7 +9,9 @@ import EducationStep from '@/components/cv-builder/steps/EducationStep';
 import SkillsStep from '@/components/cv-builder/steps/SkillsStep';
 import AdditionalInfoStep from '@/components/cv-builder/steps/AdditionalInfoStep';
 import { cvService } from '@/services/cv.service';
+import { frontendCVService } from '@/services/frontendCV.service';
 import { useToast } from '@/contexts/ToastContext';
+import { ComputerDesktopIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
 export const dynamic = 'force-dynamic';
 
@@ -277,6 +279,10 @@ export default function CVBuilderPage() {
   const [resumeGenerationProgress, setResumeGenerationProgress] = useState(0);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [isSavingAsDefault, setIsSavingAsDefault] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('modern');
+  const [generationType, setGenerationType] = useState<'backend' | 'frontend'>(
+    'backend',
+  );
   const { showToast } = useToast();
 
   const handleNext = () => {
@@ -445,6 +451,125 @@ export default function CVBuilderPage() {
     }
   };
 
+  const handleFrontendGeneration = async () => {
+    try {
+      setIsGeneratingResume(true);
+      setResumeGenerationProgress(0);
+      setShowConfirmationDialog(false);
+
+      // Simulate progress updates
+      const progressInterval = setInterval(() => {
+        setResumeGenerationProgress((prev) => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 15;
+        });
+      }, 200);
+
+      // Generate CV using frontend service
+      await frontendCVService.downloadCV(profile, selectedTemplate);
+
+      clearInterval(progressInterval);
+      setResumeGenerationProgress(100);
+
+      showToast({
+        type: 'success',
+        message: `CV generated successfully with ${selectedTemplate} template!`,
+      });
+    } catch (error) {
+      console.error('Error generating CV:', error);
+      showToast({
+        type: 'error',
+        message: 'Failed to generate CV. Please try again.',
+      });
+    } finally {
+      setIsGeneratingResume(false);
+      setResumeGenerationProgress(0);
+    }
+  };
+
+  const handleSaveFrontendAsDefaultResume = async () => {
+    // Ensure this code only runs on the client
+    if (typeof window !== 'undefined') {
+      try {
+        setIsGeneratingResume(true);
+        setIsSavingAsDefault(true);
+        setResumeGenerationProgress(0);
+        setShowConfirmationDialog(false);
+
+        // Get user ID from localStorage
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) {
+          showToast({
+            type: 'error',
+            message: 'User not found. Please log in again.',
+          });
+          return;
+        }
+
+        const userData = JSON.parse(storedUser);
+        const userId = userData.id;
+
+        if (!userId) {
+          showToast({
+            type: 'error',
+            message: 'User ID not found. Please log in again.',
+          });
+          return;
+        }
+
+        // Simulate progress updates
+        const progressInterval = setInterval(() => {
+          setResumeGenerationProgress((prev) => {
+            if (prev >= 90) {
+              clearInterval(progressInterval);
+              return 90;
+            }
+            return prev + 15;
+          });
+        }, 200);
+
+        // Save the generated CV as default
+        const result = await frontendCVService.saveGeneratedResumeAsDefault(
+          userId,
+          profile,
+          selectedTemplate,
+        );
+
+        clearInterval(progressInterval);
+        setResumeGenerationProgress(100);
+
+        // Update localStorage with the new resume info
+        const updatedUserData = {
+          ...userData,
+          resume: result.resume,
+        };
+        localStorage.setItem('user', JSON.stringify(updatedUserData));
+
+        // Also download the file
+        await frontendCVService.downloadCV(profile, selectedTemplate);
+
+        // Show success message
+        showToast({
+          type: 'success',
+          message: `CV saved as default and downloaded successfully with ${selectedTemplate} template!`,
+        });
+      } catch (error) {
+        console.error('Error saving CV as default:', error);
+        showToast({
+          type: 'error',
+          message: 'Failed to save CV as default. Please try again.',
+        });
+      } finally {
+        setIsGeneratingResume(false);
+        setIsSavingAsDefault(false);
+        setResumeGenerationProgress(0);
+      }
+    }
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 0:
@@ -572,55 +697,261 @@ export default function CVBuilderPage() {
         {/* Confirmation Dialog */}
         {showConfirmationDialog && (
           <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50'>
-            <div className='bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full border border-gray-200 dark:border-gray-700'>
+            <div className='bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full border border-gray-200 dark:border-gray-700'>
               <h3 className='text-lg font-medium text-gray-900 dark:text-white mb-4'>
                 Generate Resume
               </h3>
               <p className='text-gray-600 dark:text-gray-300 mb-6'>
-                Choose how you'd like to handle your generated resume:
+                Choose how you'd like to generate your resume:
               </p>
 
-              <div className='space-y-3 mb-6'>
-                <button
-                  onClick={handleSaveAsDefaultResume}
-                  className='w-full p-4 border-2 border-blue-500 dark:border-blue-400 rounded-lg text-left hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group'
-                >
-                  <div className='flex items-start justify-between'>
-                    <div className='flex-1'>
-                      <div className='flex items-center gap-2 mb-1'>
-                        <span className='text-sm font-medium text-blue-600 dark:text-blue-400'>
-                          Save as Default Resume
-                        </span>
-                        <span className='px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full'>
+              {/* Generation Type Selection */}
+              <div className='mb-6'>
+                <h4 className='text-sm font-medium text-gray-900 dark:text-white mb-3'>
+                  Generation Method
+                </h4>
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6'>
+                  <button
+                    onClick={() => setGenerationType('backend')}
+                    className={`p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                      generationType === 'backend'
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                        : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                    }`}
+                  >
+                    <div className='flex items-center gap-3 mb-2'>
+                      <div className='p-2 bg-blue-100 dark:bg-blue-900 rounded-lg'>
+                        <SparklesIcon className='w-5 h-5 text-blue-600 dark:text-blue-400' />
+                      </div>
+                      <div>
+                        <h5 className='font-medium text-gray-900 dark:text-white'>
+                          AI-Powered Generation
+                        </h5>
+                        <span className='inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full'>
                           Recommended
                         </span>
                       </div>
-                      <p className='text-sm text-gray-600 dark:text-gray-300'>
-                        Save this CV as your default resume and download it.
-                        This will replace your current resume in your profile.
-                      </p>
                     </div>
-                  </div>
-                </button>
+                    <p className='text-sm text-gray-600 dark:text-gray-400'>
+                      Advanced AI generates your CV with smart content
+                      optimization.
+                    </p>
+                  </button>
 
-                <button
-                  onClick={handleGenerateResume}
-                  className='w-full p-4 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors'
-                >
-                  <div className='flex items-start justify-between'>
-                    <div className='flex-1'>
-                      <div className='flex items-center gap-2 mb-1'>
-                        <span className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-                          Download Only
+                  <button
+                    onClick={() => setGenerationType('frontend')}
+                    className={`p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                      generationType === 'frontend'
+                        ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                        : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                    }`}
+                  >
+                    <div className='flex items-center gap-3 mb-2'>
+                      <div className='p-2 bg-green-100 dark:bg-green-900 rounded-lg'>
+                        <ComputerDesktopIcon className='w-5 h-5 text-green-600 dark:text-green-400' />
+                      </div>
+                      <div>
+                        <h5 className='font-medium text-gray-900 dark:text-white'>
+                          Instant Generation
+                        </h5>
+                        <span className='inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full'>
+                          New
                         </span>
                       </div>
-                      <p className='text-sm text-gray-600 dark:text-gray-300'>
-                        Just download the PDF file without saving it to your
-                        profile.
-                      </p>
                     </div>
+                    <p className='text-sm text-gray-600 dark:text-gray-400'>
+                      Generate instantly in browser with customizable templates.
+                    </p>
+                  </button>
+                </div>
+              </div>
+
+              {/* Template Selection for Frontend */}
+              {generationType === 'frontend' && (
+                <div className='mb-6'>
+                  <h4 className='text-sm font-medium text-gray-900 dark:text-white mb-3'>
+                    Choose Template
+                  </h4>
+                  <div className='grid grid-cols-1 sm:grid-cols-3 gap-3'>
+                    {['modern', 'classic', 'creative'].map((template) => (
+                      <button
+                        key={template}
+                        onClick={() => setSelectedTemplate(template)}
+                        className={`p-3 rounded-lg border-2 transition-all duration-200 text-left ${
+                          selectedTemplate === template
+                            ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                            : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                        }`}
+                      >
+                        <div className='font-medium text-gray-900 dark:text-white capitalize'>
+                          {template}
+                        </div>
+                        <div className='text-xs text-gray-500 dark:text-gray-400'>
+                          {template === 'modern' && 'Clean & Professional'}
+                          {template === 'classic' && 'Traditional & Formal'}
+                          {template === 'creative' && 'Unique & Visual'}
+                        </div>
+                      </button>
+                    ))}
                   </div>
-                </button>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className='space-y-3 mb-6'>
+                {generationType === 'backend' ? (
+                  <>
+                    <button
+                      onClick={handleSaveAsDefaultResume}
+                      className='w-full p-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg font-medium transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl'
+                    >
+                      <div className='flex items-center justify-between'>
+                        <div className='flex-1 text-left'>
+                          <div className='flex items-center gap-2 mb-1'>
+                            <span className='text-sm font-semibold'>
+                              Save as Default Resume
+                            </span>
+                            <span className='px-2 py-1 text-xs bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full font-medium'>
+                              Recommended
+                            </span>
+                          </div>
+                          <p className='text-sm text-blue-100 dark:text-blue-200'>
+                            Save this CV as your default resume and download it.
+                            This will replace your current resume in your
+                            profile.
+                          </p>
+                        </div>
+                        <div className='ml-4'>
+                          <svg
+                            className='w-5 h-5'
+                            fill='none'
+                            stroke='currentColor'
+                            viewBox='0 0 24 24'
+                          >
+                            <path
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              strokeWidth={2}
+                              d='M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={handleGenerateResume}
+                      className='w-full p-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg font-medium transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] border border-gray-300 dark:border-gray-600 shadow-md hover:shadow-lg'
+                    >
+                      <div className='flex items-center justify-between'>
+                        <div className='flex-1 text-left'>
+                          <div className='flex items-center gap-2 mb-1'>
+                            <span className='text-sm font-semibold'>
+                              Download Only
+                            </span>
+                          </div>
+                          <p className='text-sm text-gray-600 dark:text-gray-300'>
+                            Just download the PDF file without saving it to your
+                            profile.
+                          </p>
+                        </div>
+                        <div className='ml-4'>
+                          <svg
+                            className='w-5 h-5'
+                            fill='none'
+                            stroke='currentColor'
+                            viewBox='0 0 24 24'
+                          >
+                            <path
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              strokeWidth={2}
+                              d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4'
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleSaveFrontendAsDefaultResume}
+                      className='w-full p-4 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white rounded-lg font-medium transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl'
+                    >
+                      <div className='flex items-center justify-between'>
+                        <div className='flex-1 text-left'>
+                          <div className='flex items-center gap-2 mb-1'>
+                            <span className='text-sm font-semibold'>
+                              Save as Default Resume
+                            </span>
+                            <span className='px-2 py-1 text-xs bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 rounded-full font-medium'>
+                              Recommended
+                            </span>
+                          </div>
+                          <p className='text-sm text-green-100 dark:text-green-200'>
+                            Save this CV as your default resume and download it.
+                            This will replace your current resume in your
+                            profile.
+                          </p>
+                        </div>
+                        <div className='ml-4'>
+                          <svg
+                            className='w-5 h-5'
+                            fill='none'
+                            stroke='currentColor'
+                            viewBox='0 0 24 24'
+                          >
+                            <path
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              strokeWidth={2}
+                              d='M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={handleFrontendGeneration}
+                      className='w-full p-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg font-medium transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] border border-gray-300 dark:border-gray-600 shadow-md hover:shadow-lg'
+                    >
+                      <div className='flex items-center justify-between'>
+                        <div className='flex-1 text-left'>
+                          <div className='flex items-center gap-2 mb-1'>
+                            <span className='text-sm font-semibold'>
+                              Download Only
+                            </span>
+                            <span className='px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full font-medium'>
+                              Fast
+                            </span>
+                          </div>
+                          <p className='text-sm text-gray-600 dark:text-gray-300'>
+                            Generate your CV instantly with the{' '}
+                            {selectedTemplate} template. Download immediately
+                            without saving to profile.
+                          </p>
+                        </div>
+                        <div className='ml-4'>
+                          <svg
+                            className='w-5 h-5'
+                            fill='none'
+                            stroke='currentColor'
+                            viewBox='0 0 24 24'
+                          >
+                            <path
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              strokeWidth={2}
+                              d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4'
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </button>
+                  </>
+                )}
               </div>
 
               <div className='flex justify-end'>
@@ -640,9 +971,13 @@ export default function CVBuilderPage() {
           <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50'>
             <div className='bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full border border-gray-200 dark:border-gray-700'>
               <h3 className='text-lg font-medium text-gray-900 dark:text-white mb-4'>
-                {isSavingAsDefault
-                  ? 'Saving Resume as Default'
-                  : 'Generating Resume'}
+                {generationType === 'frontend'
+                  ? isSavingAsDefault
+                    ? 'Saving CV as Default'
+                    : 'Generating CV Instantly'
+                  : isSavingAsDefault
+                    ? 'Saving Resume as Default'
+                    : 'Generating Resume'}
               </h3>
               <div className='w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-4'>
                 <div
@@ -651,9 +986,13 @@ export default function CVBuilderPage() {
                 />
               </div>
               <p className='text-sm text-gray-600 dark:text-gray-300 text-center'>
-                {isSavingAsDefault
-                  ? `${resumeGenerationProgress}% Complete - Saving to your profile...`
-                  : `${resumeGenerationProgress}% Complete`}
+                {generationType === 'frontend'
+                  ? isSavingAsDefault
+                    ? `${resumeGenerationProgress}% Complete - Saving to your profile...`
+                    : `${resumeGenerationProgress}% Complete - Generating in browser...`
+                  : isSavingAsDefault
+                    ? `${resumeGenerationProgress}% Complete - Saving to your profile...`
+                    : `${resumeGenerationProgress}% Complete`}
               </p>
             </div>
           </div>

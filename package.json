@@ -36,6 +36,7 @@
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
     "@heroicons/react": "^2.2.0",
+    "@react-pdf/renderer": "^4.3.0",
     "@tiptap/extension-color": "^2.22.3",
     "@tiptap/extension-font-family": "^2.22.3",
     "@tiptap/extension-highlight": "^2.22.3",
@@ -60,6 +61,7 @@
     "framer-motion": "^12.18.1",
     "lucide-react": "^0.438.0",
     "next": "^15.3.2",
+    "pdfmake": "^0.2.20",
     "preact": "^10.19.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -79,6 +81,7 @@
     "@tailwindcss/typography": "^0.5.16",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^15.0.7",
+    "@types/pdfmake": "^0.2.11",
     "@types/react": "^18.3.21",
     "@types/testing-library__jest-dom": "^5.14.9",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
