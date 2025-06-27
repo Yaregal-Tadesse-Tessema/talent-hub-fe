@@ -65,6 +65,7 @@ export default function JobDetailsPage({
       try {
         setLoading(true);
         const response = await jobService.getJobById(resolvedParams.id);
+        console.log(response);
         setJob(response);
       } catch (err) {
         console.error('Error fetching job:', err);

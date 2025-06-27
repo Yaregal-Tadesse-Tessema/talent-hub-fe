@@ -2,91 +2,11 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
-import AddResumeModal from '@/components/ui/AddResumeModal';
-import ContactTab from './ContactTab';
-import PersonalTab from './PersonalTab';
-import ProfessionalTab from './ProfessionalTab';
 import JobAlertsTab from './JobAlertsTab';
 
 const TABS = [
-  { key: 'personal', label: 'Personal' },
-  { key: 'contact', label: 'Contact' },
-  { key: 'professional', label: 'Professional' },
-  { key: 'social', label: 'Social' },
-  { key: 'resume', label: 'Resume' },
   { key: 'jobAlerts', label: 'Job Alerts' },
   { key: 'security', label: 'Security' },
-];
-
-const mockResumes = [
-  { id: 1, name: 'Professional Resume', size: '3.5 MB' },
-  { id: 2, name: 'Product Designer', size: '4.7 MB' },
-  { id: 3, name: 'Visual Designer', size: '1.3 MB' },
-];
-
-const socialPlatforms = [
-  {
-    key: 'facebook',
-    label: 'Facebook',
-    icon: (
-      <svg
-        width='18'
-        height='18'
-        fill='currentColor'
-        viewBox='0 0 24 24'
-        className='text-blue-600'
-      >
-        <path d='M22.675 0h-21.35C.595 0 0 .592 0 1.326v21.348C0 23.408.595 24 1.325 24h11.495v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.797.143v3.24l-1.918.001c-1.504 0-1.797.715-1.797 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116C23.406 24 24 23.408 24 22.674V1.326C24 .592 23.406 0 22.675 0' />
-      </svg>
-    ),
-  },
-  {
-    key: 'twitter',
-    label: 'Twitter',
-    icon: (
-      <svg
-        width='18'
-        height='18'
-        fill='currentColor'
-        viewBox='0 0 24 24'
-        className='text-sky-500'
-      >
-        <path d='M24 4.557a9.93 9.93 0 0 1-2.828.775 4.932 4.932 0 0 0 2.165-2.724c-.951.564-2.005.974-3.127 1.195A4.916 4.916 0 0 0 16.616 3c-2.717 0-4.92 2.206-4.92 4.924 0 .386.045.762.127 1.124C7.728 8.807 4.1 6.884 1.671 3.965c-.423.722-.666 1.561-.666 2.475 0 1.708.87 3.216 2.188 4.099a4.904 4.904 0 0 1-2.229-.616c-.054 2.281 1.581 4.415 3.949 4.89-.386.104-.793.16-1.213.16-.297 0-.583-.028-.862-.08.584 1.823 2.28 3.152 4.29 3.188A9.867 9.867 0 0 1 0 21.543a13.94 13.94 0 0 0 7.548 2.209c9.057 0 14.009-7.496 14.009-13.986 0-.213-.005-.425-.014-.636A9.936 9.936 0 0 0 24 4.557z' />
-      </svg>
-    ),
-  },
-  {
-    key: 'instagram',
-    label: 'Instagram',
-    icon: (
-      <svg
-        width='18'
-        height='18'
-        fill='currentColor'
-        viewBox='0 0 24 24'
-        className='text-pink-500'
-      >
-        <path d='M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.974.974 1.246 2.241 1.308 3.608.058 1.266.069 1.646.069 4.85s-.012 3.584-.07 4.85c-.062 1.366-.334 2.633-1.308 3.608-.974.974-2.241 1.246-3.608 1.308-1.266.058-1.646.069-4.85.069s-3.584-.012-4.85-.07c-1.366-.062-2.633-.334-3.608-1.308-.974-.974-1.246-2.241-1.308-3.608C2.175 15.647 2.163 15.267 2.163 12s.012-3.584.07-4.85c.062-1.366.334-2.633 1.308-3.608.974-.974 2.241-1.246 3.608-1.308C8.416 2.175 8.796 2.163 12 2.163zm0-2.163C8.741 0 8.332.013 7.052.072 5.775.131 4.602.425 3.635 1.392 2.668 2.359 2.374 3.532 2.315 4.808 2.256 6.088 2.243 6.497 2.243 12c0 5.503.013 5.912.072 7.192.059 1.276.353 2.449 1.32 3.416.967.967 2.14 1.261 3.416 1.32 1.28.059 1.689.072 7.192.072s5.912-.013 7.192-.072c1.276-.059 2.449-.353 3.416-1.32.967-.967 1.261-2.14 1.32-3.416.059-1.28.072-1.689.072-7.192s-.013-5.912-.072-7.192c-.059-1.276-.353-2.449-1.32-3.416C21.449.425 20.276.131 19 .072 17.72.013 17.311 0 14.052 0h-4.104z' />
-        <circle cx='12' cy='12' r='3.5' />
-        <circle cx='18.406' cy='5.594' r='1.44' />
-      </svg>
-    ),
-  },
-  {
-    key: 'youtube',
-    label: 'Youtube',
-    icon: (
-      <svg
-        width='18'
-        height='18'
-        fill='currentColor'
-        viewBox='0 0 24 24'
-        className='text-red-600'
-      >
-        <path d='M23.498 6.186a2.994 2.994 0 0 0-2.112-2.112C19.458 3.5 12 3.5 12 3.5s-7.458 0-9.386.574A2.994 2.994 0 0 0 .502 6.186C0 8.114 0 12 0 12s0 3.886.502 5.814a2.994 2.994 0 0 0 2.112 2.112C4.542 20.5 12 20.5 12 20.5s7.458 0 9.386-.574a2.994 2.994 0 0 0 2.112-2.112C24 15.886 24 12 24 12s0-3.886-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z' />
-      </svg>
-    ),
-  },
 ];
 
 const initialProfile = {
@@ -132,27 +52,8 @@ const initialProfile = {
 };
 
 export default function SettingsTab() {
-  const [activeTab, setActiveTab] = useState('personal');
+  const [activeTab, setActiveTab] = useState('jobAlerts');
   const [userProfile, setUserProfile] = useState(initialProfile);
-  const [resumes, setResumes] = useState(mockResumes);
-  const [resumeMenu, setResumeMenu] = useState<number | null>(null);
-  const [addModalOpen, setAddModalOpen] = useState(false);
-  const [addLoading, setAddLoading] = useState(false);
-  const [profile, setProfile] = useState({
-    nationality: '',
-    dob: '',
-    gender: '',
-    maritalStatus: '',
-    education: '',
-    experience: '',
-    biography: '',
-  });
-  const [socialLinks, setSocialLinks] = useState([
-    { platform: 'facebook', url: '' },
-    { platform: 'twitter', url: '' },
-    { platform: 'instagram', url: '' },
-    { platform: 'youtube', url: '' },
-  ]);
   const [account, setAccount] = useState({
     mapLocation: '',
     phoneCountry: '+880',
@@ -178,54 +79,6 @@ export default function SettingsTab() {
     newPassword: false,
     confirmPassword: false,
   });
-
-  function handleDeleteResume(id: number) {
-    setResumes((prev) => prev.filter((r) => r.id !== id));
-    setResumeMenu(null);
-  }
-
-  function handleAddResume(name: string, file: File) {
-    setAddLoading(true);
-    // Simulate upload delay
-    setTimeout(() => {
-      setResumes((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          name,
-          size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-        },
-      ]);
-      setAddLoading(false);
-      setAddModalOpen(false);
-    }, 1000);
-  }
-
-  function handleProfileSave() {
-    // Implementation of handleProfileSave function
-  }
-
-  function handleSocialLinkChange(
-    idx: number,
-    field: 'platform' | 'url',
-    value: string,
-  ) {
-    setSocialLinks((prev) =>
-      prev.map((link, i) => (i === idx ? { ...link, [field]: value } : link)),
-    );
-  }
-
-  function handleRemoveSocialLink(idx: number) {
-    setSocialLinks((prev) => prev.filter((_, i) => i !== idx));
-  }
-
-  function handleAddSocialLink() {
-    setSocialLinks((prev) => [...prev, { platform: 'facebook', url: '' }]);
-  }
-
-  function handleSocialLinksSave() {
-    // Implementation for saving social links
-  }
 
   function handleAccountChange(field: string, value: any) {
     setAccount((prev) => ({ ...prev, [field]: value }));
@@ -259,108 +112,6 @@ export default function SettingsTab() {
 
   function renderTabContent() {
     switch (activeTab) {
-      case 'personal':
-        return (
-          <PersonalTab
-            userProfile={userProfile}
-            setUserProfile={setUserProfile}
-          />
-        );
-      case 'contact':
-        return (
-          <ContactTab
-            userProfile={userProfile}
-            setUserProfile={setUserProfile}
-          />
-        );
-      case 'professional':
-        return (
-          <ProfessionalTab
-            userProfile={userProfile}
-            setUserProfile={setUserProfile}
-          />
-        );
-      case 'social':
-        return (
-          <div className='mt-4 sm:mt-8'>
-            <div className='font-medium mb-4 text-gray-900 dark:text-white text-base sm:text-lg'>
-              Social Links
-            </div>
-            {socialLinks.map((link, idx) => (
-              <div key={idx} className='mb-4'>
-                <div className='flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4'>
-                  <div className='w-full sm:w-32'>
-                    <Select
-                      value={link.platform}
-                      onChange={(e) =>
-                        handleSocialLinkChange(idx, 'platform', e.target.value)
-                      }
-                    >
-                      {socialPlatforms.map((platform) => (
-                        <option key={platform.key} value={platform.key}>
-                          {platform.label}
-                        </option>
-                      ))}
-                    </Select>
-                  </div>
-                  <Input
-                    className='flex-1'
-                    placeholder='Profile link/url...'
-                    value={link.url}
-                    onChange={(e) =>
-                      handleSocialLinkChange(idx, 'url', e.target.value)
-                    }
-                  />
-                  <button
-                    type='button'
-                    className='self-start sm:self-auto ml-0 sm:ml-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors'
-                    onClick={() => handleRemoveSocialLink(idx)}
-                    aria-label='Remove social link'
-                  >
-                    <svg
-                      width='18'
-                      height='18'
-                      fill='none'
-                      viewBox='0 0 24 24'
-                      stroke='currentColor'
-                    >
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth='2'
-                        d='M6 18L18 6M6 6l12 12'
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            ))}
-            <button
-              type='button'
-              className='w-full flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-800 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mb-6 sm:mb-8 mt-2 transition-colors text-sm sm:text-base'
-              onClick={handleAddSocialLink}
-            >
-              <svg
-                width='18'
-                height='18'
-                fill='none'
-                viewBox='0 0 24 24'
-                stroke='currentColor'
-              >
-                <circle cx='12' cy='12' r='10' strokeWidth='2' />
-                <path
-                  d='M12 8v8M8 12h8'
-                  strokeWidth='2'
-                  strokeLinecap='round'
-                />
-              </svg>
-              Add New Social Link
-            </button>
-            <Button onClick={handleSocialLinksSave}>Save Changes</Button>
-          </div>
-        );
-      case 'resume':
-        return <div className='py-8'>Resume Tab (to be implemented)</div>;
       case 'jobAlerts':
         return (
           <JobAlertsTab
@@ -774,12 +525,6 @@ export default function SettingsTab() {
       </div>
 
       <div className='w-full max-w-5xl mx-auto'>{renderTabContent()}</div>
-      <AddResumeModal
-        isOpen={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
-        onAdd={handleAddResume}
-        loading={addLoading}
-      />
     </div>
   );
 }

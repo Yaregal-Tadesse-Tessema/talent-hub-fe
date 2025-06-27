@@ -1,13 +1,18 @@
 import React from 'react';
+import { FiBookmark } from 'react-icons/fi';
 
 interface CandidateDetailModalProps {
   candidate: any;
   onClose: () => void;
+  onSave?: (candidate: any) => void;
+  isSaved?: boolean;
 }
 
 const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
   candidate,
   onClose,
+  onSave,
+  isSaved = false,
 }) => {
   if (!candidate) return null;
 
@@ -104,20 +109,21 @@ const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
             )}
           </div>
           <div className='ml-auto flex items-center gap-2'>
-            <button className='border border-gray-200 dark:border-gray-600 rounded p-2 hover:bg-blue-600 hover:text-white bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'>
-              <svg
-                width='18'
-                height='18'
-                fill='none'
-                viewBox='0 0 24 24'
-                stroke='currentColor'
+            {onSave && (
+              <button
+                className={`border border-gray-200 dark:border-gray-600 rounded p-2 transition-colors ${
+                  isSaved
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'hover:bg-blue-600 hover:text-white bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                }`}
+                onClick={() => onSave(candidate)}
+                title={isSaved ? 'Remove from saved' : 'Save candidate'}
               >
-                <path
-                  d='M5 5v14l7-7 7 7V5a2 2 0 00-2-2H7a2 2 0 00-2 2z'
-                  strokeWidth='2'
+                <FiBookmark
+                  className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`}
                 />
-              </svg>
-            </button>
+              </button>
+            )}
             <button className='ml-auto bg-blue-600 text-white px-4 py-2 rounded gap-2 hover:bg-blue-700'>
               Send Mail
             </button>

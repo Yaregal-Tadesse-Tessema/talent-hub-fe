@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import OverviewTab from './employer/OverviewTab';
 import MyJobsTab from './employer/MyJobsTab';
 import SettingsTab from './employer/SettingsTab';
+import SavedCandidatesTab from './employer/SavedCandidatesTab';
 import {
   FiHome,
   FiUser,
@@ -59,6 +60,8 @@ function EmployerDashboardContent() {
         return <OverviewTab />;
       case 'myjobs':
         return <MyJobsTab />;
+      case 'saved':
+        return <SavedCandidatesTab />;
       case 'settings':
         return <SettingsTab />;
       // Add more cases for other tabs as needed

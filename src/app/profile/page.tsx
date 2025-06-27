@@ -31,6 +31,12 @@ import {
   Calendar,
   Users,
   Monitor,
+  Home,
+  Award,
+  Twitter,
+  Instagram,
+  Facebook,
+  Youtube,
 } from 'lucide-react';
 import { frontendCVService } from '@/services/frontendCV.service';
 
@@ -702,6 +708,178 @@ export default function ProfilePage() {
           )}
         </section>
 
+        {/* Address Information */}
+        <section className='bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-700/50 p-8 border border-gray-200 dark:border-gray-700'>
+          <div className='flex items-center gap-3 mb-6'>
+            <Home className='w-6 h-6 text-blue-600 dark:text-blue-400' />
+            <h2 className='text-2xl font-semibold text-gray-900 dark:text-white'>
+              Address Information
+            </h2>
+          </div>
+
+          {isEditing ? (
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Street Address
+                </label>
+                <Input
+                  value={profile.address?.street || ''}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      address: { ...profile.address, street: e.target.value },
+                    })
+                  }
+                  className='w-full'
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  City
+                </label>
+                <Input
+                  value={profile.address?.city || ''}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      address: { ...profile.address, city: e.target.value },
+                    })
+                  }
+                  className='w-full'
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  State/Province
+                </label>
+                <Input
+                  value={profile.address?.state || ''}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      address: { ...profile.address, state: e.target.value },
+                    })
+                  }
+                  className='w-full'
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Postal Code
+                </label>
+                <Input
+                  value={profile.address?.postalCode || ''}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      address: {
+                        ...profile.address,
+                        postalCode: e.target.value,
+                      },
+                    })
+                  }
+                  className='w-full'
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Country
+                </label>
+                <Input
+                  value={profile.address?.country || ''}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      address: { ...profile.address, country: e.target.value },
+                    })
+                  }
+                  className='w-full'
+                />
+              </div>
+            </div>
+          ) : (
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+              {profile.address?.street && (
+                <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <Home size={16} className='text-gray-400' />
+                    <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                      Street Address
+                    </h3>
+                  </div>
+                  <p className='text-lg font-semibold text-gray-900 dark:text-white'>
+                    {profile.address.street}
+                  </p>
+                </div>
+              )}
+              {profile.address?.city && (
+                <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <MapPin size={16} className='text-gray-400' />
+                    <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                      City
+                    </h3>
+                  </div>
+                  <p className='text-lg font-semibold text-gray-900 dark:text-white'>
+                    {profile.address.city}
+                  </p>
+                </div>
+              )}
+              {profile.address?.state && (
+                <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <MapPin size={16} className='text-gray-400' />
+                    <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                      State/Province
+                    </h3>
+                  </div>
+                  <p className='text-lg font-semibold text-gray-900 dark:text-white'>
+                    {profile.address.state}
+                  </p>
+                </div>
+              )}
+              {profile.address?.postalCode && (
+                <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <MapPin size={16} className='text-gray-400' />
+                    <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                      Postal Code
+                    </h3>
+                  </div>
+                  <p className='text-lg font-semibold text-gray-900 dark:text-white'>
+                    {profile.address.postalCode}
+                  </p>
+                </div>
+              )}
+              {profile.address?.country && (
+                <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <Globe size={16} className='text-gray-400' />
+                    <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                      Country
+                    </h3>
+                  </div>
+                  <p className='text-lg font-semibold text-gray-900 dark:text-white'>
+                    {profile.address.country}
+                  </p>
+                </div>
+              )}
+              {!profile.address?.street &&
+                !profile.address?.city &&
+                !profile.address?.state &&
+                !profile.address?.postalCode &&
+                !profile.address?.country && (
+                  <div className='col-span-full text-center py-8'>
+                    <p className='text-gray-500 dark:text-gray-400'>
+                      No address information provided
+                    </p>
+                  </div>
+                )}
+            </div>
+          )}
+        </section>
+
         {/* Professional Information */}
         <section className='bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-700/50 p-8 border border-gray-200 dark:border-gray-700'>
           <div className='flex items-center gap-3 mb-6'>
@@ -780,6 +958,28 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  AI Generated Job Fit Score
+                </label>
+                <Input
+                  value={profile.aiGeneratedJobFitScore}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      aiGeneratedJobFitScore: parseInt(e.target.value) || 0,
+                    })
+                  }
+                  type='number'
+                  min='0'
+                  max='100'
+                  className='w-full'
+                  disabled
+                />
+                <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+                  This score is automatically generated by our AI system
+                </p>
+              </div>
+              <div>
                 <TagInput
                   value={profile.industry || []}
                   onChange={(industry) => setProfile({ ...profile, industry })}
@@ -845,6 +1045,25 @@ export default function ProfilePage() {
                 <p className='text-lg font-semibold text-gray-900 dark:text-white'>
                   ${profile.salaryExpectations.toLocaleString()}
                 </p>
+              </div>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <div className='flex items-center gap-2 mb-2'>
+                  <Award size={16} className='text-gray-400' />
+                  <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                    AI Job Fit Score
+                  </h3>
+                </div>
+                <div className='flex items-center gap-2'>
+                  <div className='w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2'>
+                    <div
+                      className='bg-blue-600 dark:bg-blue-400 h-2 rounded-full transition-all duration-300'
+                      style={{ width: `${profile.aiGeneratedJobFitScore}%` }}
+                    ></div>
+                  </div>
+                  <span className='text-sm font-semibold text-gray-900 dark:text-white min-w-[3rem]'>
+                    {profile.aiGeneratedJobFitScore}%
+                  </span>
+                </div>
               </div>
               <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
                 <div className='flex items-center gap-2 mb-2'>
@@ -1169,7 +1388,7 @@ export default function ProfilePage() {
             {activeResumeTab === 'view' ? (
               <div className='space-y-4'>
                 {profile?.resume?.path ? (
-                  <div className='flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600'>
+                  <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 gap-4'>
                     <div className='flex items-center space-x-4'>
                       <FileText className='w-8 h-8 text-gray-400 dark:text-gray-500' />
                       <div>
@@ -1178,12 +1397,12 @@ export default function ProfilePage() {
                         </p>
                       </div>
                     </div>
-                    <div className='flex items-center space-x-4'>
+                    <div className='flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4'>
                       <a
                         href={profile.resume.path}
                         target='_blank'
                         rel='noopener noreferrer'
-                        className='px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300'
+                        className='px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-center'
                       >
                         View
                       </a>
@@ -1196,7 +1415,7 @@ export default function ProfilePage() {
                       <button
                         onClick={handleFrontendCVGeneration}
                         disabled={isGeneratingCV}
-                        className='px-4 py-2 text-sm font-medium text-white bg-green-600 dark:bg-green-500 rounded-md hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center gap-2'
+                        className='px-4 py-2 text-sm font-medium text-white bg-green-600 dark:bg-green-500 rounded-md hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center justify-center gap-2'
                       >
                         {isGeneratingCV ? (
                           <>
@@ -1217,7 +1436,7 @@ export default function ProfilePage() {
                     <p className='text-gray-500 dark:text-gray-400'>
                       No resume uploaded yet
                     </p>
-                    <div className='mt-4 space-x-4'>
+                    <div className='mt-4 flex flex-col sm:flex-row items-center justify-center gap-4'>
                       <button
                         onClick={() => setActiveResumeTab('upload')}
                         className='px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300'

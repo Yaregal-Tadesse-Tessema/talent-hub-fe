@@ -1,10 +1,13 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import CandidateDetailModal from './CandidateDetailModal';
+import SaveCandidateModal from '@/components/SaveCandidateModal';
 import Link from 'next/link';
 import { employeeService, JobSeekerProfile } from '@/services/employee.service';
+import { savedCandidatesService } from '@/services/savedCandidates.service';
 import CandidateFilters, { FilterState } from '@/components/CandidateFilters';
 import { useAuth } from '@/contexts/AuthContext';
+import { FiBookmark } from 'react-icons/fi';
 
 export default function FindCandidatesPage() {
   const { user } = useAuth();
@@ -16,6 +19,15 @@ export default function FindCandidatesPage() {
   const [selectedCandidate, setSelectedCandidate] =
     useState<JobSeekerProfile | null>(null);
   const [showMobileFilter, setShowMobileFilter] = useState(false);
+  const [savedCandidates, setSavedCandidates] = useState<Set<string>>(
+    new Set(),
+  );
+
+  // Save candidate modal state
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [candidateToSave, setCandidateToSave] =
+    useState<JobSeekerProfile | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -37,6 +49,7 @@ export default function FindCandidatesPage() {
   useEffect(() => {
     if (user) {
       fetchCandidates();
+      fetchSavedCandidates();
     }
   }, [user]);
 
@@ -70,6 +83,20 @@ export default function FindCandidatesPage() {
       setCandidates([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSavedCandidates = async () => {
+    if (!user?.id) return;
+
+    try {
+      const response = await savedCandidatesService.getSavedCandidates();
+      const savedIds = new Set(
+        response.items?.map((sc) => sc.candidateId) || [],
+      );
+      setSavedCandidates(savedIds);
+    } catch (error) {
+      console.error('Error fetching saved candidates:', error);
     }
   };
 
@@ -177,6 +204,80 @@ export default function FindCandidatesPage() {
     }
 
     return activeFilters;
+  };
+
+  const handleSaveCandidateClick = (candidate: JobSeekerProfile) => {
+    if (!user?.id) {
+      alert('Please log in to save candidates');
+      return;
+    }
+
+    if (savedCandidates.has(candidate.id)) {
+      // If already saved, remove from saved
+      handleRemoveSavedCandidate(candidate);
+    } else {
+      // If not saved, show save modal
+      setCandidateToSave(candidate);
+      setShowSaveModal(true);
+    }
+  };
+
+  const handleSaveCandidate = async (remark: string) => {
+    if (!user?.id || !candidateToSave) {
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // Get organization ID from selected employer
+      const organizationId = user.selectedEmployer?.tenant?.id;
+      if (!organizationId) {
+        alert('Please select an organization to save candidates');
+        return;
+      }
+
+      await savedCandidatesService.saveCandidate({
+        organizationId,
+        userId: candidateToSave.id,
+        remark: remark || undefined,
+      });
+
+      setSavedCandidates((prev) => new Set(prev).add(candidateToSave.id));
+      setShowSaveModal(false);
+      setCandidateToSave(null);
+    } catch (error) {
+      console.error('Error saving candidate:', error);
+      alert('Failed to save candidate. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleRemoveSavedCandidate = async (candidate: JobSeekerProfile) => {
+    if (!user?.id) return;
+
+    try {
+      const savedCandidate = await savedCandidatesService.getSavedCandidates();
+      const toDelete = savedCandidate.items?.find(
+        (sc) => sc.candidateId === candidate.id,
+      );
+      if (toDelete) {
+        await savedCandidatesService.deleteSavedCandidate(toDelete.id);
+        setSavedCandidates((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(candidate.id);
+          return newSet;
+        });
+      }
+    } catch (error) {
+      console.error('Error removing saved candidate:', error);
+      alert('Failed to remove candidate. Please try again.');
+    }
+  };
+
+  const handleSaveModalClose = () => {
+    setShowSaveModal(false);
+    setCandidateToSave(null);
   };
 
   return (
@@ -702,19 +803,22 @@ export default function FindCandidatesPage() {
                         </div>
                       </div>
                       <div className='flex items-center gap-2'>
-                        <button className='border border-gray-200 dark:border-gray-600 rounded p-2 hover:bg-blue-600 hover:text-white bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'>
-                          <svg
-                            width='18'
-                            height='18'
-                            fill='none'
-                            viewBox='0 0 24 24'
-                            stroke='currentColor'
-                          >
-                            <path
-                              d='M5 5v14l7-7 7 7V5a2 2 0 00-2-2H7a2 2 0 00-2 2z'
-                              strokeWidth='2'
-                            />
-                          </svg>
+                        <button
+                          className={`border border-gray-200 dark:border-gray-600 rounded p-2 transition-colors ${
+                            savedCandidates.has(candidate.id)
+                              ? 'bg-blue-600 text-white hover:bg-blue-700'
+                              : 'hover:bg-blue-600 hover:text-white bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                          }`}
+                          onClick={() => handleSaveCandidateClick(candidate)}
+                          title={
+                            savedCandidates.has(candidate.id)
+                              ? 'Remove from saved'
+                              : 'Save candidate'
+                          }
+                        >
+                          <FiBookmark
+                            className={`w-4 h-4 ${savedCandidates.has(candidate.id) ? 'fill-current' : ''}`}
+                          />
                         </button>
                         <button
                           className='px-6 py-2 rounded-md font-semibold flex items-center gap-2 transition hover:bg-blue-600 hover:text-white bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
@@ -844,8 +948,27 @@ export default function FindCandidatesPage() {
         <CandidateDetailModal
           candidate={selectedCandidate}
           onClose={handleCloseModal}
+          onSave={handleSaveCandidateClick}
+          isSaved={
+            selectedCandidate
+              ? savedCandidates.has(selectedCandidate.id)
+              : false
+          }
         />
       )}
+
+      {/* Save Candidate Modal */}
+      <SaveCandidateModal
+        isOpen={showSaveModal}
+        onClose={handleSaveModalClose}
+        onSave={handleSaveCandidate}
+        candidateName={
+          candidateToSave?.firstName && candidateToSave?.lastName
+            ? `${candidateToSave.firstName} ${candidateToSave.middleName ? candidateToSave.middleName + ' ' : ''}${candidateToSave.lastName}`
+            : candidateToSave?.email || 'Unknown Candidate'
+        }
+        isSaving={isSaving}
+      />
     </div>
   );
 }
