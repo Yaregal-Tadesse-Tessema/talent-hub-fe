@@ -18,7 +18,8 @@ import {
 import CandidateDetailModal from '../../../find-candidates/CandidateDetailModal';
 
 export default function SavedCandidatesTab() {
-  const { user } = useAuth();
+  const { user: authUser } = useAuth();
+  const [user, setUser] = useState<any>(null);
   const [savedCandidates, setSavedCandidates] = useState<SavedCandidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,17 +31,37 @@ export default function SavedCandidatesTab() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState({ notes: '', tags: '' });
 
+  // Get user from localStorage directly
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+        } else {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error parsing user from localStorage:', error);
+        setLoading(false);
+      }
+    }
+  }, []);
+
   const fetchSavedCandidates = useCallback(async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      console.log('No user ID found, skipping fetch');
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     setError(null);
     try {
       const response = await savedCandidatesService.getSavedCandidates();
-      console.log(response);
       setSavedCandidates(response.items || []);
     } catch (error) {
-      console.error('Error fetching saved candidates:', error);
       setError('Failed to load saved candidates. Please try again.');
       setSavedCandidates([]);
     } finally {

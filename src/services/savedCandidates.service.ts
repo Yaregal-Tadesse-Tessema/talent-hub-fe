@@ -142,7 +142,6 @@ export const savedCandidatesService = {
   }> {
     try {
       const response = await api.get(`/user-tenants?q=i=tenant,user`);
-
       // Map the MainEntity response to SavedCandidate format
       const mappedItems =
         response.data.items?.map((item: MainEntity) => ({
