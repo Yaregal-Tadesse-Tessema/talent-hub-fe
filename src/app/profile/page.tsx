@@ -102,6 +102,8 @@ export default function ProfilePage() {
             profileHeadLine: userData.profileHeadLine || '',
             coverLetter: userData.coverLetter || '',
             professionalSummery: userData.professionalSummery || '',
+            isProfilePublic: userData.isProfilePublic || false,
+            isResumePublic: userData.isResumePublic || false,
           };
 
           console.log('Mapped profile data:', mappedProfile);
