@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import React from 'react';
+import { ShareButton } from '@/components/ui/ShareButton';
 
 const jobs = [
   {
@@ -179,6 +180,7 @@ export default function FeaturedJobs() {
                 <button className='bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition'>
                   <BookmarkIcon />
                 </button>
+                <ShareButton />
                 <button className='flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition'>
                   Apply Now
                   <svg

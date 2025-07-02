@@ -185,7 +185,7 @@ export default function OverviewTab() {
       )}
 
       {/* Header Section */}
-      <div className='space-y-2'>
+      <div className='space-y-1'>
         <h1 className='text-2xl font-semibold mb-1 text-gray-900 dark:text-white'>
           Welcome back, {user?.firstName}! 👋
         </h1>
@@ -195,107 +195,98 @@ export default function OverviewTab() {
       </div>
 
       {/* Stats Cards Grid */}
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-        {/* Total Jobs Card */}
-        <div className='bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl p-6 border border-blue-200 dark:border-blue-700 shadow-sm hover:shadow-md transition-all duration-200'>
-          <div className='flex items-center justify-between'>
-            <div className='space-y-2'>
-              <p className='text-blue-600 dark:text-blue-400 text-sm font-medium'>
-                Total Jobs
-              </p>
-              <p className='text-3xl font-bold text-blue-900 dark:text-blue-100'>
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+        {/* Jobs Overview Card */}
+        <div className='bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl p-3 border border-blue-200 dark:border-blue-700 shadow-sm hover:shadow-md transition-all duration-200'>
+          <div className='flex items-center gap-3 mb-2'>
+            <div className='w-6 h-6 bg-blue-500 rounded-lg flex items-center justify-center'>
+              <BriefcaseIcon className='w-3 h-3 text-white' />
+            </div>
+            <span className='text-blue-600 dark:text-blue-400 text-sm font-medium'>
+              Jobs
+            </span>
+          </div>
+          <div className='grid grid-cols-3 gap-2 text-center'>
+            <div>
+              <div className='text-lg font-bold text-blue-900 dark:text-blue-100'>
                 {stats.totalJobs}
-              </p>
-              <p className='text-blue-700 dark:text-blue-300 text-sm'>
-                {stats.activeJobs} currently active
-              </p>
+              </div>
+              <div className='text-xs text-gray-600 dark:text-gray-400'>
+                Total
+              </div>
             </div>
-            <div className='w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center'>
-              <BriefcaseIcon className='w-6 h-6 text-white' />
-            </div>
-          </div>
-        </div>
-
-        {/* Total Applications Card */}
-        <div className='bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl p-6 border border-green-200 dark:border-green-700 shadow-sm hover:shadow-md transition-all duration-200'>
-          <div className='flex items-center justify-between'>
-            <div className='space-y-2'>
-              <p className='text-green-600 dark:text-green-400 text-sm font-medium'>
-                Total Applications
-              </p>
-              <p className='text-3xl font-bold text-green-900 dark:text-green-100'>
-                {stats.totalApplications}
-              </p>
-              <p className='text-green-700 dark:text-green-300 text-sm'>
-                Avg. {stats.avgApplicationsPerJob} per job
-              </p>
-            </div>
-            <div className='w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center'>
-              <UserGroupIcon className='w-6 h-6 text-white' />
-            </div>
-          </div>
-        </div>
-
-        {/* Jobs Expiring Soon Card */}
-        <div className='bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-xl p-6 border border-orange-200 dark:border-orange-700 shadow-sm hover:shadow-md transition-all duration-200'>
-          <div className='flex items-center justify-between'>
-            <div className='space-y-2'>
-              <p className='text-orange-600 dark:text-orange-400 text-sm font-medium'>
-                Expiring Soon
-              </p>
-              <p className='text-3xl font-bold text-orange-900 dark:text-orange-100'>
-                {stats.jobsExpiringSoon}
-              </p>
-              <p className='text-orange-700 dark:text-orange-300 text-sm'>
-                Within 7 days
-              </p>
-            </div>
-            <div className='w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center'>
-              <ClockIcon className='w-6 h-6 text-white' />
-            </div>
-          </div>
-        </div>
-
-        {/* Active Jobs Card */}
-        <div className='bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 rounded-xl p-6 border border-emerald-200 dark:border-emerald-700 shadow-sm hover:shadow-md transition-all duration-200'>
-          <div className='flex items-center justify-between'>
-            <div className='space-y-2'>
-              <p className='text-emerald-600 dark:text-emerald-400 text-sm font-medium'>
-                Active Jobs
-              </p>
-              <p className='text-3xl font-bold text-emerald-900 dark:text-emerald-100'>
+            <div>
+              <div className='text-lg font-bold text-blue-800 dark:text-blue-200'>
                 {stats.activeJobs}
-              </p>
-              <p className='text-emerald-700 dark:text-emerald-300 text-sm'>
-                Currently posted
-              </p>
+              </div>
+              <div className='text-xs text-gray-600 dark:text-gray-400'>
+                Active
+              </div>
             </div>
-            <div className='w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center'>
-              <EyeIcon className='w-6 h-6 text-white' />
+            <div>
+              <div className='text-lg font-bold text-orange-600 dark:text-orange-400'>
+                {stats.jobsExpiringSoon}
+              </div>
+              <div className='text-xs text-gray-600 dark:text-gray-400'>
+                Expiring
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Applications Card */}
+        <div className='bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl p-3 border border-green-200 dark:border-green-700 shadow-sm hover:shadow-md transition-all duration-200'>
+          <div className='flex items-center gap-3 mb-2'>
+            <div className='w-6 h-6 bg-green-500 rounded-lg flex items-center justify-center'>
+              <UserGroupIcon className='w-3 h-3 text-white' />
+            </div>
+            <span className='text-green-600 dark:text-green-400 text-sm font-medium'>
+              Applications
+            </span>
+          </div>
+          <div className='grid grid-cols-3 gap-2 text-center'>
+            <div>
+              <div className='text-lg font-bold text-green-900 dark:text-green-100'>
+                {stats.totalApplications}
+              </div>
+              <div className='text-xs text-gray-600 dark:text-gray-400'>
+                Total
+              </div>
+            </div>
+            <div>
+              <div className='text-lg font-bold text-green-800 dark:text-green-200'>
+                {stats.avgApplicationsPerJob}
+              </div>
+              <div className='text-xs text-gray-600 dark:text-gray-400'>
+                Avg
+              </div>
+            </div>
+            <div>
+              <div className='text-lg font-bold text-emerald-600 dark:text-emerald-400'>
+                {stats.jobsWithHighApplications}
+              </div>
+              <div className='text-xs text-gray-600 dark:text-gray-400'>
+                High
+              </div>
             </div>
           </div>
         </div>
 
         {/* Quick Actions Card */}
-        <div className='bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-xl p-6 border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-200'>
-          <div className='space-y-4'>
-            <p className='text-gray-600 dark:text-gray-400 text-sm font-medium'>
-              Quick Actions
-            </p>
-            <div className='space-y-3'>
-              <button
-                onClick={() => router.push('/post-job')}
-                className='w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors'
-              >
-                Post New Job
-              </button>
-              <button
-                onClick={() => router.push('/dashboard?tab=myjobs')}
-                className='w-full bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors'
-              >
-                Manage Jobs
-              </button>
-            </div>
+        <div className='bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-xl p-3 border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-200'>
+          <div className='grid grid-cols-1 gap-1.5'>
+            <button
+              onClick={() => router.push('/post-job')}
+              className='w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-1.5 px-2 rounded transition-colors'
+            >
+              Post Job
+            </button>
+            <button
+              onClick={() => router.push('/dashboard?tab=myjobs')}
+              className='w-full bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium py-1.5 px-2 rounded transition-colors'
+            >
+              Manage Jobs
+            </button>
           </div>
         </div>
       </div>
@@ -372,7 +363,9 @@ export default function OverviewTab() {
                                   : ''
                               }
                             >
-                              {daysRemaining} days left
+                              {daysRemaining > 0
+                                ? `${daysRemaining} days left`
+                                : 'Expired'}
                             </span>
                           </div>
                         </div>

@@ -56,12 +56,16 @@ export const ApplyJobModal: React.FC<ApplyJobModalProps> = ({
   );
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const { showToast } = useToast();
   const router = useRouter();
 
+  // Check if user has a CV
+  const hasProfileCV = !!(userData?.profile?.cv || userData?.resume?.path);
+
   useEffect(() => {
     // Set default resume if available
-    if (userData?.profile?.cv || userData?.resume?.path) {
+    if (hasProfileCV) {
       setSelectedResume('profile');
     } else {
       setSelectedResume('new');
@@ -99,7 +103,7 @@ export const ApplyJobModal: React.FC<ApplyJobModalProps> = ({
     if (open) {
       fetchScreeningQuestions();
     }
-  }, [userData, jobId, open]);
+  }, [userData, jobId, open, hasProfileCV]);
 
   const handleQuestionAnswer = (question: string, answer: any) => {
     setQuestionAnswers((prev) => ({
@@ -108,7 +112,45 @@ export const ApplyJobModal: React.FC<ApplyJobModalProps> = ({
     }));
   };
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    // Validate cover letter
+    if (!coverLetter.trim()) {
+      newErrors.coverLetter = 'Cover letter is required';
+    }
+
+    // Validate resume
+    if (selectedResume === 'new' && !newResume) {
+      newErrors.resume = 'Please upload a resume';
+    } else if (selectedResume === 'profile' && !hasProfileCV) {
+      newErrors.resume = 'No profile resume found';
+    } else if (!selectedResume) {
+      newErrors.resume = 'Please select a resume option';
+    }
+
+    // Validate required screening questions
+    screeningQuestions.forEach((question) => {
+      if (!question.isOptional) {
+        const answer = questionAnswers[question.question];
+        if (
+          !answer ||
+          (Array.isArray(answer) && answer.length === 0) ||
+          (typeof answer === 'string' && !answer.trim())
+        ) {
+          newErrors[`question_${question.question}`] =
+            'This question is required';
+        }
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const renderQuestion = (question: ScreeningQuestion) => {
+    const questionError = errors[`question_${question.question}`];
+
     switch (question.type) {
       case 'multiple-choice':
         return (
@@ -141,6 +183,9 @@ export const ApplyJobModal: React.FC<ApplyJobModalProps> = ({
                 </label>
               ))}
             </div>
+            {questionError && (
+              <p className='text-red-500 text-xs mt-1'>{questionError}</p>
+            )}
           </div>
         );
 
@@ -176,6 +221,9 @@ export const ApplyJobModal: React.FC<ApplyJobModalProps> = ({
                 <span className='text-sm text-gray-700'>No</span>
               </label>
             </div>
+            {questionError && (
+              <p className='text-red-500 text-xs mt-1'>{questionError}</p>
+            )}
           </div>
         );
 
@@ -194,10 +242,15 @@ export const ApplyJobModal: React.FC<ApplyJobModalProps> = ({
               onChange={(e) =>
                 handleQuestionAnswer(question.question, e.target.value)
               }
-              className='w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+              className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                questionError ? 'border-red-500' : ''
+              }`}
               rows={4}
               placeholder='Type your answer here...'
             />
+            {questionError && (
+              <p className='text-red-500 text-xs mt-1'>{questionError}</p>
+            )}
           </div>
         );
 
@@ -209,10 +262,7 @@ export const ApplyJobModal: React.FC<ApplyJobModalProps> = ({
   if (!open) return null;
 
   const handleSubmitApplication = async () => {
-    if (!coverLetter.trim() || (!newResume && selectedResume !== 'profile')) {
-      setMessage(
-        'Please provide a cover letter and select or upload a resume.',
-      );
+    if (!validateForm()) {
       return;
     }
 
@@ -290,47 +340,66 @@ export const ApplyJobModal: React.FC<ApplyJobModalProps> = ({
       setNewResume(file);
       setSelectedResume('new');
       setMessage('');
+      // Clear resume error when file is selected
+      setErrors((prev) => ({ ...prev, resume: '' }));
+    }
+  };
+
+  const handleCoverLetterChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    setCoverLetter(e.target.value);
+    // Clear cover letter error when user starts typing
+    if (e.target.value.trim()) {
+      setErrors((prev) => ({ ...prev, coverLetter: '' }));
     }
   };
 
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30'>
-      <div className='bg-white rounded-xl shadow-lg p-8 w-full max-w-xl relative max-h-[90vh] overflow-y-auto'>
+    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 p-4'>
+      <div className='bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8 w-full max-w-xl relative max-h-[90vh] overflow-y-auto'>
         {/* Close Button */}
         <button
-          className='absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl'
+          className='absolute top-2 right-2 sm:top-4 sm:right-4 text-gray-400 hover:text-gray-600 text-2xl z-10'
           onClick={onClose}
         >
-          <X className='w-6 h-6' />
+          <X className='w-5 h-5 sm:w-6 sm:h-6' />
         </button>
-        <div className='font-semibold text-lg mb-6'>Apply Job: {jobTitle}</div>
+
+        <div className='font-semibold text-base sm:text-lg mb-4 sm:mb-6 pr-8'>
+          Apply Job: {jobTitle}
+        </div>
 
         {/* Resume Section */}
         <div className='mb-4'>
           <label className='block text-sm font-medium text-gray-700 mb-1'>
-            Choose Resume
+            Choose Resume <span className='text-red-500'>*</span>
           </label>
           <select
-            className='w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+            className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.resume ? 'border-red-500' : ''
+            }`}
             value={selectedResume}
-            onChange={(e) => setSelectedResume(e.target.value)}
+            onChange={(e) => {
+              setSelectedResume(e.target.value);
+              setErrors((prev) => ({ ...prev, resume: '' }));
+            }}
           >
-            {userData?.profile?.cv || userData?.resume?.path ? (
-              <>
-                <option value=''>Select...</option>
-                <option value='profile'>Use Profile Resume</option>
-                <option value='new'>Upload New Resume</option>
-              </>
-            ) : (
-              <option value='new'>Upload New Resume</option>
+            <option value=''>Select...</option>
+            {hasProfileCV && (
+              <option value='profile'>Use Profile Resume</option>
             )}
+            <option value='new'>Upload New Resume</option>
           </select>
+          {errors.resume && (
+            <p className='text-red-500 text-xs mt-1'>{errors.resume}</p>
+          )}
         </div>
 
         {selectedResume === 'new' && (
           <div className='mb-4'>
             <label className='block text-sm font-medium text-gray-700 mb-1'>
-              Upload New Resume
+              Upload New Resume <span className='text-red-500'>*</span>
             </label>
             <input
               type='file'
@@ -347,14 +416,19 @@ export const ApplyJobModal: React.FC<ApplyJobModalProps> = ({
         {/* Cover Letter Section */}
         <div className='mb-4'>
           <label className='block text-sm font-medium text-gray-700 mb-1'>
-            Cover Letter
+            Cover Letter <span className='text-red-500'>*</span>
           </label>
           <textarea
-            className='w-full border rounded px-3 py-2 text-sm min-h-[100px] focus:outline-none focus:ring-2 focus:ring-blue-500'
+            className={`w-full border rounded px-3 py-2 text-sm min-h-[100px] focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.coverLetter ? 'border-red-500' : ''
+            }`}
             placeholder='Write down your biography here. Let the employers know who you are...'
             value={coverLetter}
-            onChange={(e) => setCoverLetter(e.target.value)}
+            onChange={handleCoverLetterChange}
           />
+          {errors.coverLetter && (
+            <p className='text-red-500 text-xs mt-1'>{errors.coverLetter}</p>
+          )}
         </div>
 
         {/* Add horizontal line here */}
@@ -363,7 +437,9 @@ export const ApplyJobModal: React.FC<ApplyJobModalProps> = ({
         {/* Screening Questions Section */}
         {screeningQuestions.length > 0 && (
           <div className='mb-6'>
-            <h3 className='text-lg font-semibold mb-4'>Screening Questions</h3>
+            <h3 className='text-base sm:text-lg font-semibold mb-4'>
+              Screening Questions
+            </h3>
             {screeningQuestions.map(renderQuestion)}
           </div>
         )}
@@ -374,11 +450,20 @@ export const ApplyJobModal: React.FC<ApplyJobModalProps> = ({
           </div>
         )}
 
-        <div className='flex justify-end gap-2 mt-6'>
-          <Button variant='secondary' onClick={onClose} disabled={loading}>
+        <div className='flex flex-col sm:flex-row justify-end gap-2 mt-6'>
+          <Button
+            variant='secondary'
+            onClick={onClose}
+            disabled={loading}
+            className='w-full sm:w-auto order-2 sm:order-1'
+          >
             Cancel
           </Button>
-          <Button onClick={handleSubmitApplication} disabled={loading}>
+          <Button
+            onClick={handleSubmitApplication}
+            disabled={loading}
+            className='w-full sm:w-auto order-1 sm:order-2'
+          >
             {loading ? 'Submitting...' : 'Apply Now'}
           </Button>
         </div>

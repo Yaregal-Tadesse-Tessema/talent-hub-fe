@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 import { useEffect } from 'react';
 import {
@@ -1167,16 +1168,7 @@ export default function HeroSection() {
                 placeholder='Job title, Keyword...'
               />
             </div>
-            <div className='h-6 w-px bg-gray-200 hidden md:block' />
-            <div className='flex items-center flex-1 px-3'>
-              <LocationIcon />
-              <input
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className='w-full bg-gray-50 rounded-full px-4 py-2 outline-none text-gray-700 ml-2 border-none focus:ring-2 focus:ring-blue-100 transition'
-                placeholder='Your Location'
-              />
-            </div>
+
             <button
               type='submit'
               className='ml-0 md:ml-4 mt-2 md:mt-0 px-6 py-3 bg-blue-600 text-white rounded-full font-semibold hover:bg-blue-700 transition shadow'
@@ -1200,7 +1192,10 @@ export default function HeroSection() {
       </div>
       {/* Stats Cards */}
       <div className='max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mt-16'>
-        <div className='bg-white rounded-xl shadow p-6 flex items-center gap-4'>
+        <Link
+          href='/find-job'
+          className='bg-white rounded-xl shadow p-6 flex items-center gap-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer'
+        >
           <BriefcaseIcon />
           <div>
             <div className='text-2xl font-bold text-gray-900'>
@@ -1208,8 +1203,11 @@ export default function HeroSection() {
             </div>
             <div className='text-gray-500 text-sm'>Live Job</div>
           </div>
-        </div>
-        <div className='bg-white rounded-xl shadow p-6 flex items-center gap-4'>
+        </Link>
+        <Link
+          href='/find-employers'
+          className='bg-white rounded-xl shadow p-6 flex items-center gap-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer'
+        >
           <BuildingIcon />
           <div>
             <div className='text-2xl font-bold text-gray-900'>
@@ -1217,8 +1215,11 @@ export default function HeroSection() {
             </div>
             <div className='text-gray-500 text-sm'>Companies</div>
           </div>
-        </div>
-        <div className='bg-white rounded-xl shadow p-6 flex items-center gap-4'>
+        </Link>
+        <Link
+          href='/find-candidates'
+          className='bg-white rounded-xl shadow p-6 flex items-center gap-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer'
+        >
           <UserGroupIcon />
           <div>
             <div className='text-2xl font-bold text-gray-900'>
@@ -1226,14 +1227,17 @@ export default function HeroSection() {
             </div>
             <div className='text-gray-500 text-sm'>Candidates</div>
           </div>
-        </div>
-        <div className='bg-white rounded-xl shadow p-6 flex items-center gap-4'>
+        </Link>
+        <Link
+          href='/find-job'
+          className='bg-white rounded-xl shadow p-6 flex items-center gap-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer'
+        >
           <BriefcaseIcon />
           <div>
             <div className='text-2xl font-bold text-gray-900'>7,532</div>
             <div className='text-gray-500 text-sm'>New Jobs</div>
           </div>
-        </div>
+        </Link>
       </div>
     </section>
   );

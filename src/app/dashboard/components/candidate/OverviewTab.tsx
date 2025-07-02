@@ -74,30 +74,53 @@ export default function OverviewTab() {
         </p>
       </div>
 
-      {/* Stats Cards */}
-      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 lg:mb-8'>
-        <div className='bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-4 sm:p-6 flex flex-col items-start border border-gray-200 dark:border-gray-700'>
-          <div className='text-xl sm:text-2xl lg:text-3xl font-bold mb-2 text-gray-900 dark:text-white'>
-            {stats.appliedJobs}
+      {/* Stats Card */}
+      <div className='bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-4 sm:p-6 mb-6 lg:mb-8 border border-gray-200 dark:border-gray-700'>
+        <div className='flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-8'>
+          <div className='flex items-center gap-6 sm:gap-8'>
+            <div className='text-center sm:text-left'>
+              <div className='text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-1'>
+                {stats.appliedJobs}
+              </div>
+              <div className='text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium'>
+                Applied Jobs
+              </div>
+            </div>
+            <div className='w-px h-8 sm:h-12 bg-gray-300 dark:bg-gray-600'></div>
+            <div className='text-center sm:text-left'>
+              <div className='text-2xl sm:text-3xl lg:text-4xl font-bold text-purple-600 dark:text-purple-400 mb-1'>
+                {stats.favoriteJobs}
+              </div>
+              <div className='text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium'>
+                Favorite Jobs
+              </div>
+            </div>
+            <div className='w-px h-8 sm:h-12 bg-gray-300 dark:bg-gray-600'></div>
+            <div className='text-center sm:text-left'>
+              <div className='text-2xl sm:text-3xl lg:text-4xl font-bold text-green-600 dark:text-green-400 mb-1'>
+                {stats.jobAlerts}
+              </div>
+              <div className='text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium'>
+                Job Alerts
+              </div>
+            </div>
           </div>
-          <div className='text-sm sm:text-base text-gray-500 dark:text-gray-400'>
-            Applied Jobs
-          </div>
-        </div>
-        <div className='bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-4 sm:p-6 flex flex-col items-start border border-gray-200 dark:border-gray-700'>
-          <div className='text-xl sm:text-2xl lg:text-3xl font-bold mb-2 text-gray-900 dark:text-white'>
-            {stats.favoriteJobs}
-          </div>
-          <div className='text-sm sm:text-base text-gray-500 dark:text-gray-400'>
-            Favorite Jobs
-          </div>
-        </div>
-        <div className='bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700/50 p-4 sm:p-6 flex flex-col items-start border border-gray-200 dark:border-gray-700 sm:col-span-2 lg:col-span-1'>
-          <div className='text-xl sm:text-2xl lg:text-3xl font-bold mb-2 text-gray-900 dark:text-white'>
-            {stats.jobAlerts}
-          </div>
-          <div className='text-sm sm:text-base text-gray-500 dark:text-gray-400'>
-            Job Alerts
+          <div className='hidden sm:block'>
+            <div className='w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center'>
+              <svg
+                className='w-8 h-8 text-white'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'
+                />
+              </svg>
+            </div>
           </div>
         </div>
       </div>

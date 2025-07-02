@@ -21,7 +21,7 @@ export default function HomePage() {
         <CVBuilderSection />
         <PopularVacancies />
         <HowItWorks />
-        <PopularCategory />
+        {/* <PopularCategory /> */}
         <FeaturedJobs />
         <TopCompanies />
         <Testimonials />

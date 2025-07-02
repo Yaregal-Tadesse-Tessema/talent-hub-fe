@@ -314,4 +314,14 @@ export const jobService = {
       throw error;
     }
   },
+
+  async getJobIndustryStats(): Promise<any> {
+    try {
+      const response = await api.get('/jobs/get-job-industry');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching job industry stats:', error);
+      throw error;
+    }
+  },
 };

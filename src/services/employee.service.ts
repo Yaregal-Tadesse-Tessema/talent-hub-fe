@@ -41,6 +41,8 @@ export interface JobSeekerProfile {
   experiences?: any;
   socialMediaLinks?: Record<string, string>;
   alertConfiguration?: any;
+  isProfilePublic: boolean;
+  isResumePublic: boolean;
 
   status: 'Active' | 'Inactive' | 'Pending' | string;
   tenantId: string;

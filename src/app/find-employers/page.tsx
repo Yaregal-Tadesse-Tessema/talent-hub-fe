@@ -7,6 +7,7 @@ import {
   EmployersResponse,
 } from '@/services/employer.service';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 const orgTypes = [
   'Government',
@@ -85,6 +86,7 @@ function Pagination({
 }
 
 function FindEmployersPage() {
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showOrgType, setShowOrgType] = useState(true);
@@ -183,6 +185,16 @@ function FindEmployersPage() {
     router.push(`/find-employers?${queryParams.toString()}`);
   };
 
+  const handleClearFilters = () => {
+    setSearchFilters({
+      keyword: '',
+      location: '',
+      organizationType: '',
+    });
+    setPage(1);
+    router.push('/find-employers');
+  };
+
   // Add keyboard event handler for search
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -192,6 +204,164 @@ function FindEmployersPage() {
 
   const totalPages = pagination.totalPages;
   const paginatedEmployers = employers;
+
+  // Show loading state while auth is being checked
+  if (authLoading) {
+    return (
+      <div className='flex justify-center items-center min-h-[200px] bg-gray-50 dark:bg-gray-900'>
+        <div className='text-center'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4'></div>
+          <p className='text-gray-600 dark:text-gray-400'>
+            Checking authentication...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show non-logged in user view only after auth loading is complete and user is null
+  if (!user) {
+    return (
+      <div className='min-h-screen bg-gray-50 dark:bg-gray-900'>
+        {/* Hero Section */}
+        <section className='bg-white dark:bg-gray-800 py-20'>
+          <div className='container mx-auto px-4'>
+            <div className='max-w-3xl mx-auto text-center'>
+              <h1 className='text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6'>
+                Discover Top Employers
+              </h1>
+              <p className='text-xl text-gray-600 dark:text-gray-300 mb-8'>
+                Explore companies, understand their culture, and find your
+                perfect workplace match
+              </p>
+              <Link
+                href='/signup?type=employee'
+                className='inline-block px-8 py-4 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors'
+              >
+                Join Now - It's Free
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className='py-20'>
+          <div className='container mx-auto px-4'>
+            <h2 className='text-3xl font-bold text-center mb-12 dark:text-white'>
+              Why Use TalentHub to Find Employers?
+            </h2>
+            <div className='grid md:grid-cols-3 gap-8'>
+              <FeatureCard
+                title='Comprehensive Company Profiles'
+                description='Get detailed insights into company culture, benefits, work environment, and growth opportunities before applying.'
+                icon='🏢'
+              />
+              <FeatureCard
+                title='Smart Job Matching'
+                description='Our AI-powered platform matches you with employers that align with your skills, experience, and career goals.'
+                icon='🎯'
+              />
+              <FeatureCard
+                title='Direct Application Process'
+                description='Apply directly to companies through our platform with a streamlined process that saves you time and effort.'
+                icon='📝'
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* How It Works Section */}
+        <section className='py-20 bg-white dark:bg-gray-800'>
+          <div className='container mx-auto px-4'>
+            <h2 className='text-3xl font-bold text-center mb-12 dark:text-white'>
+              How It Works
+            </h2>
+            <div className='grid md:grid-cols-4 gap-8'>
+              <StepCard
+                number='1'
+                title='Create Your Profile'
+                description='Sign up and build your professional profile with skills and experience'
+              />
+              <StepCard
+                number='2'
+                title='Browse Employers'
+                description='Explore companies and understand their culture and opportunities'
+              />
+              <StepCard
+                number='3'
+                title='Apply to Jobs'
+                description='Submit applications directly to companies that interest you'
+              />
+              <StepCard
+                number='4'
+                title='Get Hired'
+                description='Connect with employers and land your dream job'
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Benefits Section */}
+        <section className='py-20'>
+          <div className='container mx-auto px-4'>
+            <h2 className='text-3xl font-bold text-center mb-12 dark:text-white'>
+              Benefits for Job Seekers
+            </h2>
+            <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-8'>
+              <BenefitCard
+                title='Company Insights'
+                description='Learn about company culture, benefits, and work environment before applying'
+                icon='🔍'
+              />
+              <BenefitCard
+                title='Career Growth'
+                description='Find employers that offer training, mentorship, and advancement opportunities'
+                icon='📈'
+              />
+              <BenefitCard
+                title='Work-Life Balance'
+                description='Discover companies that prioritize employee well-being and flexible work arrangements'
+                icon='⚖️'
+              />
+              <BenefitCard
+                title='Competitive Salaries'
+                description='Access information about compensation packages and benefits'
+                icon='💰'
+              />
+              <BenefitCard
+                title='Diverse Opportunities'
+                description='Explore employers across different industries and company sizes'
+                icon='🌍'
+              />
+              <BenefitCard
+                title='Direct Communication'
+                description='Connect directly with hiring managers and company representatives'
+                icon='💬'
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className='py-20 bg-blue-600 text-white'>
+          <div className='container mx-auto px-4 text-center'>
+            <h2 className='text-3xl font-bold mb-6'>
+              Ready to Find Your Dream Employer?
+            </h2>
+            <p className='text-xl mb-8'>
+              Join thousands of job seekers already using TalentHub
+            </p>
+            <Link
+              href='/signup?type=employee'
+              className='inline-block px-8 py-4 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors'
+            >
+              Start Your Job Search Today
+            </Link>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -279,13 +449,33 @@ function FindEmployersPage() {
             />
           </div>
           {/* Find Employer button */}
-          <div className='flex items-center pl-0 lg:pl-4 w-full lg:w-auto'>
+          <div className='flex items-center gap-2 pl-0 lg:pl-4 w-full lg:w-auto'>
             <button
               className='bg-blue-600 dark:bg-blue-500 text-white px-6 sm:px-8 py-3 rounded-md font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition w-full lg:w-auto text-sm sm:text-base'
               onClick={handleSearch}
             >
               Find Employer
             </button>
+            {(searchFilters.keyword ||
+              searchFilters.location ||
+              searchFilters.organizationType) && (
+              <button
+                className='bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-3 rounded-md font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition text-sm sm:text-base flex items-center gap-2'
+                onClick={handleClearFilters}
+                title='Clear all filters'
+              >
+                <svg
+                  width='16'
+                  height='16'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                >
+                  <path d='M6 18L18 6M6 6l12 12' strokeWidth='2' />
+                </svg>
+                <span className='hidden sm:inline'>Clear</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -455,6 +645,29 @@ function FindEmployersPage() {
               Filter
             </button>
           </div>
+
+          {/* Clear Filters Button */}
+          {(searchFilters.keyword ||
+            searchFilters.location ||
+            searchFilters.organizationType) && (
+            <div className='mb-6'>
+              <button
+                onClick={handleClearFilters}
+                className='w-full bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 py-2 px-3 rounded-md font-medium hover:bg-red-100 dark:hover:bg-red-900/30 transition text-sm flex items-center justify-center gap-2 border border-red-200 dark:border-red-800'
+              >
+                <svg
+                  width='14'
+                  height='14'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                >
+                  <path d='M6 18L18 6M6 6l12 12' strokeWidth='2' />
+                </svg>
+                Clear All Filters
+              </button>
+            </div>
+          )}
 
           {/* Organization Type */}
           <div>
@@ -671,6 +884,69 @@ function FindEmployersPageWrapper() {
     >
       <FindEmployersPage />
     </Suspense>
+  );
+}
+
+// Component definitions for the marketing page
+function FeatureCard({
+  title,
+  description,
+  icon,
+}: {
+  title: string;
+  description: string;
+  icon: string;
+}) {
+  return (
+    <div className='text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-700'>
+      <div className='text-4xl mb-4'>{icon}</div>
+      <h3 className='text-xl font-semibold mb-3 text-gray-900 dark:text-white'>
+        {title}
+      </h3>
+      <p className='text-gray-600 dark:text-gray-300'>{description}</p>
+    </div>
+  );
+}
+
+function StepCard({
+  number,
+  title,
+  description,
+}: {
+  number: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className='text-center'>
+      <div className='w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4'>
+        {number}
+      </div>
+      <h3 className='text-lg font-semibold mb-2 text-gray-900 dark:text-white'>
+        {title}
+      </h3>
+      <p className='text-gray-600 dark:text-gray-300'>{description}</p>
+    </div>
+  );
+}
+
+function BenefitCard({
+  title,
+  description,
+  icon,
+}: {
+  title: string;
+  description: string;
+  icon: string;
+}) {
+  return (
+    <div className='p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-700'>
+      <div className='text-3xl mb-3'>{icon}</div>
+      <h3 className='text-lg font-semibold mb-2 text-gray-900 dark:text-white'>
+        {title}
+      </h3>
+      <p className='text-gray-600 dark:text-gray-300 text-sm'>{description}</p>
+    </div>
   );
 }
 

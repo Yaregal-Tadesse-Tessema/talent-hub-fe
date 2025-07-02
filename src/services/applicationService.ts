@@ -54,6 +54,8 @@ interface UserInfo {
   technicalSkills?: string[] | null;
   telegramUserId?: string | null;
   yearOfExperience?: number | null;
+  isProfilePublic?: boolean;
+  isResumePublic?: boolean;
 }
 
 export interface Application {

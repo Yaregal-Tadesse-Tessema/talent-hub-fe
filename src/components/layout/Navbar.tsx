@@ -155,9 +155,12 @@ export function Navbar({ page = 'home' }: NavbarProps) {
           detail: { employer },
         });
         window.dispatchEvent(employerChangeEvent);
+      } else {
+        throw new Error('User not found');
       }
     } catch (error) {
       console.error('Error:', error);
+      throw error; // Re-throw to let the component handle the loading state
     }
   };
 
@@ -183,6 +186,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
     { href: '/', label: 'Home' },
     { href: '/find-job', label: 'Find Job' },
     { href: '/find-candidates', label: 'Find Candidates' },
+    { href: '/find-employers', label: 'Find Companies' },
     { href: '/pricing', label: 'Pricing Plans' },
     { href: '/customer-supports', label: 'Support' },
   ];

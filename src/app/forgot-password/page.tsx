@@ -3,13 +3,55 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
+import { userService } from '@/services/userService';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!email) {
+      setError('Please enter your email address');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+    setMessage('');
+
+    try {
+      // Get dynamic origin
+      const origin =
+        typeof window !== 'undefined'
+          ? window.location.origin
+          : 'http://138.197.105.31:3000';
+
+      const response = await userService.sendPasswordResetEmail({
+        email: email,
+        link: `${origin}/reset-password`,
+      });
+
+      setMessage(
+        'Password reset email sent successfully! Please check your email.',
+      );
+      setEmail('');
+    } catch (err: any) {
+      setError(
+        err.response?.data?.message ||
+          'Failed to send password reset email. Please try again.',
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className='min-h-screen flex justify-center items-center bg-gray-50'>
-      <div className='flex flex-col justify-center px-6 py-12 bg-white rounded-xl shadow-sm max-w-lg w-full mx-4'>
+      <div className='flex flex-col justify-center px-6 py-12 bg-white rounded-xl shadow-sm max-w-xl w-full mx-4'>
         <div className='mb-8 flex justify-center items-center gap-2'>
           <span className='inline-block bg-blue-100 p-2 rounded-full items-center'>
             <svg width='24' height='24' fill='none' viewBox='0 0 24 24'>
@@ -55,16 +97,58 @@ export default function ForgotPasswordPage() {
             Create Account
           </Link>
         </p>
-        <form className='space-y-4'>
+
+        {message && (
+          <div className='mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded'>
+            {message}
+          </div>
+        )}
+
+        {error && (
+          <div className='mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded'>
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className='space-y-4'>
           <input
             type='email'
             placeholder='Email address'
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className='w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200'
+            disabled={isLoading}
           />
-          <Button type='submit' className='w-full mt-2'>
-            Reset Password <span className='ml-2'>&rarr;</span>
+          <Button type='submit' className='w-full mt-2' disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <svg
+                  className='animate-spin -ml-1 mr-3 h-5 w-5 text-white'
+                  xmlns='http://www.w3.org/2000/svg'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                >
+                  <circle
+                    className='opacity-25'
+                    cx='12'
+                    cy='12'
+                    r='10'
+                    stroke='currentColor'
+                    strokeWidth='4'
+                  ></circle>
+                  <path
+                    className='opacity-75'
+                    fill='currentColor'
+                    d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                  ></path>
+                </svg>
+                Sending...
+              </>
+            ) : (
+              <>
+                Reset Password <span className='ml-2'>&rarr;</span>
+              </>
+            )}
           </Button>
         </form>
         <div className='flex items-center my-4'>
@@ -76,6 +160,7 @@ export default function ForgotPasswordPage() {
           <Button
             variant='outline'
             className='w-1/2 flex items-center justify-center gap-2'
+            disabled={isLoading}
           >
             <svg width='20' height='20' viewBox='0 0 20 20' fill='none'>
               <g clipPath='url(#clip0_88_102)'>
@@ -107,6 +192,7 @@ export default function ForgotPasswordPage() {
           <Button
             variant='outline'
             className='w-1/2 flex items-center justify-center gap-2'
+            disabled={isLoading}
           >
             <svg width='20' height='20' viewBox='0 0 20 20' fill='none'>
               <path

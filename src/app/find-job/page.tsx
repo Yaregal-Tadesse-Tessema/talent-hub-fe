@@ -10,6 +10,7 @@ import { Job } from '@/types/job';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/contexts/ToastContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { ShareButton } from '@/components/ui/ShareButton';
 
 // Helper function to check if a job is expired
 const isJobExpired = (deadline: string): boolean => {
@@ -200,11 +201,18 @@ function FindJobContent() {
             pagination.limit,
           );
         } else {
-          // Otherwise, use getPublicJobs or getJobs based on user role
-          response =
-            !user || user?.role === 'employee'
-              ? await jobService.getPublicJobs(currentPage, pagination.limit)
-              : await jobService.getJobs();
+          // Use different endpoints based on user login status
+          if (user) {
+            // User is logged in - use the new endpoint
+            const queryParams = `q=status:=:Posted&t=${pagination.limit}&sk=${(currentPage - 1) * pagination.limit}`;
+            response = await jobService.getJobs(queryParams);
+          } else {
+            // User is not logged in - use public jobs endpoint
+            response = await jobService.getPublicJobs(
+              currentPage,
+              pagination.limit,
+            );
+          }
         }
 
         setJobs(response.items);
@@ -494,99 +502,181 @@ function FindJobContent() {
 
         {/* Card View */}
         {viewMode === 'card' && (
-          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8'>
             {jobs.map((job) => (
               <div
                 key={job.id}
-                className='rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 sm:p-6 shadow-sm dark:shadow-gray-700/50 transition hover:shadow-md dark:hover:shadow-gray-600/50 relative hover:border-blue-600 dark:hover:border-blue-500'
+                className='group relative z-0 hover:z-30 focus-within:z-30 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-xl dark:hover:shadow-gray-900/50 transition-all duration-300 hover:border-blue-300 dark:hover:border-blue-600 hover:-translate-y-1'
               >
-                <div className='flex items-center gap-3 mb-3'>
-                  {job.companyLogo && (
-                    <img
-                      src={
-                        job.companyLogo?.path ||
-                        '/images/default-company-logo.png'
-                      }
-                      alt={job.companyName}
-                      className='w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 object-contain'
-                    />
-                  )}
-                  <div className='flex-1 min-w-0'>
-                    <span className='font-semibold text-gray-800 dark:text-white text-sm sm:text-base truncate block'>
-                      {job.companyName}
-                    </span>
-                    {job.isSaved && (
-                      <span className='inline-block mt-1 bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 text-xs px-2 py-0.5 rounded-full font-medium'>
-                        Saved
+                {/* Header with company info */}
+                <div className='p-6 pb-4'>
+                  <div className='flex items-start justify-between mb-4'>
+                    <div className='flex items-center gap-3 flex-1 min-w-0'>
+                      <div className='flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl flex items-center justify-center border border-blue-200 dark:border-blue-700 overflow-hidden'>
+                        {job.companyLogo ? (
+                          <img
+                            src={
+                              job.companyLogo.path ||
+                              '/images/default-company-logo.png'
+                            }
+                            alt={job.companyName}
+                            className='w-8 h-8 object-contain'
+                          />
+                        ) : (
+                          <Briefcase className='w-6 h-6 text-blue-600 dark:text-blue-400' />
+                        )}
+                      </div>
+                      <div className='flex-1 min-w-0'>
+                        <h3 className='font-semibold text-gray-900 dark:text-white text-sm truncate'>
+                          {job.companyName}
+                        </h3>
+                        <div className='flex items-center gap-1 mt-1'>
+                          <MapPin className='w-3 h-3 text-gray-400 dark:text-gray-500' />
+                          <span className='text-xs text-gray-500 dark:text-gray-400 truncate'>
+                            {job.location}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Status badges */}
+                    <div className='flex flex-col gap-1'>
+                      {job.isSaved && (
+                        <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400'>
+                          <Bookmark className='w-3 h-3 mr-1' />
+                          Saved
+                        </span>
+                      )}
+                      {isJobExpired(job.deadline) && (
+                        <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'>
+                          Expired
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Job title */}
+                  <Link
+                    href={`/find-job/${job.id}`}
+                    className='block group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors'
+                  >
+                    <h2 className='font-bold text-gray-900 dark:text-white text-lg leading-tight mb-3 line-clamp-2 hover:text-blue-600 dark:hover:text-blue-400'>
+                      {job.title}
+                    </h2>
+                  </Link>
+
+                  {/* Job details */}
+                  <div className='space-y-3'>
+                    <div className='flex items-center justify-between'>
+                      <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'>
+                        {job.employmentType}
                       </span>
-                    )}
-                    {isJobExpired(job.deadline) && (
-                      <span className='inline-block mt-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs px-2 py-0.5 rounded-full font-medium'>
-                        Expired
-                      </span>
-                    )}
+                      <div className='text-right'>
+                        <div className='text-sm font-semibold text-gray-900 dark:text-white'>
+                          ${job.salaryRange?.min || 'N/A'} - $
+                          {job.salaryRange?.max || 'N/A'}
+                        </div>
+                        <div className='text-xs text-gray-500 dark:text-gray-400'>
+                          per year
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className='text-xs text-gray-400 dark:text-gray-500 mb-2'>
-                  {job.location}
-                </div>
-                <Link
-                  href={`/find-job/${job.id}`}
-                  className='block text-blue-600 dark:text-blue-400 font-semibold text-base sm:text-lg mb-2 hover:underline line-clamp-2'
-                >
-                  {job.title}
-                </Link>
-                <div className='flex items-center text-xs text-gray-500 dark:text-gray-400 gap-2 mb-3'>
-                  <span>{job.employmentType}</span>
-                  <span>•</span>
-                  <span>
-                    {job.salaryRange?.min || 'N/A'} -{' '}
-                    {job.salaryRange?.max || 'N/A'}
-                  </span>
-                </div>
-                <div className='text-xs text-gray-500 dark:text-gray-400 mb-4'>
-                  <div className='mb-1'>
-                    Posted: {new Date(job.postedDate).toLocaleDateString()}
+
+                {/* Footer with dates and actions */}
+                <div className='px-6 pb-6'>
+                  {/* Date info */}
+                  <div className='flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-4'>
+                    <div className='flex items-center gap-1'>
+                      <svg
+                        className='w-3 h-3'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                      >
+                        <rect
+                          x='3'
+                          y='3'
+                          width='18'
+                          height='7'
+                          strokeWidth='2'
+                        />
+                        <rect
+                          x='3'
+                          y='14'
+                          width='18'
+                          height='7'
+                          strokeWidth='2'
+                        />
+                      </svg>
+                      Posted {new Date(job.postedDate).toLocaleDateString()}
+                    </div>
+                    <div
+                      className={`flex items-center gap-1 ${isJobExpired(job.deadline) ? 'text-red-500 dark:text-red-400 font-medium' : ''}`}
+                    >
+                      <svg
+                        className='w-3 h-3'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                      >
+                        <circle cx='12' cy='12' r='10' strokeWidth='2' />
+                        <polyline points='12,6 12,12 16,14' strokeWidth='2' />
+                      </svg>
+                      {isJobExpired(job.deadline) ? 'Expired' : 'Deadline'}{' '}
+                      {new Date(job.deadline).toLocaleDateString()}
+                    </div>
                   </div>
-                  <div
-                    className={`${
-                      isJobExpired(job.deadline)
-                        ? 'text-red-500 dark:text-red-400 font-semibold'
-                        : ''
-                    }`}
-                  >
-                    {isJobExpired(job.deadline) ? 'Expired: ' : 'Deadline: '}
-                    {new Date(job.deadline).toLocaleDateString()}
+
+                  {/* Action buttons */}
+                  <div className='flex items-center gap-3'>
+                    <button
+                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
+                        isJobExpired(job.deadline)
+                          ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                          : 'bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 hover:shadow-lg'
+                      }`}
+                      onClick={() => handleApplyClick(job.id)}
+                      disabled={isJobExpired(job.deadline)}
+                    >
+                      {isJobExpired(job.deadline) ? (
+                        'Expired'
+                      ) : (
+                        <>
+                          Apply Now
+                          <ArrowRight className='w-4 h-4' />
+                        </>
+                      )}
+                    </button>
+
+                    <div className='flex items-center gap-2'>
+                      <button
+                        className={`p-2 rounded-lg transition-all duration-200 ${
+                          job.isSaved
+                            ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
+                            : 'text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        }`}
+                        onClick={() =>
+                          job.isSaved
+                            ? handleUnsaveJob(job.id)
+                            : handleSaveJob(job.id)
+                        }
+                      >
+                        <Bookmark
+                          className={`w-4 h-4 ${job.isSaved ? 'fill-current' : ''}`}
+                        />
+                      </button>
+
+                      <div className='opacity-0 group-hover:opacity-100 transition-opacity duration-200 relative'>
+                        <ShareButton />
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className='flex items-center justify-between'>
-                  <button
-                    className={`${job.isSaved ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400'}`}
-                    onClick={() =>
-                      job.isSaved
-                        ? handleUnsaveJob(job.id)
-                        : handleSaveJob(job.id)
-                    }
-                  >
-                    <Bookmark
-                      className={`w-4 h-4 sm:w-5 sm:h-5 ${job.isSaved ? 'fill-current' : ''}`}
-                    />
-                  </button>
-                  <button
-                    className={`${
-                      isJobExpired(job.deadline)
-                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed border border-gray-200 dark:border-gray-600'
-                        : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white border border-blue-200 dark:border-blue-700'
-                    } font-semibold px-3 sm:px-4 py-2 rounded-lg flex items-center gap-1 sm:gap-2 transition text-xs sm:text-sm`}
-                    onClick={() => handleApplyClick(job.id)}
-                    disabled={isJobExpired(job.deadline)}
-                  >
-                    {isJobExpired(job.deadline) ? 'Expired' : 'Apply'}
-                    {!isJobExpired(job.deadline) && (
-                      <ArrowRight className='w-3 h-3 sm:w-4 sm:h-4' />
-                    )}
-                  </button>
-                </div>
+
+                {/* Hover overlay effect */}
+                <div className='absolute inset-0 bg-gradient-to-t from-blue-50/0 via-blue-50/0 to-blue-50/0 group-hover:from-blue-50/5 group-hover:via-blue-50/3 group-hover:to-blue-50/10 dark:group-hover:from-blue-900/5 dark:group-hover:via-blue-900/3 dark:group-hover:to-blue-900/10 transition-all duration-300 pointer-events-none rounded-2xl' />
               </div>
             ))}
           </div>
@@ -745,6 +835,11 @@ function FindJobContent() {
                         className={`w-4 h-4 sm:w-5 sm:h-5 ${job.isSaved ? 'fill-current' : ''}`}
                       />
                     </button>
+                    <div
+                      className={`transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'} relative`}
+                    >
+                      <ShareButton />
+                    </div>
                     <button
                       className={`${
                         isJobExpired(job.deadline)

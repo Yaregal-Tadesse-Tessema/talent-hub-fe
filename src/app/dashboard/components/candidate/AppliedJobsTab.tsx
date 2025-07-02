@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { applicationService } from '@/services/applicationService';
 import type { Application } from '@/services/applicationService';
 import ApplicationDetailModal from './ApplicationDetailModal';
+import { ShareButton } from '@/components/ui/ShareButton';
 
 export default function AppliedJobsTab() {
   const [applications, setApplications] = useState<Application[]>([]);
@@ -142,6 +143,9 @@ export default function AppliedJobsTab() {
             >
               View Details
             </button>
+            <div className='mt-2'>
+              <ShareButton />
+            </div>
           </div>
         ))}
       </div>
@@ -201,6 +205,9 @@ export default function AppliedJobsTab() {
               >
                 View Details
               </button>
+              <div className='mt-2'>
+                <ShareButton />
+              </div>
             </div>
           </div>
         ))}

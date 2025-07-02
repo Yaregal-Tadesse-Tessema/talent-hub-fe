@@ -10,7 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { FiBookmark } from 'react-icons/fi';
 
 export default function FindCandidatesPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [candidates, setCandidates] = useState<JobSeekerProfile[]>([]);
   const [loading, setLoading] = useState(false);
   const [filterLoading, setFilterLoading] = useState(false);
@@ -282,7 +282,14 @@ export default function FindCandidatesPage() {
 
   return (
     <div className='min-h-screen bg-gray-50 dark:bg-gray-900'>
-      {!user ? (
+      {authLoading ? (
+        <div className='flex justify-center items-center min-h-screen'>
+          <div className='text-center'>
+            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4'></div>
+            <p className='text-gray-600 dark:text-gray-400'>Loading...</p>
+          </div>
+        </div>
+      ) : !user ? (
         <>
           {/* Hero Section */}
           <section className='bg-white dark:bg-gray-800 py-20'>

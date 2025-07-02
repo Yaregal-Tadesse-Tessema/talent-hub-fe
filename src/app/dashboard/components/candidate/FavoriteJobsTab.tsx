@@ -21,6 +21,7 @@ import { Job } from '@/types/job';
 import { useToast } from '@/contexts/ToastContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { ShareButton } from '@/components/ui/ShareButton';
 
 interface JobPost {
   id: string;

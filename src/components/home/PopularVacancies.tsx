@@ -12,7 +12,8 @@ export default function PopularVacancies() {
 
   useEffect(() => {
     const fetchJobStats = async () => {
-      const stats = await jobService.getJobStats();
+      const stats = await jobService.getJobIndustryStats();
+      console.log(stats);
       const sortedAndLimitedStats = stats
         .sort(
           (a: Vacancy, b: Vacancy) =>

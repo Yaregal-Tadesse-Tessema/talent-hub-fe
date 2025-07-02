@@ -130,9 +130,12 @@ export default function LoginPage() {
         // Close the popup and redirect to dashboard
         setShowEmployerSelection(false);
         router.push('/dashboard');
+      } else {
+        throw new Error(data.message || 'Failed to login');
       }
     } catch (error) {
       console.error('Error:', error);
+      throw error; // Re-throw to let the component handle the loading state
     }
   };
 

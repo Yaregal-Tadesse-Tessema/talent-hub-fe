@@ -20,8 +20,9 @@ export default function EmployerSelection({
   onClose,
 }: EmployerSelectionProps) {
   const [isCreating, setIsCreating] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [registrationType, setRegistrationType] =
-    useState<RegistrationType>('manual');
+    useState<RegistrationType>('etrade');
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     name: '',
@@ -46,6 +47,18 @@ export default function EmployerSelection({
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleEmployerSelect = async (employer: EmployerData) => {
+    setIsLoading(true);
+    try {
+      // Add a small delay to make the loading state visible
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      await onSelect(employer);
+    } catch (error) {
+      console.error('Error selecting employer:', error);
+      setIsLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -569,6 +582,18 @@ export default function EmployerSelection({
         onClick={onClose}
       />
 
+      {/* Loading Spinner Overlay */}
+      {isLoading && (
+        <div className='fixed inset-0 z-60 flex items-center justify-center bg-black bg-opacity-75'>
+          <div className='bg-white rounded-lg p-8 flex flex-col items-center space-y-4'>
+            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600'></div>
+            <p className='text-gray-700 font-medium'>
+              Connecting to your company...
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Modal */}
       <div className='flex min-h-full items-center justify-center p-4 text-center sm:p-0'>
         <div className='relative transform overflow-hidden rounded-xl bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:p-6'>
@@ -608,25 +633,49 @@ export default function EmployerSelection({
 
           {!isCreating ? (
             <>
-              <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-                {employers.map((employer) => (
-                  <div
-                    key={employer.id}
-                    onClick={() => onSelect(employer)}
-                    className='bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-blue-500 cursor-pointer group p-6'
-                  >
-                    <div className='flex flex-col items-center justify-center'>
-                      <div className='w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform'>
-                        <span className='text-xl font-semibold text-white'>
-                          {employer?.tenant?.tradeName?.charAt(0)}
-                        </span>
+              <div className='flex justify-center items-center'>
+                <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 place-items-center'>
+                  {employers.map((employer) => (
+                    <div
+                      key={employer.id}
+                      onClick={() =>
+                        !isLoading && handleEmployerSelect(employer)
+                      }
+                      className={`bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200 hover:border-blue-400 group p-8 transform hover:scale-105 hover:-translate-y-1 ${
+                        isLoading
+                          ? 'cursor-not-allowed opacity-50'
+                          : 'cursor-pointer'
+                      }`}
+                    >
+                      <div className='flex flex-col items-center justify-center'>
+                        <div className='w-20 h-20 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg'>
+                          <span className='text-2xl font-bold text-white'>
+                            {employer?.tenant?.tradeName?.charAt(0)}
+                          </span>
+                        </div>
+                        <h3 className='text-xl font-bold text-gray-800 text-center group-hover:text-blue-600 transition-colors mb-2'>
+                          {employer?.tenant?.tradeName}
+                        </h3>
+                        <div className='flex items-center text-sm text-gray-500 group-hover:text-blue-500 transition-colors'>
+                          <svg
+                            className='w-4 h-4 mr-1'
+                            fill='none'
+                            stroke='currentColor'
+                            viewBox='0 0 24 24'
+                          >
+                            <path
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              strokeWidth={2}
+                              d='M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'
+                            />
+                          </svg>
+                          <span>Company</span>
+                        </div>
                       </div>
-                      <h3 className='text-lg font-semibold text-gray-900 text-center group-hover:text-blue-600 transition-colors'>
-                        {employer?.tenant?.tradeName}
-                      </h3>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
 
               <div className='mt-8 text-center'>
@@ -658,32 +707,6 @@ export default function EmployerSelection({
                 <div className='flex bg-gray-100 rounded-lg p-1'>
                   <button
                     type='button'
-                    onClick={() => handleRegistrationTypeChange('manual')}
-                    className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-all ${
-                      registrationType === 'manual'
-                        ? 'bg-white text-blue-600 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    <div className='flex items-center justify-center space-x-2'>
-                      <svg
-                        className='w-4 h-4'
-                        fill='none'
-                        stroke='currentColor'
-                        viewBox='0 0 24 24'
-                      >
-                        <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                          strokeWidth={2}
-                          d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
-                        />
-                      </svg>
-                      <span>Manual Registration</span>
-                    </div>
-                  </button>
-                  <button
-                    type='button'
                     onClick={() => handleRegistrationTypeChange('etrade')}
                     className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-all ${
                       registrationType === 'etrade'
@@ -706,6 +729,33 @@ export default function EmployerSelection({
                         />
                       </svg>
                       <span>ETrade</span>
+                    </div>
+                  </button>
+
+                  <button
+                    type='button'
+                    onClick={() => handleRegistrationTypeChange('manual')}
+                    className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-all ${
+                      registrationType === 'manual'
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <div className='flex items-center justify-center space-x-2'>
+                      <svg
+                        className='w-4 h-4'
+                        fill='none'
+                        stroke='currentColor'
+                        viewBox='0 0 24 24'
+                      >
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
+                        />
+                      </svg>
+                      <span>Manual Registration</span>
                     </div>
                   </button>
                 </div>

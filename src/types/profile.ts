@@ -13,7 +13,7 @@ export interface UserProfile {
   middleName: string;
   lastName: string;
   gender: string;
-  status: string;
+  status?: string;
   address: Record<string, any>;
   birthDate: string;
   linkedinUrl: string;
@@ -38,4 +38,6 @@ export interface UserProfile {
   createdAt?: string;
   updatedAt?: string;
   role?: string;
+  isProfilePublic: boolean;
+  isResumePublic: boolean;
 }

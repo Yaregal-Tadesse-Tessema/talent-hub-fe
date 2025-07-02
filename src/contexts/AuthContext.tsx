@@ -27,7 +27,7 @@ interface AuthContextType {
     password: string,
   ) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
-  selectEmployer: (employer: EmployerData) => void;
+  selectEmployer: (employer: EmployerData) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -129,7 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           type: 'success',
           message: 'Login successful!',
         });
-        router.push('/dashboard');
+        router.push('/find-job');
         return { success: true, message: 'Login successful!' };
       }
 
@@ -166,7 +166,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push('/login');
   };
 
-  const selectEmployer = (employer: EmployerData) => {
+  const selectEmployer = async (employer: EmployerData) => {
     if (user) {
       const updatedUser = {
         ...user,
@@ -177,6 +177,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('user', JSON.stringify(updatedUser));
       }
       router.push('/dashboard');
+    } else {
+      throw new Error('User not found');
     }
   };
 

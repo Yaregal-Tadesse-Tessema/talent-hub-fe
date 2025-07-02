@@ -36,6 +36,8 @@ export interface User {
   professionalSummery: string;
   educations: Record<string, any>;
   experiences: Record<string, any>;
+  isProfilePublic: boolean;
+  isResumePublic: boolean;
 }
 
 export interface ReferralInformation {

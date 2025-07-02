@@ -229,22 +229,27 @@ export default function JobAlertsTab({
 
   return (
     <div className='mt-4 sm:mt-8'>
-      <div className='flex items-center justify-between mb-6'>
+      {/* Header - Improved responsive layout */}
+      <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6'>
         <div className='font-medium text-gray-900 dark:text-white text-base sm:text-lg'>
           Job Alerts
         </div>
-        <Button onClick={handleAddNew} disabled={loading}>
+        <Button
+          onClick={handleAddNew}
+          disabled={loading}
+          className='w-full sm:w-auto'
+        >
           Add New Alert
         </Button>
       </div>
 
-      {/* Table */}
+      {/* Table - Improved responsive design */}
       <div className='bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden'>
         {alertConfigurations.length === 0 ? (
-          <div className='p-8 text-center'>
+          <div className='p-4 sm:p-8 text-center'>
             <div className='text-gray-400 dark:text-gray-500 mb-4'>
               <svg
-                className='w-12 h-12 mx-auto'
+                className='w-8 h-8 sm:w-12 sm:h-12 mx-auto'
                 fill='none'
                 viewBox='0 0 24 24'
                 stroke='currentColor'
@@ -263,66 +268,134 @@ export default function JobAlertsTab({
                 />
               </svg>
             </div>
-            <h3 className='text-lg font-medium text-gray-900 dark:text-white mb-2'>
+            <h3 className='text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-2'>
               No job alerts yet
             </h3>
-            <p className='text-gray-500 dark:text-gray-400 mb-4'>
+            <p className='text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-4'>
               Create your first job alert to get notified about relevant
               opportunities
             </p>
-            <Button onClick={handleAddNew}>Create First Alert</Button>
+            <Button onClick={handleAddNew} className='w-full sm:w-auto'>
+              Create First Alert
+            </Button>
           </div>
         ) : (
-          <div className='overflow-x-auto'>
-            <table className='w-full'>
-              <thead className='bg-gray-50 dark:bg-gray-700'>
-                <tr>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider'>
-                    Job Title
-                  </th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider'>
-                    Position
-                  </th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider'>
-                    Location
-                  </th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider'>
-                    Industry
-                  </th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider'>
-                    Salary
-                  </th>
-                  <th className='px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider'>
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className='bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700'>
+          <>
+            {/* Desktop Table */}
+            <div className='hidden lg:block overflow-x-auto'>
+              <table className='w-full'>
+                <thead className='bg-gray-50 dark:bg-gray-700'>
+                  <tr>
+                    <th className='px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider'>
+                      Job Title
+                    </th>
+                    <th className='px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider'>
+                      Position
+                    </th>
+                    <th className='px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider'>
+                      Location
+                    </th>
+                    <th className='px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider'>
+                      Industry
+                    </th>
+                    <th className='px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider'>
+                      Salary
+                    </th>
+                    <th className='px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider'>
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className='bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700'>
+                  {alertConfigurations.map((alert, index) => (
+                    <tr
+                      key={alert.id || index}
+                      className='hover:bg-gray-50 dark:hover:bg-gray-700'
+                    >
+                      <td className='px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white'>
+                        {alert.jobTitle}
+                      </td>
+                      <td className='px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300'>
+                        {alert.Position}
+                      </td>
+                      <td className='px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300'>
+                        {alert.address}
+                      </td>
+                      <td className='px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300'>
+                        {alert.industry}
+                      </td>
+                      <td className='px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300'>
+                        {alert.salary || 'Not specified'}
+                      </td>
+                      <td className='px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium'>
+                        <div className='flex items-center justify-end gap-2'>
+                          <button
+                            onClick={() => handleEdit(alert)}
+                            className='text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors p-1'
+                            disabled={loading}
+                          >
+                            <svg
+                              className='w-4 h-4'
+                              fill='none'
+                              viewBox='0 0 24 24'
+                              stroke='currentColor'
+                            >
+                              <path
+                                strokeLinecap='round'
+                                strokeLinejoin='round'
+                                strokeWidth='2'
+                                d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleDelete(alert)}
+                            className='text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors p-1'
+                            disabled={loading}
+                          >
+                            <svg
+                              className='w-4 h-4'
+                              fill='none'
+                              viewBox='0 0 24 24'
+                              stroke='currentColor'
+                            >
+                              <path
+                                strokeLinecap='round'
+                                strokeLinejoin='round'
+                                strokeWidth='2'
+                                d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile/Tablet Card Layout */}
+            <div className='lg:hidden'>
+              <div className='divide-y divide-gray-200 dark:divide-gray-700'>
                 {alertConfigurations.map((alert, index) => (
-                  <tr
+                  <div
                     key={alert.id || index}
-                    className='hover:bg-gray-50 dark:hover:bg-gray-700'
+                    className='p-4 hover:bg-gray-50 dark:hover:bg-gray-700'
                   >
-                    <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white'>
-                      {alert.jobTitle}
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300'>
-                      {alert.Position}
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300'>
-                      {alert.address}
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300'>
-                      {alert.industry}
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300'>
-                      {alert.salary || 'Not specified'}
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-right text-sm font-medium'>
-                      <div className='flex items-center justify-end gap-2'>
+                    <div className='flex items-start justify-between mb-3'>
+                      <div className='flex-1 min-w-0'>
+                        <h3 className='text-sm font-medium text-gray-900 dark:text-white truncate'>
+                          {alert.jobTitle}
+                        </h3>
+                        <p className='text-sm text-gray-500 dark:text-gray-300'>
+                          {alert.Position}
+                        </p>
+                      </div>
+                      <div className='flex items-center gap-2 ml-4'>
                         <button
                           onClick={() => handleEdit(alert)}
-                          className='text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors'
+                          className='text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors p-2'
                           disabled={loading}
                         >
                           <svg
@@ -341,7 +414,7 @@ export default function JobAlertsTab({
                         </button>
                         <button
                           onClick={() => handleDelete(alert)}
-                          className='text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors'
+                          className='text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors p-2'
                           disabled={loading}
                         >
                           <svg
@@ -359,24 +432,50 @@ export default function JobAlertsTab({
                           </svg>
                         </button>
                       </div>
-                    </td>
-                  </tr>
+                    </div>
+                    <div className='grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm'>
+                      <div>
+                        <span className='text-gray-500 dark:text-gray-400'>
+                          Location:
+                        </span>
+                        <span className='ml-2 text-gray-900 dark:text-white'>
+                          {alert.address}
+                        </span>
+                      </div>
+                      <div>
+                        <span className='text-gray-500 dark:text-gray-400'>
+                          Industry:
+                        </span>
+                        <span className='ml-2 text-gray-900 dark:text-white'>
+                          {alert.industry}
+                        </span>
+                      </div>
+                      <div className='sm:col-span-2'>
+                        <span className='text-gray-500 dark:text-gray-400'>
+                          Salary:
+                        </span>
+                        <span className='ml-2 text-gray-900 dark:text-white'>
+                          {alert.salary || 'Not specified'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </div>
+            </div>
+          </>
         )}
       </div>
 
-      {/* Modal */}
+      {/* Modal - Improved responsive design */}
       {showModal && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'>
-          <div className='bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto'>
+        <div className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50'>
+          <div className='bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto'>
             {/* Header */}
-            <div className='flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700'>
-              <div className='flex items-center gap-3'>
+            <div className='flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700'>
+              <div className='flex items-center gap-2 sm:gap-3'>
                 <svg
-                  className='w-6 h-6 text-blue-600'
+                  className='w-5 h-5 sm:w-6 sm:h-6 text-blue-600'
                   fill='none'
                   viewBox='0 0 24 24'
                   stroke='currentColor'
@@ -394,17 +493,17 @@ export default function JobAlertsTab({
                     d='M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z'
                   />
                 </svg>
-                <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
+                <h2 className='text-lg sm:text-xl font-semibold text-gray-900 dark:text-white'>
                   {editingAlert ? 'Edit Job Alert' : 'Add Job Alert'}
                 </h2>
               </div>
               <button
                 onClick={handleCloseModal}
-                className='text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors'
+                className='text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1'
                 disabled={loading}
               >
                 <svg
-                  className='w-6 h-6'
+                  className='w-5 h-5 sm:w-6 sm:h-6'
                   fill='none'
                   viewBox='0 0 24 24'
                   stroke='currentColor'
@@ -420,7 +519,7 @@ export default function JobAlertsTab({
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className='p-6 space-y-4'>
+            <form onSubmit={handleSubmit} className='p-4 sm:p-6 space-y-4'>
               {/* Job Title */}
               <div>
                 <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
@@ -522,7 +621,7 @@ export default function JobAlertsTab({
               </div>
 
               {/* Actions */}
-              <div className='flex gap-3 pt-4'>
+              <div className='flex flex-col sm:flex-row gap-3 pt-4'>
                 <Button
                   type='button'
                   onClick={handleCloseModal}

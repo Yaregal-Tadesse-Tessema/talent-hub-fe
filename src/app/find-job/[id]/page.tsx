@@ -20,6 +20,7 @@ import { jobService } from '@/services/jobService';
 import { Job } from '@/types/job';
 import { sanitizeHtml } from '@/utils/sanitize';
 import { useToast } from '@/contexts/ToastContext';
+import { ShareButton } from '@/components/ui/ShareButton';
 
 // Helper function to check if a job is expired
 const isJobExpired = (deadline: string): boolean => {
@@ -199,107 +200,149 @@ export default function JobDetailsPage({
         <div className='flex flex-col lg:flex-row gap-8'>
           {/* Main Content */}
           <div className='flex-1'>
-            <Card className='mb-6 p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6 shadow-sm'>
-              <div className='flex items-center gap-6'>
-                {job.companyLogo && (
-                  <img
-                    src={job.companyLogo.path}
-                    alt={job.companyName}
-                    className='w-20 h-20 object-contain'
-                  />
-                )}
-                <div>
-                  <div className='flex items-center gap-2 mb-2'>
-                    <span className='text-2xl font-semibold text-gray-800'>
-                      {job.title}
-                    </span>
-                    <Badge
+            <Card className='mb-6 p-6 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50'>
+              <div className='flex flex-col lg:flex-row lg:items-start gap-6'>
+                {/* Company Logo and Basic Info */}
+                <div className='flex items-start gap-4 flex-1'>
+                  {job.companyLogo && (
+                    <div className='flex-shrink-0'>
+                      <img
+                        src={job.companyLogo.path}
+                        alt={job.companyName}
+                        className='w-16 h-16 lg:w-20 lg:h-20 object-contain rounded-lg border border-gray-200 bg-white p-2 shadow-sm'
+                      />
+                    </div>
+                  )}
+                  <div className='flex-1 min-w-0'>
+                    <div className='flex flex-wrap items-center gap-2 mb-3'>
+                      <h1 className='text-xl lg:text-2xl font-bold text-gray-900 leading-tight'>
+                        {job.title}
+                      </h1>
+                      <div className='flex flex-wrap gap-2'>
+                        <Badge
+                          variant='outline'
+                          className='text-blue-600 border-blue-200 bg-blue-50 font-medium'
+                        >
+                          {job.employmentType}
+                        </Badge>
+                        {isJobExpired(job.deadline) && (
+                          <Badge
+                            variant='outline'
+                            className='text-red-600 border-red-200 bg-red-50 font-medium'
+                          >
+                            Expired
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Company and Location Info */}
+                    <div className='space-y-2'>
+                      <div className='flex items-center gap-2 text-gray-700 font-medium'>
+                        <span className='truncate'>{job.companyName}</span>
+                        <ShareButton />
+                      </div>
+                      <div className='flex flex-wrap items-center gap-4 text-sm text-gray-600'>
+                        <span className='flex items-center gap-1.5'>
+                          <Globe className='w-4 h-4 text-gray-400' />
+                          <span className='truncate'>{job.location}</span>
+                        </span>
+                        <span className='flex items-center gap-1.5'>
+                          <Mail className='w-4 h-4 text-gray-400' />
+                          <span className='truncate max-w-[200px]'>
+                            {job.applicationURL}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons and Deadline */}
+                <div className='flex flex-col gap-4 lg:items-end lg:min-w-[280px]'>
+                  {/* Action Buttons */}
+                  <div className='flex items-center gap-2 w-full lg:justify-end'>
+                    <Button
                       variant='outline'
-                      className='text-blue-600 border-blue-200 bg-blue-50'
-                    >
-                      {job.employmentType}
-                    </Badge>
-                    {isJobExpired(job.deadline) && (
-                      <Badge
-                        variant='outline'
-                        className='text-red-600 border-red-200 bg-red-50'
-                      >
-                        Expired
-                      </Badge>
-                    )}
-                  </div>
-                  <div className='flex flex-wrap gap-4 text-gray-500 text-sm items-center'>
-                    <span className='flex items-center gap-1'>
-                      <Globe className='w-4 h-4' />
-                      {job.location}
-                    </span>
-                    <span className='flex items-center gap-1'>
-                      <Mail className='w-4 h-4' />
-                      {job.applicationURL}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className='flex flex-col items-end gap-2 min-w-[220px]'>
-                <div className='flex gap-2 w-full justify-end'>
-                  <Button
-                    variant='outline'
-                    size='sm'
-                    className={`border-gray-200 ${job.isFavorited ? 'text-red-600' : 'text-gray-400 hover:text-red-600'}`}
-                    onClick={() =>
-                      job.isFavorited
-                        ? handleUnfavoriteJob()
-                        : handleFavoriteJob()
-                    }
-                  >
-                    <Heart className='w-5 h-5' />
-                  </Button>
-                  <Button
-                    variant='outline'
-                    size='sm'
-                    className={`border-gray-200 ${job.isSaved ? 'text-blue-600' : 'text-gray-400 hover:text-blue-600'}`}
-                    onClick={() =>
-                      job.isSaved ? handleUnsaveJob() : handleSaveJob()
-                    }
-                  >
-                    <Bookmark className='w-5 h-5' />
-                  </Button>
-                  <Button
-                    className={`text-base font-semibold ${
-                      isJobExpired(job.deadline)
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
-                        : ''
-                    }`}
-                    onClick={() => {
-                      if (isJobExpired(job.deadline)) {
-                        showToast({
-                          type: 'error',
-                          message:
-                            'This job has expired and is no longer accepting applications',
-                        });
-                        return;
+                      size='sm'
+                      className={`h-10 px-3 border-gray-200 hover:border-red-300 transition-colors ${
+                        job.isFavorited
+                          ? 'text-red-600 bg-red-50 border-red-200'
+                          : 'text-gray-500 hover:text-red-600 hover:bg-red-50'
+                      }`}
+                      onClick={() =>
+                        job.isFavorited
+                          ? handleUnfavoriteJob()
+                          : handleFavoriteJob()
                       }
-                      setIsApplyOpen(true);
-                    }}
-                    disabled={isJobExpired(job.deadline)}
+                    >
+                      <Heart
+                        className={`w-4 h-4 ${job.isFavorited ? 'fill-current' : ''}`}
+                      />
+                    </Button>
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      className={`h-10 px-3 border-gray-200 hover:border-blue-300 transition-colors ${
+                        job.isSaved
+                          ? 'text-blue-600 bg-blue-50 border-blue-200'
+                          : 'text-gray-500 hover:text-blue-600 hover:bg-blue-50'
+                      }`}
+                      onClick={() =>
+                        job.isSaved ? handleUnsaveJob() : handleSaveJob()
+                      }
+                    >
+                      <Bookmark
+                        className={`w-4 h-4 ${job.isSaved ? 'fill-current' : ''}`}
+                      />
+                    </Button>
+
+                    <Button
+                      className={`h-10 px-6 font-semibold transition-all ${
+                        isJobExpired(job.deadline)
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                          : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
+                      }`}
+                      onClick={() => {
+                        if (isJobExpired(job.deadline)) {
+                          showToast({
+                            type: 'error',
+                            message:
+                              'This job has expired and is no longer accepting applications',
+                          });
+                          return;
+                        }
+                        setIsApplyOpen(true);
+                      }}
+                      disabled={isJobExpired(job.deadline)}
+                    >
+                      {isJobExpired(job.deadline) ? 'Job Expired' : 'Apply Now'}
+                    </Button>
+                  </div>
+
+                  {/* Deadline Info */}
+                  <div
+                    className={`text-sm text-center lg:text-right ${
+                      isJobExpired(job.deadline)
+                        ? 'text-red-600'
+                        : 'text-gray-600'
+                    }`}
                   >
-                    {isJobExpired(job.deadline) ? 'Job Expired' : 'Apply Now'}
-                  </Button>
+                    <div className='flex items-center gap-1.5 justify-center lg:justify-end'>
+                      <span className='text-red-500'>⏰</span>
+                      <span className='font-medium'>
+                        {isJobExpired(job.deadline)
+                          ? 'Expired on '
+                          : 'Expires on '}
+                        {new Date(job.deadline).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <span
-                  className={`text-xs ${
-                    isJobExpired(job.deadline)
-                      ? 'text-red-500 font-semibold'
-                      : 'text-red-500'
-                  }`}
-                >
-                  {isJobExpired(job.deadline)
-                    ? 'Job expired on: '
-                    : 'Job expires in: '}
-                  <span className='font-semibold'>
-                    {new Date(job.deadline).toLocaleDateString()}
-                  </span>
-                </span>
               </div>
             </Card>
             {/* Description */}
@@ -331,27 +374,7 @@ export default function JobDetailsPage({
               </ul>
               <div className='flex gap-2 items-center mt-4'>
                 <span>Share this job:</span>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  className='rounded-full border-blue-200 text-blue-600'
-                >
-                  <Facebook className='w-4 h-4' />
-                </Button>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  className='rounded-full border-blue-200 text-blue-600'
-                >
-                  <Twitter className='w-4 h-4' />
-                </Button>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  className='rounded-full border-red-200 text-red-600'
-                >
-                  <Youtube className='w-4 h-4' />
-                </Button>
+                <ShareButton />
               </div>
             </Card>
           </div>

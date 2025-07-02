@@ -25,9 +25,14 @@ export default function EmployerSelectionPage() {
     }
   }, [user]);
 
-  const handleEmployerSelect = (employer: EmployerData) => {
-    selectEmployer(employer);
-    setIsModalOpen(false);
+  const handleEmployerSelect = async (employer: EmployerData) => {
+    try {
+      await selectEmployer(employer);
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Error selecting employer:', error);
+      throw error; // Re-throw to let the component handle the loading state
+    }
   };
 
   return (

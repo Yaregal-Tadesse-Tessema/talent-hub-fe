@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import JobAlertsTab from './JobAlertsTab';
+import { profileService } from '@/services/profileService';
+import { userService } from '@/services/userService';
+import { useToast } from '@/contexts/ToastContext';
 
 const TABS = [
   { key: 'jobAlerts', label: 'Job Alerts' },
@@ -40,6 +43,8 @@ const initialProfile = {
   coverLetter: '',
   professionalSummery: '',
   phoneCountryCode: '+251',
+  isProfilePublic: true,
+  isResumePublic: true,
   alertConfiguration: {
     id: '',
     salary: '',
@@ -68,8 +73,8 @@ export default function SettingsTab() {
     },
     jobAlertRole: '',
     jobAlertLocation: '',
-    profilePublic: true,
-    resumePrivate: false,
+    isProfilePublic: true,
+    isResumePublic: true,
     password: '',
     newPassword: '',
     confirmPassword: '',
@@ -79,6 +84,24 @@ export default function SettingsTab() {
     newPassword: false,
     confirmPassword: false,
   });
+  const { showToast } = useToast();
+
+  // Load current privacy settings from localStorage
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        setAccount((prev) => ({
+          ...prev,
+          isProfilePublic: userData.isProfilePublic ?? true,
+          isResumePublic: userData.isResumePublic ?? true,
+        }));
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+      }
+    }
+  }, []);
 
   function handleAccountChange(field: string, value: any) {
     setAccount((prev) => ({ ...prev, [field]: value }));
@@ -89,7 +112,7 @@ export default function SettingsTab() {
       notifications: { ...prev.notifications, [field]: value },
     }));
   }
-  function handlePrivacyToggle(field: 'profilePublic' | 'resumePrivate') {
+  function handlePrivacyToggle(field: 'isProfilePublic' | 'isResumePublic') {
     setAccount((prev) => ({ ...prev, [field]: !prev[field] }));
   }
   function handlePasswordVisibility(
@@ -97,14 +120,135 @@ export default function SettingsTab() {
   ) {
     setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }));
   }
-  function handleAccountSave() {
-    return;
+  async function handleAccountSave() {
+    try {
+      // Get current user data from localStorage
+      const storedUser = localStorage.getItem('user');
+      if (!storedUser) {
+        showToast({ type: 'error', message: 'User not found' });
+        return;
+      }
+
+      const userData = JSON.parse(storedUser);
+
+      // Update privacy settings - exclude role field as it's only for FE
+      const { role, ...userDataWithoutRole } = userData;
+      const updatedProfile = {
+        ...userDataWithoutRole,
+        isProfilePublic: account.isProfilePublic,
+        isResumePublic: account.isResumePublic,
+      };
+
+      // Save to backend
+      const result = await profileService.updateProfile(updatedProfile);
+
+      // Update localStorage - preserve the role for FE
+      localStorage.setItem(
+        'user',
+        JSON.stringify({ ...result, role: 'employee' }),
+      );
+
+      showToast({
+        type: 'success',
+        message: 'Privacy settings updated successfully',
+      });
+    } catch (error) {
+      console.error('Error updating privacy settings:', error);
+      showToast({
+        type: 'error',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to update privacy settings',
+      });
+    }
   }
   function handleJobAlertSave() {
     return;
   }
-  function handlePasswordSave() {
-    return;
+  async function handlePasswordSave() {
+    try {
+      // Validate password fields
+      if (!account.newPassword || !account.confirmPassword) {
+        showToast({
+          type: 'error',
+          message: 'Please fill in all password fields',
+        });
+        return;
+      }
+
+      if (account.newPassword !== account.confirmPassword) {
+        showToast({
+          type: 'error',
+          message: 'New password and confirm password do not match',
+        });
+        return;
+      }
+
+      if (account.newPassword.length < 6) {
+        showToast({
+          type: 'error',
+          message: 'Password must be at least 6 characters long',
+        });
+        return;
+      }
+
+      // Get user email from localStorage or URL params
+      let userEmail = '';
+
+      // First try to get from localStorage (logged in user)
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          userEmail = userData.email;
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+        }
+      }
+
+      // If not found in localStorage, try to get from URL params
+      if (!userEmail && typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        userEmail = urlParams.get('email') || '';
+      }
+
+      if (!userEmail) {
+        showToast({
+          type: 'error',
+          message: 'Email address not found. Please log in again.',
+        });
+        return;
+      }
+
+      // Call the API to change password
+      await userService.changePasswordByEmail({
+        email: userEmail,
+        newPassword: account.newPassword,
+        confirmNewPassword: account.confirmPassword,
+      });
+
+      // Clear password fields on success
+      setAccount((prev) => ({
+        ...prev,
+        password: '',
+        newPassword: '',
+        confirmPassword: '',
+      }));
+
+      showToast({
+        type: 'success',
+        message: 'Password changed successfully',
+      });
+    } catch (error: any) {
+      console.error('Error changing password:', error);
+      showToast({
+        type: 'error',
+        message:
+          error.response?.data?.message ||
+          'Failed to change password. Please try again.',
+      });
+    }
   }
   function handleDeleteAccount() {
     return;
@@ -151,22 +295,6 @@ export default function SettingsTab() {
               </div>
               <div className='mb-4'>
                 <div className='flex items-center gap-2'>
-                  <span className='text-gray-400 dark:text-gray-500'>
-                    <svg
-                      width='18'
-                      height='18'
-                      fill='none'
-                      viewBox='0 0 24 24'
-                      stroke='currentColor'
-                    >
-                      <path
-                        d='M3 8l7.89 5.26a2 2 0 0 0 2.22 0L21 8M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z'
-                        strokeWidth='2'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      />
-                    </svg>
-                  </span>
                   <Input
                     type='email'
                     placeholder='Email address'
@@ -325,51 +453,62 @@ export default function SettingsTab() {
             </div>
 
             {/* Profile & Resume Privacy */}
-            <div className='border-t border-gray-200 dark:border-gray-700 pt-6 sm:pt-8 flex flex-col sm:flex-row gap-6 sm:gap-8'>
-              <div className='flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4'>
-                <span className='font-medium text-sm sm:text-base text-gray-900 dark:text-white'>
-                  Profile Privacy
-                </span>
-                <button
-                  type='button'
-                  onClick={() => handlePrivacyToggle('profilePublic')}
-                  className={`w-12 h-6 rounded-full flex items-center transition-colors ${account.profilePublic ? 'bg-blue-600 dark:bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}
-                >
-                  <span
-                    className={`inline-block w-6 h-6 bg-white dark:bg-gray-200 rounded-full shadow transform transition-transform ${account.profilePublic ? 'translate-x-6' : ''}`}
-                  ></span>
-                </button>
-                <span className='text-xs sm:text-sm text-gray-900 dark:text-white'>
-                  {account.profilePublic ? 'YES' : 'NO'}{' '}
-                  <span className='text-gray-400 dark:text-gray-500'>
-                    {account.profilePublic
-                      ? 'Your profile is public now'
-                      : 'Your profile is private now'}
-                  </span>
-                </span>
+            <div className='border-t border-gray-200 dark:border-gray-700 pt-6 sm:pt-8'>
+              <div className='font-medium mb-4 text-gray-900 dark:text-white text-base sm:text-lg'>
+                Privacy Settings
               </div>
-              <div className='flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4'>
-                <span className='font-medium text-sm sm:text-base text-gray-900 dark:text-white'>
-                  Resume Privacy
-                </span>
-                <button
-                  type='button'
-                  onClick={() => handlePrivacyToggle('resumePrivate')}
-                  className={`w-12 h-6 rounded-full flex items-center transition-colors ${account.resumePrivate ? 'bg-blue-600 dark:bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}
-                >
-                  <span
-                    className={`inline-block w-6 h-6 bg-white dark:bg-gray-200 rounded-full shadow transform transition-transform ${account.resumePrivate ? 'translate-x-6' : ''}`}
-                  ></span>
-                </button>
-                <span className='text-xs sm:text-sm text-gray-900 dark:text-white'>
-                  {account.resumePrivate ? 'YES' : 'NO'}{' '}
-                  <span className='text-gray-400 dark:text-gray-500'>
-                    {account.resumePrivate
-                      ? 'Your resume is private now'
-                      : 'Your resume is public now'}
-                  </span>
-                </span>
+              <div className='text-gray-500 dark:text-gray-400 text-sm mb-4'>
+                Control who can see your profile and resume information
               </div>
+              <div className='flex flex-col sm:flex-row gap-6 sm:gap-8'>
+                <div className='flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4'>
+                  <span className='font-medium text-sm sm:text-base text-gray-900 dark:text-white'>
+                    Profile Visibility
+                  </span>
+                  <button
+                    type='button'
+                    onClick={() => handlePrivacyToggle('isProfilePublic')}
+                    className={`w-12 h-6 rounded-full flex items-center transition-colors ${account.isProfilePublic ? 'bg-blue-600 dark:bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                  >
+                    <span
+                      className={`inline-block w-6 h-6 bg-white dark:bg-gray-200 rounded-full shadow transform transition-transform ${account.isProfilePublic ? 'translate-x-6' : ''}`}
+                    ></span>
+                  </button>
+                  <span className='text-xs sm:text-sm text-gray-900 dark:text-white'>
+                    {account.isProfilePublic ? 'YES' : 'NO'}{' '}
+                    <span className='text-gray-400 dark:text-gray-500'>
+                      {account.isProfilePublic
+                        ? 'Your profile is public now'
+                        : 'Your profile is private now'}
+                    </span>
+                  </span>
+                </div>
+                <div className='flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4'>
+                  <span className='font-medium text-sm sm:text-base text-gray-900 dark:text-white'>
+                    Resume Visibility
+                  </span>
+                  <button
+                    type='button'
+                    onClick={() => handlePrivacyToggle('isResumePublic')}
+                    className={`w-12 h-6 rounded-full flex items-center transition-colors ${account.isResumePublic ? 'bg-blue-600 dark:bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                  >
+                    <span
+                      className={`inline-block w-6 h-6 bg-white dark:bg-gray-200 rounded-full shadow transform transition-transform ${account.isResumePublic ? 'translate-x-6' : ''}`}
+                    ></span>
+                  </button>
+                  <span className='text-xs sm:text-sm text-gray-900 dark:text-white'>
+                    {account.isResumePublic ? 'YES' : 'NO'}{' '}
+                    <span className='text-gray-400 dark:text-gray-500'>
+                      {account.isResumePublic
+                        ? 'Your resume is public now'
+                        : 'Your resume is private now'}
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <Button onClick={handleAccountSave} className='mt-4'>
+                Save Privacy Settings
+              </Button>
             </div>
 
             {/* Change Password */}

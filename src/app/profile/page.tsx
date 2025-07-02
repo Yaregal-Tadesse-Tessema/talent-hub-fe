@@ -74,7 +74,6 @@ export default function ProfilePage() {
             middleName: userData.middleName || '',
             lastName: userData.lastName || '',
             gender: userData.gender || '',
-            status: userData.status || '',
             address: userData.address || {},
             birthDate: userData.birthDate || '',
             linkedinUrl: userData.linkedinUrl || '',
@@ -621,18 +620,6 @@ export default function ProfilePage() {
                   className='w-full'
                 />
               </div>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-                  Status
-                </label>
-                <Input
-                  value={profile.status}
-                  onChange={(e) =>
-                    setProfile({ ...profile, status: e.target.value })
-                  }
-                  className='w-full'
-                />
-              </div>
             </div>
           ) : (
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
@@ -691,17 +678,6 @@ export default function ProfilePage() {
                   {profile.birthDate
                     ? new Date(profile.birthDate).toLocaleDateString()
                     : 'Not specified'}
-                </p>
-              </div>
-              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
-                <div className='flex items-center gap-2 mb-2'>
-                  <User size={16} className='text-gray-400' />
-                  <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
-                    Status
-                  </h3>
-                </div>
-                <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                  {profile.status}
                 </p>
               </div>
             </div>
