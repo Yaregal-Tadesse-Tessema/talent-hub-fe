@@ -80,7 +80,7 @@ export default function LoginPage() {
           localStorage.removeItem('returnToCVBuilder'); // Clean up
           router.push(returnToCVBuilder);
         } else {
-          router.push('/dashboard');
+          router.push('/find-job');
         }
       } else {
         // Show error message

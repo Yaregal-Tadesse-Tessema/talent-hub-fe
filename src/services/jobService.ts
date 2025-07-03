@@ -161,10 +161,10 @@ export const jobService = {
 
   async getPublicJobs(page?: number, limit?: number): Promise<JobsResponse> {
     try {
-      let queryParams = 'status=Posted';
+      let queryParams = 'q=w=status:=:Posted';
       if (page && limit) {
         const skip = (page - 1) * limit;
-        queryParams += `&t=${limit}&sk=${skip}`;
+        queryParams += `%26t=${limit}%26sk=${skip}`;
       }
 
       const response = await api.get(
@@ -185,23 +185,21 @@ export const jobService = {
   ): Promise<JobsResponse> {
     try {
       let queryParams = '';
-      const conditions = [];
+      const conditions = ['status:=:Posted']; // Always include Posted status
+
       if (title) {
-        conditions.push(`title:ILIKE:${title.toLowerCase()}`);
+        conditions.push(`title:LIKE:${title}`);
       }
       if (category) {
-        conditions.push(`employmentType:ILIKE:${category.toLowerCase()}`);
+        conditions.push(`employmentType:LIKE:${category}`);
       }
-      if (conditions.length > 0) {
-        queryParams = `q=w=${conditions.join(',')}`;
-      }
+
+      queryParams = `q=w=${conditions.join(',')}`;
 
       // Add pagination parameters
       if (page && limit) {
         const skip = (page - 1) * limit;
-        queryParams += queryParams
-          ? `&t=${limit}&sk=${skip}`
-          : `t=${limit}&sk=${skip}`;
+        queryParams += `%26t=${limit}%26sk=${skip}`;
       }
 
       const response = await api.get(
@@ -236,47 +234,37 @@ export const jobService = {
   ): Promise<JobsResponse> {
     try {
       let queryParams = '';
-      const conditions = [];
+      const conditions = ['status:=:Posted']; // Always include Posted status
 
       // Basic filters
       if (filters.title) {
-        conditions.push(`title:ILIKE:${filters.title.toLowerCase()}`);
+        conditions.push(`title:LIKE:${filters.title}`);
       }
       if (filters.category) {
-        conditions.push(
-          `employmentType:ILIKE:${filters.category.toLowerCase()}`,
-        );
+        conditions.push(`employmentType:LIKE:${filters.category}`);
       }
 
       // Advanced filters
       if (filters.experienceLevel) {
-        conditions.push(
-          `experienceLevel:ILIKE:${filters.experienceLevel.toLowerCase()}`,
-        );
+        conditions.push(`experienceLevel:LIKE:${filters.experienceLevel}`);
       }
       if (filters.educationLevel) {
-        conditions.push(
-          `educationLevel:ILIKE:${filters.educationLevel.toLowerCase()}`,
-        );
+        conditions.push(`educationLevel:LIKE:${filters.educationLevel}`);
       }
       if (filters.industry) {
-        conditions.push(`industry:ILIKE:${filters.industry.toLowerCase()}`);
+        conditions.push(`industry:LIKE:${filters.industry}`);
       }
       if (filters.location) {
-        conditions.push(`location:ILIKE:${filters.location.toLowerCase()}`);
+        conditions.push(`location:LIKE:${filters.location}`);
       }
       if (filters.gender && filters.gender !== 'Any') {
-        conditions.push(`gender:ILIKE:${filters.gender.toLowerCase()}`);
+        conditions.push(`gender:LIKE:${filters.gender}`);
       }
       if (filters.fieldOfStudy) {
-        conditions.push(
-          `fieldOfStudy:ILIKE:${filters.fieldOfStudy.toLowerCase()}`,
-        );
+        conditions.push(`fieldOfStudy:LIKE:${filters.fieldOfStudy}`);
       }
       if (filters.paymentType) {
-        conditions.push(
-          `paymentType:ILIKE:${filters.paymentType.toLowerCase()}`,
-        );
+        conditions.push(`paymentType:LIKE:${filters.paymentType}`);
       }
 
       // Numeric filters
@@ -299,7 +287,7 @@ export const jobService = {
       if (filters.employmentType && filters.employmentType.length > 0) {
         // For multiple employment types, we need to handle them as separate conditions
         filters.employmentType.forEach((type) => {
-          conditions.push(`employmentType:ILIKE:${type.toLowerCase()}`);
+          conditions.push(`employmentType:LIKE:${type}`);
         });
       }
 
@@ -307,21 +295,20 @@ export const jobService = {
       if (filters.skills && filters.skills.length > 0) {
         // For multiple skills, we need to handle them as separate conditions
         filters.skills.forEach((skill) => {
-          conditions.push(`skill:ILIKE:${skill.toLowerCase()}`);
+          conditions.push(`skill:LIKE:${skill}`);
         });
       }
 
-      if (conditions.length > 0) {
-        queryParams = `q=w=${conditions.join(',')}`;
-      }
+      queryParams = `q=w=${conditions.join(',')}`;
 
       // Add pagination parameters
       if (page && limit) {
         const skip = (page - 1) * limit;
-        queryParams += queryParams
-          ? `&t=${limit}&sk=${skip}`
-          : `t=${limit}&sk=${skip}`;
+        queryParams += `%26t=${limit}%26sk=${skip}`;
       }
+
+      console.log('Generated query params:', queryParams);
+      console.log('Conditions:', conditions);
 
       const response = await api.get(
         `/jobs/get-all-public-job-postings?${queryParams}`,

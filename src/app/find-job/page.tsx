@@ -188,7 +188,7 @@ function FindJobContent() {
     total: 0,
     totalPages: 0,
     currentPage: 1,
-    limit: 12,
+    limit: 10,
   });
 
   // Update searchFilters when searchParams change
@@ -202,7 +202,6 @@ function FindJobContent() {
 
     // Reset to page 1 when search params change
     setCurrentPage(1);
-    setPagination((prev) => ({ ...prev, currentPage: 1 }));
   }, [searchParams]);
 
   // Function to count active filters
@@ -238,7 +237,10 @@ function FindJobContent() {
         // Check if we have advanced filters
         const hasAdvancedFilters = countActiveFilters(advancedFilters) > 0;
         const hasBasicFilters =
-          searchParams?.get('title') || searchParams?.get('category');
+          searchParams?.get('title') ||
+          searchParams?.get('category') ||
+          searchFilters.keyword ||
+          searchFilters.category;
 
         if (hasAdvancedFilters || hasBasicFilters) {
           // Use advanced search with filters
@@ -246,6 +248,14 @@ function FindJobContent() {
             searchParams?.get('title') || searchFilters.keyword;
           const searchCategory =
             searchParams?.get('category') || searchFilters.category;
+
+          console.log('Applying filters:', {
+            searchTitle,
+            searchCategory,
+            hasAdvancedFilters,
+            hasBasicFilters,
+            advancedFilters,
+          });
 
           response = await jobService.searchJobsWithAdvancedFilters(
             {
@@ -257,27 +267,31 @@ function FindJobContent() {
             pagination.limit,
           );
         } else {
-          // Use different endpoints based on user login status
-          if (user) {
-            // User is logged in - use the new endpoint
-            const queryParams = `q=status:=:Posted&t=${pagination.limit}&sk=${(currentPage - 1) * pagination.limit}`;
-            response = await jobService.getJobs(queryParams);
-          } else {
-            // User is not logged in - use public jobs endpoint
-            response = await jobService.getPublicJobs(
-              currentPage,
-              pagination.limit,
-            );
-          }
+          // Always use public jobs endpoint for the find job page
+          response = await jobService.getPublicJobs(
+            currentPage,
+            pagination.limit,
+          );
         }
+
+        const totalPages = Math.ceil(response.total / pagination.limit);
+
+        // Ensure current page is valid
+        const validCurrentPage = currentPage > totalPages ? 1 : currentPage;
 
         setJobs(response.items);
         setPagination({
           total: response.total,
-          totalPages: Math.ceil(response.total / pagination.limit),
-          currentPage: currentPage,
+          totalPages: totalPages,
+          currentPage: validCurrentPage,
           limit: pagination.limit,
         });
+
+        // If current page was invalid, update it
+        if (validCurrentPage !== currentPage) {
+          setCurrentPage(validCurrentPage);
+        }
+
         setError(null);
       } catch (err) {
         console.error('Error fetching jobs:', err);
@@ -291,13 +305,21 @@ function FindJobContent() {
     fetchJobs();
   }, [
     searchParams,
-    user,
     currentPage,
     pagination.limit,
     advancedFilters,
     searchFilters.keyword,
     searchFilters.category,
-  ]); // Dependencies include pagination
+  ]);
+
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const handleSearch = () => {
     const queryParams = new URLSearchParams();
@@ -1108,11 +1130,11 @@ function FindJobContent() {
         )}
 
         {/* Pagination */}
-        {pagination.total > 0 && (
+        {pagination.total > 0 && pagination.totalPages > 1 && (
           <Pagination
             current={currentPage}
             total={pagination.totalPages}
-            onChange={(page) => setCurrentPage(page)}
+            onChange={handlePageChange}
           />
         )}
       </div>
