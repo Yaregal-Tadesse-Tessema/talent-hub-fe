@@ -772,22 +772,24 @@ function FindJobContent() {
                     </button>
 
                     <div className='flex items-center gap-2'>
-                      <button
-                        className={`p-2 rounded-lg transition-all duration-200 ${
-                          job.isSaved
-                            ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
-                            : 'text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-                        }`}
-                        onClick={() =>
-                          job.isSaved
-                            ? handleUnsaveJob(job.id)
-                            : handleSaveJob(job.id)
-                        }
-                      >
-                        <Bookmark
-                          className={`w-4 h-4 ${job.isSaved ? 'fill-current' : ''}`}
-                        />
-                      </button>
+                      {user && (
+                        <button
+                          className={`p-2 rounded-lg transition-all duration-200 ${
+                            job.isSaved
+                              ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
+                              : 'text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                          }`}
+                          onClick={() =>
+                            job.isSaved
+                              ? handleUnsaveJob(job.id)
+                              : handleSaveJob(job.id)
+                          }
+                        >
+                          <Bookmark
+                            className={`w-4 h-4 ${job.isSaved ? 'fill-current' : ''}`}
+                          />
+                        </button>
+                      )}
 
                       <div className='opacity-0 group-hover:opacity-100 transition-opacity duration-200 relative'>
                         <ShareButton />
@@ -944,18 +946,20 @@ function FindJobContent() {
 
                   {/* Bookmark and Apply */}
                   <div className='flex items-center justify-between sm:justify-end gap-3 sm:gap-4 mt-4 sm:mt-0'>
-                    <button
-                      className={`${job.isSaved ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400'}`}
-                      onClick={() =>
-                        job.isSaved
-                          ? handleUnsaveJob(job.id)
-                          : handleSaveJob(job.id)
-                      }
-                    >
-                      <Bookmark
-                        className={`w-4 h-4 sm:w-5 sm:h-5 ${job.isSaved ? 'fill-current' : ''}`}
-                      />
-                    </button>
+                    {user && (
+                      <button
+                        className={`${job.isSaved ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400'}`}
+                        onClick={() =>
+                          job.isSaved
+                            ? handleUnsaveJob(job.id)
+                            : handleSaveJob(job.id)
+                        }
+                      >
+                        <Bookmark
+                          className={`w-4 h-4 sm:w-5 sm:h-5 ${job.isSaved ? 'fill-current' : ''}`}
+                        />
+                      </button>
+                    )}
                     <div
                       className={`transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'} relative`}
                     >

@@ -96,6 +96,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           type: 'success',
           message: 'Login successful! Redirecting...',
         });
+
+        // Check if there's a return URL stored
+        const returnToJob = localStorage.getItem('returnToJob');
+        const returnToCVBuilder = localStorage.getItem('returnToCVBuilder');
+
+        if (returnToJob) {
+          localStorage.removeItem('returnToJob'); // Clean up
+          router.push(`/find-job/${returnToJob}?apply=true`);
+        } else if (returnToCVBuilder) {
+          localStorage.removeItem('returnToCVBuilder'); // Clean up
+          router.push(returnToCVBuilder);
+        } else {
+          router.push('/dashboard');
+        }
+
         return { success: true, message: 'Login successful! Redirecting...' };
       }
 
@@ -129,7 +144,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           type: 'success',
           message: 'Login successful!',
         });
-        router.push('/find-job');
+
+        // Check if there's a return URL stored
+        const returnToJob = localStorage.getItem('returnToJob');
+        const returnToCVBuilder = localStorage.getItem('returnToCVBuilder');
+
+        if (returnToJob) {
+          localStorage.removeItem('returnToJob'); // Clean up
+          router.push(`/find-job/${returnToJob}?apply=true`);
+        } else if (returnToCVBuilder) {
+          localStorage.removeItem('returnToCVBuilder'); // Clean up
+          router.push(returnToCVBuilder);
+        } else {
+          router.push('/find-job');
+        }
+
         return { success: true, message: 'Login successful!' };
       }
 
@@ -176,7 +205,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (typeof window !== 'undefined') {
         localStorage.setItem('user', JSON.stringify(updatedUser));
       }
-      router.push('/dashboard');
+
+      // Check if there's a return URL stored
+      const returnToJob = localStorage.getItem('returnToJob');
+      const returnToCVBuilder = localStorage.getItem('returnToCVBuilder');
+
+      if (returnToJob) {
+        localStorage.removeItem('returnToJob'); // Clean up
+        router.push(`/find-job/${returnToJob}?apply=true`);
+      } else if (returnToCVBuilder) {
+        localStorage.removeItem('returnToCVBuilder'); // Clean up
+        router.push(returnToCVBuilder);
+      } else {
+        router.push('/dashboard');
+      }
     } else {
       throw new Error('User not found');
     }

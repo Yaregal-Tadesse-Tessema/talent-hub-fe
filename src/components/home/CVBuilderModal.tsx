@@ -35,12 +35,7 @@ export default function CVBuilderModal({
   if (!isOpen) return null;
 
   const handleStartBuilding = () => {
-    if (!user) {
-      localStorage.setItem('returnToCVBuilder', '/cv-builder');
-      router.push('/login');
-    } else {
-      router.push('/cv-builder');
-    }
+    router.push('/cv-builder');
     onClose();
   };
 

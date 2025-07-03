@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import PersonalInfoStep from '@/components/cv-builder/steps/PersonalInfoStep';
 import ProfessionalSummaryStep from '@/components/cv-builder/steps/ProfessionalSummaryStep';
 import ExperienceStep from '@/components/cv-builder/steps/ExperienceStep';
@@ -11,6 +12,7 @@ import AdditionalInfoStep from '@/components/cv-builder/steps/AdditionalInfoStep
 import { cvService } from '@/services/cv.service';
 import { frontendCVService } from '@/services/frontendCV.service';
 import { useToast } from '@/contexts/ToastContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { ComputerDesktopIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
 export const dynamic = 'force-dynamic';
@@ -284,11 +286,94 @@ export default function CVBuilderPage() {
     'backend',
   );
   const { showToast } = useToast();
+  const { user } = useAuth();
+  const router = useRouter();
+
+  // Load draft data on component mount
+  useEffect(() => {
+    const savedDraft = localStorage.getItem('cvBuilderDraft');
+    const returnToCVBuilder = localStorage.getItem('returnToCVBuilder');
+
+    if (savedDraft) {
+      try {
+        const draftData = JSON.parse(savedDraft);
+        setProfile(draftData);
+
+        if (returnToCVBuilder) {
+          showToast({
+            type: 'success',
+            message:
+              'Welcome back! Your CV draft has been restored. You can now generate your CV.',
+          });
+          localStorage.removeItem('returnToCVBuilder'); // Clean up
+        } else {
+          showToast({
+            type: 'success',
+            message:
+              'Your previous draft has been loaded. You can continue where you left off.',
+          });
+        }
+      } catch (error) {
+        console.error('Error loading draft:', error);
+        localStorage.removeItem('cvBuilderDraft');
+      }
+    } else if (returnToCVBuilder) {
+      showToast({
+        type: 'success',
+        message: 'Welcome back! You can now create your CV.',
+      });
+      localStorage.removeItem('returnToCVBuilder'); // Clean up
+    }
+  }, []); // Remove showToast from dependencies to prevent infinite re-renders
+
+  // Save draft data function
+  const saveDraft = () => {
+    const hasData =
+      profile.fullName ||
+      profile.title ||
+      profile.skills.length > 0 ||
+      profile.experience.length > 0 ||
+      profile.education.length > 0;
+
+    if (hasData) {
+      localStorage.setItem('cvBuilderDraft', JSON.stringify(profile));
+    } else {
+      // Clear draft if profile is empty
+      localStorage.removeItem('cvBuilderDraft');
+    }
+  };
+
+  // Check if user is authenticated and handle draft restoration
+  const checkAuthenticationAndProceed = (action: () => void) => {
+    if (!user) {
+      // Save current draft before redirecting
+      localStorage.setItem('cvBuilderDraft', JSON.stringify(profile));
+      localStorage.setItem('returnToCVBuilder', '/cv-builder');
+
+      showToast({
+        type: 'success',
+        message:
+          'Please log in to generate your CV. Your progress has been saved.',
+      });
+
+      router.push('/login');
+      return false;
+    }
+    return true;
+  };
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
+      // Check authentication when user reaches the last step
+      if (
+        !checkAuthenticationAndProceed(() => {
+          // This function is intentionally empty as it's just a placeholder
+        })
+      ) {
+        return;
+      }
       setShowConfirmationDialog(true);
     }
   };
@@ -300,14 +385,45 @@ export default function CVBuilderPage() {
   };
 
   const handleUpdateProfile = (data: Partial<Profile>) => {
-    setProfile((prev) => ({ ...prev, ...data }));
+    setProfile((prev) => {
+      const newProfile = { ...prev, ...data };
+      // Save draft after updating profile
+      setTimeout(() => {
+        const hasData =
+          newProfile.fullName ||
+          newProfile.title ||
+          newProfile.skills.length > 0 ||
+          newProfile.experience.length > 0 ||
+          newProfile.education.length > 0;
+
+        if (hasData) {
+          localStorage.setItem('cvBuilderDraft', JSON.stringify(newProfile));
+        } else {
+          localStorage.removeItem('cvBuilderDraft');
+        }
+      }, 0);
+      return newProfile;
+    });
   };
 
   const handleFillSampleData = () => {
     setProfile(sampleProfile);
+    // Save sample data as draft
+    setTimeout(() => {
+      localStorage.setItem('cvBuilderDraft', JSON.stringify(sampleProfile));
+    }, 0);
   };
 
   const handleGenerateResume = async () => {
+    // Check authentication first
+    if (
+      !checkAuthenticationAndProceed(() => {
+        // This function is intentionally empty as it's just a placeholder
+      })
+    ) {
+      return;
+    }
+
     // Ensure this code only runs on the client
     if (typeof window !== 'undefined') {
       try {
@@ -344,6 +460,9 @@ export default function CVBuilderPage() {
         link.click();
         link.remove();
 
+        // Clear draft data after successful generation
+        localStorage.removeItem('cvBuilderDraft');
+
         // Show success message
         showToast({
           type: 'success',
@@ -363,6 +482,15 @@ export default function CVBuilderPage() {
   };
 
   const handleSaveAsDefaultResume = async () => {
+    // Check authentication first
+    if (
+      !checkAuthenticationAndProceed(() => {
+        // This function is intentionally empty as it's just a placeholder
+      })
+    ) {
+      return;
+    }
+
     // Ensure this code only runs on the client
     if (typeof window !== 'undefined') {
       try {
@@ -432,6 +560,9 @@ export default function CVBuilderPage() {
         link.click();
         link.remove();
 
+        // Clear draft data after successful generation
+        localStorage.removeItem('cvBuilderDraft');
+
         // Show success message
         showToast({
           type: 'success',
@@ -452,6 +583,15 @@ export default function CVBuilderPage() {
   };
 
   const handleFrontendGeneration = async () => {
+    // Check authentication first
+    if (
+      !checkAuthenticationAndProceed(() => {
+        // This function is intentionally empty as it's just a placeholder
+      })
+    ) {
+      return;
+    }
+
     try {
       setIsGeneratingResume(true);
       setResumeGenerationProgress(0);
@@ -474,6 +614,9 @@ export default function CVBuilderPage() {
       clearInterval(progressInterval);
       setResumeGenerationProgress(100);
 
+      // Clear draft data after successful generation
+      localStorage.removeItem('cvBuilderDraft');
+
       showToast({
         type: 'success',
         message: `CV generated successfully with ${selectedTemplate} template!`,
@@ -491,6 +634,15 @@ export default function CVBuilderPage() {
   };
 
   const handleSaveFrontendAsDefaultResume = async () => {
+    // Check authentication first
+    if (
+      !checkAuthenticationAndProceed(() => {
+        // This function is intentionally empty as it's just a placeholder
+      })
+    ) {
+      return;
+    }
+
     // Ensure this code only runs on the client
     if (typeof window !== 'undefined') {
       try {
@@ -550,6 +702,9 @@ export default function CVBuilderPage() {
 
         // Also download the file
         await frontendCVService.downloadCV(profile, selectedTemplate);
+
+        // Clear draft data after successful generation
+        localStorage.removeItem('cvBuilderDraft');
 
         // Show success message
         showToast({

@@ -262,40 +262,44 @@ export default function JobDetailsPage({
                 <div className='flex flex-col gap-4 lg:items-end lg:min-w-[280px]'>
                   {/* Action Buttons */}
                   <div className='flex items-center gap-2 w-full lg:justify-end'>
-                    <Button
-                      variant='outline'
-                      size='sm'
-                      className={`h-10 px-3 border-gray-200 hover:border-red-300 transition-colors ${
-                        job.isFavorited
-                          ? 'text-red-600 bg-red-50 border-red-200'
-                          : 'text-gray-500 hover:text-red-600 hover:bg-red-50'
-                      }`}
-                      onClick={() =>
-                        job.isFavorited
-                          ? handleUnfavoriteJob()
-                          : handleFavoriteJob()
-                      }
-                    >
-                      <Heart
-                        className={`w-4 h-4 ${job.isFavorited ? 'fill-current' : ''}`}
-                      />
-                    </Button>
-                    <Button
-                      variant='outline'
-                      size='sm'
-                      className={`h-10 px-3 border-gray-200 hover:border-blue-300 transition-colors ${
-                        job.isSaved
-                          ? 'text-blue-600 bg-blue-50 border-blue-200'
-                          : 'text-gray-500 hover:text-blue-600 hover:bg-blue-50'
-                      }`}
-                      onClick={() =>
-                        job.isSaved ? handleUnsaveJob() : handleSaveJob()
-                      }
-                    >
-                      <Bookmark
-                        className={`w-4 h-4 ${job.isSaved ? 'fill-current' : ''}`}
-                      />
-                    </Button>
+                    {userData && (
+                      <>
+                        <Button
+                          variant='outline'
+                          size='sm'
+                          className={`h-10 px-3 border-gray-200 hover:border-red-300 transition-colors ${
+                            job.isFavorited
+                              ? 'text-red-600 bg-red-50 border-red-200'
+                              : 'text-gray-500 hover:text-red-600 hover:bg-red-50'
+                          }`}
+                          onClick={() =>
+                            job.isFavorited
+                              ? handleUnfavoriteJob()
+                              : handleFavoriteJob()
+                          }
+                        >
+                          <Heart
+                            className={`w-4 h-4 ${job.isFavorited ? 'fill-current' : ''}`}
+                          />
+                        </Button>
+                        <Button
+                          variant='outline'
+                          size='sm'
+                          className={`h-10 px-3 border-gray-200 hover:border-blue-300 transition-colors ${
+                            job.isSaved
+                              ? 'text-blue-600 bg-blue-50 border-blue-200'
+                              : 'text-gray-500 hover:text-blue-600 hover:bg-blue-50'
+                          }`}
+                          onClick={() =>
+                            job.isSaved ? handleUnsaveJob() : handleSaveJob()
+                          }
+                        >
+                          <Bookmark
+                            className={`w-4 h-4 ${job.isSaved ? 'fill-current' : ''}`}
+                          />
+                        </Button>
+                      </>
+                    )}
 
                     <Button
                       className={`h-10 px-6 font-semibold transition-all ${
