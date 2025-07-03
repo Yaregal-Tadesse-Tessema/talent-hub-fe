@@ -48,7 +48,6 @@ export default function JobsPage() {
       try {
         const response = await jobService.searchJobs(
           searchFilters.keyword,
-          searchFilters.location,
           searchFilters.category,
         );
         setJobs(response.items);

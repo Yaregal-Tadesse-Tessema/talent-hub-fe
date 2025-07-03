@@ -3,8 +3,19 @@ import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { Bookmark, ArrowRight, User, MapPin, Briefcase } from 'lucide-react';
+import {
+  Bookmark,
+  ArrowRight,
+  User,
+  MapPin,
+  Briefcase,
+  Filter,
+  X,
+} from 'lucide-react';
 import FilterModal from '@/components/ui/FilterModal';
+import AdvancedFilterModal, {
+  AdvancedFilters,
+} from '@/components/ui/AdvancedFilterModal';
 import { jobService } from '@/services/jobService';
 import { Job } from '@/types/job';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -155,9 +166,24 @@ function FindJobContent() {
   const [error, setError] = useState<string | null>(null);
   const [searchFilters, setSearchFilters] = useState({
     keyword: '',
-    location: '',
     category: '',
   });
+  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>({
+    experienceLevel: '',
+    salaryRange: { min: 0, max: 0 },
+    employmentType: [],
+    educationLevel: '',
+    industry: '',
+    location: '',
+    skills: [],
+    gender: '',
+    minimumGPA: 0,
+    fieldOfStudy: '',
+    positionNumbers: 0,
+    paymentType: '',
+  });
+  const [isAdvancedFilterOpen, setIsAdvancedFilterOpen] = useState(false);
+  const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const [pagination, setPagination] = useState({
     total: 0,
     totalPages: 0,
@@ -171,7 +197,6 @@ function FindJobContent() {
 
     setSearchFilters({
       keyword: searchParams.get('title') || '',
-      location: searchParams.get('location') || '',
       category: searchParams.get('category') || '',
     });
 
@@ -180,6 +205,29 @@ function FindJobContent() {
     setPagination((prev) => ({ ...prev, currentPage: 1 }));
   }, [searchParams]);
 
+  // Function to count active filters
+  const countActiveFilters = (filters: AdvancedFilters): number => {
+    let count = 0;
+    if (filters.experienceLevel) count++;
+    if (filters.salaryRange.min > 0 || filters.salaryRange.max > 0) count++;
+    if (filters.employmentType.length > 0) count++;
+    if (filters.educationLevel) count++;
+    if (filters.industry) count++;
+    if (filters.location) count++;
+    if (filters.skills.length > 0) count++;
+    if (filters.gender && filters.gender !== 'Any') count++;
+    if (filters.minimumGPA > 0) count++;
+    if (filters.fieldOfStudy) count++;
+    if (filters.positionNumbers > 0) count++;
+    if (filters.paymentType) count++;
+    return count;
+  };
+
+  // Update active filters count when advanced filters change
+  useEffect(() => {
+    setActiveFiltersCount(countActiveFilters(advancedFilters));
+  }, [advancedFilters]);
+
   // Combined effect for fetching jobs
   useEffect(() => {
     const fetchJobs = async () => {
@@ -187,16 +235,24 @@ function FindJobContent() {
         setLoading(true);
         let response;
 
-        // If we have search params, use searchJobs
-        if (
-          searchParams?.get('title') ||
-          searchParams?.get('location') ||
-          searchParams?.get('category')
-        ) {
-          response = await jobService.searchJobs(
-            searchParams.get('title') || '',
-            searchParams.get('location') || '',
-            searchParams.get('category') || '',
+        // Check if we have advanced filters
+        const hasAdvancedFilters = countActiveFilters(advancedFilters) > 0;
+        const hasBasicFilters =
+          searchParams?.get('title') || searchParams?.get('category');
+
+        if (hasAdvancedFilters || hasBasicFilters) {
+          // Use advanced search with filters
+          const searchTitle =
+            searchParams?.get('title') || searchFilters.keyword;
+          const searchCategory =
+            searchParams?.get('category') || searchFilters.category;
+
+          response = await jobService.searchJobsWithAdvancedFilters(
+            {
+              title: searchTitle,
+              category: searchCategory,
+              ...advancedFilters,
+            },
             currentPage,
             pagination.limit,
           );
@@ -222,22 +278,32 @@ function FindJobContent() {
           currentPage: currentPage,
           limit: pagination.limit,
         });
+        setError(null);
       } catch (err) {
         console.error('Error fetching jobs:', err);
         setError('Failed to fetch jobs. Please try again later.');
+        setJobs([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchJobs();
-  }, [searchParams, user, currentPage, pagination.limit]); // Dependencies include pagination
+  }, [
+    searchParams,
+    user,
+    currentPage,
+    pagination.limit,
+    advancedFilters,
+    searchFilters.keyword,
+    searchFilters.category,
+  ]); // Dependencies include pagination
 
   const handleSearch = () => {
     const queryParams = new URLSearchParams();
     if (searchFilters.keyword) queryParams.set('title', searchFilters.keyword);
-    if (searchFilters.location)
-      queryParams.set('location', searchFilters.location);
+    // if (searchFilters.location)
+    //   queryParams.set('location', searchFilters.location);
     if (searchFilters.category)
       queryParams.set('category', searchFilters.category);
 
@@ -333,6 +399,37 @@ function FindJobContent() {
     router.push(`/find-job/${jobId}?apply=true`);
   };
 
+  const handleAdvancedFiltersApply = (filters: AdvancedFilters) => {
+    setAdvancedFilters(filters);
+    setCurrentPage(1); // Reset to first page when applying filters
+    showToast({
+      type: 'success',
+      message: `Applied ${countActiveFilters(filters)} filter(s)`,
+    });
+  };
+
+  const handleClearAllFilters = () => {
+    setAdvancedFilters({
+      experienceLevel: '',
+      salaryRange: { min: 0, max: 0 },
+      employmentType: [],
+      educationLevel: '',
+      industry: '',
+      location: '',
+      skills: [],
+      gender: '',
+      minimumGPA: 0,
+      fieldOfStudy: '',
+      positionNumbers: 0,
+      paymentType: '',
+    });
+    setCurrentPage(1);
+    showToast({
+      type: 'success',
+      message: 'All filters cleared',
+    });
+  };
+
   return (
     <main className='min-h-screen pb-16 bg-gray-50 dark:bg-gray-900'>
       {/* Page title and breadcrumb */}
@@ -397,22 +494,6 @@ function FindJobContent() {
               onKeyPress={handleKeyPress}
             />
           </div>
-          {/* Location */}
-          <div className='flex items-center gap-2 flex-1 border-b border-gray-200 dark:border-gray-600 lg:border-b-0 lg:border-r lg:border-gray-200 dark:lg:border-gray-600 pb-4 lg:pb-0 pr-0 lg:pr-4'>
-            <MapPin className='w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400 mr-2 flex-shrink-0' />
-            <input
-              className='w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 text-sm sm:text-base'
-              placeholder='Location'
-              value={searchFilters.location}
-              onChange={(e) =>
-                setSearchFilters((prev) => ({
-                  ...prev,
-                  location: e.target.value,
-                }))
-              }
-              onKeyPress={handleKeyPress}
-            />
-          </div>
           {/* Category */}
           <div className='flex items-center gap-2 flex-1 border-b border-gray-200 dark:border-gray-600 lg:border-b-0 lg:border-r lg:border-gray-200 dark:lg:border-gray-600 pb-4 lg:pb-0 pr-0 lg:pr-4'>
             <Briefcase className='w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400 mr-2 flex-shrink-0' />
@@ -434,8 +515,26 @@ function FindJobContent() {
             </select>
           </div>
 
-          {/* Find Job Button */}
-          <div className='flex items-center pl-0 lg:pl-4 w-full lg:w-auto'>
+          {/* Advanced Filter Button */}
+          <div className='flex items-center gap-2 pl-0 lg:pl-4 w-full lg:w-auto'>
+            <button
+              onClick={() => setIsAdvancedFilterOpen(true)}
+              className={`flex items-center gap-2 px-4 py-3 rounded-md font-medium transition-colors text-sm sm:text-base border ${
+                activeFiltersCount > 0
+                  ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300'
+                  : 'bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+              }`}
+            >
+              <Filter className='w-4 h-4' />
+              Advanced Filters
+              {activeFiltersCount > 0 && (
+                <span className='bg-blue-600 dark:bg-blue-500 text-white text-xs px-2 py-1 rounded-full'>
+                  {activeFiltersCount}
+                </span>
+              )}
+            </button>
+
+            {/* Find Job Button */}
             <button
               className='bg-blue-600 dark:bg-blue-500 text-white px-6 sm:px-8 py-3 rounded-md font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition w-full lg:w-auto text-sm sm:text-base'
               onClick={handleSearch}
@@ -875,15 +974,136 @@ function FindJobContent() {
               opportunities
             </p>
             <button
-              onClick={() => {
-                setSearchFilters({ keyword: '', location: '', category: '' });
-                setCurrentPage(1);
-                router.push('/find-job');
-              }}
+              onClick={handleClearAllFilters}
               className='px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm sm:text-base'
             >
-              Clear Filters
+              Clear All Filters
             </button>
+          </div>
+        )}
+
+        {/* Active Filters Display */}
+        {activeFiltersCount > 0 && (
+          <div className='mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700'>
+            <div className='flex items-center justify-between mb-3'>
+              <h3 className='font-medium text-blue-900 dark:text-blue-100'>
+                Active Filters ({activeFiltersCount})
+              </h3>
+              <button
+                onClick={handleClearAllFilters}
+                className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 text-sm font-medium'
+              >
+                Clear All
+              </button>
+            </div>
+            <div className='flex flex-wrap gap-2'>
+              {advancedFilters.experienceLevel && (
+                <span className='inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-sm'>
+                  Experience: {advancedFilters.experienceLevel}
+                  <button
+                    onClick={() =>
+                      setAdvancedFilters((prev) => ({
+                        ...prev,
+                        experienceLevel: '',
+                      }))
+                    }
+                    className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
+                  >
+                    <X className='w-3 h-3' />
+                  </button>
+                </span>
+              )}
+              {(advancedFilters.salaryRange.min > 0 ||
+                advancedFilters.salaryRange.max > 0) && (
+                <span className='inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-sm'>
+                  Salary: ${advancedFilters.salaryRange.min || 0} - $
+                  {advancedFilters.salaryRange.max || '∞'}
+                  <button
+                    onClick={() =>
+                      setAdvancedFilters((prev) => ({
+                        ...prev,
+                        salaryRange: { min: 0, max: 0 },
+                      }))
+                    }
+                    className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
+                  >
+                    <X className='w-3 h-3' />
+                  </button>
+                </span>
+              )}
+              {advancedFilters.employmentType.length > 0 && (
+                <span className='inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-sm'>
+                  Type: {advancedFilters.employmentType.join(', ')}
+                  <button
+                    onClick={() =>
+                      setAdvancedFilters((prev) => ({
+                        ...prev,
+                        employmentType: [],
+                      }))
+                    }
+                    className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
+                  >
+                    <X className='w-3 h-3' />
+                  </button>
+                </span>
+              )}
+              {advancedFilters.educationLevel && (
+                <span className='inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-sm'>
+                  Education: {advancedFilters.educationLevel}
+                  <button
+                    onClick={() =>
+                      setAdvancedFilters((prev) => ({
+                        ...prev,
+                        educationLevel: '',
+                      }))
+                    }
+                    className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
+                  >
+                    <X className='w-3 h-3' />
+                  </button>
+                </span>
+              )}
+              {advancedFilters.industry && (
+                <span className='inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-sm'>
+                  Industry: {advancedFilters.industry}
+                  <button
+                    onClick={() =>
+                      setAdvancedFilters((prev) => ({ ...prev, industry: '' }))
+                    }
+                    className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
+                  >
+                    <X className='w-3 h-3' />
+                  </button>
+                </span>
+              )}
+              {advancedFilters.location && (
+                <span className='inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-sm'>
+                  Location: {advancedFilters.location}
+                  <button
+                    onClick={() =>
+                      setAdvancedFilters((prev) => ({ ...prev, location: '' }))
+                    }
+                    className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
+                  >
+                    <X className='w-3 h-3' />
+                  </button>
+                </span>
+              )}
+              {advancedFilters.skills.length > 0 && (
+                <span className='inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-sm'>
+                  Skills: {advancedFilters.skills.slice(0, 3).join(', ')}
+                  {advancedFilters.skills.length > 3 && '...'}
+                  <button
+                    onClick={() =>
+                      setAdvancedFilters((prev) => ({ ...prev, skills: [] }))
+                    }
+                    className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
+                  >
+                    <X className='w-3 h-3' />
+                  </button>
+                </span>
+              )}
+            </div>
           </div>
         )}
 
@@ -901,6 +1121,14 @@ function FindJobContent() {
       <FilterModal
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
+      />
+
+      {/* Advanced Filter Modal */}
+      <AdvancedFilterModal
+        isOpen={isAdvancedFilterOpen}
+        onClose={() => setIsAdvancedFilterOpen(false)}
+        onApplyFilters={handleAdvancedFiltersApply}
+        currentFilters={advancedFilters}
       />
     </main>
   );

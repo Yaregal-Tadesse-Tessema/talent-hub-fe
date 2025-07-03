@@ -179,7 +179,6 @@ export const jobService = {
 
   async searchJobs(
     title?: string,
-    location?: string,
     category?: string,
     page?: number,
     limit?: number,
@@ -189,10 +188,6 @@ export const jobService = {
       const conditions = [];
       if (title) {
         conditions.push(`title:ILIKE:${title.toLowerCase()}`);
-      }
-      if (location) {
-        conditions.push(`location:ILIKE:${location.toLowerCase()}`);
-        conditions.push(`city:ILIKE:${location.toLowerCase()}`);
       }
       if (category) {
         conditions.push(`employmentType:ILIKE:${category.toLowerCase()}`);
@@ -215,6 +210,125 @@ export const jobService = {
       return response.data;
     } catch (error) {
       console.error('Error searching jobs:', error);
+      throw error;
+    }
+  },
+
+  async searchJobsWithAdvancedFilters(
+    filters: {
+      title?: string;
+      category?: string;
+      experienceLevel?: string;
+      salaryRange?: { min: number; max: number };
+      employmentType?: string[];
+      educationLevel?: string;
+      industry?: string;
+      location?: string;
+      skills?: string[];
+      gender?: string;
+      minimumGPA?: number;
+      fieldOfStudy?: string;
+      positionNumbers?: number;
+      paymentType?: string;
+    },
+    page?: number,
+    limit?: number,
+  ): Promise<JobsResponse> {
+    try {
+      let queryParams = '';
+      const conditions = [];
+
+      // Basic filters
+      if (filters.title) {
+        conditions.push(`title:ILIKE:${filters.title.toLowerCase()}`);
+      }
+      if (filters.category) {
+        conditions.push(
+          `employmentType:ILIKE:${filters.category.toLowerCase()}`,
+        );
+      }
+
+      // Advanced filters
+      if (filters.experienceLevel) {
+        conditions.push(
+          `experienceLevel:ILIKE:${filters.experienceLevel.toLowerCase()}`,
+        );
+      }
+      if (filters.educationLevel) {
+        conditions.push(
+          `educationLevel:ILIKE:${filters.educationLevel.toLowerCase()}`,
+        );
+      }
+      if (filters.industry) {
+        conditions.push(`industry:ILIKE:${filters.industry.toLowerCase()}`);
+      }
+      if (filters.location) {
+        conditions.push(`location:ILIKE:${filters.location.toLowerCase()}`);
+      }
+      if (filters.gender && filters.gender !== 'Any') {
+        conditions.push(`gender:ILIKE:${filters.gender.toLowerCase()}`);
+      }
+      if (filters.fieldOfStudy) {
+        conditions.push(
+          `fieldOfStudy:ILIKE:${filters.fieldOfStudy.toLowerCase()}`,
+        );
+      }
+      if (filters.paymentType) {
+        conditions.push(
+          `paymentType:ILIKE:${filters.paymentType.toLowerCase()}`,
+        );
+      }
+
+      // Numeric filters
+      if (filters.minimumGPA && filters.minimumGPA > 0) {
+        conditions.push(`minimumGPA:gte:${filters.minimumGPA}`);
+      }
+      if (filters.positionNumbers && filters.positionNumbers > 0) {
+        conditions.push(`positionNumbers:gte:${filters.positionNumbers}`);
+      }
+
+      // Salary range filter - handle min and max separately
+      if (filters.salaryRange && filters.salaryRange.min > 0) {
+        conditions.push(`salaryRange.min:gte:${filters.salaryRange.min}`);
+      }
+      if (filters.salaryRange && filters.salaryRange.max > 0) {
+        conditions.push(`salaryRange.max:lte:${filters.salaryRange.max}`);
+      }
+
+      // Employment type array filter
+      if (filters.employmentType && filters.employmentType.length > 0) {
+        // For multiple employment types, we need to handle them as separate conditions
+        filters.employmentType.forEach((type) => {
+          conditions.push(`employmentType:ILIKE:${type.toLowerCase()}`);
+        });
+      }
+
+      // Skills array filter
+      if (filters.skills && filters.skills.length > 0) {
+        // For multiple skills, we need to handle them as separate conditions
+        filters.skills.forEach((skill) => {
+          conditions.push(`skill:ILIKE:${skill.toLowerCase()}`);
+        });
+      }
+
+      if (conditions.length > 0) {
+        queryParams = `q=w=${conditions.join(',')}`;
+      }
+
+      // Add pagination parameters
+      if (page && limit) {
+        const skip = (page - 1) * limit;
+        queryParams += queryParams
+          ? `&t=${limit}&sk=${skip}`
+          : `t=${limit}&sk=${skip}`;
+      }
+
+      const response = await api.get(
+        `/jobs/get-all-public-job-postings?${queryParams}`,
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error searching jobs with advanced filters:', error);
       throw error;
     }
   },
