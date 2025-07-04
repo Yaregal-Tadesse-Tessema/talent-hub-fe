@@ -126,11 +126,11 @@ function DashboardContent() {
 
       {/* Sidebar Navigation (Candidate) */}
       <aside
-        className={`sidebar fixed inset-y-0 left-0 z-40 pt-8 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+        className={`sidebar fixed inset-y-0 left-0 z-40 pt-8 lg:pt-0 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className='flex flex-col h-full p-4 lg:p-6'>
+        <div className='flex flex-col h-full p-4 lg:px-6'>
           <div className='flex-1'>
             <h2 className='text-xs font-semibold text-gray-400 dark:text-gray-500 mb-6 uppercase tracking-wider'>
               Candidate Dashboard
