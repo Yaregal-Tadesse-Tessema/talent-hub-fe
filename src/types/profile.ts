@@ -5,6 +5,31 @@ export interface FileInfo {
   updatedAt?: string;
 }
 
+export interface Education {
+  id?: string;
+  degree: string;
+  institution: string;
+  location?: string;
+  startDate: string;
+  endDate?: string;
+  current?: boolean;
+  gpa?: number;
+  courses?: string[];
+  description?: string;
+}
+
+export interface Experience {
+  id?: string;
+  jobTitle: string;
+  company: string;
+  location?: string;
+  startDate: string;
+  endDate?: string;
+  current?: boolean;
+  description?: string;
+  technologies?: string[];
+}
+
 export interface UserProfile {
   id: string;
   phone: string;
@@ -29,12 +54,15 @@ export interface UserProfile {
   softSkills: string[];
   profile: FileInfo;
   resume: FileInfo;
-  educations: Record<string, any>;
-  experiences: Record<string, any>;
+  educations: Education[];
+  experiences: Experience[];
   socialMediaLinks: Record<string, any>;
   profileHeadLine: string;
   coverLetter: string;
   professionalSummery: string;
+  notificationSetting?: string[];
+  alertConfiguration?: string[];
+  smsAlertConfiguration?: string[];
   createdAt?: string;
   updatedAt?: string;
   role?: string;

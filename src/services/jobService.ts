@@ -418,7 +418,7 @@ export const jobService = {
 
   async getJobIndustryStats(): Promise<any> {
     try {
-      const response = await api.get('/jobs/get-job-industry');
+      const response = await api.get('/jobs/get-job-industry/statistics');
       return response.data;
     } catch (error) {
       console.error('Error fetching job industry stats:', error);

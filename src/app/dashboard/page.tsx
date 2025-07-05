@@ -142,6 +142,15 @@ function DashboardContent() {
                 return (
                   <button
                     key={tab.key}
+                    data-tutorial={
+                      tab.key === 'overview'
+                        ? 'profile-section'
+                        : tab.key === 'applied'
+                          ? 'applications'
+                          : tab.key === 'settings'
+                            ? 'settings'
+                            : undefined
+                    }
                     onClick={() => {
                       setActiveTab(tab.key);
                       // Close sidebar on mobile after tab selection

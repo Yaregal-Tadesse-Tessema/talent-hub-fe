@@ -11,7 +11,7 @@ import { TagInput } from '@/components/ui/TagInput';
 import { useToast } from '@/contexts/ToastContext';
 import { profileService } from '@/services/profileService';
 import Image from 'next/image';
-import { UserProfile, FileInfo } from '@/types/profile';
+import { UserProfile, FileInfo, Education, Experience } from '@/types/profile';
 import {
   Edit3,
   Save,
@@ -37,8 +37,12 @@ import {
   Instagram,
   Facebook,
   Youtube,
+  Bell,
 } from 'lucide-react';
 import { frontendCVService } from '@/services/frontendCV.service';
+import CVParserModal from '@/components/cv/CVParserModal';
+import EducationModal from '@/components/forms/EducationModal';
+import ExperienceModal from '@/components/forms/ExperienceModal';
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
@@ -50,8 +54,25 @@ export default function ProfilePage() {
   );
   const [isGeneratingCV, setIsGeneratingCV] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('modern');
+  const [showCVParser, setShowCVParser] = useState(false);
   const router = useRouter();
   const { showToast } = useToast();
+  const [editingEduIndex, setEditingEduIndex] = useState<number | null>(null);
+  const [addingEdu, setAddingEdu] = useState(false);
+  const [eduModalOpen, setEduModalOpen] = useState(false);
+  const [eduModalInitial, setEduModalInitial] = useState<
+    Partial<Education> | undefined
+  >(undefined);
+  const [eduModalEditIndex, setEduModalEditIndex] = useState<number | null>(
+    null,
+  );
+  const [expModalOpen, setExpModalOpen] = useState(false);
+  const [expModalInitial, setExpModalInitial] = useState<
+    Partial<Experience> | undefined
+  >(undefined);
+  const [expModalEditIndex, setExpModalEditIndex] = useState<number | null>(
+    null,
+  );
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -96,24 +117,35 @@ export default function ProfilePage() {
               : [],
             profile: userData.profile || {},
             resume: userData.resume || {},
-            educations: userData.educations || {},
-            experiences: userData.experiences || {},
+            educations: Array.isArray(userData.educations)
+              ? userData.educations
+              : [],
+            experiences: Array.isArray(userData.experiences)
+              ? userData.experiences
+              : [],
             socialMediaLinks: userData.socialMediaLinks || {},
             profileHeadLine: userData.profileHeadLine || '',
             coverLetter: userData.coverLetter || '',
             professionalSummery: userData.professionalSummery || '',
+            notificationSetting: Array.isArray(userData.notificationSetting)
+              ? userData.notificationSetting
+              : [],
+            alertConfiguration: Array.isArray(userData.alertConfiguration)
+              ? userData.alertConfiguration
+              : [],
+            smsAlertConfiguration: Array.isArray(userData.smsAlertConfiguration)
+              ? userData.smsAlertConfiguration
+              : [],
             isProfilePublic: userData.isProfilePublic || false,
             isResumePublic: userData.isResumePublic || false,
           };
 
-          console.log('Mapped profile data:', mappedProfile);
           setProfile(mappedProfile);
 
           // Fetch profile completeness
           try {
             const completenessData =
               await profileService.getProfileCompleteness(userData.id);
-            console.log('Profile completeness:', completenessData);
           } catch (error) {
             console.error('Error fetching profile completeness:', error);
           }
@@ -152,6 +184,142 @@ export default function ProfilePage() {
         type: 'error',
         message:
           error instanceof Error ? error.message : 'Failed to update profile',
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCVParserSave = async (parsedProfile: UserProfile) => {
+    if (!profile) return;
+
+    setSaving(true);
+    try {
+      // Helper function to clean date fields
+      const cleanDateField = (dateValue: any): string => {
+        if (!dateValue || typeof dateValue !== 'string') return '';
+
+        const trimmed = dateValue.trim();
+        if (
+          trimmed === '' ||
+          trimmed === 'Unknown' ||
+          trimmed === 'null' ||
+          trimmed === 'undefined'
+        ) {
+          return '';
+        }
+
+        try {
+          const date = new Date(trimmed);
+          if (isNaN(date.getTime())) {
+            return '';
+          }
+          return date.toISOString(); // Return ISO timestamp format for backend
+        } catch (error) {
+          return '';
+        }
+      };
+
+      // Recursive function to clean all date fields
+      const cleanObjectDates = (obj: any): any => {
+        if (!obj || typeof obj !== 'object') return obj;
+
+        if (Array.isArray(obj)) {
+          return obj.map((item) => cleanObjectDates(item));
+        }
+
+        const cleaned: any = {};
+        for (const [key, value] of Object.entries(obj)) {
+          if (typeof value === 'object' && value !== null) {
+            cleaned[key] = cleanObjectDates(value);
+          } else if (
+            typeof value === 'string' &&
+            key.toLowerCase().includes('date')
+          ) {
+            cleaned[key] = cleanDateField(value);
+          } else {
+            cleaned[key] = value;
+          }
+        }
+        return cleaned;
+      };
+
+      // Merge parsed data with existing profile data
+      const mergedProfile = {
+        ...profile,
+        ...parsedProfile,
+        id: profile.id, // Keep original ID
+        profile: profile.profile, // Keep existing profile picture
+        resume: profile.resume, // Keep existing resume
+      };
+
+      // Clean all date fields in the merged profile
+      const cleanedMergedProfile = cleanObjectDates(mergedProfile);
+
+      // Ensure all required fields have proper fallback values
+      const finalMergedProfile = {
+        ...cleanedMergedProfile,
+        // Ensure arrays are always arrays
+        industry: cleanedMergedProfile.industry || [],
+        preferredJobLocation: cleanedMergedProfile.preferredJobLocation || [],
+        technicalSkills: cleanedMergedProfile.technicalSkills || [],
+        softSkills: cleanedMergedProfile.softSkills || [],
+        notificationSetting: cleanedMergedProfile.notificationSetting || [],
+        alertConfiguration: cleanedMergedProfile.alertConfiguration || [],
+        smsAlertConfiguration: cleanedMergedProfile.smsAlertConfiguration || [],
+        // Ensure objects are always objects
+        address: cleanedMergedProfile.address || {},
+        educations: cleanedMergedProfile.educations || {},
+        experiences: cleanedMergedProfile.experiences || {},
+        socialMediaLinks: cleanedMergedProfile.socialMediaLinks || {},
+        profile: cleanedMergedProfile.profile || { path: '' },
+        resume: cleanedMergedProfile.resume || { path: '' },
+        // Ensure strings are never undefined
+        phone: cleanedMergedProfile.phone || '',
+        email: cleanedMergedProfile.email || '',
+        firstName: cleanedMergedProfile.firstName || '',
+        middleName: cleanedMergedProfile.middleName || '',
+        lastName: cleanedMergedProfile.lastName || '',
+        gender: cleanedMergedProfile.gender || '',
+        status: cleanedMergedProfile.status || 'Active',
+        birthDate: cleanedMergedProfile.birthDate || '1990-01-01T00:00:00.000Z',
+        linkedinUrl: cleanedMergedProfile.linkedinUrl || '',
+        portfolioUrl: cleanedMergedProfile.portfolioUrl || '',
+        telegramUserId: cleanedMergedProfile.telegramUserId || '',
+        highestLevelOfEducation:
+          cleanedMergedProfile.highestLevelOfEducation || '',
+        profileHeadLine: cleanedMergedProfile.profileHeadLine || '',
+        coverLetter: cleanedMergedProfile.coverLetter || '',
+        professionalSummery: cleanedMergedProfile.professionalSummery || '',
+        // Ensure numbers are never undefined
+        yearOfExperience: cleanedMergedProfile.yearOfExperience || 0,
+        salaryExpectations: cleanedMergedProfile.salaryExpectations || 0,
+        aiGeneratedJobFitScore:
+          cleanedMergedProfile.aiGeneratedJobFitScore || 0,
+        // Ensure booleans are never undefined
+        isProfilePublic: cleanedMergedProfile.isProfilePublic || false,
+        isResumePublic: cleanedMergedProfile.isResumePublic || false,
+      };
+
+      const updatedProfile =
+        await profileService.updateProfile(finalMergedProfile);
+      localStorage.setItem(
+        'user',
+        JSON.stringify({ ...updatedProfile, role: 'employee' }),
+      );
+      setProfile(updatedProfile);
+      showToast({
+        type: 'success',
+        message: 'Profile updated with CV data successfully',
+      });
+    } catch (error) {
+      console.error('Error updating profile with CV data:', error);
+      showToast({
+        type: 'error',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to update profile with CV data',
       });
     } finally {
       setSaving(false);
@@ -264,16 +432,6 @@ export default function ProfilePage() {
 
     setIsGeneratingCV(true);
     try {
-      // Debug: Log profile structure to understand data format
-      console.log('Profile data:', {
-        experiences: profile.experiences,
-        educations: profile.educations,
-        experiencesType: typeof profile.experiences,
-        educationsType: typeof profile.educations,
-        isExperiencesArray: Array.isArray(profile.experiences),
-        isEducationsArray: Array.isArray(profile.educations),
-      });
-
       // Helper function to convert object to array
       const convertObjectToArray = (obj: any): any[] => {
         if (Array.isArray(obj)) return obj;
@@ -287,8 +445,8 @@ export default function ProfilePage() {
 
       // Check if we have enough data for a meaningful CV
       const hasExperiences =
-        convertObjectToArray(profile.experiences).length > 0;
-      const hasEducations = convertObjectToArray(profile.educations).length > 0;
+        profile.experiences && profile.experiences.length > 0;
+      const hasEducations = profile.educations && profile.educations.length > 0;
       const hasSkills =
         (profile.technicalSkills || []).length > 0 ||
         (profile.softSkills || []).length > 0;
@@ -366,12 +524,14 @@ export default function ProfilePage() {
       const cvProfile = {
         fullName: `${profile.firstName} ${profile.lastName}`,
         title: profile.profileHeadLine || 'Professional',
-        slogan: profile.professionalSummery || '',
+        slogan:
+          profile.professionalSummery ||
+          'Experienced professional with a passion for excellence.',
         email: profile.email,
         phone: profile.phone,
         address: Array.isArray(profile.preferredJobLocation)
           ? profile.preferredJobLocation.join(', ')
-          : profile.preferredJobLocation || '',
+          : profile.preferredJobLocation || 'Your Location',
         profilePicture: profile.profile?.path || '',
         linkedin: profile.linkedinUrl || '',
         github: '',
@@ -381,27 +541,27 @@ export default function ProfilePage() {
           ...(profile.technicalSkills || []),
           ...(profile.softSkills || []),
         ],
-        experience: convertObjectToArray(profile.experiences).map(
-          (exp: any) => ({
-            position: exp.position || exp.title || '',
-            company: exp.company || exp.employer || '',
-            startDate: exp.startDate || exp.startDate || '',
-            endDate: exp.endDate || exp.endDate || '',
+        experience:
+          profile.experiences?.map((exp) => ({
+            position: exp.jobTitle,
+            company: exp.company,
+            startDate: exp.startDate,
+            endDate: exp.current ? undefined : exp.endDate,
             current: exp.current || false,
-            description: exp.description || exp.summary || '',
-            location: exp.location || exp.city || '',
-          }),
-        ),
-        education: convertObjectToArray(profile.educations).map((edu: any) => ({
-          degree: edu.degree || edu.title || '',
-          institution: edu.institution || edu.school || edu.university || '',
-          field: edu.field || edu.major || edu.studyField || '',
-          startDate: edu.startDate || edu.startDate || '',
-          endDate: edu.endDate || edu.endDate || edu.graduationDate || '',
-          current: edu.current || false,
-          description: edu.description || edu.summary || '',
-          location: edu.location || edu.city || '',
-        })),
+            description: exp.description || '',
+            location: exp.location,
+          })) || [],
+        education:
+          profile.educations?.map((edu) => ({
+            degree: edu.degree,
+            institution: edu.institution,
+            field: edu.courses?.join(', ') || '',
+            startDate: edu.startDate,
+            endDate: edu.current ? undefined : edu.endDate,
+            current: edu.current || false,
+            description: edu.description || '',
+            location: edu.location,
+          })) || [],
         certificates: [],
         publications: [],
         projects: [],
@@ -410,8 +570,6 @@ export default function ProfilePage() {
         volunteer: [],
         references: [],
       };
-
-      console.log('Generated CV profile:', cvProfile);
 
       await frontendCVService.downloadCV(cvProfile, selectedTemplate);
 
@@ -454,23 +612,33 @@ export default function ProfilePage() {
             Manage your professional information and preferences
           </p>
         </div>
-        <Button
-          onClick={() => setIsEditing(!isEditing)}
-          variant={isEditing ? 'outline' : 'primary'}
-          className='flex items-center gap-2'
-        >
-          {isEditing ? (
-            <>
-              <X size={16} />
-              Cancel
-            </>
-          ) : (
-            <>
-              <Edit3 size={16} />
-              Edit
-            </>
-          )}
-        </Button>
+        <div className='flex gap-3'>
+          <Button
+            onClick={() => setShowCVParser(true)}
+            variant='outline'
+            className='flex items-center gap-2'
+          >
+            <FileText size={16} />
+            Parse CV
+          </Button>
+          <Button
+            onClick={() => setIsEditing(!isEditing)}
+            variant={isEditing ? 'outline' : 'primary'}
+            className='flex items-center gap-2'
+          >
+            {isEditing ? (
+              <>
+                <X size={16} />
+                Cancel
+              </>
+            ) : (
+              <>
+                <Edit3 size={16} />
+                Edit
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       <div className='space-y-8'>
@@ -977,6 +1145,35 @@ export default function ProfilePage() {
                   tagColor='green'
                 />
               </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Telegram User ID
+                </label>
+                <Input
+                  value={profile.telegramUserId || ''}
+                  onChange={(e) =>
+                    setProfile({ ...profile, telegramUserId: e.target.value })
+                  }
+                  placeholder='Enter your Telegram user ID'
+                  className='w-full'
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Status
+                </label>
+                <Select
+                  value={profile.status || 'Active'}
+                  onChange={(e) =>
+                    setProfile({ ...profile, status: e.target.value })
+                  }
+                  className='w-full'
+                >
+                  <option value='Active'>Active</option>
+                  <option value='Inactive'>Inactive</option>
+                  <option value='Pending'>Pending</option>
+                </Select>
+              </div>
             </div>
           ) : (
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
@@ -1078,6 +1275,62 @@ export default function ProfilePage() {
                     </span>
                   ))}
                 </div>
+              </div>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <div className='flex items-center gap-2 mb-2'>
+                  <Phone size={16} className='text-gray-400' />
+                  <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                    Telegram User ID
+                  </h3>
+                </div>
+                <p className='text-lg font-semibold text-gray-900 dark:text-white'>
+                  {profile.telegramUserId || 'Not provided'}
+                </p>
+              </div>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <div className='flex items-center gap-2 mb-2'>
+                  <User size={16} className='text-gray-400' />
+                  <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                    Status
+                  </h3>
+                </div>
+                <span
+                  className={`inline-flex px-2 py-1 rounded-full text-sm font-medium ${
+                    profile.status === 'Active'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                      : profile.status === 'Inactive'
+                        ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                  }`}
+                >
+                  {profile.status || 'Active'}
+                </span>
+              </div>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <div className='flex items-center gap-2 mb-2'>
+                  <GraduationCap size={16} className='text-gray-400' />
+                  <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                    Education
+                  </h3>
+                </div>
+                <p className='text-lg font-semibold text-gray-900 dark:text-white'>
+                  {profile.educations && profile.educations.length > 0
+                    ? `${profile.educations.length} degree(s)`
+                    : 'No education added'}
+                </p>
+              </div>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <div className='flex items-center gap-2 mb-2'>
+                  <Briefcase size={16} className='text-gray-400' />
+                  <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                    Work Experience
+                  </h3>
+                </div>
+                <p className='text-lg font-semibold text-gray-900 dark:text-white'>
+                  {profile.experiences && profile.experiences.length > 0
+                    ? `${profile.experiences.length} position(s)`
+                    : 'No experience added'}
+                </p>
               </div>
             </div>
           )}
@@ -1184,6 +1437,364 @@ export default function ProfilePage() {
               <p className='text-gray-900 dark:text-white whitespace-pre-wrap'>
                 {profile.professionalSummery}
               </p>
+            </div>
+          )}
+        </section>
+
+        {/* Education */}
+        <section className='bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-700/50 p-8 border border-gray-200 dark:border-gray-700'>
+          <div className='flex items-center gap-3 mb-6'>
+            <GraduationCap className='w-6 h-6 text-blue-600 dark:text-blue-400' />
+            <h2 className='text-2xl font-semibold text-gray-900 dark:text-white'>
+              Education
+            </h2>
+          </div>
+          {isEditing ? (
+            <div className='space-y-6'>
+              {profile.educations && profile.educations.length > 0 && (
+                <div className='space-y-4'>
+                  {profile.educations.map((education, index) => (
+                    <div
+                      key={education.id || index}
+                      className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 flex justify-between items-start'
+                    >
+                      <div>
+                        <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
+                          {education.degree}
+                        </h3>
+                        <p className='text-gray-600 dark:text-gray-400 font-medium'>
+                          {education.institution}
+                        </p>
+                        <div className='flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400'>
+                          <span>
+                            {education.startDate} -{' '}
+                            {education.current ? 'Present' : education.endDate}
+                          </span>
+                          {education.location && (
+                            <span>{education.location}</span>
+                          )}
+                          {education.gpa && <span>GPA: {education.gpa}</span>}
+                        </div>
+                      </div>
+                      <div className='flex gap-2'>
+                        <Button
+                          size='sm'
+                          variant='outline'
+                          onClick={() => {
+                            setEduModalEditIndex(index);
+                            setEduModalInitial(education);
+                            setEduModalOpen(true);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          size='sm'
+                          variant='outline'
+                          onClick={() => {
+                            const newArr = profile.educations.filter(
+                              (_, i) => i !== index,
+                            );
+                            setProfile({ ...profile, educations: newArr });
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className='text-center'>
+                <Button
+                  variant='primary'
+                  onClick={() => {
+                    setEduModalEditIndex(null);
+                    setEduModalInitial(undefined);
+                    setEduModalOpen(true);
+                  }}
+                >
+                  Add Education
+                </Button>
+              </div>
+              <EducationModal
+                open={eduModalOpen}
+                initial={eduModalInitial}
+                onClose={() => setEduModalOpen(false)}
+                onSave={(edu) => {
+                  if (eduModalEditIndex !== null) {
+                    // Edit existing
+                    const newArr = [...profile.educations];
+                    newArr[eduModalEditIndex] = {
+                      ...edu,
+                      id: edu.id || Date.now().toString(),
+                    };
+                    setProfile({ ...profile, educations: newArr });
+                  } else {
+                    // Add new
+                    setProfile({
+                      ...profile,
+                      educations: [
+                        ...profile.educations,
+                        { ...edu, id: Date.now().toString() },
+                      ],
+                    });
+                  }
+                  setEduModalOpen(false);
+                }}
+              />
+            </div>
+          ) : (
+            <div className='space-y-4'>
+              {profile.educations && profile.educations.length > 0 ? (
+                profile.educations.map((education, index) => (
+                  <div
+                    key={education.id || index}
+                    className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'
+                  >
+                    <div className='flex items-start justify-between'>
+                      <div className='flex-1'>
+                        <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
+                          {education.degree}
+                        </h3>
+                        <p className='text-gray-600 dark:text-gray-400 font-medium'>
+                          {education.institution}
+                        </p>
+                        {education.courses && education.courses.length > 0 && (
+                          <div className='mt-2'>
+                            <p className='text-sm text-gray-500 dark:text-gray-400 font-medium'>
+                              Courses:
+                            </p>
+                            <div className='flex flex-wrap gap-1 mt-1'>
+                              {education.courses.map((course, courseIndex) => (
+                                <span
+                                  key={courseIndex}
+                                  className='px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-xs'
+                                >
+                                  {course}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        <div className='flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400'>
+                          <span>
+                            {education.startDate} -{' '}
+                            {education.current ? 'Present' : education.endDate}
+                          </span>
+                          {education.location && (
+                            <span>{education.location}</span>
+                          )}
+                          {education.gpa && <span>GPA: {education.gpa}</span>}
+                        </div>
+                        {education.description && (
+                          <p className='mt-2 text-gray-600 dark:text-gray-400'>
+                            {education.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className='text-center py-8'>
+                  <GraduationCap className='mx-auto h-12 w-12 text-gray-400 mb-4' />
+                  <p className='text-gray-500 dark:text-gray-400'>
+                    No education information available
+                  </p>
+                  <p className='text-sm text-gray-400 dark:text-gray-500 mt-2'>
+                    Use CV parsing to automatically add your education history
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* Experience */}
+        <section className='bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-700/50 p-8 border border-gray-200 dark:border-gray-700'>
+          <div className='flex items-center gap-3 mb-6'>
+            <Briefcase className='w-6 h-6 text-blue-600 dark:text-blue-400' />
+            <h2 className='text-2xl font-semibold text-gray-900 dark:text-white'>
+              Work Experience
+            </h2>
+          </div>
+          {isEditing ? (
+            <div className='space-y-6'>
+              {profile.experiences && profile.experiences.length > 0 && (
+                <div className='space-y-4'>
+                  {profile.experiences.map((experience, index) => (
+                    <div
+                      key={experience.id || index}
+                      className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 flex justify-between items-start'
+                    >
+                      <div>
+                        <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
+                          {experience.jobTitle}
+                        </h3>
+                        <p className='text-gray-600 dark:text-gray-400 font-medium'>
+                          {experience.company}
+                        </p>
+                        <div className='flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400'>
+                          <span>
+                            {experience.startDate} -{' '}
+                            {experience.current
+                              ? 'Present'
+                              : experience.endDate}
+                          </span>
+                          {experience.location && (
+                            <span>{experience.location}</span>
+                          )}
+                        </div>
+                        {experience.technologies &&
+                          experience.technologies.length > 0 && (
+                            <div className='mt-2 flex flex-wrap gap-1'>
+                              {experience.technologies.map((tech, i) => (
+                                <span
+                                  key={i}
+                                  className='px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-xs'
+                                >
+                                  {tech}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                      </div>
+                      <div className='flex gap-2'>
+                        <Button
+                          size='sm'
+                          variant='outline'
+                          onClick={() => {
+                            setExpModalEditIndex(index);
+                            setExpModalInitial(experience);
+                            setExpModalOpen(true);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          size='sm'
+                          variant='outline'
+                          onClick={() => {
+                            const newArr = profile.experiences.filter(
+                              (_, i) => i !== index,
+                            );
+                            setProfile({ ...profile, experiences: newArr });
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className='text-center'>
+                <Button
+                  variant='primary'
+                  onClick={() => {
+                    setExpModalEditIndex(null);
+                    setExpModalInitial(undefined);
+                    setExpModalOpen(true);
+                  }}
+                >
+                  Add Experience
+                </Button>
+              </div>
+              <ExperienceModal
+                open={expModalOpen}
+                initial={expModalInitial}
+                onClose={() => setExpModalOpen(false)}
+                onSave={(exp) => {
+                  if (expModalEditIndex !== null) {
+                    // Edit existing
+                    const newArr = [...profile.experiences];
+                    newArr[expModalEditIndex] = {
+                      ...exp,
+                      id: exp.id || Date.now().toString(),
+                    };
+                    setProfile({ ...profile, experiences: newArr });
+                  } else {
+                    // Add new
+                    setProfile({
+                      ...profile,
+                      experiences: [
+                        ...profile.experiences,
+                        { ...exp, id: Date.now().toString() },
+                      ],
+                    });
+                  }
+                  setExpModalOpen(false);
+                }}
+              />
+            </div>
+          ) : (
+            <div className='space-y-4'>
+              {profile.experiences && profile.experiences.length > 0 ? (
+                profile.experiences.map((experience, index) => (
+                  <div
+                    key={experience.id || index}
+                    className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'
+                  >
+                    <div className='flex items-start justify-between'>
+                      <div className='flex-1'>
+                        <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
+                          {experience.jobTitle}
+                        </h3>
+                        <p className='text-gray-600 dark:text-gray-400 font-medium'>
+                          {experience.company}
+                        </p>
+                        {experience.technologies &&
+                          experience.technologies.length > 0 && (
+                            <div className='mt-2'>
+                              <p className='text-sm text-gray-500 dark:text-gray-400 font-medium'>
+                                Technologies:
+                              </p>
+                              <div className='flex flex-wrap gap-1 mt-1'>
+                                {experience.technologies.map(
+                                  (tech, techIndex) => (
+                                    <span
+                                      key={techIndex}
+                                      className='px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-xs'
+                                    >
+                                      {tech}
+                                    </span>
+                                  ),
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        <div className='flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400'>
+                          <span>
+                            {experience.startDate} -{' '}
+                            {experience.current
+                              ? 'Present'
+                              : experience.endDate}
+                          </span>
+                          {experience.location && (
+                            <span>{experience.location}</span>
+                          )}
+                        </div>
+                        {experience.description && (
+                          <p className='mt-2 text-gray-600 dark:text-gray-400'>
+                            {experience.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className='text-center py-8'>
+                  <Briefcase className='mx-auto h-12 w-12 text-gray-400 mb-4' />
+                  <p className='text-gray-500 dark:text-gray-400'>
+                    No work experience available
+                  </p>
+                  <p className='text-sm text-gray-400 dark:text-gray-500 mt-2'>
+                    Use CV parsing to automatically add your work experience
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </section>
@@ -1322,6 +1933,144 @@ export default function ProfilePage() {
                   </p>
                 </div>
               )}
+            </div>
+          )}
+        </section>
+
+        {/* Notification Settings */}
+        <section className='bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-700/50 p-8 border border-gray-200 dark:border-gray-700'>
+          <div className='flex items-center gap-3 mb-6'>
+            <Bell className='w-6 h-6 text-blue-600 dark:text-blue-400' />
+            <h2 className='text-2xl font-semibold text-gray-900 dark:text-white'>
+              Notification Settings
+            </h2>
+          </div>
+
+          {isEditing ? (
+            <div className='space-y-6'>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Notification Settings
+                </label>
+                <TagInput
+                  value={profile.notificationSetting || []}
+                  onChange={(notificationSetting) =>
+                    setProfile({ ...profile, notificationSetting })
+                  }
+                  placeholder='Add notification preferences (e.g., email, push, sms)'
+                  tagColor='purple'
+                />
+                <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+                  Add notification types you want to receive
+                </p>
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Alert Configuration
+                </label>
+                <TagInput
+                  value={profile.alertConfiguration || []}
+                  onChange={(alertConfiguration) =>
+                    setProfile({ ...profile, alertConfiguration })
+                  }
+                  placeholder='Add alert types (e.g., job matches, applications)'
+                  tagColor='yellow'
+                />
+                <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+                  Configure what types of alerts you want to receive
+                </p>
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  SMS Alert Configuration
+                </label>
+                <TagInput
+                  value={profile.smsAlertConfiguration || []}
+                  onChange={(smsAlertConfiguration) =>
+                    setProfile({ ...profile, smsAlertConfiguration })
+                  }
+                  placeholder='Add SMS alert types'
+                  tagColor='green'
+                />
+                <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+                  Configure SMS notifications you want to receive
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <div className='flex items-center gap-2 mb-2'>
+                  <Bell size={16} className='text-gray-400' />
+                  <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                    Notification Settings
+                  </h3>
+                </div>
+                <div className='flex flex-wrap gap-2'>
+                  {profile.notificationSetting?.map((setting, index) => (
+                    <span
+                      key={index}
+                      className='px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-full text-sm'
+                    >
+                      {setting}
+                    </span>
+                  ))}
+                  {(!profile.notificationSetting ||
+                    profile.notificationSetting.length === 0) && (
+                    <p className='text-gray-500 dark:text-gray-400 text-sm'>
+                      No notification settings configured
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <div className='flex items-center gap-2 mb-2'>
+                  <Bell size={16} className='text-gray-400' />
+                  <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                    Alert Configuration
+                  </h3>
+                </div>
+                <div className='flex flex-wrap gap-2'>
+                  {profile.alertConfiguration?.map((alert, index) => (
+                    <span
+                      key={index}
+                      className='px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 rounded-full text-sm'
+                    >
+                      {alert}
+                    </span>
+                  ))}
+                  {(!profile.alertConfiguration ||
+                    profile.alertConfiguration.length === 0) && (
+                    <p className='text-gray-500 dark:text-gray-400 text-sm'>
+                      No alert configurations set
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
+                <div className='flex items-center gap-2 mb-2'>
+                  <Phone size={16} className='text-gray-400' />
+                  <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                    SMS Alerts
+                  </h3>
+                </div>
+                <div className='flex flex-wrap gap-2'>
+                  {profile.smsAlertConfiguration?.map((sms, index) => (
+                    <span
+                      key={index}
+                      className='px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-sm'
+                    >
+                      {sms}
+                    </span>
+                  ))}
+                  {(!profile.smsAlertConfiguration ||
+                    profile.smsAlertConfiguration.length === 0) && (
+                    <p className='text-gray-500 dark:text-gray-400 text-sm'>
+                      No SMS alerts configured
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </section>
@@ -1501,6 +2250,14 @@ export default function ProfilePage() {
           </div>
         )}
       </div>
+
+      {/* CV Parser Modal */}
+      <CVParserModal
+        isOpen={showCVParser}
+        onClose={() => setShowCVParser(false)}
+        onSave={handleCVParserSave}
+        userId={profile?.id || ''}
+      />
     </div>
   );
 }

@@ -8,6 +8,9 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { NavigationProvider } from '@/components/navigation/NavigationProvider';
+import { TutorialProvider } from '@/contexts/TutorialContext';
+import TutorialOverlay from '@/components/ui/TutorialOverlay';
+import TutorialTrigger from '@/components/ui/TutorialTrigger';
 
 // Memoized component to prevent unnecessary re-renders
 const MemoizedNavbar = React.memo(Navbar);
@@ -46,11 +49,18 @@ export default function ClientLayout({
     <ThemeProvider>
       <ToastProvider>
         <AuthProvider>
-          <NavigationProvider>
-            {layoutConfig.shouldShowNavbar && <MemoizedNavbar page='home' />}
-            {children}
-            {layoutConfig.isHomePage && <MemoizedFooter />}
-          </NavigationProvider>
+          <TutorialProvider>
+            <NavigationProvider>
+              <TutorialOverlay>
+                {layoutConfig.shouldShowNavbar && (
+                  <MemoizedNavbar page='home' />
+                )}
+                {children}
+                {layoutConfig.isHomePage && <MemoizedFooter />}
+                <TutorialTrigger />
+              </TutorialOverlay>
+            </NavigationProvider>
+          </TutorialProvider>
         </AuthProvider>
       </ToastProvider>
     </ThemeProvider>

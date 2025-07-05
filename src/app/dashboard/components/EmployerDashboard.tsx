@@ -102,6 +102,17 @@ function EmployerDashboardContent() {
                 return (
                   <button
                     key={tab.key}
+                    data-tutorial={
+                      tab.key === 'overview'
+                        ? 'analytics'
+                        : tab.key === 'myjobs'
+                          ? 'manage-jobs'
+                          : tab.key === 'saved'
+                            ? 'saved-candidates'
+                            : tab.key === 'settings'
+                              ? 'settings'
+                              : undefined
+                    }
                     onClick={() => handleTabChange(tab.key)}
                     className={`group relative px-4 py-3 rounded-lg font-medium flex items-center gap-3 transition-all duration-200 ${
                       isActive

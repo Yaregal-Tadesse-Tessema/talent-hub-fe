@@ -269,7 +269,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                 </span>
               </Link>
             </div>
-            <div className='flex items-center gap-6'>
+            <div className='flex items-center gap-6' data-tutorial='navigation'>
               {(user && user.role === 'employer'
                 ? employerNavLinks
                 : user && user.role === 'employee'
@@ -340,6 +340,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
 
                 <div className='relative' ref={notificationDropdownRef}>
                   <button
+                    data-tutorial='notifications'
                     className='relative'
                     onClick={async () => {
                       setNotificationDropdownOpen((v) => !v);
@@ -389,7 +390,10 @@ export function Navbar({ page = 'home' }: NavbarProps) {
                 </div>
                 {user.role === 'employer' && (
                   <Link href='/post-job'>
-                    <button className='flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700'>
+                    <button
+                      data-tutorial='post-job'
+                      className='flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700'
+                    >
                       <svg
                         width='24'
                         height='24'
@@ -411,6 +415,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
               </div>
               <div className='relative' ref={profileDropdownRef}>
                 <button
+                  data-tutorial='profile-menu'
                   onClick={() => setDropdownOpen((v) => !v)}
                   className='focus:outline-none'
                 >

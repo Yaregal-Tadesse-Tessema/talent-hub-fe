@@ -534,6 +534,7 @@ export default function FindCandidatesPage() {
                   <path d='M21 21l-4.35-4.35' strokeWidth='2' />
                 </svg>
                 <input
+                  data-tutorial='search-candidates'
                   className='flex-1 bg-transparent border-none outline-none text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500'
                   placeholder='Search by name, job title, or professional summary...'
                   value={searchQuery}
@@ -659,6 +660,7 @@ export default function FindCandidatesPage() {
                   candidates.map((candidate, idx) => (
                     <div
                       key={candidate.id || candidate.email || idx}
+                      data-tutorial='candidate-card'
                       className='flex items-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm px-6 py-4 justify-between hover:ring-2 hover:ring-blue-500 dark:hover:ring-blue-400'
                     >
                       <div className='flex items-center gap-4'>
@@ -811,6 +813,7 @@ export default function FindCandidatesPage() {
                       </div>
                       <div className='flex items-center gap-2'>
                         <button
+                          data-tutorial='save-candidate'
                           className={`border border-gray-200 dark:border-gray-600 rounded p-2 transition-colors ${
                             savedCandidates.has(candidate.id)
                               ? 'bg-blue-600 text-white hover:bg-blue-700'

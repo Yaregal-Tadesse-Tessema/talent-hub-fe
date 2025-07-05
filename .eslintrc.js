@@ -20,6 +20,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
     'react-hooks/exhaustive-deps': 'off',
+    'no-useless-escape': 'off',
 
     'react/display-name': 'off',
     'react/jsx-curly-brace-presence': [

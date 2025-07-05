@@ -97,6 +97,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           message: 'Login successful! Redirecting...',
         });
 
+        // Clear any previous tutorial state to ensure fresh tutorial on login
+        const tutorialKeys = Object.keys(localStorage).filter(
+          (key) =>
+            key.startsWith('tutorial') || key.startsWith('tutorialShown_'),
+        );
+        tutorialKeys.forEach((key) => localStorage.removeItem(key));
+
         // Check if there's a return URL stored
         const returnToJob = localStorage.getItem('returnToJob');
         const returnToCVBuilder = localStorage.getItem('returnToCVBuilder');
@@ -144,6 +151,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           type: 'success',
           message: 'Login successful!',
         });
+
+        // Clear any previous tutorial state to ensure fresh tutorial on login
+        const tutorialKeys = Object.keys(localStorage).filter(
+          (key) =>
+            key.startsWith('tutorial') || key.startsWith('tutorialShown_'),
+        );
+        tutorialKeys.forEach((key) => localStorage.removeItem(key));
 
         // Check if there's a return URL stored
         const returnToJob = localStorage.getItem('returnToJob');

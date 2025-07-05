@@ -504,6 +504,7 @@ function FindJobContent() {
               <path d='M21 21l-4.35-4.35' strokeWidth='2' />
             </svg>
             <input
+              data-tutorial='search-bar'
               className='w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 text-sm sm:text-base'
               placeholder='Job title, Keyword...'
               value={searchFilters.keyword}
@@ -540,6 +541,7 @@ function FindJobContent() {
           {/* Advanced Filter Button */}
           <div className='flex items-center gap-2 pl-0 lg:pl-4 w-full lg:w-auto'>
             <button
+              data-tutorial='filters'
               onClick={() => setIsAdvancedFilterOpen(true)}
               className={`flex items-center gap-2 px-4 py-3 rounded-md font-medium transition-colors text-sm sm:text-base border ${
                 activeFiltersCount > 0
@@ -627,6 +629,7 @@ function FindJobContent() {
             {jobs.map((job) => (
               <div
                 key={job.id}
+                data-tutorial='job-card'
                 className='group relative z-0 hover:z-30 focus-within:z-30 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-xl dark:hover:shadow-gray-900/50 transition-all duration-300 hover:border-blue-300 dark:hover:border-blue-600 hover:-translate-y-1'
               >
                 {/* Header with company info */}
@@ -753,6 +756,7 @@ function FindJobContent() {
                   {/* Action buttons */}
                   <div className='flex items-center gap-3'>
                     <button
+                      data-tutorial='apply-button'
                       className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
                         isJobExpired(job.deadline)
                           ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
