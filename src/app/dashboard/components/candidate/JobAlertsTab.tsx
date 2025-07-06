@@ -258,12 +258,10 @@ export default function JobAlertsTab({
   };
 
   return (
-    <div className=' p-4'>
+    <div className=' px-4'>
       {/* Header - Improved responsive layout */}
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6'>
-        <div className='font-medium text-gray-900 dark:text-white text-base sm:text-lg'>
-          Job Alerts
-        </div>
+        <div></div>
         <Button
           onClick={handleAddNew}
           disabled={loading}

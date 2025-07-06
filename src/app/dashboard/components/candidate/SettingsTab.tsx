@@ -97,6 +97,9 @@ export default function SettingsTab() {
           isProfilePublic: userData.isProfilePublic ?? true,
           isResumePublic: userData.isResumePublic ?? true,
         }));
+
+        // Load the full user profile data
+        setUserProfile(userData);
       } catch (error) {
         console.error('Error parsing user data:', error);
       }
@@ -376,82 +379,6 @@ export default function SettingsTab() {
               <Button onClick={handleAccountSave}>Save Changes</Button>
             </div>
 
-            {/* Job Alerts */}
-            <div className='border-t border-gray-200 dark:border-gray-700 pt-6 sm:pt-8'>
-              <div className='font-medium mb-4 text-gray-900 dark:text-white text-base sm:text-lg'>
-                Job Alerts
-              </div>
-              <div className='flex flex-col sm:flex-row gap-4 mb-4'>
-                <div className='flex items-center gap-2 flex-1'>
-                  <span className='text-gray-400 dark:text-gray-500'>
-                    <svg
-                      width='18'
-                      height='18'
-                      fill='none'
-                      viewBox='0 0 24 24'
-                      stroke='currentColor'
-                    >
-                      <path
-                        d='M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'
-                        strokeWidth='2'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      />
-                      <circle
-                        cx='12'
-                        cy='7'
-                        r='4'
-                        strokeWidth='2'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      />
-                    </svg>
-                  </span>
-                  <Input
-                    placeholder='Your job roles'
-                    value={account.jobAlertRole}
-                    onChange={(e) =>
-                      handleAccountChange('jobAlertRole', e.target.value)
-                    }
-                  />
-                </div>
-                <div className='flex items-center gap-2 flex-1'>
-                  <span className='text-gray-400 dark:text-gray-500'>
-                    <svg
-                      width='18'
-                      height='18'
-                      fill='none'
-                      viewBox='0 0 24 24'
-                      stroke='currentColor'
-                    >
-                      <path
-                        d='M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 1 1 18 0z'
-                        strokeWidth='2'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      />
-                      <circle
-                        cx='12'
-                        cy='10'
-                        r='3'
-                        strokeWidth='2'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      />
-                    </svg>
-                  </span>
-                  <Input
-                    placeholder='City, state, country name'
-                    value={account.jobAlertLocation}
-                    onChange={(e) =>
-                      handleAccountChange('jobAlertLocation', e.target.value)
-                    }
-                  />
-                </div>
-              </div>
-              <Button onClick={handleJobAlertSave}>Save Changes</Button>
-            </div>
-
             {/* Profile & Resume Privacy */}
             <div className='border-t border-gray-200 dark:border-gray-700 pt-6 sm:pt-8'>
               <div className='font-medium mb-4 text-gray-900 dark:text-white text-base sm:text-lg'>
@@ -663,7 +590,7 @@ export default function SettingsTab() {
         ))}
       </div>
 
-      <div className='w-full max-w-5xl mx-auto'>{renderTabContent()}</div>
+      <div className='w-full'>{renderTabContent()}</div>
     </div>
   );
 }

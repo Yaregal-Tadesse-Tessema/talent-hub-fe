@@ -23,7 +23,6 @@ const TABS = [
   { key: 'overview', label: 'Overview', icon: HomeIcon },
   { key: 'applied', label: 'Applied Jobs', icon: BriefcaseIcon },
   { key: 'favorite', label: 'Favorite Jobs', icon: HeartIcon },
-  { key: 'alerts', label: 'Job Alert', icon: BellIcon },
   { key: 'settings', label: 'Settings', icon: Cog6ToothIcon },
 ];
 
@@ -87,13 +86,6 @@ function DashboardContent() {
         return <AppliedJobsTab />;
       case 'favorite':
         return <FavoriteJobsTab />;
-      case 'alerts':
-        return (
-          <JobAlertsTab
-            userProfile={userProfile}
-            setUserProfile={setUserProfile}
-          />
-        );
       case 'settings':
         return <SettingsTab />;
       default:
