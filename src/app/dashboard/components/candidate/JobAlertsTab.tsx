@@ -4,6 +4,8 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { profileService } from '@/services/profileService';
 import { useToast } from '@/contexts/ToastContext';
+import { jobPositions, locations, industries } from '@/constants/jobOptions';
+import ConfirmationDialog from '@/components/ui/ConfirmationDialog';
 
 interface AlertConfiguration {
   id?: string;
@@ -11,7 +13,7 @@ interface AlertConfiguration {
   jobTitle: string;
   Position: string;
   address: string;
-  tenantsId: string[];
+  tenantsId: string;
   industry: string;
 }
 
@@ -37,14 +39,19 @@ export default function JobAlertsTab({
     jobTitle: '',
     Position: '',
     address: '',
-    tenantsId: [],
+    tenantsId: '',
     industry: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [alertToDelete, setAlertToDelete] = useState<AlertConfiguration | null>(
+    null,
+  );
   const { showToast } = useToast();
 
   // Initialize alert configurations from user profile
   useEffect(() => {
+    console.log('userProfile', userProfile);
     if (userProfile?.alertConfiguration) {
       const configs = Array.isArray(userProfile.alertConfiguration)
         ? userProfile.alertConfiguration
@@ -96,7 +103,7 @@ export default function JobAlertsTab({
       jobTitle: '',
       Position: '',
       address: '',
-      tenantsId: [],
+      tenantsId: '',
       industry: '',
     });
     setErrors({});
@@ -114,13 +121,24 @@ export default function JobAlertsTab({
     setShowModal(true);
   };
 
-  const handleDelete = async (alertToDelete: AlertConfiguration) => {
-    if (!confirm('Are you sure you want to delete this job alert?')) {
-      return;
-    }
+  const handleDelete = (alert: AlertConfiguration) => {
+    setAlertToDelete(alert);
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!alertToDelete) return;
 
     setLoading(true);
     try {
+      // Set tenantsId to userProfile.id
+      const alertConfigForAPI = {
+        ...alertToDelete,
+        tenantsId: userProfile.id,
+      };
+
+      await profileService.removeAlertConfiguration(alertConfigForAPI);
+
       const updatedConfigs = alertConfigurations.filter(
         (config) => config !== alertToDelete,
       );
@@ -129,8 +147,6 @@ export default function JobAlertsTab({
         ...userProfile,
         alertConfiguration: updatedConfigs,
       };
-
-      await profileService.updateProfile(updatedUserProfile);
 
       setUserProfile(updatedUserProfile);
       setAlertConfigurations(updatedConfigs);
@@ -155,7 +171,14 @@ export default function JobAlertsTab({
       });
     } finally {
       setLoading(false);
+      setShowDeleteConfirmation(false);
+      setAlertToDelete(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirmation(false);
+    setAlertToDelete(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -168,6 +191,14 @@ export default function JobAlertsTab({
 
     setLoading(true);
     try {
+      // Set tenantsId to userProfile.id
+      const alertConfigForAPI = {
+        ...formData,
+        tenantsId: userProfile.id,
+      };
+
+      await profileService.addAlertConfiguration(alertConfigForAPI);
+
       let updatedConfigs: AlertConfiguration[];
 
       if (editingAlert) {
@@ -186,7 +217,6 @@ export default function JobAlertsTab({
         alertConfiguration: updatedConfigs,
       };
       console.log('updatedUserProfile', updatedUserProfile);
-      await profileService.updateProfile(updatedUserProfile);
 
       setUserProfile(updatedUserProfile);
       setAlertConfigurations(updatedConfigs);
@@ -547,16 +577,21 @@ export default function JobAlertsTab({
                 <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                   Position *
                 </label>
-                <Input
-                  type='text'
+                <Select
                   value={formData.Position}
                   onChange={(e) =>
                     handleInputChange('Position', e.target.value)
                   }
-                  placeholder='e.g., Senior, Junior, Lead'
                   className={errors.Position ? 'border-red-500' : ''}
                   disabled={loading}
-                />
+                >
+                  <option value=''>Select position</option>
+                  {jobPositions.map((position) => (
+                    <option key={position.value} value={position.value}>
+                      {position.name}
+                    </option>
+                  ))}
+                </Select>
                 {errors.Position && (
                   <p className='mt-1 text-sm text-red-600 dark:text-red-400'>
                     {errors.Position}
@@ -569,14 +604,19 @@ export default function JobAlertsTab({
                 <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                   Location *
                 </label>
-                <Input
-                  type='text'
+                <Select
                   value={formData.address}
                   onChange={(e) => handleInputChange('address', e.target.value)}
-                  placeholder='e.g., New York, NY'
                   className={errors.address ? 'border-red-500' : ''}
                   disabled={loading}
-                />
+                >
+                  <option value=''>Select location</option>
+                  {locations.map((location) => (
+                    <option key={location} value={location}>
+                      {location}
+                    </option>
+                  ))}
+                </Select>
                 {errors.address && (
                   <p className='mt-1 text-sm text-red-600 dark:text-red-400'>
                     {errors.address}
@@ -589,16 +629,21 @@ export default function JobAlertsTab({
                 <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                   Industry *
                 </label>
-                <Input
-                  type='text'
+                <Select
                   value={formData.industry}
                   onChange={(e) =>
                     handleInputChange('industry', e.target.value)
                   }
-                  placeholder='e.g., Technology, Healthcare, Finance'
                   className={errors.industry ? 'border-red-500' : ''}
                   disabled={loading}
-                />
+                >
+                  <option value=''>Select industry</option>
+                  {industries.map((industry) => (
+                    <option key={industry.value} value={industry.value}>
+                      {industry.name}
+                    </option>
+                  ))}
+                </Select>
                 {errors.industry && (
                   <p className='mt-1 text-sm text-red-600 dark:text-red-400'>
                     {errors.industry}
@@ -643,6 +688,19 @@ export default function JobAlertsTab({
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        open={showDeleteConfirmation}
+        onClose={cancelDelete}
+        onConfirm={confirmDelete}
+        title='Delete Job Alert'
+        message={`Are you sure you want to delete the job alert for "${alertToDelete?.jobTitle}"? This action cannot be undone.`}
+        confirmText='Delete Alert'
+        cancelText='Cancel'
+        variant='danger'
+        isLoading={loading}
+      />
     </div>
   );
 }

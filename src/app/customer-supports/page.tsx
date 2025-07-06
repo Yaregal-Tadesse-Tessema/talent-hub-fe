@@ -1,6 +1,11 @@
 'use client';
-import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import {
+  ChevronDownIcon,
+  ChatBubbleLeftRightIcon,
+} from '@heroicons/react/24/outline';
 import { useState } from 'react';
+import { AIChatSupport } from '@/components/support/AIChatSupport';
+import { SupportKnowledgeBase } from '@/components/support/SupportKnowledgeBase';
 
 export const dynamic = 'force-static';
 
@@ -128,6 +133,7 @@ const resources = [
 
 export default function CustomerSupportPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [isAIChatOpen, setIsAIChatOpen] = useState(false);
 
   return (
     <div className='bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-800'>
@@ -159,6 +165,18 @@ export default function CustomerSupportPage() {
               We're here to help you make the most of TalentHub. Choose from our
               support channels below or browse our frequently asked questions.
             </p>
+            <div className='mt-8'>
+              <button
+                onClick={() => setIsAIChatOpen(true)}
+                className='inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl'
+              >
+                <ChatBubbleLeftRightIcon className='h-5 w-5 mr-2' />
+                Chat with AI Assistant
+              </button>
+              <p className='mt-2 text-sm text-gray-600 dark:text-gray-400'>
+                Get instant answers to common questions
+              </p>
+            </div>
           </div>
         </div>
         <div className='absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]'>
@@ -279,6 +297,19 @@ export default function CustomerSupportPage() {
           </div>
         </div>
       </div>
+
+      {/* Knowledge Base Section */}
+      <div className='mx-auto max-w-7xl px-6 lg:px-8 py-14 sm:py-32'>
+        <div className='mx-auto max-w-4xl'>
+          <SupportKnowledgeBase />
+        </div>
+      </div>
+
+      {/* AI Chat Support */}
+      <AIChatSupport
+        isOpen={isAIChatOpen}
+        onClose={() => setIsAIChatOpen(false)}
+      />
     </div>
   );
 }

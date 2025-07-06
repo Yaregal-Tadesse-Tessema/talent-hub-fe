@@ -16,6 +16,9 @@ export function useTutorialTrigger() {
   useEffect(() => {
     if (!user || isTutorialActive) return;
 
+    // Only show tutorial if user is logging in for the first time
+    if (!user.isFirstTime) return;
+
     // Skip tutorial demo page
     if (pathname === '/tutorial-demo') return;
 
@@ -23,29 +26,31 @@ export function useTutorialTrigger() {
     const tutorialPages = ['/find-job', '/find-candidates', '/dashboard'];
     if (!tutorialPages.includes(pathname)) return;
 
-    // Check if we should show tutorial for this page
-    const pageTutorialKey = `tutorialShown_${pathname}`;
-    const hasShownTutorialForPage = localStorage.getItem(pageTutorialKey);
+    // Get appropriate tutorial based on user role and current page
+    const role = user.role;
+    const tutorials = getTutorialsForRole(role, pathname);
 
-    if (!hasShownTutorialForPage) {
-      // Get appropriate tutorial based on user role and current page
-      const role = user.role;
-      const tutorials = getTutorialsForRole(role, pathname);
+    // Find the first tutorial that hasn't been seen
+    const tutorialToShow = tutorials.find(
+      (tutorial) => !hasSeenTutorial(tutorial.id),
+    );
 
-      // Find the first tutorial that hasn't been seen
-      const tutorialToShow = tutorials.find(
-        (tutorial) => !hasSeenTutorial(tutorial.id),
-      );
-
-      if (tutorialToShow) {
-        // Mark this page's tutorial as shown
-        localStorage.setItem(pageTutorialKey, 'true');
-
-        // Small delay to ensure the page is fully loaded
-        setTimeout(() => {
-          showTutorial(tutorialToShow);
-        }, 1000);
-      }
+    if (tutorialToShow) {
+      // Small delay to ensure the page is fully loaded
+      setTimeout(() => {
+        showTutorial(tutorialToShow);
+        // Mark user as not first time anymore
+        try {
+          const storedUser = localStorage.getItem('user');
+          if (storedUser) {
+            const userData = JSON.parse(storedUser);
+            userData.isFirstTime = false;
+            localStorage.setItem('user', JSON.stringify(userData));
+          }
+        } catch (e) {
+          // ignore
+        }
+      }, 1000);
     }
   }, [user, pathname, showTutorial, hasSeenTutorial, isTutorialActive]);
 

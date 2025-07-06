@@ -11,6 +11,7 @@ import { NavigationProvider } from '@/components/navigation/NavigationProvider';
 import { TutorialProvider } from '@/contexts/TutorialContext';
 import TutorialOverlay from '@/components/ui/TutorialOverlay';
 import TutorialTrigger from '@/components/ui/TutorialTrigger';
+import { FloatingChatButton } from '@/components/support/FloatingChatButton';
 
 // Memoized component to prevent unnecessary re-renders
 const MemoizedNavbar = React.memo(Navbar);
@@ -58,6 +59,7 @@ export default function ClientLayout({
                 {children}
                 {layoutConfig.isHomePage && <MemoizedFooter />}
                 <TutorialTrigger />
+                {layoutConfig.shouldShowNavbar && <FloatingChatButton />}
               </TutorialOverlay>
             </NavigationProvider>
           </TutorialProvider>

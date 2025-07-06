@@ -254,7 +254,7 @@ const AdvancedFilterModal: React.FC<AdvancedFilterModalProps> = ({
                   Salary Range
                 </h3>
               </div>
-              <div className='flex gap-2 sm:gap-3'>
+              <div className='space-y-2 sm:space-y-3'>
                 <input
                   type='number'
                   placeholder='Min'
@@ -265,7 +265,7 @@ const AdvancedFilterModal: React.FC<AdvancedFilterModalProps> = ({
                       min: parseInt(e.target.value) || 0,
                     })
                   }
-                  className='flex-1 p-2 sm:p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                  className='w-full p-2 sm:p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />
                 <input
                   type='number'
@@ -277,7 +277,7 @@ const AdvancedFilterModal: React.FC<AdvancedFilterModalProps> = ({
                       max: parseInt(e.target.value) || 0,
                     })
                   }
-                  className='flex-1 p-2 sm:p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                  className='w-full p-2 sm:p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />
               </div>
             </div>

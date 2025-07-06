@@ -5,9 +5,36 @@ interface ProfileCompleteness {
   percentage: number;
 }
 
+interface AlertConfiguration {
+  salary: string;
+  jobTitle: string;
+  Position: string;
+  address: string;
+  tenantsId: string;
+  industry: string;
+}
+
 class ProfileService {
   async updateProfile(profile: UserProfile): Promise<UserProfile> {
     const response = await api.put(`/users`, profile);
+    return response.data;
+  }
+
+  async addAlertConfiguration(alertConfig: AlertConfiguration): Promise<any> {
+    const response = await api.put(
+      `/users/add-alert-configuration`,
+      alertConfig,
+    );
+    return response.data;
+  }
+
+  async removeAlertConfiguration(
+    alertConfig: AlertConfiguration,
+  ): Promise<any> {
+    const response = await api.put(
+      `/users/remove-alert-configuration`,
+      alertConfig,
+    );
     return response.data;
   }
 

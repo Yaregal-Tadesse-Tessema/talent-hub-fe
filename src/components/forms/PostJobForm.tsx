@@ -4,6 +4,7 @@ import { jobService, JobPosting } from '@/services/jobService';
 import { useToast } from '@/contexts/ToastContext';
 import { useRouter } from 'next/navigation';
 import ConfirmationDialog from '@/components/ui/ConfirmationDialog';
+import { industries } from '@/constants/jobOptions';
 
 interface FormData {
   title: string;
@@ -645,18 +646,11 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
             }`}
           >
             <option value=''>Select Industry</option>
-            <option value='InformationTechnology'>
-              Information Technology
-            </option>
-            <option value='Healthcare'>Healthcare</option>
-            <option value='Finance'>Finance</option>
-            <option value='Education'>Education</option>
-            <option value='Manufacturing'>Manufacturing</option>
-            <option value='Retail'>Retail</option>
-            <option value='Marketing'>Marketing</option>
-            <option value='Sales'>Sales</option>
-            <option value='Consulting'>Consulting</option>
-            <option value='Other'>Other</option>
+            {industries.map((industry) => (
+              <option key={industry.value} value={industry.value}>
+                {industry.name}
+              </option>
+            ))}
           </select>
           {validationErrors.industry && (
             <p className='text-red-500 text-sm mt-1'>
