@@ -9,6 +9,7 @@ import {
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import EmployerPageSidebar from '@/components/ui/EmployerPageSidebar';
+import { isAuthError } from '@/utils/auth';
 
 const orgTypes = [
   'Government',
@@ -192,15 +193,30 @@ function FindEmployersPage() {
           currentPage: page,
           limit: perPage,
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to fetch employers:', error);
-        setEmployers([]);
-        setPagination({
-          total: 0,
-          totalPages: 0,
-          currentPage: page,
-          limit: perPage,
-        });
+
+        // Check if it's an authentication error
+        if (isAuthError(error)) {
+          // Authentication error - the API interceptor should handle logout
+          // Just set empty state and let the auth context handle the redirect
+          setEmployers([]);
+          setPagination({
+            total: 0,
+            totalPages: 0,
+            currentPage: page,
+            limit: perPage,
+          });
+        } else {
+          // Other errors - show empty state
+          setEmployers([]);
+          setPagination({
+            total: 0,
+            totalPages: 0,
+            currentPage: page,
+            limit: perPage,
+          });
+        }
       } finally {
         setLoading(false);
       }

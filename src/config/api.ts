@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { handleLogout } from '@/utils/auth';
 
 export const API_BASE_URL = 'http://138.197.105.31:3010/api';
 
@@ -72,29 +73,8 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) {
-          // Clear all stored values and redirect to login
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('user');
-
-          // Get current path
-          const currentPath = window.location.pathname;
-          // List of public routes that don't require authentication
-          const publicRoutes = [
-            '/find-job',
-            '/',
-            '/login',
-            '/signup',
-            '/forgot-password',
-            '/verify-email',
-            '/reset-password',
-          ];
-
-          // Only redirect to login if not on a public route
-          if (!publicRoutes.some((route) => currentPath.startsWith(route))) {
-            window.location.href = '/login';
-          }
-
+          // Handle logout and redirect
+          handleLogout();
           throw new Error('No refresh token available');
         }
 
@@ -125,26 +105,8 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
 
-        // Get current path
-        const currentPath = window.location.pathname;
-        // List of public routes that don't require authentication
-        const publicRoutes = [
-          '/find-job',
-          '/',
-          '/login',
-          '/signup',
-          '/forgot-password',
-          '/verify-email',
-          '/reset-password',
-        ];
-
-        // Only redirect to login if not on a public route
-        if (!publicRoutes.some((route) => currentPath.startsWith(route))) {
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
-        }
+        // Handle logout and redirect for any refresh error
+        handleLogout();
 
         return Promise.reject(refreshError);
       } finally {

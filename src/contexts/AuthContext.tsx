@@ -6,6 +6,7 @@ import { API_BASE_URL } from '@/config/api';
 import { useToast } from '@/contexts/ToastContext';
 import { EmployerData } from '@/types/employer';
 import { useTheme } from './ThemeContext';
+import { clearAuthData } from '@/utils/auth';
 
 interface User {
   id: string;
@@ -203,9 +204,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    clearAuthData();
     setTheme('light');
     router.push('/login');
   };
