@@ -99,7 +99,8 @@ export default function JobPageSidebar({
               (config: any) =>
                 config &&
                 typeof config === 'object' &&
-                Object.keys(config).length > 0,
+                Object.keys(config).length > 0 &&
+                config.jobTitle, // Ensure at least jobTitle exists
             );
 
             setAlertConfigurations(validConfigs);
@@ -146,7 +147,8 @@ export default function JobPageSidebar({
             (config: any) =>
               config &&
               typeof config === 'object' &&
-              Object.keys(config).length > 0,
+              Object.keys(config).length > 0 &&
+              config.jobTitle, // Ensure at least jobTitle exists
           );
 
           setAlertConfigurations(validConfigs);
@@ -289,9 +291,9 @@ export default function JobPageSidebar({
                 </div>
               ) : alertConfigurations.length > 0 ? (
                 <div className='space-y-3'>
-                  {alertConfigurations.slice(0, 3).map((alert) => (
+                  {alertConfigurations.slice(0, 3).map((alert, index) => (
                     <div
-                      key={alert.id}
+                      key={alert.id || `alert-${index}`}
                       className='p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600'
                     >
                       <div className='flex items-start justify-between mb-2'>
@@ -299,17 +301,21 @@ export default function JobPageSidebar({
                           {alert.jobTitle}
                         </h4>
                         <button
-                          onClick={() => handleDeleteAlert(alert.id)}
+                          onClick={() =>
+                            handleDeleteAlert(alert.id || `alert-${index}`)
+                          }
                           className='p-1 text-gray-400 hover:text-red-500 transition-colors'
                         >
                           <X className='w-3 h-3' />
                         </button>
                       </div>
                       <div className='space-y-1 text-xs text-gray-500 dark:text-gray-400'>
-                        <div className='flex items-center gap-1'>
-                          <Briefcase className='w-3 h-3' />
-                          <span>{alert.Position}</span>
-                        </div>
+                        {alert.Position && (
+                          <div className='flex items-center gap-1'>
+                            <Briefcase className='w-3 h-3' />
+                            <span>{alert.Position}</span>
+                          </div>
+                        )}
                         {alert.address && (
                           <div className='flex items-center gap-1'>
                             <MapPin className='w-3 h-3' />

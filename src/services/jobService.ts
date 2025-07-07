@@ -177,6 +177,34 @@ export const jobService = {
     }
   },
 
+  async getJobsForUser(page?: number, limit?: number): Promise<JobsResponse> {
+    try {
+      // Check if user is logged in
+      const storedUser = localStorage.getItem('user');
+      const isAuthenticated = !!storedUser;
+
+      if (isAuthenticated) {
+        // Use tenant endpoint for authenticated users
+        let queryParams = 'q=w=status:=:Posted';
+        if (page && limit) {
+          const skip = (page - 1) * limit;
+          queryParams += `%26t=${limit}%26sk=${skip}`;
+        }
+
+        const response = await api.get(
+          `/jobs/get-all-tenant-job-postings?${queryParams}`,
+        );
+        return response.data;
+      } else {
+        // Use public endpoint for non-authenticated users
+        return this.getPublicJobs(page, limit);
+      }
+    } catch (error) {
+      console.error('Error fetching jobs for user:', error);
+      throw error;
+    }
+  },
+
   async searchJobs(
     title?: string,
     category?: string,
@@ -208,6 +236,47 @@ export const jobService = {
       return response.data;
     } catch (error) {
       console.error('Error searching jobs:', error);
+      throw error;
+    }
+  },
+
+  async searchJobsForUser(
+    title?: string,
+    category?: string,
+    page?: number,
+    limit?: number,
+  ): Promise<JobsResponse> {
+    try {
+      // Check if user is logged in
+      const storedUser = localStorage.getItem('user');
+      const isAuthenticated = !!storedUser;
+
+      let queryParams = '';
+      const conditions = ['status:=:Posted']; // Always include Posted status
+
+      if (title) {
+        conditions.push(`title:LIKE:${title}`);
+      }
+      if (category) {
+        conditions.push(`employmentType:LIKE:${category}`);
+      }
+
+      queryParams = `q=w=${conditions.join(',')}`;
+
+      // Add pagination parameters
+      if (page && limit) {
+        const skip = (page - 1) * limit;
+        queryParams += `%26t=${limit}%26sk=${skip}`;
+      }
+
+      const endpoint = isAuthenticated
+        ? '/jobs/get-all-tenant-job-postings'
+        : '/jobs/get-all-public-job-postings';
+
+      const response = await api.get(`${endpoint}?${queryParams}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error searching jobs for user:', error);
       throw error;
     }
   },
@@ -316,6 +385,123 @@ export const jobService = {
       return response.data;
     } catch (error) {
       console.error('Error searching jobs with advanced filters:', error);
+      throw error;
+    }
+  },
+
+  async searchJobsWithAdvancedFiltersForUser(
+    filters: {
+      title?: string;
+      category?: string;
+      experienceLevel?: string;
+      salaryRange?: { min: number; max: number };
+      employmentType?: string[];
+      educationLevel?: string;
+      industry?: string;
+      location?: string;
+      skills?: string[];
+      gender?: string;
+      minimumGPA?: number;
+      fieldOfStudy?: string;
+      positionNumbers?: number;
+      paymentType?: string;
+    },
+    page?: number,
+    limit?: number,
+  ): Promise<JobsResponse> {
+    try {
+      // Check if user is logged in
+      const storedUser = localStorage.getItem('user');
+      const isAuthenticated = !!storedUser;
+
+      let queryParams = '';
+      const conditions = ['status:=:Posted']; // Always include Posted status
+
+      // Basic filters
+      if (filters.title) {
+        conditions.push(`title:LIKE:${filters.title}`);
+      }
+      if (filters.category) {
+        conditions.push(`employmentType:LIKE:${filters.category}`);
+      }
+
+      // Advanced filters
+      if (filters.experienceLevel) {
+        conditions.push(`experienceLevel:LIKE:${filters.experienceLevel}`);
+      }
+      if (filters.educationLevel) {
+        conditions.push(`educationLevel:LIKE:${filters.educationLevel}`);
+      }
+      if (filters.industry) {
+        conditions.push(`industry:LIKE:${filters.industry}`);
+      }
+      if (filters.location) {
+        conditions.push(`location:LIKE:${filters.location}`);
+      }
+      if (filters.gender && filters.gender !== 'Any') {
+        conditions.push(`gender:LIKE:${filters.gender}`);
+      }
+      if (filters.fieldOfStudy) {
+        conditions.push(`fieldOfStudy:LIKE:${filters.fieldOfStudy}`);
+      }
+      if (filters.paymentType) {
+        conditions.push(`paymentType:LIKE:${filters.paymentType}`);
+      }
+
+      // Numeric filters
+      if (filters.minimumGPA && filters.minimumGPA > 0) {
+        conditions.push(`minimumGPA:gte:${filters.minimumGPA}`);
+      }
+      if (filters.positionNumbers && filters.positionNumbers > 0) {
+        conditions.push(`positionNumbers:gte:${filters.positionNumbers}`);
+      }
+
+      // Salary range filter - handle min and max separately
+      if (filters.salaryRange && filters.salaryRange.min > 0) {
+        conditions.push(`salaryRange.min:gte:${filters.salaryRange.min}`);
+      }
+      if (filters.salaryRange && filters.salaryRange.max > 0) {
+        conditions.push(`salaryRange.max:lte:${filters.salaryRange.max}`);
+      }
+
+      // Employment type array filter
+      if (filters.employmentType && filters.employmentType.length > 0) {
+        // For multiple employment types, we need to handle them as separate conditions
+        filters.employmentType.forEach((type) => {
+          conditions.push(`employmentType:LIKE:${type}`);
+        });
+      }
+
+      // Skills array filter
+      if (filters.skills && filters.skills.length > 0) {
+        // For multiple skills, we need to handle them as separate conditions
+        filters.skills.forEach((skill) => {
+          conditions.push(`skill:LIKE:${skill}`);
+        });
+      }
+
+      queryParams = `q=w=${conditions.join(',')}`;
+
+      // Add pagination parameters
+      if (page && limit) {
+        const skip = (page - 1) * limit;
+        queryParams += `%26t=${limit}%26sk=${skip}`;
+      }
+
+      console.log('Generated query params:', queryParams);
+      console.log('Conditions:', conditions);
+
+      const endpoint = isAuthenticated
+        ? '/jobs/get-all-tenant-job-postings'
+        : '/jobs/get-all-public-job-postings';
+
+      const response = await api.get(`${endpoint}?${queryParams}`);
+      return response.data;
+    } catch (error) {
+      console.error(
+        'Error searching jobs with advanced filters for user:',
+        error,
+      );
       throw error;
     }
   },

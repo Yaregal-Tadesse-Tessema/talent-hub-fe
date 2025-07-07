@@ -46,7 +46,7 @@ export default function JobsPage() {
     const fetchJobs = async () => {
       setIsLoading(true);
       try {
-        const response = await jobService.searchJobs(
+        const response = await jobService.searchJobsForUser(
           searchFilters.keyword,
           searchFilters.category,
         );

@@ -264,7 +264,7 @@ function FindJobContent() {
             advancedFilters,
           });
 
-          response = await jobService.searchJobsWithAdvancedFilters(
+          response = await jobService.searchJobsWithAdvancedFiltersForUser(
             {
               title: searchTitle,
               category: searchCategory,
@@ -274,8 +274,8 @@ function FindJobContent() {
             pagination.limit,
           );
         } else {
-          // Always use public jobs endpoint for the find job page
-          response = await jobService.getPublicJobs(
+          // Use appropriate endpoint based on user authentication status
+          response = await jobService.getJobsForUser(
             currentPage,
             pagination.limit,
           );
@@ -705,9 +705,29 @@ function FindJobContent() {
                       {/* Job details */}
                       <div className='space-y-2 sm:space-y-3'>
                         <div className='flex items-center justify-between'>
-                          <span className='inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'>
-                            {job.employmentType}
-                          </span>
+                          <div className='flex items-center gap-2'>
+                            <span className='inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'>
+                              {job.employmentType}
+                            </span>
+                            {user && (
+                              <button
+                                className={`p-1 rounded-lg transition-all duration-200 ${
+                                  job.isSaved
+                                    ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
+                                    : 'text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                }`}
+                                onClick={() =>
+                                  job.isSaved
+                                    ? handleUnsaveJob(job.id)
+                                    : handleSaveJob(job.id)
+                                }
+                              >
+                                <Bookmark
+                                  className={`w-3 h-3 ${job.isSaved ? 'fill-current' : ''}`}
+                                />
+                              </button>
+                            )}
+                          </div>
                           <div className='text-right'>
                             <div className='text-xs sm:text-sm font-semibold text-gray-900 dark:text-white'>
                               ${job.salaryRange?.min || 'N/A'} - $
@@ -874,20 +894,35 @@ function FindJobContent() {
                               {job.title}
                             </Link>
                             <div className='flex items-center gap-1 sm:gap-2'>
-                              {job.isSaved && (
-                                <span className='bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium'>
-                                  Saved
-                                </span>
-                              )}
                               {isJobExpired(job.deadline) && (
                                 <span className='bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium'>
                                   Expired
                                 </span>
                               )}
                               {job.employmentType && (
-                                <span className='bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium'>
-                                  {job.employmentType}
-                                </span>
+                                <div className='flex items-center gap-1'>
+                                  <span className='bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium'>
+                                    {job.employmentType}
+                                  </span>
+                                  {user && (
+                                    <button
+                                      className={`p-0.5 rounded transition-all duration-200 ${
+                                        job.isSaved
+                                          ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
+                                          : 'text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                      }`}
+                                      onClick={() =>
+                                        job.isSaved
+                                          ? handleUnsaveJob(job.id)
+                                          : handleSaveJob(job.id)
+                                      }
+                                    >
+                                      <Bookmark
+                                        className={`w-4 h-4 ${job.isSaved ? 'fill-current' : ''}`}
+                                      />
+                                    </button>
+                                  )}
+                                </div>
                               )}
                             </div>
                           </div>
@@ -979,20 +1014,6 @@ function FindJobContent() {
 
                       {/* Bookmark and Apply */}
                       <div className='flex items-center justify-between sm:justify-end gap-2 sm:gap-3 md:gap-4 mt-3 sm:mt-0'>
-                        {user && (
-                          <button
-                            className={`${job.isSaved ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400'}`}
-                            onClick={() =>
-                              job.isSaved
-                                ? handleUnsaveJob(job.id)
-                                : handleSaveJob(job.id)
-                            }
-                          >
-                            <Bookmark
-                              className={`w-4 h-4 sm:w-5 sm:h-5 ${job.isSaved ? 'fill-current' : ''}`}
-                            />
-                          </button>
-                        )}
                         <div
                           className={`transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'} relative`}
                         >
