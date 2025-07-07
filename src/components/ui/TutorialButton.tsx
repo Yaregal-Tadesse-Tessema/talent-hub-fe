@@ -27,7 +27,12 @@ export default function TutorialButton({
   const [showMenu, setShowMenu] = useState(false);
 
   const role = user?.role;
-  const availableTutorials = role ? getTutorialsForRole(role, pathname) : [];
+  const availableTutorials = (() => {
+    if (role && (role === 'employer' || role === 'employee') && pathname) {
+      return getTutorialsForRole(role as 'employer' | 'employee', pathname);
+    }
+    return [];
+  })();
 
   const handleTutorialClick = (tutorialId: string) => {
     const tutorial = getTutorialById(tutorialId);

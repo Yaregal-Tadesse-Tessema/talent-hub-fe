@@ -95,6 +95,7 @@ export default function ProfilePage() {
             middleName: userData.middleName || '',
             lastName: userData.lastName || '',
             gender: userData.gender || '',
+            status: userData.status || 'Active',
             address: userData.address || {},
             birthDate: userData.birthDate || '',
             linkedinUrl: userData.linkedinUrl || '',
@@ -138,6 +139,7 @@ export default function ProfilePage() {
               : [],
             isProfilePublic: userData.isProfilePublic || false,
             isResumePublic: userData.isResumePublic || false,
+            isFirstTime: userData.isFirstTime || false,
           };
 
           setProfile(mappedProfile);
@@ -542,7 +544,7 @@ export default function ProfilePage() {
           ...(profile.softSkills || []),
         ],
         experience:
-          profile.experiences?.map((exp) => ({
+          (profile.experiences as Experience[])?.map((exp: Experience) => ({
             position: exp.jobTitle,
             company: exp.company,
             startDate: exp.startDate,
@@ -552,7 +554,7 @@ export default function ProfilePage() {
             location: exp.location,
           })) || [],
         education:
-          profile.educations?.map((edu) => ({
+          (profile.educations as Education[])?.map((edu: Education) => ({
             degree: edu.degree,
             institution: edu.institution,
             field: edu.courses?.join(', ') || '',
@@ -1451,60 +1453,74 @@ export default function ProfilePage() {
           </div>
           {isEditing ? (
             <div className='space-y-6'>
-              {profile.educations && profile.educations.length > 0 && (
-                <div className='space-y-4'>
-                  {profile.educations.map((education, index) => (
-                    <div
-                      key={education.id || index}
-                      className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 flex justify-between items-start'
-                    >
-                      <div>
-                        <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
-                          {education.degree}
-                        </h3>
-                        <p className='text-gray-600 dark:text-gray-400 font-medium'>
-                          {education.institution}
-                        </p>
-                        <div className='flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400'>
-                          <span>
-                            {education.startDate} -{' '}
-                            {education.current ? 'Present' : education.endDate}
-                          </span>
-                          {education.location && (
-                            <span>{education.location}</span>
-                          )}
-                          {education.gpa && <span>GPA: {education.gpa}</span>}
-                        </div>
-                      </div>
-                      <div className='flex gap-2'>
-                        <Button
-                          size='sm'
-                          variant='outline'
-                          onClick={() => {
-                            setEduModalEditIndex(index);
-                            setEduModalInitial(education);
-                            setEduModalOpen(true);
-                          }}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size='sm'
-                          variant='outline'
-                          onClick={() => {
-                            const newArr = profile.educations.filter(
-                              (_, i) => i !== index,
-                            );
-                            setProfile({ ...profile, educations: newArr });
-                          }}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              {Array.isArray(profile.educations) &&
+                profile.educations.length > 0 && (
+                  <div className='space-y-4'>
+                    {Array.isArray(profile.educations)
+                      ? profile.educations.map(
+                          (education: Education, index: number) => (
+                            <div
+                              key={education.id || index}
+                              className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 flex justify-between items-start'
+                            >
+                              <div>
+                                <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
+                                  {education.degree}
+                                </h3>
+                                <p className='text-gray-600 dark:text-gray-400 font-medium'>
+                                  {education.institution}
+                                </p>
+                                <div className='flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400'>
+                                  <span>
+                                    {education.startDate} -{' '}
+                                    {education.current
+                                      ? 'Present'
+                                      : education.endDate}
+                                  </span>
+                                  {education.location && (
+                                    <span>{education.location}</span>
+                                  )}
+                                  {education.gpa && (
+                                    <span>GPA: {education.gpa}</span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className='flex gap-2'>
+                                <Button
+                                  size='sm'
+                                  variant='outline'
+                                  onClick={() => {
+                                    setEduModalEditIndex(index);
+                                    setEduModalInitial(education);
+                                    setEduModalOpen(true);
+                                  }}
+                                >
+                                  Edit
+                                </Button>
+                                <Button
+                                  size='sm'
+                                  variant='outline'
+                                  onClick={() => {
+                                    if (Array.isArray(profile.educations)) {
+                                      const newArr = profile.educations.filter(
+                                        (_: any, i: number) => i !== index,
+                                      );
+                                      setProfile({
+                                        ...profile,
+                                        educations: newArr,
+                                      });
+                                    }
+                                  }}
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          ),
+                        )
+                      : null}
+                  </div>
+                )}
               <div className='text-center'>
                 <Button
                   variant='primary'
@@ -1524,7 +1540,9 @@ export default function ProfilePage() {
                 onSave={(edu) => {
                   if (eduModalEditIndex !== null) {
                     // Edit existing
-                    const newArr = [...profile.educations];
+                    const newArr = Array.isArray(profile.educations)
+                      ? [...profile.educations]
+                      : [];
                     newArr[eduModalEditIndex] = {
                       ...edu,
                       id: edu.id || Date.now().toString(),
@@ -1534,10 +1552,12 @@ export default function ProfilePage() {
                     // Add new
                     setProfile({
                       ...profile,
-                      educations: [
-                        ...profile.educations,
-                        { ...edu, id: Date.now().toString() },
-                      ],
+                      educations: Array.isArray(profile.educations)
+                        ? [
+                            ...profile.educations,
+                            { ...edu, id: Date.now().toString() },
+                          ]
+                        : [{ ...edu, id: Date.now().toString() }],
                     });
                   }
                   setEduModalOpen(false);
@@ -1546,67 +1566,67 @@ export default function ProfilePage() {
             </div>
           ) : (
             <div className='space-y-4'>
-              {profile.educations && profile.educations.length > 0 ? (
-                profile.educations.map((education, index) => (
-                  <div
-                    key={education.id || index}
-                    className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'
-                  >
-                    <div className='flex items-start justify-between'>
-                      <div className='flex-1'>
-                        <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
-                          {education.degree}
-                        </h3>
-                        <p className='text-gray-600 dark:text-gray-400 font-medium'>
-                          {education.institution}
-                        </p>
-                        {education.courses && education.courses.length > 0 && (
-                          <div className='mt-2'>
-                            <p className='text-sm text-gray-500 dark:text-gray-400 font-medium'>
-                              Courses:
+              {Array.isArray(profile.educations) &&
+              profile.educations.length > 0
+                ? profile.educations.map(
+                    (education: Education, index: number) => (
+                      <div
+                        key={education.id || index}
+                        className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'
+                      >
+                        <div className='flex items-start justify-between'>
+                          <div className='flex-1'>
+                            <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
+                              {education.degree}
+                            </h3>
+                            <p className='text-gray-600 dark:text-gray-400 font-medium'>
+                              {education.institution}
                             </p>
-                            <div className='flex flex-wrap gap-1 mt-1'>
-                              {education.courses.map((course, courseIndex) => (
-                                <span
-                                  key={courseIndex}
-                                  className='px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-xs'
-                                >
-                                  {course}
-                                </span>
-                              ))}
+                            {education.courses &&
+                              education.courses.length > 0 && (
+                                <div className='mt-2'>
+                                  <p className='text-sm text-gray-500 dark:text-gray-400 font-medium'>
+                                    Courses:
+                                  </p>
+                                  <div className='flex flex-wrap gap-1 mt-1'>
+                                    {education.courses.map(
+                                      (course: string, courseIndex: number) => (
+                                        <span
+                                          key={courseIndex}
+                                          className='px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-xs'
+                                        >
+                                          {course}
+                                        </span>
+                                      ),
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            <div className='flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400'>
+                              <span>
+                                {education.startDate} -{' '}
+                                {education.current
+                                  ? 'Present'
+                                  : education.endDate}
+                              </span>
+                              {education.location && (
+                                <span>{education.location}</span>
+                              )}
+                              {education.gpa && (
+                                <span>GPA: {education.gpa}</span>
+                              )}
                             </div>
+                            {education.description && (
+                              <p className='mt-2 text-gray-600 dark:text-gray-400'>
+                                {education.description}
+                              </p>
+                            )}
                           </div>
-                        )}
-                        <div className='flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400'>
-                          <span>
-                            {education.startDate} -{' '}
-                            {education.current ? 'Present' : education.endDate}
-                          </span>
-                          {education.location && (
-                            <span>{education.location}</span>
-                          )}
-                          {education.gpa && <span>GPA: {education.gpa}</span>}
                         </div>
-                        {education.description && (
-                          <p className='mt-2 text-gray-600 dark:text-gray-400'>
-                            {education.description}
-                          </p>
-                        )}
                       </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className='text-center py-8'>
-                  <GraduationCap className='mx-auto h-12 w-12 text-gray-400 mb-4' />
-                  <p className='text-gray-500 dark:text-gray-400'>
-                    No education information available
-                  </p>
-                  <p className='text-sm text-gray-400 dark:text-gray-500 mt-2'>
-                    Use CV parsing to automatically add your education history
-                  </p>
-                </div>
-              )}
+                    ),
+                  )
+                : null}
             </div>
           )}
         </section>
@@ -1621,74 +1641,86 @@ export default function ProfilePage() {
           </div>
           {isEditing ? (
             <div className='space-y-6'>
-              {profile.experiences && profile.experiences.length > 0 && (
-                <div className='space-y-4'>
-                  {profile.experiences.map((experience, index) => (
-                    <div
-                      key={experience.id || index}
-                      className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 flex justify-between items-start'
-                    >
-                      <div>
-                        <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
-                          {experience.jobTitle}
-                        </h3>
-                        <p className='text-gray-600 dark:text-gray-400 font-medium'>
-                          {experience.company}
-                        </p>
-                        <div className='flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400'>
-                          <span>
-                            {experience.startDate} -{' '}
-                            {experience.current
-                              ? 'Present'
-                              : experience.endDate}
-                          </span>
-                          {experience.location && (
-                            <span>{experience.location}</span>
-                          )}
-                        </div>
-                        {experience.technologies &&
-                          experience.technologies.length > 0 && (
-                            <div className='mt-2 flex flex-wrap gap-1'>
-                              {experience.technologies.map((tech, i) => (
-                                <span
-                                  key={i}
-                                  className='px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-xs'
+              {Array.isArray(profile.experiences) &&
+                profile.experiences.length > 0 && (
+                  <div className='space-y-4'>
+                    {Array.isArray(profile.experiences)
+                      ? profile.experiences.map(
+                          (experience: Experience, index: number) => (
+                            <div
+                              key={experience.id || index}
+                              className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 flex justify-between items-start'
+                            >
+                              <div>
+                                <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
+                                  {experience.jobTitle}
+                                </h3>
+                                <p className='text-gray-600 dark:text-gray-400 font-medium'>
+                                  {experience.company}
+                                </p>
+                                <div className='flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400'>
+                                  <span>
+                                    {experience.startDate} -{' '}
+                                    {experience.current
+                                      ? 'Present'
+                                      : experience.endDate}
+                                  </span>
+                                  {experience.location && (
+                                    <span>{experience.location}</span>
+                                  )}
+                                </div>
+                                {experience.technologies &&
+                                  experience.technologies.length > 0 && (
+                                    <div className='mt-2 flex flex-wrap gap-1'>
+                                      {experience.technologies.map(
+                                        (tech: string, i: number) => (
+                                          <span
+                                            key={i}
+                                            className='px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-xs'
+                                          >
+                                            {tech}
+                                          </span>
+                                        ),
+                                      )}
+                                    </div>
+                                  )}
+                              </div>
+                              <div className='flex gap-2'>
+                                <Button
+                                  size='sm'
+                                  variant='outline'
+                                  onClick={() => {
+                                    setExpModalEditIndex(index);
+                                    setExpModalInitial(experience);
+                                    setExpModalOpen(true);
+                                  }}
                                 >
-                                  {tech}
-                                </span>
-                              ))}
+                                  Edit
+                                </Button>
+                                <Button
+                                  size='sm'
+                                  variant='outline'
+                                  onClick={() => {
+                                    if (Array.isArray(profile.experiences)) {
+                                      const newArr = profile.experiences.filter(
+                                        (_: any, i: number) => i !== index,
+                                      );
+                                      setProfile({
+                                        ...profile,
+                                        experiences: newArr,
+                                      });
+                                    }
+                                  }}
+                                >
+                                  Delete
+                                </Button>
+                              </div>
                             </div>
-                          )}
-                      </div>
-                      <div className='flex gap-2'>
-                        <Button
-                          size='sm'
-                          variant='outline'
-                          onClick={() => {
-                            setExpModalEditIndex(index);
-                            setExpModalInitial(experience);
-                            setExpModalOpen(true);
-                          }}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size='sm'
-                          variant='outline'
-                          onClick={() => {
-                            const newArr = profile.experiences.filter(
-                              (_, i) => i !== index,
-                            );
-                            setProfile({ ...profile, experiences: newArr });
-                          }}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                          ),
+                        )
+                      : null}
+                  </div>
+                )}
               <div className='text-center'>
                 <Button
                   variant='primary'
@@ -1708,7 +1740,9 @@ export default function ProfilePage() {
                 onSave={(exp) => {
                   if (expModalEditIndex !== null) {
                     // Edit existing
-                    const newArr = [...profile.experiences];
+                    const newArr = Array.isArray(profile.experiences)
+                      ? [...profile.experiences]
+                      : [];
                     newArr[expModalEditIndex] = {
                       ...exp,
                       id: exp.id || Date.now().toString(),
@@ -1718,10 +1752,12 @@ export default function ProfilePage() {
                     // Add new
                     setProfile({
                       ...profile,
-                      experiences: [
-                        ...profile.experiences,
-                        { ...exp, id: Date.now().toString() },
-                      ],
+                      experiences: Array.isArray(profile.experiences)
+                        ? [
+                            ...profile.experiences,
+                            { ...exp, id: Date.now().toString() },
+                          ]
+                        : [{ ...exp, id: Date.now().toString() }],
                     });
                   }
                   setExpModalOpen(false);
@@ -1730,71 +1766,64 @@ export default function ProfilePage() {
             </div>
           ) : (
             <div className='space-y-4'>
-              {profile.experiences && profile.experiences.length > 0 ? (
-                profile.experiences.map((experience, index) => (
-                  <div
-                    key={experience.id || index}
-                    className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'
-                  >
-                    <div className='flex items-start justify-between'>
-                      <div className='flex-1'>
-                        <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
-                          {experience.jobTitle}
-                        </h3>
-                        <p className='text-gray-600 dark:text-gray-400 font-medium'>
-                          {experience.company}
-                        </p>
-                        {experience.technologies &&
-                          experience.technologies.length > 0 && (
-                            <div className='mt-2'>
-                              <p className='text-sm text-gray-500 dark:text-gray-400 font-medium'>
-                                Technologies:
-                              </p>
-                              <div className='flex flex-wrap gap-1 mt-1'>
-                                {experience.technologies.map(
-                                  (tech, techIndex) => (
-                                    <span
-                                      key={techIndex}
-                                      className='px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-xs'
-                                    >
-                                      {tech}
-                                    </span>
-                                  ),
-                                )}
-                              </div>
+              {Array.isArray(profile.experiences) &&
+              profile.experiences.length > 0
+                ? profile.experiences.map(
+                    (experience: Experience, index: number) => (
+                      <div
+                        key={experience.id || index}
+                        className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'
+                      >
+                        <div className='flex items-start justify-between'>
+                          <div className='flex-1'>
+                            <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
+                              {experience.jobTitle}
+                            </h3>
+                            <p className='text-gray-600 dark:text-gray-400 font-medium'>
+                              {experience.company}
+                            </p>
+                            {experience.technologies &&
+                              experience.technologies.length > 0 && (
+                                <div className='mt-2'>
+                                  <p className='text-sm text-gray-500 dark:text-gray-400 font-medium'>
+                                    Technologies:
+                                  </p>
+                                  <div className='flex flex-wrap gap-1 mt-1'>
+                                    {experience.technologies.map(
+                                      (tech: string, techIndex: number) => (
+                                        <span
+                                          key={techIndex}
+                                          className='px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-xs'
+                                        >
+                                          {tech}
+                                        </span>
+                                      ),
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            <div className='flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400'>
+                              <span>
+                                {experience.startDate} -{' '}
+                                {experience.current
+                                  ? 'Present'
+                                  : experience.endDate}
+                              </span>
+                              {experience.location && (
+                                <span>{experience.location}</span>
+                              )}
                             </div>
-                          )}
-                        <div className='flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400'>
-                          <span>
-                            {experience.startDate} -{' '}
-                            {experience.current
-                              ? 'Present'
-                              : experience.endDate}
-                          </span>
-                          {experience.location && (
-                            <span>{experience.location}</span>
-                          )}
+                            {experience.description && (
+                              <p className='mt-2 text-gray-600 dark:text-gray-400'>
+                                {experience.description}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                        {experience.description && (
-                          <p className='mt-2 text-gray-600 dark:text-gray-400'>
-                            {experience.description}
-                          </p>
-                        )}
                       </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className='text-center py-8'>
-                  <Briefcase className='mx-auto h-12 w-12 text-gray-400 mb-4' />
-                  <p className='text-gray-500 dark:text-gray-400'>
-                    No work experience available
-                  </p>
-                  <p className='text-sm text-gray-400 dark:text-gray-500 mt-2'>
-                    Use CV parsing to automatically add your work experience
-                  </p>
-                </div>
-              )}
+                    ),
+                  )
+                : null}
             </div>
           )}
         </section>

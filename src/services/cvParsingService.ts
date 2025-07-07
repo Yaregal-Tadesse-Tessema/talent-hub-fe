@@ -28,7 +28,7 @@ function fixMalformedJSON(jsonText: string): string {
   );
 
   // Fix missing quotes in object keys
-  fixed = fixed.replace(/(\{|,\)\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
+  fixed = fixed.replace(/(\{|,)\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
 
   // Fix boolean and null values
   fixed = fixed.replace(/:\s*true\s*([,}\]])/g, ': true$1');
@@ -209,7 +209,7 @@ function normalizeEducationAndExperienceData(parsedData: any): ParsedCVData {
             location: '',
           };
         }
-      } else if (typeof value === 'object') {
+      } else if (typeof value === 'object' && value !== null) {
         // Handle nested object structure like {"GP Registrar": {"Any Surgery, Derby. Aug 2020 - Aug 2021": "description"}}
         if (Object.keys(value).length === 1) {
           const [companyInfo, description] = Object.entries(value)[0];
@@ -525,7 +525,7 @@ export function mapParsedDataToUserProfile(
   console.log('Mapping parsed data to UserProfile:', parsedData);
 
   // Handle birthDate properly - if empty or invalid, set to null or a default date
-  let birthDate = parsedData.birthDate;
+  let birthDate: string | null = parsedData.birthDate;
   if (!birthDate || birthDate.trim() === '') {
     birthDate = null; // Set to null instead of empty string
   } else {
@@ -655,6 +655,10 @@ export function mapParsedDataToUserProfile(
     professionalSummery: parsedData.professionalSummery || '',
     isProfilePublic: false,
     isResumePublic: false,
+    notificationSetting: [],
+    alertConfiguration: [],
+    smsAlertConfiguration: [],
+    isFirstTime: false,
   };
 
   // Clean all date fields in the entire userProfile object

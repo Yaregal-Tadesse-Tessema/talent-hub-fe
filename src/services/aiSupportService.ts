@@ -7,7 +7,7 @@ try {
     // Dynamic import to avoid SSR issues
     import('cohere-ai')
       .then((cohereModule) => {
-        cohere = cohereModule.cohere;
+        cohere = cohereModule.default;
         if (cohere && process.env.NEXT_PUBLIC_COHERE_API_KEY) {
           cohere.init({
             token: process.env.NEXT_PUBLIC_COHERE_API_KEY,

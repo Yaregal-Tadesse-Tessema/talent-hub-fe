@@ -98,7 +98,7 @@ export default function LoadingAnimation({
     steps.forEach((step, index) => {
       setTimeout(() => {
         setCurrentStep(index);
-        setCompletedSteps((prev) => new Set([...prev, step.id]));
+        setCompletedSteps((prev) => new Set([...Array.from(prev), step.id]));
       }, totalDelay);
       totalDelay += stepDurations[index];
     });

@@ -104,8 +104,8 @@ export default function TutorialOverlay({ children }: TutorialOverlayProps) {
     const tooltipWidth = 320; // Approximate tooltip width
     const tooltipHeight = 200; // Approximate tooltip height
 
-    let top = rect.bottom + 20;
-    let left = rect.left + rect.width / 2;
+    let top: number | string = rect.bottom + 20;
+    let left: number | string = rect.left + rect.width / 2;
     let transform = 'translateX(-50%)';
 
     switch (step.position) {
@@ -137,32 +137,48 @@ export default function TutorialOverlay({ children }: TutorialOverlayProps) {
     }
 
     // Adjust for viewport boundaries
-    const adjustedLeft = Math.max(
-      10,
-      Math.min(left, viewportWidth - tooltipWidth - 10),
-    );
-    const adjustedTop = Math.max(
-      10,
-      Math.min(top, viewportHeight - tooltipHeight - 10),
-    );
+    const adjustedLeft =
+      typeof left === 'number'
+        ? Math.max(10, Math.min(left, viewportWidth - tooltipWidth - 10))
+        : left;
+    const adjustedTop =
+      typeof top === 'number'
+        ? Math.max(10, Math.min(top, viewportHeight - tooltipHeight - 10))
+        : top;
 
     // If tooltip would be cut off, try alternative positions
     if (step.position !== 'center') {
-      if (adjustedTop !== top && step.position === 'bottom') {
+      if (
+        typeof adjustedTop === 'number' &&
+        adjustedTop !== top &&
+        step.position === 'bottom'
+      ) {
         // If bottom is cut off, try top
         top = rect.top - 20;
         transform = 'translateX(-50%) translateY(-100%)';
-      } else if (adjustedTop !== top && step.position === 'top') {
+      } else if (
+        typeof adjustedTop === 'number' &&
+        adjustedTop !== top &&
+        step.position === 'top'
+      ) {
         // If top is cut off, try bottom
         top = rect.bottom + 20;
         transform = 'translateX(-50%)';
       }
 
-      if (adjustedLeft !== left && step.position === 'right') {
+      if (
+        typeof adjustedLeft === 'number' &&
+        adjustedLeft !== left &&
+        step.position === 'right'
+      ) {
         // If right is cut off, try left
         left = rect.left - 20;
         transform = 'translateX(-100%) translateY(-50%)';
-      } else if (adjustedLeft !== left && step.position === 'left') {
+      } else if (
+        typeof adjustedLeft === 'number' &&
+        adjustedLeft !== left &&
+        step.position === 'left'
+      ) {
         // If left is cut off, try right
         left = rect.right + 20;
         transform = 'translateY(-50%)';
@@ -170,8 +186,14 @@ export default function TutorialOverlay({ children }: TutorialOverlayProps) {
     }
 
     return {
-      top: `${Math.max(10, Math.min(top, viewportHeight - tooltipHeight - 10))}px`,
-      left: `${Math.max(10, Math.min(left, viewportWidth - tooltipWidth - 10))}px`,
+      top:
+        typeof top === 'number'
+          ? `${Math.max(10, Math.min(top, viewportHeight - tooltipHeight - 10))}px`
+          : top,
+      left:
+        typeof left === 'number'
+          ? `${Math.max(10, Math.min(left, viewportWidth - tooltipWidth - 10))}px`
+          : left,
       transform,
     };
   };

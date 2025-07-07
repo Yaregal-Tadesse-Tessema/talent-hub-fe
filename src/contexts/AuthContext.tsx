@@ -17,6 +17,7 @@ interface User {
   profile?: {
     path?: string;
   };
+  isFirstTime?: boolean;
 }
 
 interface AuthContextType {

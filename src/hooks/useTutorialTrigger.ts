@@ -24,7 +24,7 @@ export function useTutorialTrigger() {
 
     // Only trigger on specific pages that have tutorials
     const tutorialPages = ['/find-job', '/find-candidates', '/dashboard'];
-    if (!tutorialPages.includes(pathname)) return;
+    if (!pathname || !tutorialPages.includes(pathname)) return;
 
     // Get appropriate tutorial based on user role and current page
     const role = user.role;
@@ -56,7 +56,7 @@ export function useTutorialTrigger() {
 
   // Trigger tutorial on page change (for role-specific tutorials)
   useEffect(() => {
-    if (!user || isTutorialActive) return;
+    if (!user || isTutorialActive || !pathname) return;
 
     const role = user.role;
     const tutorials = getTutorialsForRole(role, pathname);
@@ -77,7 +77,7 @@ export function useTutorialTrigger() {
   // Function to manually trigger a tutorial (for testing or manual activation)
   const triggerTutorial = (tutorialId: string) => {
     const role = user?.role;
-    if (!role) return;
+    if (!role || !pathname) return;
 
     const tutorials = getTutorialsForRole(role, pathname);
     const tutorial = tutorials.find((t) => t.id === tutorialId);

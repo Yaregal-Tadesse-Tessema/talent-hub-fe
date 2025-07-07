@@ -96,7 +96,7 @@ export default function JobPageSidebar({
               : [userData.alertConfiguration];
 
             const validConfigs = configs.filter(
-              (config) =>
+              (config: any) =>
                 config &&
                 typeof config === 'object' &&
                 Object.keys(config).length > 0,
@@ -143,7 +143,7 @@ export default function JobPageSidebar({
 
           // Filter out empty or invalid configurations
           const validConfigs = configs.filter(
-            (config) =>
+            (config: any) =>
               config &&
               typeof config === 'object' &&
               Object.keys(config).length > 0,

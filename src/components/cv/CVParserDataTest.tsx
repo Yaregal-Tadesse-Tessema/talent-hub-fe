@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/Textarea';
@@ -5,7 +7,8 @@ import {
   parseCVFromText,
   mapParsedDataToUserProfile,
 } from '@/services/cvParsingService';
-import { ParsedCVData, UserProfile } from '@/types/profile';
+import { ParsedCVData } from '@/services/cvParsingService';
+import { UserProfile } from '@/types/profile';
 
 export default function CVParserDataTest() {
   const [cvText, setCvText] = useState('');
