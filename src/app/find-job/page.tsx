@@ -883,7 +883,6 @@ function FindJobContent() {
                             />
                           )}
                         </div>
-
                         {/* Main Info */}
                         <div className='flex-1 min-w-0'>
                           <div className='flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1 sm:mb-2'>
