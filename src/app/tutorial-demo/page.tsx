@@ -2,16 +2,33 @@
 
 import React from 'react';
 import { useTutorial } from '@/contexts/TutorialContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { getTutorialById } from '@/constants/tutorials';
 import TutorialButton from '@/components/ui/TutorialButton';
 
 export default function TutorialDemoPage() {
   const { showTutorial } = useTutorial();
+  const { user, updateUserIsFirstTime } = useAuth();
 
   const handleStartTutorial = (tutorialId: string) => {
     const tutorial = getTutorialById(tutorialId);
     if (tutorial) {
       showTutorial(tutorial);
+    }
+  };
+
+  const handleResetIsFirstTime = () => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        userData.isFirstTime = true;
+        localStorage.setItem('user', JSON.stringify(userData));
+        // Reload the page to reflect changes
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Error resetting isFirstTime:', error);
     }
   };
 
@@ -157,6 +174,74 @@ export default function TutorialDemoPage() {
             <p>• Press Escape to close the tutorial</p>
             <p>• Click outside the tutorial to close it</p>
             <p>• Tutorials will automatically show on successful login</p>
+          </div>
+        </div>
+
+        {/* Test Section */}
+        <div className='mt-8 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-6'>
+          <h2 className='text-xl font-semibold mb-4 text-yellow-900 dark:text-yellow-100'>
+            Testing isFirstTime Functionality
+          </h2>
+          <div className='space-y-4'>
+            <div className='bg-white dark:bg-gray-800 rounded-lg p-4'>
+              <h3 className='text-lg font-medium mb-2 text-gray-900 dark:text-white'>
+                Current User Status
+              </h3>
+              <div className='space-y-2 text-sm'>
+                <p>
+                  <strong>User:</strong> {user?.name || 'Not logged in'}
+                </p>
+                <p>
+                  <strong>Role:</strong> {user?.role || 'N/A'}
+                </p>
+                <p>
+                  <strong>isFirstTime:</strong>{' '}
+                  {user?.isFirstTime ? 'true' : 'false'}
+                </p>
+                <p>
+                  <strong>Email:</strong> {user?.email || 'N/A'}
+                </p>
+              </div>
+            </div>
+
+            <div className='space-y-2'>
+              <button
+                onClick={handleResetIsFirstTime}
+                className='px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 transition-colors'
+              >
+                Reset isFirstTime to true
+              </button>
+              <button
+                onClick={() =>
+                  updateUserIsFirstTime().catch((error) =>
+                    console.error('Error updating isFirstTime:', error),
+                  )
+                }
+                className='px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors'
+              >
+                Set isFirstTime to false
+              </button>
+            </div>
+
+            <div className='text-sm text-yellow-800 dark:text-yellow-200'>
+              <p>
+                <strong>Testing Instructions:</strong>
+              </p>
+              <ul className='list-disc list-inside space-y-1 mt-2'>
+                <li>
+                  Set isFirstTime to true, then navigate to /find-job,
+                  /find-candidates, or /dashboard
+                </li>
+                <li>Tutorial should automatically show for first-time users</li>
+                <li>
+                  Complete or skip the tutorial to see isFirstTime change to
+                  false
+                </li>
+                <li>
+                  Navigate to the same page again - tutorial should not show
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>

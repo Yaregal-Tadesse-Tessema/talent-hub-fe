@@ -439,6 +439,11 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
     setIsSubmitting(true);
 
     try {
+      // Calculate new deadline: 30 days from current date
+      const newDeadline = new Date();
+      newDeadline.setDate(newDeadline.getDate() + 30);
+      const newDeadlineISO = newDeadline.toISOString();
+
       // Filter out empty array items and ensure proper date formatting
       const cleanedData = {
         ...formData,
@@ -447,7 +452,7 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
         responsibilities: formData.responsibilities.filter(Boolean),
         jobPostRequirement: formData.jobPostRequirement.filter(Boolean),
         postedDate: new Date(formData.postedDate).toISOString(),
-        deadline: new Date(formData.deadline).toISOString(),
+        deadline: newDeadlineISO, // Use the new calculated deadline
         onHoldDate: formData.onHoldDate
           ? new Date(formData.onHoldDate).toISOString()
           : null,
@@ -467,7 +472,8 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
 
       showToast({
         type: 'success',
-        message: 'Job posted successfully!',
+        message:
+          'Job posted successfully! The application deadline has been set to 30 days from today.',
       });
 
       // Redirect to jobs list or dashboard
@@ -1131,6 +1137,41 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
             onChange={handleInputChange}
             className='w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700'
           />
+          <div className='mt-2 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg'>
+            <div className='flex items-start space-x-2'>
+              <svg
+                className='w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0'
+                fill='currentColor'
+                viewBox='0 0 20 20'
+              >
+                <path
+                  fillRule='evenodd'
+                  d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z'
+                  clipRule='evenodd'
+                />
+              </svg>
+              <div className='text-sm text-blue-800 dark:text-blue-200'>
+                <p className='font-medium'>
+                  Deadline will be updated when published
+                </p>
+                <p className='mt-1'>
+                  The application deadline will be automatically set to{' '}
+                  <span className='font-semibold'>
+                    {new Date(
+                      Date.now() + 30 * 24 * 60 * 60 * 1000,
+                    ).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </span>{' '}
+                  (30 days from today) when you publish this job posting.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className='space-y-2'>
@@ -1422,7 +1463,17 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
         onClose={() => setShowPublishConfirmation(false)}
         onConfirm={confirmPublish}
         title='Confirm Job Posting'
-        message='Are you sure you want to publish this job posting? This action cannot be undone.'
+        message={`Are you sure you want to publish this job posting? This action cannot be undone.
+
+Note: The application deadline will be automatically set to ${new Date(
+          Date.now() + 30 * 24 * 60 * 60 * 1000,
+        ).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })} (30 days from today).`}
         confirmText='Publish Job'
         cancelText='Cancel'
         variant='info'

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface TutorialStep {
   id: string;
@@ -43,6 +44,7 @@ export function TutorialProvider({ children }: { children: React.ReactNode }) {
   const [currentTutorial, setCurrentTutorial] = useState<Tutorial | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isTutorialActive, setIsTutorialActive] = useState(false);
+  const { user, updateUserIsFirstTime } = useAuth();
 
   // Check if user has seen a tutorial
   const hasSeenTutorial = (tutorialId: string): boolean => {
@@ -93,6 +95,14 @@ export function TutorialProvider({ children }: { children: React.ReactNode }) {
     } else {
       // Tutorial completed
       markTutorialAsSeen(currentTutorial.id);
+
+      // Update user's isFirstTime status if this is a first-time user
+      if (user?.isFirstTime) {
+        updateUserIsFirstTime().catch((error) => {
+          console.error('Failed to update user isFirstTime status:', error);
+        });
+      }
+
       closeTutorial();
     }
   };
@@ -104,6 +114,13 @@ export function TutorialProvider({ children }: { children: React.ReactNode }) {
   };
 
   const closeTutorial = () => {
+    // Update user's isFirstTime status if this is a first-time user and tutorial was active
+    if (user?.isFirstTime && isTutorialActive && currentTutorial) {
+      updateUserIsFirstTime().catch((error) => {
+        console.error('Failed to update user isFirstTime status:', error);
+      });
+    }
+
     setIsTutorialActive(false);
     setCurrentTutorial(null);
     setCurrentStepIndex(0);
@@ -112,6 +129,13 @@ export function TutorialProvider({ children }: { children: React.ReactNode }) {
   const skipTutorial = () => {
     if (currentTutorial) {
       markTutorialAsSeen(currentTutorial.id);
+
+      // Update user's isFirstTime status if this is a first-time user
+      if (user?.isFirstTime) {
+        updateUserIsFirstTime().catch((error) => {
+          console.error('Failed to update user isFirstTime status:', error);
+        });
+      }
     }
     closeTutorial();
   };

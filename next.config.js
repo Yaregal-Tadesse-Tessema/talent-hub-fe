@@ -111,7 +111,7 @@ const nextConfig = {
       if (process.env.ANALYZE === 'true') {
         try {
           // eslint-disable-next-line @typescript-eslint/no-var-requires
-          const { BundleAnalyzerPlugin } = require('@next/bundle-analyzer');
+          const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
           config.plugins.push(
             new BundleAnalyzerPlugin({
               analyzerMode: 'static',

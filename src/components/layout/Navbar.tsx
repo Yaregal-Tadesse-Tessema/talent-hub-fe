@@ -196,6 +196,7 @@ export function Navbar({ page = 'home' }: NavbarProps) {
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/find-candidates', label: 'Find Candidates' },
     { href: '/customer-supports', label: 'Support' },
+    { href: '/admin', label: 'Admins' },
   ];
 
   // Links for employee

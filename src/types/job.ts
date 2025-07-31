@@ -113,3 +113,25 @@ export interface JobsResponse {
   total: number;
   items: Job[];
 }
+
+export interface JobPostingData {
+  tenantName: string;
+  tenantAddress: string;
+  tenantPhone: string;
+  jobType: string;
+  worktype: string;
+  jobTitle: string;
+  experienceLevel: string;
+  jobRequirement: string[];
+  responsibilities: string[];
+  howToApply: string;
+  email: string;
+  skills: string[];
+  description: string;
+  position: string;
+  industry: string;
+  deadline: string;
+  gender: string;
+  numberOfPosition: number;
+  requiredYearOfExperience: number;
+}

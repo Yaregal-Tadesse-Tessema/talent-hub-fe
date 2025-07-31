@@ -115,7 +115,7 @@ export default function EmployerPageSidebar({
       window.location.href = '/profile';
     } else if (action === 'Browse Jobs') {
       // Navigate to job listings
-      window.location.href = '/find-jobs';
+      window.location.href = '/find-job';
     }
   };
 

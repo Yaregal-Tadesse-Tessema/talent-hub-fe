@@ -16,7 +16,6 @@ interface EmployeeFormData {
   middleName: string;
   lastName: string;
   gender: string;
-  status: 'Active';
   password: string;
   address: Record<string, any>;
   birthDate: string;
@@ -64,7 +63,6 @@ function SignupPageContent() {
     middleName: '',
     lastName: '',
     gender: 'male',
-    status: 'Active',
     password: '',
     address: {},
     birthDate: '',

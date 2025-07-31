@@ -4,7 +4,7 @@ A comprehensive guided tour system for the TalentHub platform that helps new use
 
 ## Features
 
-- **Automatic Tutorial Triggering**: Tutorials automatically show on successful login
+- **Automatic Tutorial Triggering**: Tutorials automatically show on successful login for first-time users
 - **Role-Based Tutorials**: Different tutorials for employees and employers
 - **Page-Specific Tutorials**: Tutorials tailored to specific pages
 - **Interactive Elements**: Click actions, scrolling, and highlighting
@@ -13,6 +13,31 @@ A comprehensive guided tour system for the TalentHub platform that helps new use
 - **Dark Mode Support**: Fully compatible with dark/light themes
 - **Smooth Animations**: Powered by Framer Motion
 - **Progress Tracking**: Users can skip tutorials and track completion
+- **First-Time User Detection**: Automatically detects and handles first-time users
+
+## First-Time User Functionality
+
+### How it Works
+
+1. **User Registration**: When a user logs in for the first time, the `isFirstTime` property is automatically set to `true`
+2. **Tutorial Triggering**: Tutorials only show for users with `isFirstTime: true`
+3. **Tutorial Completion**: When a user completes, skips, or closes a tutorial, `isFirstTime` is automatically set to `false` both in localStorage and the database
+4. **Persistent State**: The `isFirstTime` status is stored in localStorage and the database, persisting across sessions
+
+### User Flow
+
+```
+New User Login → isFirstTime: true → Tutorial Shows → User Completes/Skips Tutorial → isFirstTime: false → No More Tutorials
+```
+
+### Testing
+
+Visit `/tutorial-demo` to test the tutorial system:
+
+- View current user's `isFirstTime` status
+- Reset `isFirstTime` to `true` for testing
+- Manually set `isFirstTime` to `false`
+- Test tutorial triggering on different pages
 
 ## Components
 
@@ -23,20 +48,28 @@ A comprehensive guided tour system for the TalentHub platform that helps new use
    - Manages tutorial state and provides tutorial functionality
    - Handles tutorial persistence in localStorage
    - Provides methods for showing, navigating, and closing tutorials
+   - Automatically updates user's `isFirstTime` status when tutorials are completed
 
-2. **TutorialOverlay** (`src/components/ui/TutorialOverlay.tsx`)
+2. **AuthContext** (`src/contexts/AuthContext.tsx`)
+
+   - Manages user authentication and state
+   - Provides `updateUserIsFirstTime()` method to update user's first-time status
+   - Automatically sets `isFirstTime: true` for new users on login
+   - Persists user state including `isFirstTime` in localStorage
+
+3. **TutorialOverlay** (`src/components/ui/TutorialOverlay.tsx`)
 
    - Main tutorial overlay component with highlighting
    - Handles element targeting and positioning
    - Provides navigation controls and keyboard shortcuts
 
-3. **TutorialButton** (`src/components/ui/TutorialButton.tsx`)
+4. **TutorialButton** (`src/components/ui/TutorialButton.tsx`)
 
    - Reusable button component for triggering tutorials
    - Multiple variants: floating, inline, icon
    - Automatically shows available tutorials
 
-4. **TutorialTrigger** (`src/components/ui/TutorialTrigger.tsx`)
+5. **TutorialTrigger** (`src/components/ui/TutorialTrigger.tsx`)
    - Automatically triggers tutorials on login and page navigation
    - Handles role-based and page-specific tutorial logic
 
@@ -68,6 +101,47 @@ interface TutorialStep {
   actionText?: string;
   skipable?: boolean;
 }
+```
+
+## Persistence
+
+Tutorial completion is stored in localStorage:
+
+- `seenTutorials`: Array of completed tutorial IDs
+- `user.isFirstTime`: Boolean indicating if user is a first-time user (stored in both localStorage and database)
+
+## API Methods
+
+### AuthContext Methods
+
+```typescript
+// Update user's isFirstTime status to false (updates both localStorage and database)
+updateUserIsFirstTime(): Promise<void>
+```
+
+### TutorialContext Methods
+
+```typescript
+// Show a specific tutorial
+showTutorial(tutorial: Tutorial): void
+
+// Navigate to next step
+nextStep(): void
+
+// Navigate to previous step
+previousStep(): void
+
+// Close tutorial (also updates isFirstTime if applicable)
+closeTutorial(): void
+
+// Skip tutorial (also updates isFirstTime if applicable)
+skipTutorial(): void
+
+// Check if user has seen a tutorial
+hasSeenTutorial(tutorialId: string): boolean
+
+// Mark tutorial as seen
+markTutorialAsSeen(tutorialId: string): void
 ```
 
 ## Usage
@@ -178,7 +252,7 @@ The tutorial overlay supports different positioning options:
 
 ### Login Triggering
 
-- Tutorials automatically trigger on successful login
+- Tutorials automatically trigger on successful login for first-time users
 - Clears previous tutorial state to ensure fresh experience
 - Shows role-appropriate tutorials for the current page
 
@@ -186,14 +260,7 @@ The tutorial overlay supports different positioning options:
 
 - Tutorials can trigger when navigating to specific pages
 - Only shows tutorials that haven't been completed
-- Respects user's tutorial completion history
-
-## Persistence
-
-Tutorial completion is stored in localStorage:
-
-- `seenTutorials`: Array of completed tutorial IDs
-- `tutorialTriggered`: Flag to prevent multiple triggers on login
+- Respects user's tutorial completion history and `isFirstTime` status
 
 ## Customization
 
@@ -226,6 +293,7 @@ Visit `/tutorial-demo` to see the tutorial system in action with various example
 
 ### Tutorial Not Showing
 
+- Check if the user's `isFirstTime` property is `true`
 - Check if the tutorial is defined in `tutorials.ts`
 - Verify the user role matches the tutorial role
 - Ensure the current page matches the tutorial page

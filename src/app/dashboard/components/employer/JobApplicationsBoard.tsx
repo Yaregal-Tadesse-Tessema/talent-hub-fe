@@ -699,7 +699,7 @@ export default function JobApplicationsBoard({
 
   // --- UI ---
   return (
-    <div className='flex-1'>
+    <div className='flex-1 p-4'>
       {/* Header: Breadcrumb left, toggler/filter/sort right */}
       <div className='flex items-center justify-between mb-2'>
         <Breadcrumb job={job} onBack={onBack} />

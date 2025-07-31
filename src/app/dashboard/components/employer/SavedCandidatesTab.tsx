@@ -61,6 +61,7 @@ export default function SavedCandidatesTab() {
     try {
       const response = await savedCandidatesService.getSavedCandidates();
       setSavedCandidates(response.items || []);
+      console.log('response.items', response.items);
     } catch (error) {
       setError('Failed to load saved candidates. Please try again.');
       setSavedCandidates([]);
@@ -256,184 +257,190 @@ export default function SavedCandidatesTab() {
         </div>
       ) : (
         <div className='space-y-4'>
-          {savedCandidates.map((savedCandidate) => (
-            <div
-              key={savedCandidate.id}
-              className='flex items-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm px-6 py-4 justify-between hover:ring-2 hover:ring-blue-500 dark:hover:ring-blue-400'
-            >
-              <div className='flex items-center gap-4'>
-                <div className='w-16 h-16 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center'>
-                  {/* Profile image placeholder */}
-                  <svg width='32' height='32' fill='none' viewBox='0 0 32 32'>
-                    <rect
-                      width='32'
-                      height='32'
-                      rx='8'
-                      fill='#E5E7EB'
-                      className='dark:fill-gray-600'
-                    />
-                    <path
-                      d='M16 18c-3.314 0-6 2.239-6 5v1h12v-1c0-2.761-2.686-5-6-5z'
-                      fill='#D1D5DB'
-                      className='dark:fill-gray-500'
-                    />
-                    <circle
-                      cx='16'
-                      cy='12'
-                      r='5'
-                      fill='#D1D5DB'
-                      className='dark:fill-gray-500'
-                    />
-                  </svg>
+          {savedCandidates
+            .filter((savedCandidate) => savedCandidate?.candidate)
+            .map((savedCandidate) => (
+              <div
+                key={savedCandidate.id}
+                className='flex items-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm px-6 py-4 justify-between hover:ring-2 hover:ring-blue-500 dark:hover:ring-blue-400'
+              >
+                <div className='flex items-center gap-4'>
+                  <div className='w-16 h-16 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center'>
+                    {/* Profile image placeholder */}
+                    <svg width='32' height='32' fill='none' viewBox='0 0 32 32'>
+                      <rect
+                        width='32'
+                        height='32'
+                        rx='8'
+                        fill='#E5E7EB'
+                        className='dark:fill-gray-600'
+                      />
+                      <path
+                        d='M16 18c-3.314 0-6 2.239-6 5v1h12v-1c0-2.761-2.686-5-6-5z'
+                        fill='#D1D5DB'
+                        className='dark:fill-gray-500'
+                      />
+                      <circle
+                        cx='16'
+                        cy='12'
+                        r='5'
+                        fill='#D1D5DB'
+                        className='dark:fill-gray-500'
+                      />
+                    </svg>
+                  </div>
+                  <div className='flex-1'>
+                    <div
+                      className='font-semibold text-base text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:cursor-pointer'
+                      onClick={() =>
+                        handleCandidateClick(savedCandidate.candidate)
+                      }
+                    >
+                      {savedCandidate?.candidate?.firstName &&
+                      savedCandidate?.candidate?.lastName
+                        ? `${savedCandidate.candidate?.firstName} ${savedCandidate.candidate.middleName ? savedCandidate.candidate.middleName + ' ' : ''}${savedCandidate.candidate.lastName}`
+                        : savedCandidate?.candidate.email ||
+                          'Unknown Candidate'}
+                    </div>
+                    <div className='text-gray-500 dark:text-gray-400 text-sm'>
+                      {savedCandidate.candidate.profileHeadLine ||
+                        'No title specified'}
+                    </div>
+                    <div className='flex items-center gap-2 text-gray-400 dark:text-gray-500 text-xs mt-1'>
+                      <svg
+                        width='16'
+                        height='16'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                      >
+                        <path
+                          d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z'
+                          strokeWidth='2'
+                        />
+                      </svg>
+                      {savedCandidate.candidate.preferredJobLocation
+                        ? savedCandidate.candidate.preferredJobLocation
+                        : savedCandidate.candidate.address?.city ||
+                          savedCandidate.candidate.address?.region ||
+                          'Location not specified'}
+                      {savedCandidate.candidate.yearOfExperience !==
+                        undefined &&
+                        savedCandidate.candidate.yearOfExperience !== null && (
+                          <>
+                            <span>•</span>
+                            {savedCandidate.candidate.yearOfExperience}{' '}
+                            {savedCandidate.candidate.yearOfExperience === 1
+                              ? 'year'
+                              : 'years'}{' '}
+                            experience
+                          </>
+                        )}
+                    </div>
+                    <div className='flex items-center gap-2 text-gray-400 dark:text-gray-500 text-xs mt-1'>
+                      {savedCandidate.candidate.highestLevelOfEducation && (
+                        <>
+                          <svg
+                            width='16'
+                            height='16'
+                            fill='none'
+                            viewBox='0 0 24 24'
+                            stroke='currentColor'
+                          >
+                            <path d='M12 14l9-5-9-5-9 5 9 5z' strokeWidth='2' />
+                            <path
+                              d='M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z'
+                              strokeWidth='2'
+                            />
+                          </svg>
+                          {savedCandidate.candidate.highestLevelOfEducation}
+                        </>
+                      )}
+                      {savedCandidate.candidate.salaryExpectations && (
+                        <>
+                          <span>•</span>$
+                          {savedCandidate.candidate.salaryExpectations.toLocaleString()}
+                          /year
+                        </>
+                      )}
+                    </div>
+
+                    {/* Notes and Tags */}
+                    {(savedCandidate.notes || savedCandidate.tags?.length) && (
+                      <div className='mt-2 space-y-1'>
+                        {savedCandidate.notes && (
+                          <div className='text-xs text-gray-600 dark:text-gray-400'>
+                            <span className='font-medium'>Notes:</span>{' '}
+                            {savedCandidate.notes}
+                          </div>
+                        )}
+                        {savedCandidate.tags &&
+                          savedCandidate.tags.length > 0 && (
+                            <div className='flex flex-wrap gap-1'>
+                              {savedCandidate.tags.map((tag, tagIdx) => (
+                                <span
+                                  key={tagIdx}
+                                  className='px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs rounded-full'
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                      </div>
+                    )}
+
+                    {savedCandidate.candidate.technicalSkills &&
+                      savedCandidate.candidate.technicalSkills.length > 0 && (
+                        <div className='flex flex-wrap gap-1 mt-2'>
+                          {savedCandidate.candidate.technicalSkills
+                            .slice(0, 3)
+                            .map((skill: string, skillIdx: number) => (
+                              <span
+                                key={skillIdx}
+                                className='px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs rounded-full'
+                              >
+                                {skill}
+                              </span>
+                            ))}
+                          {savedCandidate.candidate.technicalSkills.length >
+                            3 && (
+                            <span className='px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs rounded-full'>
+                              +
+                              {savedCandidate.candidate.technicalSkills.length -
+                                3}{' '}
+                              more
+                            </span>
+                          )}
+                        </div>
+                      )}
+                  </div>
                 </div>
-                <div className='flex-1'>
-                  <div
-                    className='font-semibold text-base text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:cursor-pointer'
+                <div className='flex items-center gap-2'>
+                  <button
                     onClick={() =>
                       handleCandidateClick(savedCandidate.candidate)
                     }
+                    className='px-4 py-2 rounded-md font-semibold flex items-center gap-2 transition hover:bg-blue-600 hover:text-white bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
                   >
-                    {savedCandidate.candidate.firstName &&
-                    savedCandidate.candidate.lastName
-                      ? `${savedCandidate.candidate.firstName} ${savedCandidate.candidate.middleName ? savedCandidate.candidate.middleName + ' ' : ''}${savedCandidate.candidate.lastName}`
-                      : savedCandidate.candidate.email || 'Unknown Candidate'}
-                  </div>
-                  <div className='text-gray-500 dark:text-gray-400 text-sm'>
-                    {savedCandidate.candidate.profileHeadLine ||
-                      'No title specified'}
-                  </div>
-                  <div className='flex items-center gap-2 text-gray-400 dark:text-gray-500 text-xs mt-1'>
-                    <svg
-                      width='16'
-                      height='16'
-                      fill='none'
-                      viewBox='0 0 24 24'
-                      stroke='currentColor'
-                    >
-                      <path
-                        d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z'
-                        strokeWidth='2'
-                      />
-                    </svg>
-                    {savedCandidate.candidate.preferredJobLocation
-                      ? savedCandidate.candidate.preferredJobLocation
-                      : savedCandidate.candidate.address?.city ||
-                        savedCandidate.candidate.address?.region ||
-                        'Location not specified'}
-                    {savedCandidate.candidate.yearOfExperience !== undefined &&
-                      savedCandidate.candidate.yearOfExperience !== null && (
-                        <>
-                          <span>•</span>
-                          {savedCandidate.candidate.yearOfExperience}{' '}
-                          {savedCandidate.candidate.yearOfExperience === 1
-                            ? 'year'
-                            : 'years'}{' '}
-                          experience
-                        </>
-                      )}
-                  </div>
-                  <div className='flex items-center gap-2 text-gray-400 dark:text-gray-500 text-xs mt-1'>
-                    {savedCandidate.candidate.highestLevelOfEducation && (
-                      <>
-                        <svg
-                          width='16'
-                          height='16'
-                          fill='none'
-                          viewBox='0 0 24 24'
-                          stroke='currentColor'
-                        >
-                          <path d='M12 14l9-5-9-5-9 5 9 5z' strokeWidth='2' />
-                          <path
-                            d='M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z'
-                            strokeWidth='2'
-                          />
-                        </svg>
-                        {savedCandidate.candidate.highestLevelOfEducation}
-                      </>
-                    )}
-                    {savedCandidate.candidate.salaryExpectations && (
-                      <>
-                        <span>•</span>$
-                        {savedCandidate.candidate.salaryExpectations.toLocaleString()}
-                        /year
-                      </>
-                    )}
-                  </div>
-
-                  {/* Notes and Tags */}
-                  {(savedCandidate.notes || savedCandidate.tags?.length) && (
-                    <div className='mt-2 space-y-1'>
-                      {savedCandidate.notes && (
-                        <div className='text-xs text-gray-600 dark:text-gray-400'>
-                          <span className='font-medium'>Notes:</span>{' '}
-                          {savedCandidate.notes}
-                        </div>
-                      )}
-                      {savedCandidate.tags &&
-                        savedCandidate.tags.length > 0 && (
-                          <div className='flex flex-wrap gap-1'>
-                            {savedCandidate.tags.map((tag, tagIdx) => (
-                              <span
-                                key={tagIdx}
-                                className='px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs rounded-full'
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                    </div>
-                  )}
-
-                  {savedCandidate.candidate.technicalSkills &&
-                    savedCandidate.candidate.technicalSkills.length > 0 && (
-                      <div className='flex flex-wrap gap-1 mt-2'>
-                        {savedCandidate.candidate.technicalSkills
-                          .slice(0, 3)
-                          .map((skill: string, skillIdx: number) => (
-                            <span
-                              key={skillIdx}
-                              className='px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs rounded-full'
-                            >
-                              {skill}
-                            </span>
-                          ))}
-                        {savedCandidate.candidate.technicalSkills.length >
-                          3 && (
-                          <span className='px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs rounded-full'>
-                            +
-                            {savedCandidate.candidate.technicalSkills.length -
-                              3}{' '}
-                            more
-                          </span>
-                        )}
-                      </div>
-                    )}
+                    <FiEye className='w-4 h-4' />
+                    View
+                  </button>
+                  <button
+                    onClick={() => handleEdit(savedCandidate)}
+                    className='p-2 border border-gray-200 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  >
+                    <FiEdit2 className='w-4 h-4' />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(savedCandidate)}
+                    className='p-2 border border-gray-200 dark:border-gray-600 rounded hover:bg-red-50 dark:hover:bg-red-900/30 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400'
+                  >
+                    <FiTrash2 className='w-4 h-4' />
+                  </button>
                 </div>
               </div>
-              <div className='flex items-center gap-2'>
-                <button
-                  onClick={() => handleCandidateClick(savedCandidate.candidate)}
-                  className='px-4 py-2 rounded-md font-semibold flex items-center gap-2 transition hover:bg-blue-600 hover:text-white bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-                >
-                  <FiEye className='w-4 h-4' />
-                  View
-                </button>
-                <button
-                  onClick={() => handleEdit(savedCandidate)}
-                  className='p-2 border border-gray-200 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                >
-                  <FiEdit2 className='w-4 h-4' />
-                </button>
-                <button
-                  onClick={() => handleDelete(savedCandidate)}
-                  className='p-2 border border-gray-200 dark:border-gray-600 rounded hover:bg-red-50 dark:hover:bg-red-900/30 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400'
-                >
-                  <FiTrash2 className='w-4 h-4' />
-                </button>
-              </div>
-            </div>
-          ))}
+            ))}
         </div>
       )}
 

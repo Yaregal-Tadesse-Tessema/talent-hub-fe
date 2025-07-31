@@ -2,134 +2,176 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Textarea } from '@/components/ui/Textarea';
-import {
-  parseCVFromText,
-  mapParsedDataToUserProfile,
-} from '@/services/cvParsingService';
-import { ParsedCVData } from '@/services/cvParsingService';
+import { useToast } from '@/contexts/ToastContext';
 import { UserProfile } from '@/types/profile';
 
 export default function CVParserDataTest() {
-  const [cvText, setCvText] = useState('');
-  const [parsedData, setParsedData] = useState<ParsedCVData | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { showToast } = useToast();
 
-  const testCV = `John Doe
-Software Engineer
-john.doe@email.com
-+1 (555) 123-4567
-New York, NY
-
-EXPERIENCE
-Software Engineer at TechCorp (2020-2023)
-- Developed web applications using React and Node.js
-- Led team of 3 developers
-
-EDUCATION
-BS Computer Science, University of Technology (2018)
-
-SKILLS
-JavaScript, React, Node.js, Python`;
-
-  const handleTest = async () => {
+  const handleTestSave = async () => {
     setIsLoading(true);
+
+    // Simulate a test user profile
+    const testProfile: UserProfile = {
+      id: 'test-user-id',
+      firstName: 'John',
+      middleName: '',
+      lastName: 'Doe',
+      email: 'john.doe@example.com',
+      phone: '+1234567890',
+      gender: 'male',
+      status: 'Active',
+      address: {
+        street: '123 Test Street',
+        city: 'Test City',
+        state: 'Test State',
+        postalCode: '12345',
+        country: 'Test Country',
+      },
+      birthDate: '1990-01-01',
+      linkedinUrl: 'https://linkedin.com/in/johndoe',
+      portfolioUrl: 'https://johndoe.dev',
+      yearOfExperience: 5,
+      industry: ['Technology', 'Software Development'],
+      telegramUserId: 'test_telegram_id',
+      preferredJobLocation: ['San Francisco', 'New York'],
+      highestLevelOfEducation: 'Bachelor',
+      salaryExpectations: 100000,
+      aiGeneratedJobFitScore: 85,
+      technicalSkills: ['JavaScript', 'React', 'Node.js', 'TypeScript'],
+      softSkills: ['Leadership', 'Communication', 'Problem Solving'],
+      profile: {},
+      resume: {},
+      educations: {
+        'education-1': {
+          degree: 'Bachelor of Science',
+          institution: 'Test University',
+          field: 'Computer Science',
+          startDate: '2010-09-01',
+          endDate: '2014-05-01',
+          current: false,
+          description:
+            'Studied computer science with focus on software engineering',
+        },
+      },
+      experiences: {
+        'experience-1': {
+          position: 'Senior Software Engineer',
+          company: 'Test Company Inc.',
+          startDate: '2020-01-01',
+          endDate: '',
+          current: true,
+          location: 'San Francisco, CA',
+          description:
+            'Led development of web applications using React and Node.js',
+        },
+      },
+      socialMediaLinks: {
+        linkedin: 'https://linkedin.com/in/johndoe',
+        github: 'https://github.com/johndoe',
+        twitter: 'https://twitter.com/johndoe',
+      },
+      profileHeadLine: 'Senior Software Engineer with 5+ years of experience',
+      coverLetter:
+        'Experienced software engineer passionate about building scalable applications.',
+      professionalSummery:
+        'Dedicated software engineer with expertise in modern web technologies.',
+      notificationSetting: [],
+      alertConfiguration: [],
+      smsAlertConfiguration: [],
+      isProfilePublic: false,
+      isResumePublic: false,
+      isFirstTime: false,
+    };
+
     try {
-      const textToParse = cvText || testCV;
-      console.log('Testing with CV text:', textToParse);
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Parse CV
-      const parsed = await parseCVFromText(textToParse);
-      console.log('Parsed CV data:', parsed);
-      setParsedData(parsed);
+      showToast({
+        type: 'success',
+        message: 'Test profile saved successfully!',
+      });
 
-      // Map to UserProfile
-      const profile = mapParsedDataToUserProfile(parsed, 'test-user-id');
-      console.log('Mapped UserProfile:', profile);
-      setUserProfile(profile);
+      console.log('Test profile data:', testProfile);
     } catch (error) {
-      console.error('Test failed:', error);
+      showToast({
+        type: 'error',
+        message: 'Failed to save test profile',
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className='max-w-4xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg'>
-      <h2 className='text-2xl font-bold mb-6 text-gray-900 dark:text-white'>
-        CV Parser Data Structure Test
-      </h2>
-
-      <div className='space-y-4 mb-6'>
-        <div>
-          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-            CV Text (or use default test CV)
-          </label>
-          <Textarea
-            value={cvText}
-            onChange={(e) => setCvText(e.target.value)}
-            placeholder='Paste CV text here or leave empty to use test CV'
-            rows={8}
-            className='w-full'
-          />
+    <div className='max-w-4xl mx-auto p-6'>
+      <div className='bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-700/50 p-6 border border-gray-200 dark:border-gray-700'>
+        <div className='text-center mb-6'>
+          <h1 className='text-2xl font-bold text-gray-900 dark:text-white mb-2'>
+            CV Parser Data Test
+          </h1>
+          <p className='text-gray-600 dark:text-gray-400'>
+            Test component for CV parser functionality
+          </p>
         </div>
 
-        <Button onClick={handleTest} disabled={isLoading} className='w-full'>
-          {isLoading ? 'Testing...' : 'Test Data Structure'}
-        </Button>
-      </div>
-
-      {parsedData && (
-        <div className='space-y-6'>
-          <div className='bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4'>
-            <h3 className='text-green-800 dark:text-green-200 font-medium mb-2'>
-              Parsed CV Data
+        <div className='space-y-4'>
+          <div className='bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800'>
+            <h3 className='text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2'>
+              Test Information
             </h3>
-            <pre className='text-green-700 dark:text-green-300 text-sm overflow-auto max-h-64'>
-              {JSON.stringify(parsedData, null, 2)}
-            </pre>
+            <p className='text-blue-800 dark:text-blue-200 text-sm'>
+              This component allows you to test the CV parser data handling
+              functionality. Click the button below to simulate saving a test
+              user profile.
+            </p>
           </div>
 
-          <div className='bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4'>
-            <h3 className='text-blue-800 dark:text-blue-200 font-medium mb-2'>
-              Key Fields Check
-            </h3>
-            <div className='grid grid-cols-2 gap-4 text-sm'>
-              <div>
-                <strong>firstName:</strong> {parsedData.firstName}
-              </div>
-              <div>
-                <strong>lastName:</strong> {parsedData.lastName}
-              </div>
-              <div>
-                <strong>email:</strong> {parsedData.email}
-              </div>
-              <div>
-                <strong>phone:</strong> {parsedData.phone}
-              </div>
-              <div>
-                <strong>address:</strong> {JSON.stringify(parsedData.address)}
-              </div>
-              <div>
-                <strong>technicalSkills:</strong>{' '}
-                {JSON.stringify(parsedData.technicalSkills)}
-              </div>
+          <div className='flex justify-center'>
+            <Button
+              onClick={handleTestSave}
+              disabled={isLoading}
+              variant='primary'
+              className='px-8 py-3'
+            >
+              {isLoading ? (
+                <>
+                  <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2'></div>
+                  Testing...
+                </>
+              ) : (
+                'Test Save Profile'
+              )}
+            </Button>
+          </div>
+
+          <div className='bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg'>
+            <h4 className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+              Test Data Preview:
+            </h4>
+            <div className='text-xs text-gray-600 dark:text-gray-400 space-y-1'>
+              <p>
+                <strong>Name:</strong> John Doe
+              </p>
+              <p>
+                <strong>Email:</strong> john.doe@example.com
+              </p>
+              <p>
+                <strong>Experience:</strong> 5 years
+              </p>
+              <p>
+                <strong>Skills:</strong> JavaScript, React, Node.js, TypeScript
+              </p>
+              <p>
+                <strong>Education:</strong> Bachelor of Science in Computer
+                Science
+              </p>
             </div>
           </div>
         </div>
-      )}
-
-      {userProfile && (
-        <div className='bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4 mt-6'>
-          <h3 className='text-purple-800 dark:text-purple-200 font-medium mb-2'>
-            Mapped UserProfile
-          </h3>
-          <pre className='text-purple-700 dark:text-purple-300 text-sm overflow-auto max-h-64'>
-            {JSON.stringify(userProfile, null, 2)}
-          </pre>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

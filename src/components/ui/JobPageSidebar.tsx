@@ -68,6 +68,7 @@ export default function JobPageSidebar({
       description: 'Get notified about the best opportunities first',
       cta: 'Upgrade Now',
       type: 'premium',
+      link: '/dashboard/profile',
     },
     {
       id: 2,
@@ -75,6 +76,7 @@ export default function JobPageSidebar({
       description: 'Create professional resumes that stand out',
       cta: 'Try Free',
       type: 'feature',
+      link: '/cv-builder',
     },
   ];
 
@@ -356,6 +358,39 @@ export default function JobPageSidebar({
             </div>
           </div>
 
+          {/* Advertisements Section */}
+          <div className='space-y-3'>
+            {advertisements.map((ad) => (
+              <div
+                key={ad.id}
+                onClick={() => {
+                  window.open(ad.link, '_blank');
+                }}
+                className={`p-4 rounded-xl border ${
+                  ad.type === 'premium'
+                    ? 'bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border-purple-200 dark:border-purple-700'
+                    : 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-700'
+                }`}
+              >
+                <h4 className='font-semibold text-gray-900 dark:text-white text-sm mb-1'>
+                  {ad.title}
+                </h4>
+                <p className='text-xs text-gray-600 dark:text-gray-300 mb-3'>
+                  {ad.description}
+                </p>
+                <button
+                  className={`w-full py-2 px-3 rounded-lg text-xs font-medium transition-colors ${
+                    ad.type === 'premium'
+                      ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                      : 'bg-green-600 hover:bg-green-700 text-white'
+                  }`}
+                >
+                  {ad.cta}
+                </button>
+              </div>
+            ))}
+          </div>
+
           {/* Industry News Section */}
           <div className='bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm'>
             <div className='p-4 border-b border-gray-200 dark:border-gray-700'>
@@ -390,36 +425,6 @@ export default function JobPageSidebar({
                 </article>
               ))}
             </div>
-          </div>
-
-          {/* Advertisements Section */}
-          <div className='space-y-3'>
-            {advertisements.map((ad) => (
-              <div
-                key={ad.id}
-                className={`p-4 rounded-xl border ${
-                  ad.type === 'premium'
-                    ? 'bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border-purple-200 dark:border-purple-700'
-                    : 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-700'
-                }`}
-              >
-                <h4 className='font-semibold text-gray-900 dark:text-white text-sm mb-1'>
-                  {ad.title}
-                </h4>
-                <p className='text-xs text-gray-600 dark:text-gray-300 mb-3'>
-                  {ad.description}
-                </p>
-                <button
-                  className={`w-full py-2 px-3 rounded-lg text-xs font-medium transition-colors ${
-                    ad.type === 'premium'
-                      ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                      : 'bg-green-600 hover:bg-green-700 text-white'
-                  }`}
-                >
-                  {ad.cta}
-                </button>
-              </div>
-            ))}
           </div>
 
           {/* Alert Configuration Modal */}

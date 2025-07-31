@@ -74,6 +74,33 @@ export default function ProfilePage() {
     null,
   );
 
+  // Helper function to safely convert object to array
+  const safeArray = (value: any): any[] => {
+    if (Array.isArray(value)) return value;
+    if (value && typeof value === 'object') {
+      return Object.values(value).filter(
+        (item) => item && typeof item === 'object',
+      );
+    }
+    return [];
+  };
+
+  // Helper function to clean alert configuration data
+  const cleanAlertConfiguration = (alerts: any[]): any[] => {
+    if (!Array.isArray(alerts)) return [];
+
+    return alerts.filter((alert) => {
+      // Filter out experience objects that got mixed in
+      if (typeof alert === 'object' && alert !== null) {
+        // If it has experience-related fields, it's probably experience data
+        if (alert.jobTitle || alert.Position || alert.company || alert.salary) {
+          return false; // Filter out experience objects
+        }
+      }
+      return true; // Keep other alerts
+    });
+  };
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       const storedUser = localStorage.getItem('user');
@@ -118,12 +145,8 @@ export default function ProfilePage() {
               : [],
             profile: userData.profile || {},
             resume: userData.resume || {},
-            educations: Array.isArray(userData.educations)
-              ? userData.educations
-              : [],
-            experiences: Array.isArray(userData.experiences)
-              ? userData.experiences
-              : [],
+            educations: safeArray(userData.educations),
+            experiences: safeArray(userData.experiences),
             socialMediaLinks: userData.socialMediaLinks || {},
             profileHeadLine: userData.profileHeadLine || '',
             coverLetter: userData.coverLetter || '',
@@ -141,6 +164,40 @@ export default function ProfilePage() {
             isResumePublic: userData.isResumePublic || false,
             isFirstTime: userData.isFirstTime || false,
           };
+
+          // Clean up data - move experience objects from alertConfiguration to experiences
+          if (
+            mappedProfile.alertConfiguration &&
+            Array.isArray(mappedProfile.alertConfiguration)
+          ) {
+            const experienceObjects = mappedProfile.alertConfiguration.filter(
+              (alert: any) =>
+                typeof alert === 'object' &&
+                alert !== null &&
+                (alert.jobTitle ||
+                  alert.Position ||
+                  alert.company ||
+                  alert.salary),
+            );
+
+            if (experienceObjects.length > 0) {
+              // Add experience objects to experiences array
+              mappedProfile.experiences = [
+                ...safeArray(mappedProfile.experiences),
+                ...experienceObjects,
+              ];
+
+              // Remove experience objects from alertConfiguration
+              mappedProfile.alertConfiguration = cleanAlertConfiguration(
+                mappedProfile.alertConfiguration,
+              );
+
+              console.log(
+                'Moved experience objects from alertConfiguration to experiences:',
+                experienceObjects.length,
+              );
+            }
+          }
 
           setProfile(mappedProfile);
 
@@ -271,8 +328,8 @@ export default function ProfilePage() {
         smsAlertConfiguration: cleanedMergedProfile.smsAlertConfiguration || [],
         // Ensure objects are always objects
         address: cleanedMergedProfile.address || {},
-        educations: cleanedMergedProfile.educations || {},
-        experiences: cleanedMergedProfile.experiences || {},
+        educations: safeArray(cleanedMergedProfile.educations),
+        experiences: safeArray(cleanedMergedProfile.experiences),
         socialMediaLinks: cleanedMergedProfile.socialMediaLinks || {},
         profile: cleanedMergedProfile.profile || { path: '' },
         resume: cleanedMergedProfile.resume || { path: '' },
@@ -544,7 +601,7 @@ export default function ProfilePage() {
           ...(profile.softSkills || []),
         ],
         experience:
-          (profile.experiences as Experience[])?.map((exp: Experience) => ({
+          safeArray(profile.experiences).map((exp: Experience) => ({
             position: exp.jobTitle,
             company: exp.company,
             startDate: exp.startDate,
@@ -554,7 +611,7 @@ export default function ProfilePage() {
             location: exp.location,
           })) || [],
         education:
-          (profile.educations as Education[])?.map((edu: Education) => ({
+          safeArray(profile.educations).map((edu: Education) => ({
             degree: edu.degree,
             institution: edu.institution,
             field: edu.courses?.join(', ') || '',
@@ -651,8 +708,12 @@ export default function ProfilePage() {
               <div className='w-40 h-40 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 border-4 border-gray-200 dark:border-gray-600 shadow-lg'>
                 {profile?.profile?.path ? (
                   <Image
-                    src={profile.profile.path}
-                    alt={`${profile.firstName}'s profile picture`}
+                    src={
+                      typeof profile.profile.path === 'object'
+                        ? ''
+                        : profile.profile.path
+                    }
+                    alt={`${typeof profile.firstName === 'object' ? 'Profile' : profile.firstName}'s profile picture`}
                     width={160}
                     height={160}
                     className='w-full h-full object-cover'
@@ -803,7 +864,15 @@ export default function ProfilePage() {
                   </h3>
                 </div>
                 <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                  {`${profile.firstName} ${profile.middleName ? profile.middleName + ' ' : ''}${profile.lastName}`}
+                  {typeof profile.firstName === 'object' ||
+                  typeof profile.middleName === 'object' ||
+                  typeof profile.lastName === 'object'
+                    ? JSON.stringify({
+                        firstName: profile.firstName,
+                        middleName: profile.middleName,
+                        lastName: profile.lastName,
+                      })
+                    : `${profile.firstName} ${profile.middleName ? profile.middleName + ' ' : ''}${profile.lastName}`}
                 </p>
               </div>
               <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
@@ -814,7 +883,9 @@ export default function ProfilePage() {
                   </h3>
                 </div>
                 <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                  {profile.email}
+                  {typeof profile.email === 'object'
+                    ? JSON.stringify(profile.email)
+                    : profile.email}
                 </p>
               </div>
               <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
@@ -825,7 +896,9 @@ export default function ProfilePage() {
                   </h3>
                 </div>
                 <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                  {profile.phone}
+                  {typeof profile.phone === 'object'
+                    ? JSON.stringify(profile.phone)
+                    : profile.phone}
                 </p>
               </div>
               <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
@@ -836,7 +909,9 @@ export default function ProfilePage() {
                   </h3>
                 </div>
                 <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                  {profile.gender}
+                  {typeof profile.gender === 'object'
+                    ? JSON.stringify(profile.gender)
+                    : profile.gender}
                 </p>
               </div>
               <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
@@ -847,9 +922,11 @@ export default function ProfilePage() {
                   </h3>
                 </div>
                 <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                  {profile.birthDate
-                    ? new Date(profile.birthDate).toLocaleDateString()
-                    : 'Not specified'}
+                  {typeof profile.birthDate === 'object'
+                    ? JSON.stringify(profile.birthDate)
+                    : profile.birthDate
+                      ? new Date(profile.birthDate).toLocaleDateString()
+                      : 'Not specified'}
                 </p>
               </div>
             </div>
@@ -957,7 +1034,9 @@ export default function ProfilePage() {
                     </h3>
                   </div>
                   <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                    {profile.address.street}
+                    {typeof profile.address.street === 'object'
+                      ? JSON.stringify(profile.address.street)
+                      : profile.address.street}
                   </p>
                 </div>
               )}
@@ -970,7 +1049,9 @@ export default function ProfilePage() {
                     </h3>
                   </div>
                   <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                    {profile.address.city}
+                    {typeof profile.address.city === 'object'
+                      ? JSON.stringify(profile.address.city)
+                      : profile.address.city}
                   </p>
                 </div>
               )}
@@ -983,7 +1064,9 @@ export default function ProfilePage() {
                     </h3>
                   </div>
                   <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                    {profile.address.state}
+                    {typeof profile.address.state === 'object'
+                      ? JSON.stringify(profile.address.state)
+                      : profile.address.state}
                   </p>
                 </div>
               )}
@@ -996,7 +1079,9 @@ export default function ProfilePage() {
                     </h3>
                   </div>
                   <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                    {profile.address.postalCode}
+                    {typeof profile.address.postalCode === 'object'
+                      ? JSON.stringify(profile.address.postalCode)
+                      : profile.address.postalCode}
                   </p>
                 </div>
               )}
@@ -1009,7 +1094,9 @@ export default function ProfilePage() {
                     </h3>
                   </div>
                   <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                    {profile.address.country}
+                    {typeof profile.address.country === 'object'
+                      ? JSON.stringify(profile.address.country)
+                      : profile.address.country}
                   </p>
                 </div>
               )}
@@ -1187,7 +1274,9 @@ export default function ProfilePage() {
                   </h3>
                 </div>
                 <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                  {profile.profileHeadLine}
+                  {typeof profile.profileHeadLine === 'object'
+                    ? JSON.stringify(profile.profileHeadLine)
+                    : profile.profileHeadLine}
                 </p>
               </div>
               <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
@@ -1198,7 +1287,10 @@ export default function ProfilePage() {
                   </h3>
                 </div>
                 <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                  {profile.yearOfExperience} years
+                  {typeof profile.yearOfExperience === 'object'
+                    ? JSON.stringify(profile.yearOfExperience)
+                    : profile.yearOfExperience}{' '}
+                  years
                 </p>
               </div>
               <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
@@ -1209,7 +1301,9 @@ export default function ProfilePage() {
                   </h3>
                 </div>
                 <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                  {profile.highestLevelOfEducation}
+                  {typeof profile.highestLevelOfEducation === 'object'
+                    ? JSON.stringify(profile.highestLevelOfEducation)
+                    : profile.highestLevelOfEducation}
                 </p>
               </div>
               <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
@@ -1220,7 +1314,10 @@ export default function ProfilePage() {
                   </h3>
                 </div>
                 <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                  ${profile.salaryExpectations.toLocaleString()}
+                  $
+                  {typeof profile.salaryExpectations === 'object'
+                    ? JSON.stringify(profile.salaryExpectations)
+                    : profile.salaryExpectations.toLocaleString()}
                 </p>
               </div>
               <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
@@ -1234,11 +1331,16 @@ export default function ProfilePage() {
                   <div className='w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2'>
                     <div
                       className='bg-blue-600 dark:bg-blue-400 h-2 rounded-full transition-all duration-300'
-                      style={{ width: `${profile.aiGeneratedJobFitScore}%` }}
+                      style={{
+                        width: `${typeof profile.aiGeneratedJobFitScore === 'object' ? 0 : profile.aiGeneratedJobFitScore}%`,
+                      }}
                     ></div>
                   </div>
                   <span className='text-sm font-semibold text-gray-900 dark:text-white min-w-[3rem]'>
-                    {profile.aiGeneratedJobFitScore}%
+                    {typeof profile.aiGeneratedJobFitScore === 'object'
+                      ? JSON.stringify(profile.aiGeneratedJobFitScore)
+                      : profile.aiGeneratedJobFitScore}
+                    %
                   </span>
                 </div>
               </div>
@@ -1255,7 +1357,7 @@ export default function ProfilePage() {
                       key={index}
                       className='px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-sm'
                     >
-                      {ind}
+                      {typeof ind === 'object' ? JSON.stringify(ind) : ind}
                     </span>
                   ))}
                 </div>
@@ -1273,7 +1375,7 @@ export default function ProfilePage() {
                       key={index}
                       className='px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-sm'
                     >
-                      {loc}
+                      {typeof loc === 'object' ? JSON.stringify(loc) : loc}
                     </span>
                   ))}
                 </div>
@@ -1286,7 +1388,9 @@ export default function ProfilePage() {
                   </h3>
                 </div>
                 <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                  {profile.telegramUserId || 'Not provided'}
+                  {typeof profile.telegramUserId === 'object'
+                    ? JSON.stringify(profile.telegramUserId)
+                    : profile.telegramUserId || 'Not provided'}
                 </p>
               </div>
               <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
@@ -1305,7 +1409,9 @@ export default function ProfilePage() {
                         : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
                   }`}
                 >
-                  {profile.status || 'Active'}
+                  {typeof profile.status === 'object'
+                    ? JSON.stringify(profile.status)
+                    : profile.status || 'Active'}
                 </span>
               </div>
               <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
@@ -1316,8 +1422,8 @@ export default function ProfilePage() {
                   </h3>
                 </div>
                 <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                  {profile.educations && profile.educations.length > 0
-                    ? `${profile.educations.length} degree(s)`
+                  {safeArray(profile.educations).length > 0
+                    ? `${safeArray(profile.educations).length} degree(s)`
                     : 'No education added'}
                 </p>
               </div>
@@ -1329,8 +1435,8 @@ export default function ProfilePage() {
                   </h3>
                 </div>
                 <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                  {profile.experiences && profile.experiences.length > 0
-                    ? `${profile.experiences.length} position(s)`
+                  {safeArray(profile.experiences).length > 0
+                    ? `${safeArray(profile.experiences).length} position(s)`
                     : 'No experience added'}
                 </p>
               </div>
@@ -1381,7 +1487,9 @@ export default function ProfilePage() {
                       key={index}
                       className='px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-full text-sm'
                     >
-                      {skill}
+                      {typeof skill === 'object'
+                        ? JSON.stringify(skill)
+                        : skill}
                     </span>
                   ))}
                 </div>
@@ -1399,7 +1507,9 @@ export default function ProfilePage() {
                       key={index}
                       className='px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 rounded-full text-sm'
                     >
-                      {skill}
+                      {typeof skill === 'object'
+                        ? JSON.stringify(skill)
+                        : skill}
                     </span>
                   ))}
                 </div>
@@ -1437,7 +1547,9 @@ export default function ProfilePage() {
           ) : (
             <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
               <p className='text-gray-900 dark:text-white whitespace-pre-wrap'>
-                {profile.professionalSummery}
+                {typeof profile.professionalSummery === 'object'
+                  ? JSON.stringify(profile.professionalSummery)
+                  : profile.professionalSummery}
               </p>
             </div>
           )}
@@ -1453,74 +1565,67 @@ export default function ProfilePage() {
           </div>
           {isEditing ? (
             <div className='space-y-6'>
-              {Array.isArray(profile.educations) &&
-                profile.educations.length > 0 && (
-                  <div className='space-y-4'>
-                    {Array.isArray(profile.educations)
-                      ? profile.educations.map(
-                          (education: Education, index: number) => (
-                            <div
-                              key={education.id || index}
-                              className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 flex justify-between items-start'
-                            >
-                              <div>
-                                <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
-                                  {education.degree}
-                                </h3>
-                                <p className='text-gray-600 dark:text-gray-400 font-medium'>
-                                  {education.institution}
-                                </p>
-                                <div className='flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400'>
-                                  <span>
-                                    {education.startDate} -{' '}
-                                    {education.current
-                                      ? 'Present'
-                                      : education.endDate}
-                                  </span>
-                                  {education.location && (
-                                    <span>{education.location}</span>
-                                  )}
-                                  {education.gpa && (
-                                    <span>GPA: {education.gpa}</span>
-                                  )}
-                                </div>
-                              </div>
-                              <div className='flex gap-2'>
-                                <Button
-                                  size='sm'
-                                  variant='outline'
-                                  onClick={() => {
-                                    setEduModalEditIndex(index);
-                                    setEduModalInitial(education);
-                                    setEduModalOpen(true);
-                                  }}
-                                >
-                                  Edit
-                                </Button>
-                                <Button
-                                  size='sm'
-                                  variant='outline'
-                                  onClick={() => {
-                                    if (Array.isArray(profile.educations)) {
-                                      const newArr = profile.educations.filter(
-                                        (_: any, i: number) => i !== index,
-                                      );
-                                      setProfile({
-                                        ...profile,
-                                        educations: newArr,
-                                      });
-                                    }
-                                  }}
-                                >
-                                  Delete
-                                </Button>
-                              </div>
-                            </div>
-                          ),
-                        )
-                      : null}
-                  </div>
-                )}
+              {safeArray(profile.educations).length > 0 && (
+                <div className='space-y-4'>
+                  {safeArray(profile.educations).map(
+                    (education: Education, index: number) => (
+                      <div
+                        key={education.id || index}
+                        className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 flex justify-between items-start'
+                      >
+                        <div>
+                          <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
+                            {education.degree}
+                          </h3>
+                          <p className='text-gray-600 dark:text-gray-400 font-medium'>
+                            {education.institution}
+                          </p>
+                          <div className='flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400'>
+                            <span>
+                              {education.startDate} -{' '}
+                              {education.current
+                                ? 'Present'
+                                : education.endDate}
+                            </span>
+                            {education.location && (
+                              <span>{education.location}</span>
+                            )}
+                            {education.gpa && <span>GPA: {education.gpa}</span>}
+                          </div>
+                        </div>
+                        <div className='flex gap-2'>
+                          <Button
+                            size='sm'
+                            variant='outline'
+                            onClick={() => {
+                              setEduModalEditIndex(index);
+                              setEduModalInitial(education);
+                              setEduModalOpen(true);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            size='sm'
+                            variant='outline'
+                            onClick={() => {
+                              const newArr = safeArray(
+                                profile.educations,
+                              ).filter((_: any, i: number) => i !== index);
+                              setProfile({
+                                ...profile,
+                                educations: newArr,
+                              });
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    ),
+                  )}
+                </div>
+              )}
               <div className='text-center'>
                 <Button
                   variant='primary'
@@ -1540,9 +1645,7 @@ export default function ProfilePage() {
                 onSave={(edu) => {
                   if (eduModalEditIndex !== null) {
                     // Edit existing
-                    const newArr = Array.isArray(profile.educations)
-                      ? [...profile.educations]
-                      : [];
+                    const newArr = [...safeArray(profile.educations)];
                     newArr[eduModalEditIndex] = {
                       ...edu,
                       id: edu.id || Date.now().toString(),
@@ -1552,12 +1655,10 @@ export default function ProfilePage() {
                     // Add new
                     setProfile({
                       ...profile,
-                      educations: Array.isArray(profile.educations)
-                        ? [
-                            ...profile.educations,
-                            { ...edu, id: Date.now().toString() },
-                          ]
-                        : [{ ...edu, id: Date.now().toString() }],
+                      educations: [
+                        ...safeArray(profile.educations),
+                        { ...edu, id: Date.now().toString() },
+                      ],
                     });
                   }
                   setEduModalOpen(false);
@@ -1566,9 +1667,8 @@ export default function ProfilePage() {
             </div>
           ) : (
             <div className='space-y-4'>
-              {Array.isArray(profile.educations) &&
-              profile.educations.length > 0
-                ? profile.educations.map(
+              {safeArray(profile.educations).length > 0
+                ? safeArray(profile.educations).map(
                     (education: Education, index: number) => (
                       <div
                         key={education.id || index}
@@ -1641,86 +1741,81 @@ export default function ProfilePage() {
           </div>
           {isEditing ? (
             <div className='space-y-6'>
-              {Array.isArray(profile.experiences) &&
-                profile.experiences.length > 0 && (
-                  <div className='space-y-4'>
-                    {Array.isArray(profile.experiences)
-                      ? profile.experiences.map(
-                          (experience: Experience, index: number) => (
-                            <div
-                              key={experience.id || index}
-                              className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 flex justify-between items-start'
-                            >
-                              <div>
-                                <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
-                                  {experience.jobTitle}
-                                </h3>
-                                <p className='text-gray-600 dark:text-gray-400 font-medium'>
-                                  {experience.company}
-                                </p>
-                                <div className='flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400'>
-                                  <span>
-                                    {experience.startDate} -{' '}
-                                    {experience.current
-                                      ? 'Present'
-                                      : experience.endDate}
-                                  </span>
-                                  {experience.location && (
-                                    <span>{experience.location}</span>
-                                  )}
-                                </div>
-                                {experience.technologies &&
-                                  experience.technologies.length > 0 && (
-                                    <div className='mt-2 flex flex-wrap gap-1'>
-                                      {experience.technologies.map(
-                                        (tech: string, i: number) => (
-                                          <span
-                                            key={i}
-                                            className='px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-xs'
-                                          >
-                                            {tech}
-                                          </span>
-                                        ),
-                                      )}
-                                    </div>
-                                  )}
+              {safeArray(profile.experiences).length > 0 && (
+                <div className='space-y-4'>
+                  {safeArray(profile.experiences).map(
+                    (experience: Experience, index: number) => (
+                      <div
+                        key={experience.id || index}
+                        className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 flex justify-between items-start'
+                      >
+                        <div>
+                          <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
+                            {experience.jobTitle}
+                          </h3>
+                          <p className='text-gray-600 dark:text-gray-400 font-medium'>
+                            {experience.company}
+                          </p>
+                          <div className='flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400'>
+                            <span>
+                              {experience.startDate} -{' '}
+                              {experience.current
+                                ? 'Present'
+                                : experience.endDate}
+                            </span>
+                            {experience.location && (
+                              <span>{experience.location}</span>
+                            )}
+                          </div>
+                          {experience.technologies &&
+                            experience.technologies.length > 0 && (
+                              <div className='mt-2 flex flex-wrap gap-1'>
+                                {experience.technologies.map(
+                                  (tech: string, i: number) => (
+                                    <span
+                                      key={i}
+                                      className='px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-xs'
+                                    >
+                                      {tech}
+                                    </span>
+                                  ),
+                                )}
                               </div>
-                              <div className='flex gap-2'>
-                                <Button
-                                  size='sm'
-                                  variant='outline'
-                                  onClick={() => {
-                                    setExpModalEditIndex(index);
-                                    setExpModalInitial(experience);
-                                    setExpModalOpen(true);
-                                  }}
-                                >
-                                  Edit
-                                </Button>
-                                <Button
-                                  size='sm'
-                                  variant='outline'
-                                  onClick={() => {
-                                    if (Array.isArray(profile.experiences)) {
-                                      const newArr = profile.experiences.filter(
-                                        (_: any, i: number) => i !== index,
-                                      );
-                                      setProfile({
-                                        ...profile,
-                                        experiences: newArr,
-                                      });
-                                    }
-                                  }}
-                                >
-                                  Delete
-                                </Button>
-                              </div>
-                            </div>
-                          ),
-                        )
-                      : null}
-                  </div>
-                )}
+                            )}
+                        </div>
+                        <div className='flex gap-2'>
+                          <Button
+                            size='sm'
+                            variant='outline'
+                            onClick={() => {
+                              setExpModalEditIndex(index);
+                              setExpModalInitial(experience);
+                              setExpModalOpen(true);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            size='sm'
+                            variant='outline'
+                            onClick={() => {
+                              const newArr = safeArray(
+                                profile.experiences,
+                              ).filter((_: any, i: number) => i !== index);
+                              setProfile({
+                                ...profile,
+                                experiences: newArr,
+                              });
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    ),
+                  )}
+                </div>
+              )}
               <div className='text-center'>
                 <Button
                   variant='primary'
@@ -1740,9 +1835,7 @@ export default function ProfilePage() {
                 onSave={(exp) => {
                   if (expModalEditIndex !== null) {
                     // Edit existing
-                    const newArr = Array.isArray(profile.experiences)
-                      ? [...profile.experiences]
-                      : [];
+                    const newArr = [...safeArray(profile.experiences)];
                     newArr[expModalEditIndex] = {
                       ...exp,
                       id: exp.id || Date.now().toString(),
@@ -1752,12 +1845,10 @@ export default function ProfilePage() {
                     // Add new
                     setProfile({
                       ...profile,
-                      experiences: Array.isArray(profile.experiences)
-                        ? [
-                            ...profile.experiences,
-                            { ...exp, id: Date.now().toString() },
-                          ]
-                        : [{ ...exp, id: Date.now().toString() }],
+                      experiences: [
+                        ...safeArray(profile.experiences),
+                        { ...exp, id: Date.now().toString() },
+                      ],
                     });
                   }
                   setExpModalOpen(false);
@@ -1766,9 +1857,8 @@ export default function ProfilePage() {
             </div>
           ) : (
             <div className='space-y-4'>
-              {Array.isArray(profile.experiences) &&
-              profile.experiences.length > 0
-                ? profile.experiences.map(
+              {safeArray(profile.experiences).length > 0
+                ? safeArray(profile.experiences).map(
                     (experience: Experience, index: number) => (
                       <div
                         key={experience.id || index}
@@ -1857,7 +1947,9 @@ export default function ProfilePage() {
           ) : (
             <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
               <p className='text-gray-900 dark:text-white whitespace-pre-wrap'>
-                {profile.coverLetter}
+                {typeof profile.coverLetter === 'object'
+                  ? JSON.stringify(profile.coverLetter)
+                  : profile.coverLetter}
               </p>
             </div>
           )}
@@ -1925,12 +2017,18 @@ export default function ProfilePage() {
                   </h3>
                 </div>
                 <a
-                  href={profile.linkedinUrl}
+                  href={
+                    typeof profile.linkedinUrl === 'object'
+                      ? '#'
+                      : profile.linkedinUrl
+                  }
                   target='_blank'
                   rel='noopener noreferrer'
                   className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300'
                 >
-                  {profile.linkedinUrl}
+                  {typeof profile.linkedinUrl === 'object'
+                    ? JSON.stringify(profile.linkedinUrl)
+                    : profile.linkedinUrl}
                 </a>
               </div>
               <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
@@ -1941,12 +2039,18 @@ export default function ProfilePage() {
                   </h3>
                 </div>
                 <a
-                  href={profile.portfolioUrl}
+                  href={
+                    typeof profile.portfolioUrl === 'object'
+                      ? '#'
+                      : profile.portfolioUrl
+                  }
                   target='_blank'
                   rel='noopener noreferrer'
                   className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300'
                 >
-                  {profile.portfolioUrl}
+                  {typeof profile.portfolioUrl === 'object'
+                    ? JSON.stringify(profile.portfolioUrl)
+                    : profile.portfolioUrl}
                 </a>
               </div>
               {profile.telegramUserId && (
@@ -1958,7 +2062,9 @@ export default function ProfilePage() {
                     </h3>
                   </div>
                   <p className='text-gray-900 dark:text-white'>
-                    {profile.telegramUserId}
+                    {typeof profile.telegramUserId === 'object'
+                      ? JSON.stringify(profile.telegramUserId)
+                      : profile.telegramUserId}
                   </p>
                 </div>
               )}
@@ -2041,7 +2147,9 @@ export default function ProfilePage() {
                       key={index}
                       className='px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-full text-sm'
                     >
-                      {setting}
+                      {typeof setting === 'object'
+                        ? JSON.stringify(setting)
+                        : setting}
                     </span>
                   ))}
                   {(!profile.notificationSetting ||
@@ -2060,16 +2168,20 @@ export default function ProfilePage() {
                   </h3>
                 </div>
                 <div className='flex flex-wrap gap-2'>
-                  {profile.alertConfiguration?.map((alert, index) => (
+                  {cleanAlertConfiguration(
+                    profile.alertConfiguration || [],
+                  ).map((alert: any, index) => (
                     <span
                       key={index}
                       className='px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 rounded-full text-sm'
                     >
-                      {alert}
+                      {typeof alert === 'object'
+                        ? JSON.stringify(alert)
+                        : alert}
                     </span>
                   ))}
-                  {(!profile.alertConfiguration ||
-                    profile.alertConfiguration.length === 0) && (
+                  {cleanAlertConfiguration(profile.alertConfiguration || [])
+                    .length === 0 && (
                     <p className='text-gray-500 dark:text-gray-400 text-sm'>
                       No alert configurations set
                     </p>
@@ -2089,7 +2201,7 @@ export default function ProfilePage() {
                       key={index}
                       className='px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-sm'
                     >
-                      {sms}
+                      {typeof sms === 'object' ? JSON.stringify(sms) : sms}
                     </span>
                   ))}
                   {(!profile.smsAlertConfiguration ||
@@ -2149,13 +2261,19 @@ export default function ProfilePage() {
                       <FileText className='w-8 h-8 text-gray-400 dark:text-gray-500' />
                       <div>
                         <p className='text-sm font-medium text-gray-900 dark:text-white'>
-                          {profile.resume.originalname || 'Resume.pdf'}
+                          {typeof profile.resume.originalname === 'object'
+                            ? JSON.stringify(profile.resume.originalname)
+                            : profile.resume.originalname || 'Resume.pdf'}
                         </p>
                       </div>
                     </div>
                     <div className='flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4'>
                       <a
-                        href={profile.resume.path}
+                        href={
+                          typeof profile.resume.path === 'object'
+                            ? '#'
+                            : profile.resume.path
+                        }
                         target='_blank'
                         rel='noopener noreferrer'
                         className='px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-center'

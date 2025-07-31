@@ -39,17 +39,6 @@ export function useTutorialTrigger() {
       // Small delay to ensure the page is fully loaded
       setTimeout(() => {
         showTutorial(tutorialToShow);
-        // Mark user as not first time anymore
-        try {
-          const storedUser = localStorage.getItem('user');
-          if (storedUser) {
-            const userData = JSON.parse(storedUser);
-            userData.isFirstTime = false;
-            localStorage.setItem('user', JSON.stringify(userData));
-          }
-        } catch (e) {
-          // ignore
-        }
       }, 1000);
     }
   }, [user, pathname, showTutorial, hasSeenTutorial, isTutorialActive]);
@@ -57,6 +46,9 @@ export function useTutorialTrigger() {
   // Trigger tutorial on page change (for role-specific tutorials)
   useEffect(() => {
     if (!user || isTutorialActive || !pathname) return;
+
+    // Only show tutorial if user is a first-time user
+    if (!user.isFirstTime) return;
 
     const role = user.role;
     const tutorials = getTutorialsForRole(role, pathname);

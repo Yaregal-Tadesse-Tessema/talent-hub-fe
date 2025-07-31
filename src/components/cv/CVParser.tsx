@@ -9,12 +9,18 @@ import { SkillInput } from '@/components/ui/SkillInput';
 import { TagInput } from '@/components/ui/TagInput';
 import { useToast } from '@/contexts/ToastContext';
 import {
-  parseCVFromText,
   ParsedCVData,
-  mapParsedDataToUserProfile,
+  mapExtractedDataToUserProfile,
+  cvParsingService,
 } from '@/services/cvParsingService';
 import { UserProfile } from '@/types/profile';
 import LoadingAnimation from '@/components/ui/LoadingAnimation';
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+} from '@hello-pangea/dnd';
 import {
   Upload,
   FileText,
@@ -31,6 +37,8 @@ import {
   AlertCircle,
   Download,
   Eye,
+  Trash2,
+  GripVertical,
 } from 'lucide-react';
 
 interface CVParserProps {
@@ -41,7 +49,7 @@ interface CVParserProps {
 
 export default function CVParser({ onSave, onCancel, userId }: CVParserProps) {
   const [step, setStep] = useState<'upload' | 'review' | 'edit'>('upload');
-  const [cvText, setCvText] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isParsing, setIsParsing] = useState(false);
   const [showLoadingAnimation, setShowLoadingAnimation] = useState(false);
   const [parsedData, setParsedData] = useState<ParsedCVData | null>(null);
@@ -49,15 +57,36 @@ export default function CVParser({ onSave, onCancel, userId }: CVParserProps) {
   const [isSaving, setIsSaving] = useState(false);
   const { showToast } = useToast();
 
-  const handleCVTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setCvText(e.target.value);
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check if file is PDF
+      if (file.type !== 'application/pdf') {
+        showToast({
+          type: 'error',
+          message: 'Please select a PDF file only',
+        });
+        return;
+      }
+
+      // Check file size (12MB limit)
+      if (file.size > 12 * 1024 * 1024) {
+        showToast({
+          type: 'error',
+          message: 'File size exceeds 12MB limit',
+        });
+        return;
+      }
+
+      setSelectedFile(file);
+    }
   };
 
   const handleParseCV = async () => {
-    if (!cvText.trim()) {
+    if (!selectedFile) {
       showToast({
         type: 'error',
-        message: 'Please enter CV text to parse',
+        message: 'Please select a PDF file to parse',
       });
       return;
     }
@@ -66,10 +95,43 @@ export default function CVParser({ onSave, onCancel, userId }: CVParserProps) {
     setShowLoadingAnimation(true);
 
     try {
-      const parsed = await parseCVFromText(cvText);
-      console.log('Parsed data received in component:', parsed);
+      // Use the CV parsing service to extract data from the file
+      const extractedData =
+        await cvParsingService.extractCVFromFile(selectedFile);
+      // Use AI to map the extracted data to UserProfile
+      const mappedProfile = await mapExtractedDataToUserProfile(
+        extractedData,
+        userId,
+      );
 
-      console.log('Setting parsed data to state:', parsed);
+      // Convert UserProfile back to ParsedCVData for display
+      const parsed: ParsedCVData = {
+        firstName: mappedProfile.firstName,
+        middleName: mappedProfile.middleName,
+        lastName: mappedProfile.lastName,
+        email: mappedProfile.email,
+        phone: mappedProfile.phone,
+        gender: mappedProfile.gender,
+        birthDate: mappedProfile.birthDate,
+        address: mappedProfile.address as any,
+        linkedinUrl: mappedProfile.linkedinUrl,
+        portfolioUrl: mappedProfile.portfolioUrl,
+        yearOfExperience: mappedProfile.yearOfExperience,
+        industry: mappedProfile.industry,
+        telegramUserId: mappedProfile.telegramUserId,
+        preferredJobLocation: mappedProfile.preferredJobLocation,
+        highestLevelOfEducation: mappedProfile.highestLevelOfEducation,
+        salaryExpectations: mappedProfile.salaryExpectations,
+        technicalSkills: mappedProfile.technicalSkills,
+        softSkills: mappedProfile.softSkills,
+        profileHeadLine: mappedProfile.profileHeadLine,
+        coverLetter: mappedProfile.coverLetter,
+        professionalSummery: mappedProfile.professionalSummery,
+        educations: mappedProfile.educations as any,
+        experiences: mappedProfile.experiences as any,
+        socialMediaLinks: mappedProfile.socialMediaLinks as any,
+      };
+
       setParsedData(parsed);
       setEditedData(parsed);
       setStep('review');
@@ -105,13 +167,99 @@ export default function CVParser({ onSave, onCancel, userId }: CVParserProps) {
     setStep('review');
   };
 
+  const handleDeleteExperience = (keyToDelete: string) => {
+    if (editedData) {
+      const newExperiences = { ...editedData.experiences };
+      delete newExperiences[keyToDelete];
+      setEditedData({
+        ...editedData,
+        experiences: newExperiences,
+      });
+    }
+  };
+
+  const handleDeleteEducation = (keyToDelete: string) => {
+    if (editedData) {
+      const newEducations = { ...editedData.educations };
+      delete newEducations[keyToDelete];
+      setEditedData({
+        ...editedData,
+        educations: newEducations,
+      });
+    }
+  };
+
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination || !editedData) return;
+
+    const { source, destination, type } = result;
+
+    if (type === 'experience') {
+      const experienceEntries = Object.entries(editedData.experiences);
+      const [reorderedItem] = experienceEntries.splice(source.index, 1);
+      experienceEntries.splice(destination.index, 0, reorderedItem);
+
+      const newExperiences = Object.fromEntries(experienceEntries);
+      setEditedData({
+        ...editedData,
+        experiences: newExperiences,
+      });
+    } else if (type === 'education') {
+      const educationEntries = Object.entries(editedData.educations);
+      const [reorderedItem] = educationEntries.splice(source.index, 1);
+      educationEntries.splice(destination.index, 0, reorderedItem);
+
+      const newEducations = Object.fromEntries(educationEntries);
+      setEditedData({
+        ...editedData,
+        educations: newEducations,
+      });
+    }
+  };
+
   const handleSaveToProfile = async () => {
     if (!editedData) return;
 
     setIsSaving(true);
     try {
-      // Use the proper mapping function
-      const userProfile = mapParsedDataToUserProfile(editedData, userId);
+      // Convert ParsedCVData back to UserProfile for saving
+      const userProfile: UserProfile = {
+        id: userId,
+        firstName: editedData.firstName,
+        middleName: editedData.middleName,
+        lastName: editedData.lastName,
+        email: editedData.email,
+        phone: editedData.phone,
+        gender: editedData.gender,
+        status: 'Active',
+        address: editedData.address as any,
+        birthDate: editedData.birthDate,
+        linkedinUrl: editedData.linkedinUrl,
+        portfolioUrl: editedData.portfolioUrl,
+        yearOfExperience: editedData.yearOfExperience,
+        industry: editedData.industry,
+        telegramUserId: editedData.telegramUserId,
+        preferredJobLocation: editedData.preferredJobLocation,
+        highestLevelOfEducation: editedData.highestLevelOfEducation,
+        salaryExpectations: editedData.salaryExpectations,
+        aiGeneratedJobFitScore: 0,
+        technicalSkills: editedData.technicalSkills,
+        softSkills: editedData.softSkills,
+        profile: {},
+        resume: {},
+        educations: editedData.educations as any,
+        experiences: editedData.experiences as any,
+        socialMediaLinks: editedData.socialMediaLinks as any,
+        profileHeadLine: editedData.profileHeadLine,
+        coverLetter: editedData.coverLetter,
+        professionalSummery: editedData.professionalSummery,
+        notificationSetting: [],
+        alertConfiguration: [],
+        smsAlertConfiguration: [],
+        isProfilePublic: false,
+        isResumePublic: false,
+        isFirstTime: false,
+      };
 
       onSave(userProfile);
       showToast({
@@ -137,25 +285,55 @@ export default function CVParser({ onSave, onCancel, userId }: CVParserProps) {
           Parse Your CV
         </h2>
         <p className='text-gray-600 dark:text-gray-400'>
-          Paste your CV text below and we'll extract your information
-          automatically
+          Upload your CV PDF and we'll extract your information automatically
         </p>
       </div>
 
       <div className='space-y-4'>
-        <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
-          CV Text
-        </label>
-        <Textarea
-          value={cvText}
-          onChange={handleCVTextChange}
-          placeholder='Paste your CV/resume text here...'
-          rows={15}
-          className='w-full'
-        />
+        <div className='border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6'>
+          <div className='text-center'>
+            <Upload className='mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4' />
+            <div className='space-y-2'>
+              <label
+                htmlFor='cv-upload'
+                className='cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 dark:focus-within:ring-offset-gray-800'
+              >
+                <span>Upload a PDF file</span>
+                <input
+                  id='cv-upload'
+                  name='cv-upload'
+                  type='file'
+                  accept='.pdf'
+                  className='sr-only'
+                  onChange={handleFileSelect}
+                />
+              </label>
+              <p className='text-xs text-gray-500 dark:text-gray-400'>
+                PDF files only, up to 12MB
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {selectedFile && (
+          <div className='bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800'>
+            <div className='flex items-center gap-3'>
+              <Check className='h-5 w-5 text-green-600 dark:text-green-400' />
+              <div>
+                <p className='text-sm font-medium text-green-800 dark:text-green-200'>
+                  File selected: {selectedFile.name}
+                </p>
+                <p className='text-xs text-green-600 dark:text-green-400'>
+                  Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <p className='text-sm text-gray-500 dark:text-gray-400'>
-          Copy and paste the text content from your CV or resume. The AI will
-          extract your information and organize it into your profile.
+          Upload your CV or resume in PDF format. Our AI will extract your
+          information and organize it into your profile.
         </p>
       </div>
 
@@ -166,7 +344,7 @@ export default function CVParser({ onSave, onCancel, userId }: CVParserProps) {
         </Button>
         <Button
           onClick={handleParseCV}
-          disabled={isParsing || !cvText.trim()}
+          disabled={isParsing || !selectedFile}
           variant='primary'
         >
           {isParsing ? (
@@ -750,6 +928,638 @@ export default function CVParser({ onSave, onCancel, userId }: CVParserProps) {
               rows={4}
               className='w-full'
             />
+          </section>
+
+          {/* Experience */}
+          <section className='bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-700/50 p-6 border border-gray-200 dark:border-gray-700'>
+            <div className='flex items-center gap-3 mb-4'>
+              <Briefcase className='w-5 h-5 text-blue-600 dark:text-blue-400' />
+              <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
+                Work Experience
+              </h3>
+            </div>
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable droppableId='experiences' type='experience'>
+                {(provided) => (
+                  <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className='space-y-6'
+                  >
+                    {Object.entries(editedData?.experiences || {}).map(
+                      ([key, exp], index) => (
+                        <Draggable key={key} draggableId={key} index={index}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              className={`relative ${
+                                snapshot.isDragging
+                                  ? 'opacity-75 scale-105'
+                                  : ''
+                              }`}
+                            >
+                              {/* Experience Card */}
+                              <div className='bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-l-4 border-blue-500 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200'>
+                                {/* Experience Header */}
+                                <div className='flex items-start justify-between mb-4'>
+                                  <div className='flex items-center gap-3'>
+                                    <div className='flex items-center gap-2'>
+                                      <div
+                                        {...provided.dragHandleProps}
+                                        className='cursor-grab active:cursor-grabbing p-1 hover:bg-blue-100 dark:hover:bg-blue-800/30 rounded'
+                                      >
+                                        <GripVertical className='w-4 h-4 text-blue-500 dark:text-blue-400' />
+                                      </div>
+                                      <div className='w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-semibold'>
+                                        {index + 1}
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <h4 className='text-lg font-semibold text-gray-900 dark:text-white'>
+                                        {exp.position || 'Position'}
+                                      </h4>
+                                      <p className='text-blue-600 dark:text-blue-400 font-medium'>
+                                        {exp.company || 'Company'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className='flex items-center gap-2'>
+                                    {exp.current && (
+                                      <span className='px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-medium rounded-full'>
+                                        Current
+                                      </span>
+                                    )}
+                                    <button
+                                      onClick={() =>
+                                        handleDeleteExperience(key)
+                                      }
+                                      className='p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200'
+                                      title='Delete experience'
+                                    >
+                                      <Trash2 className='w-4 h-4' />
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* Experience Details */}
+                                <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'>
+                                  <div>
+                                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                                      Position
+                                    </label>
+                                    <Input
+                                      value={exp.position || ''}
+                                      onChange={(e) =>
+                                        setEditedData({
+                                          ...editedData,
+                                          experiences: {
+                                            ...editedData.experiences,
+                                            [key]: {
+                                              ...exp,
+                                              position: e.target.value,
+                                            },
+                                          },
+                                        })
+                                      }
+                                      className='w-full'
+                                      placeholder='e.g., Senior Software Engineer'
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                                      Company
+                                    </label>
+                                    <Input
+                                      value={exp.company || ''}
+                                      onChange={(e) =>
+                                        setEditedData({
+                                          ...editedData,
+                                          experiences: {
+                                            ...editedData.experiences,
+                                            [key]: {
+                                              ...exp,
+                                              company: e.target.value,
+                                            },
+                                          },
+                                        })
+                                      }
+                                      className='w-full'
+                                      placeholder='e.g., Google Inc.'
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                                      Start Date
+                                    </label>
+                                    <Input
+                                      value={exp.startDate || ''}
+                                      onChange={(e) =>
+                                        setEditedData({
+                                          ...editedData,
+                                          experiences: {
+                                            ...editedData.experiences,
+                                            [key]: {
+                                              ...exp,
+                                              startDate: e.target.value,
+                                            },
+                                          },
+                                        })
+                                      }
+                                      type='date'
+                                      className='w-full'
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                                      End Date
+                                    </label>
+                                    <Input
+                                      value={exp.endDate || ''}
+                                      onChange={(e) =>
+                                        setEditedData({
+                                          ...editedData,
+                                          experiences: {
+                                            ...editedData.experiences,
+                                            [key]: {
+                                              ...exp,
+                                              endDate: e.target.value,
+                                            },
+                                          },
+                                        })
+                                      }
+                                      type='date'
+                                      className='w-full'
+                                      disabled={exp.current}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                                      Location
+                                    </label>
+                                    <Input
+                                      value={exp.location || ''}
+                                      onChange={(e) =>
+                                        setEditedData({
+                                          ...editedData,
+                                          experiences: {
+                                            ...editedData.experiences,
+                                            [key]: {
+                                              ...exp,
+                                              location: e.target.value,
+                                            },
+                                          },
+                                        })
+                                      }
+                                      className='w-full'
+                                      placeholder='e.g., San Francisco, CA'
+                                    />
+                                  </div>
+                                  <div className='flex items-center'>
+                                    <input
+                                      type='checkbox'
+                                      id={`current-${key}`}
+                                      checked={exp.current || false}
+                                      onChange={(e) =>
+                                        setEditedData({
+                                          ...editedData,
+                                          experiences: {
+                                            ...editedData.experiences,
+                                            [key]: {
+                                              ...exp,
+                                              current: e.target.checked,
+                                            },
+                                          },
+                                        })
+                                      }
+                                      className='mr-2'
+                                    />
+                                    <label
+                                      htmlFor={`current-${key}`}
+                                      className='text-sm font-medium text-gray-700 dark:text-gray-300'
+                                    >
+                                      Currently working here
+                                    </label>
+                                  </div>
+                                </div>
+
+                                {/* Description */}
+                                <div>
+                                  <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                                    Description
+                                  </label>
+                                  <Textarea
+                                    value={exp.description || ''}
+                                    onChange={(e) =>
+                                      setEditedData({
+                                        ...editedData,
+                                        experiences: {
+                                          ...editedData.experiences,
+                                          [key]: {
+                                            ...exp,
+                                            description: e.target.value,
+                                          },
+                                        },
+                                      })
+                                    }
+                                    rows={3}
+                                    className='w-full'
+                                    placeholder='Describe your role, responsibilities, and achievements...'
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      ),
+                    )}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+          </section>
+
+          {/* Education */}
+          <section className='bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-700/50 p-6 border border-gray-200 dark:border-gray-700'>
+            <div className='flex items-center gap-3 mb-4'>
+              <GraduationCap className='w-5 h-5 text-blue-600 dark:text-blue-400' />
+              <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
+                Education
+              </h3>
+            </div>
+            <div className='space-y-6'>
+              {Object.entries(editedData?.educations || {}).map(
+                ([key, edu], index) => (
+                  <div key={key} className='relative'>
+                    {/* Education Card */}
+                    <div className='bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-l-4 border-green-500 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200'>
+                      {/* Education Header */}
+                      <div className='flex items-start justify-between mb-4'>
+                        <div className='flex items-center gap-3'>
+                          <div className='w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-semibold'>
+                            {index + 1}
+                          </div>
+                          <div>
+                            <h4 className='text-lg font-semibold text-gray-900 dark:text-white'>
+                              {edu.degree || 'Degree'}
+                            </h4>
+                            <p className='text-green-600 dark:text-green-400 font-medium'>
+                              {edu.institution || 'Institution'}
+                            </p>
+                          </div>
+                        </div>
+                        {edu.current && (
+                          <span className='px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-medium rounded-full'>
+                            Current
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Education Details */}
+                      <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'>
+                        <div>
+                          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                            Degree
+                          </label>
+                          <Input
+                            value={edu.degree || ''}
+                            onChange={(e) =>
+                              setEditedData({
+                                ...editedData,
+                                educations: {
+                                  ...editedData.educations,
+                                  [key]: { ...edu, degree: e.target.value },
+                                },
+                              })
+                            }
+                            className='w-full'
+                            placeholder='e.g., Bachelor of Science'
+                          />
+                        </div>
+                        <div>
+                          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                            Institution
+                          </label>
+                          <Input
+                            value={edu.institution || ''}
+                            onChange={(e) =>
+                              setEditedData({
+                                ...editedData,
+                                educations: {
+                                  ...editedData.educations,
+                                  [key]: {
+                                    ...edu,
+                                    institution: e.target.value,
+                                  },
+                                },
+                              })
+                            }
+                            className='w-full'
+                            placeholder='e.g., Stanford University'
+                          />
+                        </div>
+                        <div>
+                          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                            Field of Study
+                          </label>
+                          <Input
+                            value={edu.field || ''}
+                            onChange={(e) =>
+                              setEditedData({
+                                ...editedData,
+                                educations: {
+                                  ...editedData.educations,
+                                  [key]: { ...edu, field: e.target.value },
+                                },
+                              })
+                            }
+                            className='w-full'
+                            placeholder='e.g., Computer Science'
+                          />
+                        </div>
+                        <div>
+                          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                            Start Date
+                          </label>
+                          <Input
+                            value={edu.startDate || ''}
+                            onChange={(e) =>
+                              setEditedData({
+                                ...editedData,
+                                educations: {
+                                  ...editedData.educations,
+                                  [key]: { ...edu, startDate: e.target.value },
+                                },
+                              })
+                            }
+                            type='date'
+                            className='w-full'
+                          />
+                        </div>
+                        <div>
+                          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                            End Date
+                          </label>
+                          <Input
+                            value={edu.endDate || ''}
+                            onChange={(e) =>
+                              setEditedData({
+                                ...editedData,
+                                educations: {
+                                  ...editedData.educations,
+                                  [key]: { ...edu, endDate: e.target.value },
+                                },
+                              })
+                            }
+                            type='date'
+                            className='w-full'
+                            disabled={edu.current}
+                          />
+                        </div>
+                        <div className='flex items-center'>
+                          <input
+                            type='checkbox'
+                            id={`edu-current-${key}`}
+                            checked={edu.current || false}
+                            onChange={(e) =>
+                              setEditedData({
+                                ...editedData,
+                                educations: {
+                                  ...editedData.educations,
+                                  [key]: { ...edu, current: e.target.checked },
+                                },
+                              })
+                            }
+                            className='mr-2'
+                          />
+                          <label
+                            htmlFor={`edu-current-${key}`}
+                            className='text-sm font-medium text-gray-700 dark:text-gray-300'
+                          >
+                            Currently studying
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      <div>
+                        <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                          Description
+                        </label>
+                        <Textarea
+                          value={edu.description || ''}
+                          onChange={(e) =>
+                            setEditedData({
+                              ...editedData,
+                              educations: {
+                                ...editedData.educations,
+                                [key]: { ...edu, description: e.target.value },
+                              },
+                            })
+                          }
+                          rows={3}
+                          className='w-full'
+                          placeholder='Describe your studies, achievements, and relevant coursework...'
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ),
+              )}
+            </div>
+          </section>
+
+          {/* Additional Information */}
+          <section className='bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-700/50 p-6 border border-gray-200 dark:border-gray-700'>
+            <div className='flex items-center gap-3 mb-4'>
+              <Mail className='w-5 h-5 text-blue-600 dark:text-blue-400' />
+              <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
+                Additional Information
+              </h3>
+            </div>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  LinkedIn URL
+                </label>
+                <Input
+                  value={editedData.linkedinUrl}
+                  onChange={(e) =>
+                    setEditedData({
+                      ...editedData,
+                      linkedinUrl: e.target.value,
+                    })
+                  }
+                  type='url'
+                  className='w-full'
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Portfolio URL
+                </label>
+                <Input
+                  value={editedData.portfolioUrl}
+                  onChange={(e) =>
+                    setEditedData({
+                      ...editedData,
+                      portfolioUrl: e.target.value,
+                    })
+                  }
+                  type='url'
+                  className='w-full'
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Birth Date
+                </label>
+                <Input
+                  value={editedData.birthDate}
+                  onChange={(e) =>
+                    setEditedData({ ...editedData, birthDate: e.target.value })
+                  }
+                  type='date'
+                  className='w-full'
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Industry
+                </label>
+                <TagInput
+                  value={editedData.industry}
+                  onChange={(industry) =>
+                    setEditedData({ ...editedData, industry })
+                  }
+                  placeholder='Type industry and press Enter'
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Preferred Job Locations
+                </label>
+                <TagInput
+                  value={editedData.preferredJobLocation}
+                  onChange={(preferredJobLocation) =>
+                    setEditedData({ ...editedData, preferredJobLocation })
+                  }
+                  placeholder='Type location and press Enter'
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Telegram User ID
+                </label>
+                <Input
+                  value={editedData.telegramUserId}
+                  onChange={(e) =>
+                    setEditedData({
+                      ...editedData,
+                      telegramUserId: e.target.value,
+                    })
+                  }
+                  className='w-full'
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Address Information */}
+          <section className='bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-700/50 p-6 border border-gray-200 dark:border-gray-700'>
+            <div className='flex items-center gap-3 mb-4'>
+              <MapPin className='w-5 h-5 text-blue-600 dark:text-blue-400' />
+              <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
+                Address Information
+              </h3>
+            </div>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Street Address
+                </label>
+                <Input
+                  value={editedData.address?.street || ''}
+                  onChange={(e) =>
+                    setEditedData({
+                      ...editedData,
+                      address: {
+                        ...editedData.address,
+                        street: e.target.value,
+                      },
+                    })
+                  }
+                  className='w-full'
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  City
+                </label>
+                <Input
+                  value={editedData.address?.city || ''}
+                  onChange={(e) =>
+                    setEditedData({
+                      ...editedData,
+                      address: { ...editedData.address, city: e.target.value },
+                    })
+                  }
+                  className='w-full'
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  State/Province
+                </label>
+                <Input
+                  value={editedData.address?.state || ''}
+                  onChange={(e) =>
+                    setEditedData({
+                      ...editedData,
+                      address: { ...editedData.address, state: e.target.value },
+                    })
+                  }
+                  className='w-full'
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Postal Code
+                </label>
+                <Input
+                  value={editedData.address?.postalCode || ''}
+                  onChange={(e) =>
+                    setEditedData({
+                      ...editedData,
+                      address: {
+                        ...editedData.address,
+                        postalCode: e.target.value,
+                      },
+                    })
+                  }
+                  className='w-full'
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Country
+                </label>
+                <Input
+                  value={editedData.address?.country || ''}
+                  onChange={(e) =>
+                    setEditedData({
+                      ...editedData,
+                      address: {
+                        ...editedData.address,
+                        country: e.target.value,
+                      },
+                    })
+                  }
+                  className='w-full'
+                />
+              </div>
+            </div>
           </section>
         </div>
       )}

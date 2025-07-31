@@ -480,16 +480,13 @@ export const jobService = {
         });
       }
 
-      queryParams = `q=w=${conditions.join(',')}`;
+      queryParams = `q=w=${conditions.join('|')}`;
 
       // Add pagination parameters
       if (page && limit) {
         const skip = (page - 1) * limit;
         queryParams += `%26t=${limit}%26sk=${skip}`;
       }
-
-      console.log('Generated query params:', queryParams);
-      console.log('Conditions:', conditions);
 
       const endpoint = isAuthenticated
         ? '/jobs/get-all-tenant-job-postings'

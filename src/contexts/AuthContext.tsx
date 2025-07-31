@@ -7,6 +7,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { EmployerData } from '@/types/employer';
 import { useTheme } from './ThemeContext';
 import { clearAuthData } from '@/utils/auth';
+import { profileService } from '@/services/profileService';
 
 interface User {
   id: string;
@@ -30,6 +31,7 @@ interface AuthContextType {
   ) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
   selectEmployer: (employer: EmployerData) => Promise<void>;
+  updateUserIsFirstTime: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -77,6 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const user = {
           ...employerData?.profile,
           role: 'employer' as const,
+          isFirstTime: true,
         };
         console.log(employerData);
         setUser(user);
@@ -86,6 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             JSON.stringify({
               ...employerData?.profile,
               role: 'employer' as const,
+              isFirstTime: true,
             }),
           );
           // Store both tokens
@@ -141,10 +145,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const user = {
           ...employeeData?.profile,
           role: 'employee' as const,
+          isFirstTime: true,
         };
         setUser(user);
         if (typeof window !== 'undefined') {
-          localStorage.setItem('user', JSON.stringify(user));
+          localStorage.setItem(
+            'user',
+            JSON.stringify({
+              ...employeeData?.profile,
+              role: 'employee' as const,
+              isFirstTime: true,
+            }),
+          );
           // Store both tokens
           localStorage.setItem('accessToken', employeeData.accessToken);
           localStorage.setItem('refreshToken', employeeData.refreshToken);
@@ -238,6 +250,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateUserIsFirstTime = async () => {
+    if (user) {
+      try {
+        // Since the User interface is simplified but actual user data contains more fields,
+        // we'll use the user data as-is and only update the isFirstTime field
+        const userDataForAPI = {
+          ...user,
+          isFirstTime: false,
+        } as any; // Type assertion to handle the interface mismatch
+
+        // Update the database via API
+        const updatedProfile =
+          await profileService.updateProfile(userDataForAPI);
+
+        // Update local state and localStorage with the updated profile data
+        const updatedUser = {
+          ...user,
+          ...updatedProfile,
+          isFirstTime: false,
+          role: user.role, // Preserve the role type
+        };
+        setUser(updatedUser);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+        }
+      } catch (error) {
+        console.error(
+          'Failed to update user isFirstTime status in database:',
+          error,
+        );
+        // Fallback: still update localStorage even if API call fails
+        const updatedUser = {
+          ...user,
+          isFirstTime: false,
+        };
+        setUser(updatedUser);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+        }
+        // Show error toast but don't throw to prevent tutorial interruption
+        showToast({
+          type: 'error',
+          message: 'Failed to update tutorial status. Please try again later.',
+        });
+        throw error;
+      }
+    } else {
+      throw new Error('User not found');
+    }
+  };
+
   // Memoize user data to prevent unnecessary re-renders
   const userValue = React.useMemo(
     () => ({
@@ -246,6 +309,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       login,
       logout,
       selectEmployer,
+      updateUserIsFirstTime,
     }),
     [user, loading],
   );
