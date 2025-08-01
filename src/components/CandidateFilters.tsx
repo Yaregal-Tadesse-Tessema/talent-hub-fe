@@ -8,7 +8,6 @@ export interface FilterState {
   salaryRange: string;
   jobFitScore: string;
   industries: string[];
-  radius: number;
 }
 
 export interface FilterProps {
@@ -34,8 +33,8 @@ const educations = [
   'High School',
   'Intermediate',
   'Graduation',
-  'Master Degree',
-  'Bachelor Degree',
+  "Bachelor's Degree",
+  "Master's Degree",
   'Diploma',
   'PhD',
   'Associate Degree',
@@ -72,9 +71,18 @@ const industries = [
   'Manufacturing',
   'Retail',
   'Marketing',
+  'Sales',
+  'Human Resources',
+  'Legal',
   'Consulting',
   'Non-profit',
   'Government',
+  'Entertainment',
+  'Real Estate',
+  'Transportation',
+  'Energy',
+  'Agriculture',
+  'Media',
   'Other',
 ];
 
@@ -92,17 +100,23 @@ export default function CandidateFilters({
     industry: true,
   });
 
+  // Local state for immediate UI updates
+  const [localFilters, setLocalFilters] = useState<FilterState>(filters);
+
+  // Update local filters when props change
+  React.useEffect(() => {
+    setLocalFilters(filters);
+  }, [filters]);
+
   const timeoutRef = useRef<NodeJS.Timeout>();
 
   // Debounced filter change handler
   const debouncedFilterChange = useCallback(
     (newFilters: FilterState) => {
-      console.log('Debounced filter change triggered with:', newFilters);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
       timeoutRef.current = setTimeout(() => {
-        console.log('Calling onFiltersChange with:', newFilters);
         onFiltersChange(newFilters);
       }, 300);
     },
@@ -112,35 +126,48 @@ export default function CandidateFilters({
   // Handle single filter change
   const handleFilterChange = useCallback(
     (key: keyof FilterState, value: any) => {
-      console.log(`Filter changed: ${key} = ${value}`);
-      const newFilters = { ...filters, [key]: value };
-      debouncedFilterChange(newFilters);
+      // Use functional update to avoid stale closures
+      setLocalFilters((prevFilters) => {
+        const newFilters = { ...prevFilters, [key]: value };
+        // Debounce the actual filter application
+        debouncedFilterChange(newFilters);
+        return newFilters;
+      });
     },
-    [filters, debouncedFilterChange],
+    [debouncedFilterChange],
   );
 
   // Handle checkbox array changes (education, industries)
   const handleArrayFilterChange = useCallback(
     (key: 'education' | 'industries', value: string) => {
-      console.log(`Array filter changed: ${key} = ${value}`);
-      const currentArray = filters[key] as string[];
-      const newArray = currentArray.includes(value)
-        ? currentArray.filter((item) => item !== value)
-        : [...currentArray, value];
+      console.log('handleArrayFilterChange called:', { key, value });
+      // Use functional update to avoid stale closures
+      setLocalFilters((prevFilters) => {
+        const currentArray = prevFilters[key] as string[];
+        const newArray = currentArray.includes(value)
+          ? currentArray.filter((item) => item !== value)
+          : [...currentArray, value];
 
-      // Handle "All" selection
-      if (value === 'All') {
-        const newFilters = { ...filters, [key]: ['All'] };
+        let newFilters: FilterState;
+
+        // Handle "All" selection
+        if (value === 'All') {
+          newFilters = { ...prevFilters, [key]: ['All'] };
+        } else {
+          // Remove "All" if other items are selected
+          const filteredArray = newArray.filter((item) => item !== 'All');
+          const finalArray =
+            filteredArray.length === 0 ? ['All'] : filteredArray;
+          newFilters = { ...prevFilters, [key]: finalArray };
+        }
+
+        console.log('newFilters:', newFilters);
+        // Debounce the actual filter application
         debouncedFilterChange(newFilters);
-      } else {
-        // Remove "All" if other items are selected
-        const filteredArray = newArray.filter((item) => item !== 'All');
-        const finalArray = filteredArray.length === 0 ? ['All'] : filteredArray;
-        const newFilters = { ...filters, [key]: finalArray };
-        debouncedFilterChange(newFilters);
-      }
+        return newFilters;
+      });
     },
-    [filters, debouncedFilterChange],
+    [debouncedFilterChange],
   );
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -182,8 +209,8 @@ export default function CandidateFilters({
               salaryRange: 'All',
               jobFitScore: 'All',
               industries: ['All'],
-              radius: 32,
             };
+            setLocalFilters(resetFilters);
             onFiltersChange(resetFilters);
           }}
           className='text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300'
@@ -209,10 +236,10 @@ export default function CandidateFilters({
                   type='radio'
                   name='experience'
                   value={exp}
-                  checked={filters.experience === exp}
-                  onChange={(e) =>
-                    handleFilterChange('experience', e.target.value)
-                  }
+                  checked={localFilters.experience === exp}
+                  onChange={(e) => {
+                    handleFilterChange('experience', e.target.value);
+                  }}
                   className='mr-3 accent-blue-600'
                 />
                 <span className='text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400'>
@@ -237,7 +264,7 @@ export default function CandidateFilters({
               >
                 <input
                   type='checkbox'
-                  checked={filters.education.includes(edu)}
+                  checked={localFilters.education.includes(edu)}
                   onChange={() => handleArrayFilterChange('education', edu)}
                   className='mr-3 accent-blue-600'
                 />
@@ -265,7 +292,7 @@ export default function CandidateFilters({
                   type='radio'
                   name='gender'
                   value={gender}
-                  checked={filters.gender === gender}
+                  checked={localFilters.gender === gender}
                   onChange={(e) => handleFilterChange('gender', e.target.value)}
                   className='mr-3 accent-blue-600'
                 />
@@ -293,7 +320,7 @@ export default function CandidateFilters({
                   type='radio'
                   name='salary'
                   value={range}
-                  checked={filters.salaryRange === range}
+                  checked={localFilters.salaryRange === range}
                   onChange={(e) =>
                     handleFilterChange('salaryRange', e.target.value)
                   }
@@ -323,7 +350,7 @@ export default function CandidateFilters({
                   type='radio'
                   name='jobFit'
                   value={score}
-                  checked={filters.jobFitScore === score}
+                  checked={localFilters.jobFitScore === score}
                   onChange={(e) =>
                     handleFilterChange('jobFitScore', e.target.value)
                   }
@@ -351,7 +378,7 @@ export default function CandidateFilters({
               >
                 <input
                   type='checkbox'
-                  checked={filters.industries.includes(industry)}
+                  checked={localFilters.industries.includes(industry)}
                   onChange={() =>
                     handleArrayFilterChange('industries', industry)
                   }

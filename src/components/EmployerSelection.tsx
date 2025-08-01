@@ -625,7 +625,7 @@ export default function EmployerSelection({
             <p className='mt-2 text-sm text-gray-600'>
               {isCreating
                 ? 'Choose your registration method and complete the process'
-                : employers.length === 0
+                : !Array.isArray(employers) || employers.length === 0
                   ? "You haven't registered your company yet. Let's get you started!"
                   : 'Please select your company to continue'}
             </p>
@@ -635,46 +635,47 @@ export default function EmployerSelection({
             <>
               <div className='flex justify-center items-center'>
                 <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 place-items-center'>
-                  {employers?.map((employer) => (
-                    <div
-                      key={employer?.id}
-                      onClick={() =>
-                        !isLoading && handleEmployerSelect(employer)
-                      }
-                      className={`bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200 hover:border-blue-400 group p-8 transform hover:scale-105 hover:-translate-y-1 ${
-                        isLoading
-                          ? 'cursor-not-allowed opacity-50'
-                          : 'cursor-pointer'
-                      }`}
-                    >
-                      <div className='flex flex-col items-center justify-center'>
-                        <div className='w-20 h-20 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg'>
-                          <span className='text-2xl font-bold text-white'>
-                            {employer?.tenant?.tradeName?.charAt(0)}
-                          </span>
-                        </div>
-                        <h3 className='text-xl font-bold text-gray-800 text-center group-hover:text-blue-600 transition-colors mb-2'>
-                          {employer?.tenant?.tradeName}
-                        </h3>
-                        <div className='flex items-center text-sm text-gray-500 group-hover:text-blue-500 transition-colors'>
-                          <svg
-                            className='w-4 h-4 mr-1'
-                            fill='none'
-                            stroke='currentColor'
-                            viewBox='0 0 24 24'
-                          >
-                            <path
-                              strokeLinecap='round'
-                              strokeLinejoin='round'
-                              strokeWidth={2}
-                              d='M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'
-                            />
-                          </svg>
-                          <span>Company</span>
+                  {Array.isArray(employers) &&
+                    employers.map((employer) => (
+                      <div
+                        key={employer?.id}
+                        onClick={() =>
+                          !isLoading && handleEmployerSelect(employer)
+                        }
+                        className={`bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200 hover:border-blue-400 group p-8 transform hover:scale-105 hover:-translate-y-1 ${
+                          isLoading
+                            ? 'cursor-not-allowed opacity-50'
+                            : 'cursor-pointer'
+                        }`}
+                      >
+                        <div className='flex flex-col items-center justify-center'>
+                          <div className='w-20 h-20 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg'>
+                            <span className='text-2xl font-bold text-white'>
+                              {employer?.tenant?.tradeName?.charAt(0)}
+                            </span>
+                          </div>
+                          <h3 className='text-xl font-bold text-gray-800 text-center group-hover:text-blue-600 transition-colors mb-2'>
+                            {employer?.tenant?.tradeName}
+                          </h3>
+                          <div className='flex items-center text-sm text-gray-500 group-hover:text-blue-500 transition-colors'>
+                            <svg
+                              className='w-4 h-4 mr-1'
+                              fill='none'
+                              stroke='currentColor'
+                              viewBox='0 0 24 24'
+                            >
+                              <path
+                                strokeLinecap='round'
+                                strokeLinejoin='round'
+                                strokeWidth={2}
+                                d='M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'
+                              />
+                            </svg>
+                            <span>Company</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </div>
 

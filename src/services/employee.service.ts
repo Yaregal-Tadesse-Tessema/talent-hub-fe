@@ -20,15 +20,15 @@ export interface JobSeekerProfile {
   birthDate: string;
   gender: 'male' | 'female';
   gpa: string | null;
-  yearOfExperience: string;
+  yearOfExperience: number;
   highestLevelOfEducation: string;
   industry: string[];
   preferredJobLocation: string[];
   profileHeadLine: string;
   professionalSummery: string;
   coverLetter: string;
-  salaryExpectations: string;
-  aiGeneratedJobFitScore: string;
+  salaryExpectations: number;
+  aiGeneratedJobFitScore: number;
   linkedinUrl: string;
   portfolioUrl: string;
   telegramUserId: string;
@@ -81,7 +81,6 @@ export const employeeService = {
     experience?: string,
     education?: string[],
     gender?: string,
-    radius?: number,
     salaryRange?: string,
     jobFitScore?: string,
     industries?: string[],
@@ -100,13 +99,14 @@ export const employeeService = {
         conditions.push(`lastName:ILIKE:${searchTerm}`);
         conditions.push(`profileHeadLine:ILIKE:${searchTerm}`);
         conditions.push(`professionalSummery:ILIKE:${searchTerm}`);
-        // For array fields, we need to use a different approach
-        // Remove ILIKE from array fields as it's not supported in PostgreSQL
-        // conditions.push(`technicalSkills:ILIKE:${searchTerm}`);
-        // conditions.push(`softSkills:ILIKE:${searchTerm}`);
+
+        // For array fields, we can use ILIKE to search within the array
+        // This will search for the term in technicalSkills and softSkills arrays
+        conditions.push(`technicalSkills:ILIKE:${searchTerm}`);
+        conditions.push(`softSkills:ILIKE:${searchTerm}`);
       }
 
-      // Experience filter
+      // Experience filter - handle string to number conversion
       if (experience && experience !== 'All') {
         let experienceCondition = '';
         switch (experience) {
@@ -142,10 +142,23 @@ export const employeeService = {
         }
       }
 
-      // Education filter
+      // Education filter - map to actual database values
       if (education && education.length > 0 && !education.includes('All')) {
+        const educationMapping: { [key: string]: string } = {
+          'High School': 'High School',
+          Intermediate: 'Intermediate',
+          Graduation: 'Graduation',
+          'Master Degree': "Master's Degree",
+          'Bachelor Degree': "Bachelor's Degree",
+          Diploma: 'Diploma',
+          PhD: 'PhD',
+          'Associate Degree': 'Associate Degree',
+          Certificate: 'Certificate',
+        };
+
         education.forEach((edu) => {
-          conditions.push(`highestLevelOfEducation:=:${edu}`);
+          const mappedValue = educationMapping[edu] || edu;
+          conditions.push(`highestLevelOfEducation:=:${mappedValue}`);
         });
       }
 
@@ -155,7 +168,7 @@ export const employeeService = {
         conditions.push(`gender:=:${genderValue}`);
       }
 
-      // Salary range filter
+      // Salary range filter - handle string to number conversion
       if (salaryRange && salaryRange !== 'All') {
         let salaryCondition = '';
         switch (salaryRange) {
@@ -187,7 +200,7 @@ export const employeeService = {
         }
       }
 
-      // Job fit score filter
+      // Job fit score filter - handle string to number conversion
       if (jobFitScore && jobFitScore !== 'All') {
         let scoreCondition = '';
         switch (jobFitScore) {
@@ -215,17 +228,19 @@ export const employeeService = {
         }
       }
 
-      // Industry filter
+      // Industry filter - handle array field properly
       if (industries && industries.length > 0 && !industries.includes('All')) {
-        industries.forEach((industry) => {
-          // Use = operator for array fields instead of LIKE
-          conditions.push(`industry:=:${industry}`);
-        });
+        // For array fields, we need to check if the array contains the value
+        // This might need to be adjusted based on your backend implementation
+        const industryConditions = industries.map(
+          (industry) => `industry:ILIKE:${industry}`,
+        );
+        conditions.push(`(${industryConditions.join(',')})`);
       }
 
       // Build query params
       if (conditions.length > 0) {
-        queryParams = `q=w=${conditions.join(',')}`;
+        queryParams = `q=w=${conditions.join('|')}`;
       }
 
       // Always add status filter

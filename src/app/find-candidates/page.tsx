@@ -42,7 +42,6 @@ export default function FindCandidatesPage() {
     salaryRange: 'All',
     jobFitScore: 'All',
     industries: ['All'],
-    radius: 32,
   });
 
   // Fetch candidates when user is logged in
@@ -56,18 +55,20 @@ export default function FindCandidatesPage() {
   const fetchCandidates = async () => {
     setLoading(true);
     try {
+      console.log('Fetching initial candidates...');
       const response = await employeeService.searchCandidates(
         '', // no search query
-        'All', // all experience levels
-        ['All'], // all education levels
-        'All', // all genders
-        32, // default radius
-        'All', // all salary ranges
-        'All', // all job fit scores
-        ['All'], // all industries
+        undefined, // all experience levels
+        undefined, // all education levels
+        undefined, // all genders
+        undefined, // all salary ranges
+        undefined, // all job fit scores
+        undefined, // all industries
         pageSize,
         (currentPage - 1) * pageSize,
       );
+
+      console.log('Initial candidates response:', response);
 
       // The service now returns a properly typed response with items
       const candidatesData = response.items || [];
@@ -107,37 +108,83 @@ export default function FindCandidatesPage() {
       setLoading(true);
     }
 
-    // Debug: Log the filter values being passed
-    console.log('Filter values being passed:', {
+    console.log('Search parameters:', {
       searchQuery,
-      experience: filters.experience,
-      education: filters.education,
-      gender: filters.gender,
-      radius: filters.radius,
-      salaryRange: filters.salaryRange,
-      jobFitScore: filters.jobFitScore,
-      industries: filters.industries,
-      top: pageSize,
+      filters,
+      pageSize,
+      currentPage,
       skip: (currentPage - 1) * pageSize,
     });
 
     try {
       const response = await employeeService.searchCandidates(
         searchQuery,
-        filters.experience,
-        filters.education,
-        filters.gender,
-        filters.radius,
-        filters.salaryRange,
-        filters.jobFitScore,
-        filters.industries,
+        filters.experience === 'All' ? undefined : filters.experience,
+        filters.education.includes('All') ? undefined : filters.education,
+        filters.gender === 'All' ? undefined : filters.gender,
+        filters.salaryRange === 'All' ? undefined : filters.salaryRange,
+        filters.jobFitScore === 'All' ? undefined : filters.jobFitScore,
+        filters.industries.includes('All') ? undefined : filters.industries,
         pageSize,
         (currentPage - 1) * pageSize,
       );
 
       // The service now returns a properly typed response with items
       const candidatesData = response.items || [];
-      console.log('Search results:', candidatesData);
+      setCandidates(candidatesData);
+
+      // Update total count if available in response
+      if (response.total !== undefined) {
+        setTotalCandidates(response.total);
+      }
+    } catch (error) {
+      console.error('Error searching candidates:', error);
+      setCandidates([]);
+    } finally {
+      if (isFilterSearch) {
+        setFilterLoading(false);
+      } else {
+        setLoading(false);
+      }
+    }
+  };
+
+  // Search function that accepts filters as parameter to avoid timing issues
+  const handleSearchWithFilters = async (
+    searchFilters: FilterState,
+    isFilterSearch = false,
+  ) => {
+    if (isFilterSearch) {
+      setFilterLoading(true);
+    } else {
+      setLoading(true);
+    }
+
+    try {
+      const response = await employeeService.searchCandidates(
+        searchQuery,
+        searchFilters.experience === 'All'
+          ? undefined
+          : searchFilters.experience,
+        searchFilters.education.includes('All')
+          ? undefined
+          : searchFilters.education,
+        searchFilters.gender === 'All' ? undefined : searchFilters.gender,
+        searchFilters.salaryRange === 'All'
+          ? undefined
+          : searchFilters.salaryRange,
+        searchFilters.jobFitScore === 'All'
+          ? undefined
+          : searchFilters.jobFitScore,
+        searchFilters.industries.includes('All')
+          ? undefined
+          : searchFilters.industries,
+        pageSize,
+        (currentPage - 1) * pageSize,
+      );
+
+      // The service now returns a properly typed response with items
+      const candidatesData = response.items || [];
       setCandidates(candidatesData);
 
       // Update total count if available in response
@@ -165,12 +212,12 @@ export default function FindCandidatesPage() {
 
   // Handle filter changes
   const handleFiltersChange = (newFilters: FilterState) => {
-    console.log('Filters changed:', newFilters);
     setFilters(newFilters);
     // Reset to first page when filters change
     setCurrentPage(1);
     if (user) {
-      handleSearch(true);
+      // Pass the new filters directly to avoid timing issues
+      handleSearchWithFilters(newFilters, true);
     }
   };
 
@@ -730,7 +777,7 @@ export default function FindCandidatesPage() {
                               <>
                                 <span>•</span>
                                 {candidate.yearOfExperience}{' '}
-                                {parseInt(candidate.yearOfExperience) === 1
+                                {candidate.yearOfExperience === 1
                                   ? 'year'
                                   : 'years'}{' '}
                                 experience

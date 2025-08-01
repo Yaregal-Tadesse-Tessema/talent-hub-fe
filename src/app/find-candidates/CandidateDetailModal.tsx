@@ -279,10 +279,8 @@ const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                     </svg>
                     <span>
                       {candidate.yearOfExperience}{' '}
-                      {parseInt(candidate.yearOfExperience) === 1
-                        ? 'year'
-                        : 'years'}{' '}
-                      of experience
+                      {candidate.yearOfExperience === 1 ? 'year' : 'years'} of
+                      experience
                     </span>
                   </div>
                 )}
