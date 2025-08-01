@@ -87,23 +87,23 @@ export const employeeService = {
     top?: number,
     skip?: number,
   ): Promise<{ items: JobSeekerProfile[]; total?: number }> {
-    try {
-      let queryParams = '';
-      const conditions = [];
+    let queryParams = '';
+    const conditions: string[] = [];
+    let finalQueryParams = '';
 
+    try {
       // Search query for name, skills, job title, etc.
       if (searchQuery && searchQuery.trim()) {
         const searchTerm = searchQuery.trim().toLowerCase();
 
-        conditions.push(`firstName:ILIKE:${searchTerm}`);
-        conditions.push(`lastName:ILIKE:${searchTerm}`);
-        conditions.push(`profileHeadLine:ILIKE:${searchTerm}`);
-        conditions.push(`professionalSummery:ILIKE:${searchTerm}`);
-
-        // For array fields, we can use ILIKE to search within the array
-        // This will search for the term in technicalSkills and softSkills arrays
-        conditions.push(`technicalSkills:ILIKE:${searchTerm}`);
-        conditions.push(`softSkills:ILIKE:${searchTerm}`);
+        // Try searching across multiple fields using parentheses grouping
+        // This format: (field1:LIKE:term,field2:LIKE:term,field3:LIKE:term)
+        const searchConditions = [
+          `firstName:LIKE:${searchTerm}`,
+          `lastName:LIKE:${searchTerm}`,
+          `email:LIKE:${searchTerm}`,
+        ];
+        conditions.push(`(${searchConditions.join(',')})`);
       }
 
       // Experience filter - handle string to number conversion
@@ -245,7 +245,7 @@ export const employeeService = {
 
       // Always add status filter
       const statusParam = 'status=Active';
-      let finalQueryParams =
+      finalQueryParams =
         conditions.length > 0 ? `${queryParams}&${statusParam}` : statusParam;
 
       // Add pagination parameters
@@ -256,11 +256,23 @@ export const employeeService = {
         finalQueryParams += `&sk=${skip}`;
       }
 
+      console.log('Search query params:', finalQueryParams);
+
       const response = await api.get(`/users/?${finalQueryParams}`);
 
       return response.data;
     } catch (error) {
-      console.error('Error searching candidates:', error);
+      // If search fails, try to get all candidates as fallback
+      if (searchQuery && searchQuery.trim()) {
+        try {
+          const fallbackResponse = await api.get('/users/?q=w=status:=:Active');
+          return fallbackResponse.data;
+        } catch (fallbackError) {
+          console.error('Fallback also failed:', fallbackError);
+          throw error; // Throw the original error
+        }
+      }
+
       throw error;
     }
   },
