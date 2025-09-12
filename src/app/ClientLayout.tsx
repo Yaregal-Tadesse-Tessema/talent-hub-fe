@@ -58,7 +58,7 @@ export default function ClientLayout({
                 )}
                 {children}
                 {layoutConfig.isHomePage && <MemoizedFooter />}
-                <TutorialTrigger />
+                {/* <TutorialTrigger /> */}
                 {layoutConfig.shouldShowNavbar && <FloatingChatButton />}
               </TutorialOverlay>
             </NavigationProvider>
