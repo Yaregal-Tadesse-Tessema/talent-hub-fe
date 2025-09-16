@@ -335,7 +335,7 @@ export default function JobDetailsPage({
                         }
                         if (job.isApplied) {
                           showToast({
-                            type: 'info',
+                            type: 'error',
                             message: 'You have already applied to this job',
                           });
                           return;

@@ -66,6 +66,7 @@ interface JobPost {
   updatedBy: string | null;
   deletedBy: string | null;
   onHoldDate: string | null;
+  isApplied?: boolean;
 }
 
 interface Favourite {
