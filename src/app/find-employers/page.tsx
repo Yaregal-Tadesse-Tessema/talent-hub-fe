@@ -674,7 +674,7 @@ function FindEmployersPage() {
                   <div className='flex items-start sm:items-center gap-2 sm:gap-3 md:gap-4 flex-1 min-w-0'>
                     <div className='w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0'>
                       <span className='text-base sm:text-lg md:text-2xl font-bold text-gray-400 dark:text-gray-500'>
-                        {employer.tradeName[0]}
+                        {employer.tradeName?.[0] || '?'}
                       </span>
                     </div>
                     <div className='flex-1 min-w-0'>
@@ -702,7 +702,8 @@ function FindEmployersPage() {
                             />
                           </svg>
                           <span className='truncate'>
-                            {employer.address.subcity}
+                            {employer.address?.subcity ||
+                              'Location not specified'}
                           </span>
                         </div>
                         {employer.industry && (

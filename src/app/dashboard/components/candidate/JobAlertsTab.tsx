@@ -43,6 +43,9 @@ export default function JobAlertsTab({
     industry: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [customPosition, setCustomPosition] = useState('');
+  const [locationSuggestions, setLocationSuggestions] = useState<string[]>([]);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [alertToDelete, setAlertToDelete] = useState<AlertConfiguration | null>(
     null,
@@ -75,6 +78,11 @@ export default function JobAlertsTab({
       newErrors.Position = 'Position is required';
     }
 
+    // If "Other" is selected, validate custom position input
+    if (formData.Position === 'other' && !customPosition.trim()) {
+      newErrors.Position = 'Please specify the position';
+    }
+
     if (!formData.address.trim()) {
       newErrors.address = 'Address is required';
     }
@@ -97,6 +105,35 @@ export default function JobAlertsTab({
     }
   };
 
+  // Location autocomplete functions
+  const handleLocationInputChange = (value: string) => {
+    handleInputChange('address', value);
+
+    if (value.length > 0) {
+      const filtered = locations.filter((location) =>
+        location.toLowerCase().includes(value.toLowerCase()),
+      );
+      setLocationSuggestions(filtered.slice(0, 8)); // Show max 8 suggestions
+      setShowLocationSuggestions(true);
+    } else {
+      setLocationSuggestions([]);
+      setShowLocationSuggestions(false);
+    }
+  };
+
+  const handleLocationSelect = (location: string) => {
+    handleInputChange('address', location);
+    setLocationSuggestions([]);
+    setShowLocationSuggestions(false);
+  };
+
+  const handleLocationBlur = () => {
+    // Delay hiding suggestions to allow for click events
+    setTimeout(() => {
+      setShowLocationSuggestions(false);
+    }, 200);
+  };
+
   const resetForm = () => {
     setFormData({
       salary: '',
@@ -106,6 +143,9 @@ export default function JobAlertsTab({
       tenantsId: '',
       industry: '',
     });
+    setCustomPosition('');
+    setLocationSuggestions([]);
+    setShowLocationSuggestions(false);
     setErrors({});
     setEditingAlert(null);
   };
@@ -117,6 +157,16 @@ export default function JobAlertsTab({
 
   const handleEdit = (alert: AlertConfiguration) => {
     setFormData(alert);
+    // Check if the position is a custom one (not in the predefined list)
+    const isCustomPosition = !jobPositions.some(
+      (pos) => pos.value === alert.Position,
+    );
+    if (isCustomPosition && alert.Position !== 'other') {
+      setCustomPosition(alert.Position);
+      setFormData((prev) => ({ ...prev, Position: 'other' }));
+    } else {
+      setCustomPosition('');
+    }
     setEditingAlert(alert);
     setShowModal(true);
   };
@@ -191,9 +241,16 @@ export default function JobAlertsTab({
 
     setLoading(true);
     try {
+      // Use custom position if "Other" is selected
+      const finalFormData = {
+        ...formData,
+        Position:
+          formData.Position === 'other' ? customPosition : formData.Position,
+      };
+
       // Set tenantsId to userProfile.id
       const alertConfigForAPI = {
-        ...formData,
+        ...finalFormData,
         tenantsId: userProfile.id,
       };
 
@@ -204,11 +261,13 @@ export default function JobAlertsTab({
       if (editingAlert) {
         // Update existing alert
         updatedConfigs = alertConfigurations.map((config) =>
-          config === editingAlert ? { ...formData, id: config.id } : config,
+          config === editingAlert
+            ? { ...finalFormData, id: config.id }
+            : config,
         );
       } else {
         // Add new alert
-        const newAlert = { ...formData, id: Date.now().toString() };
+        const newAlert = { ...finalFormData, id: Date.now().toString() };
         updatedConfigs = [...alertConfigurations, newAlert];
       }
 
@@ -577,9 +636,13 @@ export default function JobAlertsTab({
                 </label>
                 <Select
                   value={formData.Position}
-                  onChange={(e) =>
-                    handleInputChange('Position', e.target.value)
-                  }
+                  onChange={(e) => {
+                    handleInputChange('Position', e.target.value);
+                    // Clear custom position when selecting a predefined option
+                    if (e.target.value !== 'other') {
+                      setCustomPosition('');
+                    }
+                  }}
                   className={errors.Position ? 'border-red-500' : ''}
                   disabled={loading}
                 >
@@ -590,6 +653,21 @@ export default function JobAlertsTab({
                     </option>
                   ))}
                 </Select>
+
+                {/* Custom Position Input - Show when "Other" is selected */}
+                {formData.Position === 'other' && (
+                  <div className='mt-2'>
+                    <Input
+                      type='text'
+                      value={customPosition}
+                      onChange={(e) => setCustomPosition(e.target.value)}
+                      placeholder='Please specify the position'
+                      className={errors.Position ? 'border-red-500' : ''}
+                      disabled={loading}
+                    />
+                  </div>
+                )}
+
                 {errors.Position && (
                   <p className='mt-1 text-sm text-red-600 dark:text-red-400'>
                     {errors.Position}
@@ -598,23 +676,41 @@ export default function JobAlertsTab({
               </div>
 
               {/* Address */}
-              <div>
+              <div className='relative'>
                 <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                   Location *
                 </label>
-                <Select
+                <Input
+                  type='text'
                   value={formData.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  onChange={(e) => handleLocationInputChange(e.target.value)}
+                  onBlur={handleLocationBlur}
+                  onFocus={() => {
+                    if (formData.address.length > 0) {
+                      setShowLocationSuggestions(true);
+                    }
+                  }}
+                  placeholder='Type to search cities in Ethiopia...'
                   className={errors.address ? 'border-red-500' : ''}
                   disabled={loading}
-                >
-                  <option value=''>Select location</option>
-                  {locations.map((location) => (
-                    <option key={location} value={location}>
-                      {location}
-                    </option>
-                  ))}
-                </Select>
+                />
+
+                {/* Location Suggestions Dropdown */}
+                {showLocationSuggestions && locationSuggestions.length > 0 && (
+                  <div className='absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-48 overflow-y-auto'>
+                    {locationSuggestions.map((location, index) => (
+                      <button
+                        key={index}
+                        type='button'
+                        className='w-full px-4 py-2 text-left text-sm text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none'
+                        onClick={() => handleLocationSelect(location)}
+                      >
+                        {location}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 {errors.address && (
                   <p className='mt-1 text-sm text-red-600 dark:text-red-400'>
                     {errors.address}

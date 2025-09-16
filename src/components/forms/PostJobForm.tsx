@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import RichTextEditor from './RichTextEditor';
+import React, { useState, useEffect, useRef } from 'react';
+import RichTextEditor, { RichTextEditorRef } from './RichTextEditor';
 import { jobService, JobPosting } from '@/services/jobService';
 import { useToast } from '@/contexts/ToastContext';
 import { useRouter } from 'next/navigation';
 import ConfirmationDialog from '@/components/ui/ConfirmationDialog';
 import { industries } from '@/constants/jobOptions';
+import {
+  jobDescriptionService,
+  JobDescriptionRequest,
+} from '@/services/jobDescriptionService';
 
 interface FormData {
   title: string;
@@ -101,10 +105,123 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
     Record<string, string>
   >({});
   const [draftJobId, setDraftJobId] = useState<string | null>(jobId || null);
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   const [showPublishConfirmation, setShowPublishConfirmation] = useState(false);
   const [isLoadingJob, setIsLoadingJob] = useState(false);
+  const [isDraftEditing, setIsDraftEditing] = useState(false);
+  const editorRef = useRef<RichTextEditorRef>(null);
   const { showToast } = useToast();
   const router = useRouter();
+
+  // Generate AI job description
+  const generateJobDescription = async () => {
+    console.log('🎯 Generate button clicked, current form data:', {
+      title: formData.title,
+      position: formData.position,
+      industry: formData.industry,
+      employmentType: formData.employmentType,
+    });
+
+    // Validate that we have the required information from step 1
+    if (
+      !formData.title ||
+      !formData.position ||
+      !formData.industry ||
+      !formData.employmentType
+    ) {
+      console.log('❌ Validation failed in form');
+      showToast({
+        type: 'error',
+        message:
+          'Please complete the basic information (Job Title, Position, Industry, Employment Type) before generating a description.',
+      });
+      return;
+    }
+
+    console.log('✅ Form validation passed, starting generation...');
+    setIsGeneratingDescription(true);
+
+    try {
+      const request: JobDescriptionRequest = {
+        title: formData.title,
+        position: formData.position,
+        industry: formData.industry,
+        employmentType: formData.employmentType,
+      };
+
+      console.log('📤 Sending request to jobDescriptionService:', request);
+      const response =
+        await jobDescriptionService.generateJobDescription(request);
+
+      console.log('📥 Received response from jobDescriptionService:', response);
+
+      if (response.success) {
+        console.log('✅ Success! Updating form data with description');
+        console.log('📝 Description to be set:', response.description);
+        console.log('📝 Current form description:', formData.description);
+
+        // Update form data immediately
+        setFormData((prev) => {
+          const updated = { ...prev, description: response.description };
+          console.log('📝 Updated form data with AI content:', updated);
+          return updated;
+        });
+
+        // Update editor content directly
+        if (editorRef.current) {
+          console.log('🎯 Calling direct content update to editor');
+          editorRef.current.updateContent(response.description);
+        }
+
+        showToast({
+          type: 'success',
+          message:
+            'Job description generated successfully! You can edit it as needed.',
+        });
+      } else {
+        console.log(
+          '⚠️ Generation failed, but might have fallback description',
+        );
+        // Even if AI failed, we might have a fallback description
+        if (response.description) {
+          // Update form data
+          setFormData((prev) => ({
+            ...prev,
+            description: response.description,
+          }));
+
+          // Update editor content
+          if (editorRef.current) {
+            console.log('🎯 Calling direct content update for fallback');
+            editorRef.current.updateContent(response.description);
+          }
+
+          showToast({
+            type: 'error',
+            message:
+              response.error ||
+              'Generated a template description. Please review and edit as needed.',
+          });
+        } else {
+          showToast({
+            type: 'error',
+            message:
+              response.error ||
+              'Failed to generate job description. Please try again.',
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error generating job description:', error);
+      showToast({
+        type: 'error',
+        message:
+          'Failed to generate job description. Please try again or write your own description.',
+      });
+    } finally {
+      setIsGeneratingDescription(false);
+    }
+  };
 
   const totalSteps = 6;
 
@@ -154,6 +271,8 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
         });
 
         setDraftJobId(job.id);
+        setIsDraftEditing(true); // Mark that we're editing a draft
+        console.log('📝 Draft job loaded, marking as draft editing mode');
       } catch (error) {
         console.error('Error loading existing job:', error);
         showToast({
@@ -714,12 +833,79 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
         </div>
       </div>
 
+      {/* AI Generation Button */}
+      <div className='bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4'>
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center space-x-3'>
+            <div className='w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center'>
+              <svg
+                className='w-4 h-4 text-blue-600 dark:text-blue-400'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z'
+                />
+              </svg>
+            </div>
+            <div>
+              <h3 className='text-sm font-medium text-gray-900 dark:text-white'>
+                AI-Powered Description Generator
+              </h3>
+              <p className='text-xs text-gray-600 dark:text-gray-300'>
+                Generate a professional job description based on your job
+                details
+              </p>
+            </div>
+          </div>
+          <button
+            type='button'
+            onClick={generateJobDescription}
+            disabled={isGeneratingDescription}
+            className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center space-x-2 ${
+              isGeneratingDescription
+                ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md'
+            }`}
+          >
+            {isGeneratingDescription ? (
+              <>
+                <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400'></div>
+                <span>Generating...</span>
+              </>
+            ) : (
+              <>
+                <svg
+                  className='w-4 h-4'
+                  fill='none'
+                  stroke='currentColor'
+                  viewBox='0 0 24 24'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M13 10V3L4 14h7v7l9-11h-7z'
+                  />
+                </svg>
+                <span>Generate with AI</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
       <div className='space-y-2'>
         <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
           Detailed Description <span className='text-red-500'>*</span>
         </label>
         <div className='border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all duration-200'>
           <RichTextEditor
+            ref={editorRef}
             content={formData.description}
             onChange={(content) =>
               setFormData((prev) => ({ ...prev, description: content }))

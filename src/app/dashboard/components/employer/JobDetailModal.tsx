@@ -227,28 +227,28 @@ export default function JobDetailModal({
   if (!isOpen) return null;
 
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
-      <div className='bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden border border-gray-200 dark:border-gray-700'>
+    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4'>
+      <div className='bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-6xl w-full max-h-[95vh] sm:max-h-[90vh] flex flex-col border border-gray-200 dark:border-gray-700'>
         {/* Header */}
-        <div className='flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700'>
-          <div>
-            <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
+        <div className='flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0'>
+          <div className='min-w-0 flex-1'>
+            <h2 className='text-lg sm:text-xl font-semibold text-gray-900 dark:text-white truncate'>
               {job.title}
             </h2>
-            <p className='text-gray-500 dark:text-gray-400 text-sm mt-1'>
+            <p className='text-gray-500 dark:text-gray-400 text-sm mt-1 truncate'>
               {job.employmentType} • {job.location}
             </p>
           </div>
           <button
             onClick={onClose}
-            className='p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors'
+            className='p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0 ml-2'
           >
-            <XMarkIcon className='w-6 h-6 text-gray-500 dark:text-gray-400' />
+            <XMarkIcon className='w-5 h-5 sm:w-6 sm:h-6 text-gray-500 dark:text-gray-400' />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className='flex border-b border-gray-200 dark:border-gray-700'>
+        <div className='flex border-b border-gray-200 dark:border-gray-700 flex-shrink-0 overflow-x-auto'>
           {[
             { key: 'details', label: 'Job Details', icon: DocumentTextIcon },
             { key: 'applications', label: 'Applications', icon: UserGroupIcon },
@@ -259,21 +259,22 @@ export default function JobDetailModal({
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as Tab)}
-                className={`flex items-center gap-2 px-6 py-3 font-medium border-b-2 transition-colors ${
+                className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-6 py-3 font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0 ${
                   activeTab === tab.key
                     ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                     : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
-                <Icon className='w-5 h-5' />
-                {tab.label}
+                <Icon className='w-4 h-4 sm:w-5 sm:h-5' />
+                <span className='hidden sm:inline'>{tab.label}</span>
+                <span className='sm:hidden'>{tab.label.split(' ')[0]}</span>
               </button>
             );
           })}
         </div>
 
         {/* Content */}
-        <div className='flex-1 overflow-y-auto p-6'>
+        <div className='flex-1 overflow-y-auto p-4 sm:p-6 min-h-0'>
           {activeTab === 'details' && (
             <div className='space-y-6'>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
@@ -558,13 +559,32 @@ export default function JobDetailModal({
 
         {/* Add/Edit Question Modal */}
         {isAddingQuestion && (
-          <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
-            <div className='bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full border border-gray-200 dark:border-gray-700'>
-              <div className='p-6'>
-                <h3 className='text-lg font-semibold text-gray-900 dark:text-white mb-4'>
+          <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-2 sm:p-4'>
+            <div className='bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] flex flex-col border border-gray-200 dark:border-gray-700'>
+              <div className='flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0'>
+                <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
                   {editingQuestion ? 'Edit Question' : 'Add Question'}
                 </h3>
+                <button
+                  onClick={() => {
+                    setIsAddingQuestion(false);
+                    setEditingQuestion(null);
+                    setNewQuestion({
+                      question: '',
+                      type: 'multiple_choice',
+                      options: [''],
+                      isKnockout: false,
+                      isOptional: false,
+                      weight: 1,
+                    });
+                  }}
+                  className='p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors'
+                >
+                  <XMarkIcon className='w-5 h-5 text-gray-500 dark:text-gray-400' />
+                </button>
+              </div>
 
+              <div className='flex-1 overflow-y-auto p-4 sm:p-6 min-h-0'>
                 <div className='space-y-4'>
                   <div>
                     <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
@@ -632,7 +652,7 @@ export default function JobDetailModal({
                     </div>
                   )}
 
-                  <div className='flex items-center gap-4'>
+                  <div className='flex flex-col sm:flex-row items-start sm:items-center gap-4'>
                     <label className='flex items-center'>
                       <input
                         type='checkbox'
@@ -686,32 +706,32 @@ export default function JobDetailModal({
                     />
                   </div>
                 </div>
+              </div>
 
-                <div className='flex justify-end gap-3 mt-6'>
-                  <button
-                    onClick={() => {
-                      setIsAddingQuestion(false);
-                      setEditingQuestion(null);
-                      setNewQuestion({
-                        question: '',
-                        type: 'multiple_choice',
-                        options: [''],
-                        isKnockout: false,
-                        isOptional: false,
-                        weight: 1,
-                      });
-                    }}
-                    className='px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded'
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSubmitQuestion}
-                    className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700'
-                  >
-                    {editingQuestion ? 'Update' : 'Add'} Question
-                  </button>
-                </div>
+              <div className='flex justify-end gap-3 p-4 sm:p-6 border-t border-gray-200 dark:border-gray-700 flex-shrink-0'>
+                <button
+                  onClick={() => {
+                    setIsAddingQuestion(false);
+                    setEditingQuestion(null);
+                    setNewQuestion({
+                      question: '',
+                      type: 'multiple_choice',
+                      options: [''],
+                      isKnockout: false,
+                      isOptional: false,
+                      weight: 1,
+                    });
+                  }}
+                  className='px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded'
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmitQuestion}
+                  className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700'
+                >
+                  {editingQuestion ? 'Update' : 'Add'} Question
+                </button>
               </div>
             </div>
           </div>

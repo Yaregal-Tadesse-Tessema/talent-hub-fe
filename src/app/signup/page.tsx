@@ -38,6 +38,7 @@ interface ValidationErrors {
   middleName?: string;
   lastName?: string;
   phone?: string;
+  gender?: string;
   birthDate?: string;
 }
 
@@ -55,6 +56,8 @@ function SignupPageContent() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [showSuccess, setShowSuccess] = useState(false);
+  const [employeeCountryCode, setEmployeeCountryCode] = useState('+251');
+  const [employerCountryCode, setEmployerCountryCode] = useState('+251');
 
   const [employeeData, setEmployeeData] = useState<EmployeeFormData>({
     phone: '',
@@ -62,7 +65,7 @@ function SignupPageContent() {
     firstName: '',
     middleName: '',
     lastName: '',
-    gender: 'male',
+    gender: '',
     password: '',
     address: {},
     birthDate: '',
@@ -89,10 +92,23 @@ function SignupPageContent() {
     return passwordRegex.test(password);
   };
 
-  const validatePhone = (phone: string): boolean => {
-    // Basic phone validation - can be adjusted based on requirements
-    const phoneRegex = /^\+?[\d\s-]{10,}$/;
-    return phoneRegex.test(phone);
+  const validatePhone = (phone: string, countryCode: string): boolean => {
+    // Remove country code from phone number for validation
+    const phoneWithoutCode = phone.replace(countryCode, '').trim();
+
+    // Ethiopian phone number validation
+    // Format 1: 09xxxxxxxxx (10 digits starting with 0)
+    // Format 2: 9xxxxxxxxx (9 digits starting with 9)
+    // Format 3: +251 9xxxxxxxx (international format)
+
+    // Remove all spaces and non-digit characters except + at the beginning
+    const cleanPhone = phoneWithoutCode.replace(/[\s-]/g, '');
+
+    // Check if it's a valid Ethiopian mobile number
+    // Ethiopian mobile numbers: 09xxxxxxxxx or 9xxxxxxxxx (9 digits after 0 or 9)
+    const ethiopianMobileRegex = /^(0?9\d{8})$/;
+
+    return ethiopianMobileRegex.test(cleanPhone);
   };
 
   const validateName = (name: string): boolean => {
@@ -149,23 +165,28 @@ function SignupPageContent() {
         'First name should only contain letters, 2-50 characters';
     }
 
-    // Last name validation
-    if (!employeeData.lastName) {
-      newErrors.lastName = 'Last name is required';
-    } else if (!validateName(employeeData.lastName)) {
+    // Last name validation (optional)
+    if (employeeData.lastName && !validateName(employeeData.lastName)) {
       newErrors.lastName =
         'Last name should only contain letters, 2-50 characters';
     }
 
     // Phone validation (if provided)
-    if (employeeData.phone && !validatePhone(employeeData.phone)) {
-      newErrors.phone = 'Please enter a valid phone number';
+    if (
+      employeeData.phone &&
+      !validatePhone(employeeData.phone, employeeCountryCode)
+    ) {
+      newErrors.phone =
+        'Please enter a valid Ethiopian phone number (e.g., 09xxxxxxxxx or 9xxxxxxxxx)';
     }
 
-    // Birth date validation
-    if (!employeeData.birthDate) {
-      newErrors.birthDate = 'Date of birth is required';
-    } else if (!validateBirthDate(employeeData.birthDate)) {
+    // Gender validation
+    if (!employeeData.gender) {
+      newErrors.gender = 'Please select your gender';
+    }
+
+    // Birth date validation (optional)
+    if (employeeData.birthDate && !validateBirthDate(employeeData.birthDate)) {
       newErrors.birthDate = 'You must be at least 18 years old';
     }
 
@@ -190,6 +211,19 @@ function SignupPageContent() {
     }
   };
 
+  const handleEmployeePhoneBlur = () => {
+    if (
+      employeeData.phone &&
+      !validatePhone(employeeData.phone, employeeCountryCode)
+    ) {
+      setErrors((prev) => ({
+        ...prev,
+        phone:
+          'Please enter a valid Ethiopian phone number (e.g., 09xxxxxxxxx or 9xxxxxxxxx)',
+      }));
+    }
+  };
+
   const handleEmployeeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -207,7 +241,13 @@ function SignupPageContent() {
     setIsLoading(true);
 
     try {
-      const response = await api.post('/users', employeeData);
+      // Create payload without empty birthDate to avoid database errors
+      const payload: any = { ...employeeData };
+      if (!payload.birthDate || payload.birthDate.trim() === '') {
+        delete payload.birthDate;
+      }
+
+      const response = await api.post('/users', payload);
 
       if (response.data) {
         showToast({
@@ -270,14 +310,16 @@ function SignupPageContent() {
       newErrors.firstName =
         'First name should only contain letters, 2-50 characters';
     }
-    if (!employerData.lastName) {
-      newErrors.lastName = 'Last name is required';
-    } else if (!validateName(employerData.lastName)) {
+    if (employerData.lastName && !validateName(employerData.lastName)) {
       newErrors.lastName =
         'Last name should only contain letters, 2-50 characters';
     }
-    if (employerData.phoneNumber && !validatePhone(employerData.phoneNumber)) {
-      newErrors.phone = 'Please enter a valid phone number';
+    if (
+      employerData.phoneNumber &&
+      !validatePhone(employerData.phoneNumber, employerCountryCode)
+    ) {
+      newErrors.phone =
+        'Please enter a valid Ethiopian phone number (e.g., 09xxxxxxxxx or 9xxxxxxxxx)';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -299,8 +341,22 @@ function SignupPageContent() {
     }
   };
 
+  const handleEmployerPhoneBlur = () => {
+    if (
+      employerData.phoneNumber &&
+      !validatePhone(employerData.phoneNumber, employerCountryCode)
+    ) {
+      setErrors((prev) => ({
+        ...prev,
+        phone:
+          'Please enter a valid Ethiopian phone number (e.g., 09xxxxxxxxx or 9xxxxxxxxx)',
+      }));
+    }
+  };
+
   const handleEmployerSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('employerData', employerData);
     if (!validateEmployerForm()) {
       const firstError = Object.values(errors)[0];
       showToast({
@@ -389,7 +445,7 @@ function SignupPageContent() {
             <input
               type='text'
               name='firstName'
-              placeholder='Enter Your First Name'
+              placeholder='Enter Your First Name *'
               value={employeeData.firstName}
               onChange={handleEmployeeInputChange}
               required
@@ -406,48 +462,67 @@ function SignupPageContent() {
             <input
               type='text'
               name='lastName'
-              placeholder='Enter Your Last Name'
+              placeholder='Enter Your Last Name (Optional)'
               value={employeeData.lastName}
               onChange={handleEmployeeInputChange}
-              required
               className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 ${errors.lastName ? 'border-red-500' : ''}`}
             />
             <input
               type='email'
               name='email'
-              placeholder='Enter Your Email'
+              placeholder='Enter Your Email *'
               value={employeeData.email}
               onChange={handleEmployeeInputChange}
               required
               className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 ${errors.email ? 'border-red-500' : ''}`}
             />
-            <input
-              type='tel'
-              name='phone'
-              placeholder='Enter Your Phone Number'
-              value={employeeData.phone}
-              onChange={handleEmployeeInputChange}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 ${errors.phone ? 'border-red-500' : ''}`}
-            />
-            <select
-              name='gender'
-              value={employeeData.gender}
-              onChange={handleEmployeeInputChange}
-              className='w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200'
-            >
-              <option value='male'>Male</option>
-              <option value='female'>Female</option>
-            </select>
+            <div className='w-full md:col-span-2'>
+              <div className='flex w-full'>
+                <select
+                  value={employeeCountryCode}
+                  onChange={(e) => setEmployeeCountryCode(e.target.value)}
+                  className='px-3 py-3 border border-r-0 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-200 bg-gray-50 text-gray-700 pr-8'
+                >
+                  <option value='+251'>🇪🇹 +251</option>
+                </select>
+                <input
+                  type='tel'
+                  name='phone'
+                  placeholder='09xxxxxxxxx or 9xxxxxxxxx'
+                  value={employeeData.phone}
+                  onChange={handleEmployeeInputChange}
+                  onBlur={handleEmployeePhoneBlur}
+                  className={`flex-1 px-4 py-3 border-l-0 border rounded-r-lg focus:outline-none focus:ring-2 focus:ring-blue-200 ${errors.phone ? 'border-red-500' : ''}`}
+                />
+              </div>
+              {errors.phone && (
+                <p className='text-red-500 text-sm mt-1'>{errors.phone}</p>
+              )}
+            </div>
+            <div className='w-full'>
+              <select
+                name='gender'
+                value={employeeData.gender}
+                onChange={handleEmployeeInputChange}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 ${errors.gender ? 'border-red-500' : ''}`}
+              >
+                <option value=''>Select Gender *</option>
+                <option value='male'>Male</option>
+                <option value='female'>Female</option>
+              </select>
+              {errors.gender && (
+                <p className='text-red-500 text-sm mt-1'>{errors.gender}</p>
+              )}
+            </div>
             <div className='md:col-span-2'>
               <label className='block text-sm font-medium text-gray-700 mb-1'>
-                Date of Birth
+                Date of Birth (Optional)
               </label>
               <input
                 type='date'
                 name='birthDate'
                 value={employeeData.birthDate}
                 onChange={handleEmployeeInputChange}
-                required
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 ${errors.birthDate ? 'border-red-500' : ''}`}
               />
             </div>
@@ -455,7 +530,7 @@ function SignupPageContent() {
               <input
                 type={showPassword ? 'text' : 'password'}
                 name='password'
-                placeholder='Enter Your Password'
+                placeholder='Enter Your Password *'
                 value={employeeData.password}
                 onChange={handleEmployeeInputChange}
                 required
@@ -481,7 +556,7 @@ function SignupPageContent() {
             <div className='relative w-full'>
               <input
                 type={showConfirm ? 'text' : 'password'}
-                placeholder='Confirm Your Password'
+                placeholder='Confirm Your Password *'
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
@@ -577,7 +652,7 @@ function SignupPageContent() {
             <input
               type='text'
               name='firstName'
-              placeholder='Enter Your First Name'
+              placeholder='Enter Your First Name *'
               value={employerData.firstName}
               onChange={handleEmployerInputChange}
               required
@@ -594,34 +669,49 @@ function SignupPageContent() {
             <input
               type='text'
               name='lastName'
-              placeholder='Enter Your Last Name'
+              placeholder='Enter Your Last Name (Optional)'
               value={employerData.lastName}
               onChange={handleEmployerInputChange}
-              required
               className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 ${errors.lastName ? 'border-red-500' : ''}`}
             />
             <input
               type='email'
               name='email'
-              placeholder='Enter Your Email'
+              placeholder='Enter Your Email *'
               value={employerData.email}
               onChange={handleEmployerInputChange}
               required
               className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 ${errors.email ? 'border-red-500' : ''}`}
             />
-            <input
-              type='tel'
-              name='phoneNumber'
-              placeholder='Enter Your Phone Number'
-              value={employerData.phoneNumber}
-              onChange={handleEmployerInputChange}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 ${errors.phone ? 'border-red-500' : ''}`}
-            />
+            <div className='w-full md:col-span-2'>
+              <div className='flex w-full'>
+                <select
+                  disabled
+                  value={employerCountryCode}
+                  onChange={(e) => setEmployerCountryCode(e.target.value)}
+                  className='px-3 py-3 border border-r-0 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-200 bg-gray-50 text-gray-700 pr-8'
+                >
+                  <option value='+251'>🇪🇹 +251</option>
+                </select>
+                <input
+                  type='tel'
+                  name='phoneNumber'
+                  placeholder='09xxxxxxxxx or 9xxxxxxxxx'
+                  value={employerData.phoneNumber}
+                  onChange={handleEmployerInputChange}
+                  onBlur={handleEmployerPhoneBlur}
+                  className={`flex-1 px-4 py-3 border-l-0 border rounded-r-lg focus:outline-none focus:ring-2 focus:ring-blue-200 ${errors.phone ? 'border-red-500' : ''}`}
+                />
+              </div>
+              {errors.phone && (
+                <p className='text-red-500 text-sm mt-1'>{errors.phone}</p>
+              )}
+            </div>
             <div className='relative w-full md:col-span-2'>
               <input
                 type={showPassword ? 'text' : 'password'}
                 name='password'
-                placeholder='Enter Your Password'
+                placeholder='Enter Your Password *'
                 value={employerData.password}
                 onChange={handleEmployerInputChange}
                 required
@@ -647,7 +737,7 @@ function SignupPageContent() {
             <div className='relative w-full md:col-span-2'>
               <input
                 type={showConfirm ? 'text' : 'password'}
-                placeholder='Confirm Your Password'
+                placeholder='Confirm Your Password *'
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required

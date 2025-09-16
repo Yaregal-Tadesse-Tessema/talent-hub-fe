@@ -5,6 +5,7 @@ import {
   HomeIcon,
   BriefcaseIcon,
   HeartIcon,
+  BookmarkIcon,
   BellIcon,
   Cog6ToothIcon,
   Bars3Icon,
@@ -13,6 +14,7 @@ import {
 import OverviewTab from './components/candidate/OverviewTab';
 import AppliedJobsTab from './components/candidate/AppliedJobsTab';
 import FavoriteJobsTab from './components/candidate/FavoriteJobsTab';
+import SavedJobsTab from './components/candidate/SavedJobsTab';
 import JobAlertsTab from './components/candidate/JobAlertsTab';
 import SettingsTab from './components/candidate/SettingsTab';
 import EmployerDashboard from './components/EmployerDashboard';
@@ -23,6 +25,7 @@ const TABS = [
   { key: 'overview', label: 'Overview', icon: HomeIcon },
   { key: 'applied', label: 'Applied Jobs', icon: BriefcaseIcon },
   { key: 'favorite', label: 'Favorite Jobs', icon: HeartIcon },
+  { key: 'saved', label: 'Saved Jobs', icon: BookmarkIcon },
   { key: 'settings', label: 'Settings', icon: Cog6ToothIcon },
 ];
 
@@ -86,6 +89,8 @@ function DashboardContent() {
         return <AppliedJobsTab />;
       case 'favorite':
         return <FavoriteJobsTab />;
+      case 'saved':
+        return <SavedJobsTab />;
       case 'settings':
         return <SettingsTab />;
       default:

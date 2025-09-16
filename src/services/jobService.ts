@@ -527,6 +527,16 @@ export const jobService = {
     }
   },
 
+  async getSavedJobs(): Promise<any> {
+    try {
+      const response = await api.get('/save-jobs');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching saved jobs:', error);
+      throw error;
+    }
+  },
+
   async favoriteJob(
     jobPostId: string,
     userId: string,

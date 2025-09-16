@@ -242,7 +242,8 @@ export default function ApplicationDetailModal({
                   </div>
                   <a
                     href={application.cv.path}
-                    download
+                    target='_blank'
+                    rel='noopener noreferrer'
                     className='p-2 rounded bg-blue-50 text-blue-600 hover:bg-blue-100'
                   >
                     <ArrowDownTrayIcon className='w-6 h-6' />

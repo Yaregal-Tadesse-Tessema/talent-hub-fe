@@ -598,6 +598,10 @@ export default function FavoriteJobsTab() {
                         <button className='w-full sm:w-auto px-4 py-2 rounded-lg font-medium bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed text-sm'>
                           Deadline Expired
                         </button>
+                      ) : job.isApplied ? (
+                        <button className='w-full sm:w-auto px-4 py-2 rounded-lg font-medium bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed text-sm'>
+                          Applied
+                        </button>
                       ) : (
                         <button
                           onClick={() => handleApplyClick(job.id)}
@@ -648,6 +652,10 @@ export default function FavoriteJobsTab() {
                       {isExpired ? (
                         <button className='w-full sm:w-auto px-3 sm:px-4 py-2 rounded font-medium bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed text-xs sm:text-sm'>
                           Deadline Expired
+                        </button>
+                      ) : job.isApplied ? (
+                        <button className='w-full sm:w-auto px-3 sm:px-4 py-2 rounded font-medium bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed text-xs sm:text-sm'>
+                          Applied
                         </button>
                       ) : (
                         <button

@@ -11,6 +11,7 @@ import {
   Briefcase,
   Filter,
   X,
+  DollarSign,
 } from 'lucide-react';
 import FilterModal from '@/components/ui/FilterModal';
 import AdvancedFilterModal, {
@@ -23,6 +24,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { ShareButton } from '@/components/ui/ShareButton';
 import JobPageSidebar from '@/components/ui/JobPageSidebar';
+import Tooltip from '@/components/ui/Tooltip';
 
 // Helper function to check if a job is expired
 const isJobExpired = (deadline: string): boolean => {
@@ -169,8 +171,11 @@ function FindJobContent() {
   const [hoveredJobId, setHoveredJobId] = useState<string | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [savedJobs, setSavedJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [savedJobsLoading, setSavedJobsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'all' | 'saved'>('all');
   const [searchFilters, setSearchFilters] = useState({
     keyword: '',
     category: '',
@@ -256,14 +261,6 @@ function FindJobContent() {
           const searchCategory =
             searchParams?.get('category') || searchFilters.category;
 
-          console.log('Applying filters:', {
-            searchTitle,
-            searchCategory,
-            hasAdvancedFilters,
-            hasBasicFilters,
-            advancedFilters,
-          });
-
           response = await jobService.searchJobsWithAdvancedFiltersForUser(
             {
               title: searchTitle,
@@ -287,6 +284,8 @@ function FindJobContent() {
         const validCurrentPage = currentPage > totalPages ? 1 : currentPage;
 
         setJobs(response.items);
+        console.log(response.items);
+
         setPagination({
           total: response.total,
           totalPages: totalPages,
@@ -318,6 +317,45 @@ function FindJobContent() {
     searchFilters.keyword,
     searchFilters.category,
   ]);
+
+  // Fetch saved jobs
+  const fetchSavedJobs = async () => {
+    if (!user) return;
+
+    setSavedJobsLoading(true);
+    try {
+      const response = await jobService.getSavedJobs();
+      console.log('Saved jobs response:', response); // Debug log
+
+      // Ensure we always have an array
+      if (Array.isArray(response)) {
+        setSavedJobs(response);
+      } else if (response && Array.isArray(response.data)) {
+        setSavedJobs(response.data);
+      } else if (response && Array.isArray(response.items)) {
+        setSavedJobs(response.items);
+      } else {
+        console.warn('Unexpected response format:', response);
+        setSavedJobs([]);
+      }
+    } catch (error) {
+      console.error('Error fetching saved jobs:', error);
+      setSavedJobs([]); // Ensure we always have an array
+      showToast({
+        type: 'error',
+        message: 'Failed to fetch saved jobs',
+      });
+    } finally {
+      setSavedJobsLoading(false);
+    }
+  };
+
+  // Fetch saved jobs when user changes or tab changes to saved
+  useEffect(() => {
+    if (user && activeTab === 'saved') {
+      fetchSavedJobs();
+    }
+  }, [user, activeTab]);
 
   // Scroll to top when page changes
   useEffect(() => {
@@ -370,6 +408,10 @@ function FindJobContent() {
       setJobs(
         jobs.map((job) => (job.id === jobId ? { ...job, isSaved: true } : job)),
       );
+      // Refresh saved jobs if we're on the saved tab
+      if (activeTab === 'saved') {
+        fetchSavedJobs();
+      }
       showToast({ type: 'success', message: 'Job saved successfully' });
     } catch (error) {
       console.error('Error saving job:', error);
@@ -390,9 +432,14 @@ function FindJobContent() {
           job.id === jobId ? { ...job, isSaved: false } : job,
         ),
       );
+      // Remove from saved jobs list and refresh if we're on the saved tab
+      if (activeTab === 'saved') {
+        setSavedJobs(savedJobs.filter((job) => job.id !== jobId));
+      }
       showToast({ type: 'success', message: 'Job unsaved successfully' });
     } catch (error) {
       console.error('Error unsaving job:', error);
+      showToast({ type: 'error', message: 'Failed to unsave job' });
     }
   };
 
@@ -478,11 +525,15 @@ function FindJobContent() {
       </div>
 
       {/* Loading and error states */}
-      {loading && (
+      {(loading || (activeTab === 'saved' && savedJobsLoading)) && (
         <div className='flex justify-center items-center min-h-[200px] bg-gray-50 dark:bg-gray-900'>
           <div className='text-center'>
             <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4'></div>
-            <p className='text-gray-600 dark:text-gray-400'>Loading jobs...</p>
+            <p className='text-gray-600 dark:text-gray-400'>
+              {activeTab === 'saved'
+                ? 'Loading saved jobs...'
+                : 'Loading jobs...'}
+            </p>
           </div>
         </div>
       )}
@@ -494,200 +545,265 @@ function FindJobContent() {
         </div>
       )}
 
-      {/* Top search/filter bar */}
-      <div className='bg-gray-100 dark:bg-gray-800 px-3 sm:px-4 md:px-8 lg:px-16 py-3 sm:py-4 md:py-6 pb-4 sm:pb-6 md:pb-8 border-b border-gray-200 dark:border-gray-700'>
-        <div className='flex flex-col lg:flex-row gap-3 sm:gap-4 items-stretch lg:items-center shadow dark:shadow-gray-700/50 rounded-xl px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-          {/* Job title search */}
-          <div className='flex items-center gap-2 flex-1 border-b border-gray-200 dark:border-gray-600 lg:border-b-0 lg:border-r lg:border-gray-200 dark:lg:border-gray-600 pb-3 sm:pb-4 lg:pb-0 pr-0 lg:pr-4 w-full min-w-0'>
-            <svg
-              width='18'
-              height='18'
-              fill='none'
-              viewBox='0 0 24 24'
-              stroke='#2563eb'
-              className='mr-2 flex-shrink-0 sm:w-5 sm:h-5'
-            >
-              <circle cx='11' cy='11' r='7' strokeWidth='2' />
-              <path d='M21 21l-4.35-4.35' strokeWidth='2' />
-            </svg>
-            <input
-              data-tutorial='search-bar'
-              className='w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 text-sm sm:text-base min-w-0'
-              placeholder='Job title, Keyword...'
-              value={searchFilters.keyword}
-              onChange={(e) =>
-                setSearchFilters((prev) => ({
-                  ...prev,
-                  keyword: e.target.value,
-                }))
-              }
-              onKeyPress={handleKeyPress}
-            />
-          </div>
-          {/* Category */}
-          <div className='flex items-center gap-2 flex-1 border-b border-gray-200 dark:border-gray-600 lg:border-b-0 lg:border-r lg:border-gray-200 dark:lg:border-gray-600 pb-3 sm:pb-4 lg:pb-0 pr-0 lg:pr-4 min-w-0'>
-            <Briefcase className='w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400 mr-2 flex-shrink-0' />
-            <select
-              className='w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-300 text-sm sm:text-base min-w-0'
-              value={searchFilters.category}
-              onChange={(e) =>
-                setSearchFilters((prev) => ({
-                  ...prev,
-                  category: e.target.value,
-                }))
-              }
-            >
-              <option value=''>Select Category</option>
-              <option value='FullTime'>Full Time</option>
-              <option value='PartTime'>Part Time</option>
-              <option value='Contract'>Contract</option>
-              <option value='Internship'>Internship</option>
-            </select>
-          </div>
-
-          {/* Advanced Filter Button */}
-          <div className='flex items-center gap-2 pl-0 lg:pl-4 w-full lg:w-auto'>
+      {/* Tabs */}
+      {user && (
+        <div className='bg-gray-100 dark:bg-gray-800 px-3 sm:px-4 md:px-8 lg:px-16 py-2 border-b border-gray-200 dark:border-gray-700'>
+          <div className='flex space-x-1 bg-gray-200 dark:bg-gray-700 p-1 rounded-lg w-fit'>
             <button
-              data-tutorial='filters'
-              onClick={() => setIsAdvancedFilterOpen(true)}
-              className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-md font-medium transition-colors text-sm sm:text-base border ${
-                activeFiltersCount > 0
-                  ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300'
-                  : 'bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+              onClick={() => setActiveTab('all')}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                activeTab === 'all'
+                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
-              <Filter className='w-4 h-4' />
-              <span className='hidden sm:inline'>Advanced Filters</span>
-              <span className='sm:hidden'>Filters</span>
-              {activeFiltersCount > 0 && (
-                <span className='bg-blue-600 dark:bg-blue-500 text-white text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full'>
-                  {activeFiltersCount}
-                </span>
-              )}
+              All Jobs
             </button>
-
-            {/* Find Job Button */}
             <button
-              className='bg-blue-600 dark:bg-blue-500 text-white px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-md font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition w-full lg:w-auto text-sm sm:text-base'
-              onClick={handleSearch}
+              onClick={() => setActiveTab('saved')}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                activeTab === 'saved'
+                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              }`}
             >
-              Find Job
+              Saved Jobs
             </button>
           </div>
         </div>
-      </div>
+      )}
 
-      <div className='flex flex-col lg:flex-row px-3 sm:px-4 md:px-8 lg:px-16 py-3 sm:py-4 md:py-8 gap-3 sm:gap-4 md:gap-6 lg:gap-8'>
-        <div className='flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8'>
-          {/* Main Content */}
-          <div className='flex-1'>
-            {/* View Mode Toggle */}
-            <div className='flex justify-between items-center mb-4 sm:mb-6'>
-              <div className='text-sm sm:text-base text-gray-600 dark:text-gray-400'>
-                {pagination.total} jobs found
-              </div>
-              <div className='flex items-center gap-1 sm:gap-2'>
-                <button
-                  onClick={() => setViewMode('card')}
-                  className={`p-1.5 sm:p-2 rounded-lg transition-colors ${
-                    viewMode === 'card'
-                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
-                  }`}
-                >
-                  <svg
-                    width='18'
-                    height='18'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                    className='sm:w-5 sm:h-5'
-                  >
-                    <rect x='3' y='3' width='7' height='7' strokeWidth='2' />
-                    <rect x='14' y='3' width='7' height='7' strokeWidth='2' />
-                    <rect x='3' y='14' width='7' height='7' strokeWidth='2' />
-                    <rect x='14' y='14' width='7' height='7' strokeWidth='2' />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-1.5 sm:p-2 rounded-lg transition-colors ${
-                    viewMode === 'list'
-                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
-                  }`}
-                >
-                  <svg
-                    width='18'
-                    height='18'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                    className='sm:w-5 sm:h-5'
-                  >
-                    <line x1='8' y1='6' x2='21' y2='6' strokeWidth='2' />
-                    <line x1='8' y1='12' x2='21' y2='12' strokeWidth='2' />
-                    <line x1='8' y1='18' x2='21' y2='18' strokeWidth='2' />
-                    <line x1='3' y1='6' x2='3.01' y2='6' strokeWidth='2' />
-                    <line x1='3' y1='12' x2='3.01' y2='12' strokeWidth='2' />
-                    <line x1='3' y1='18' x2='3.01' y2='18' strokeWidth='2' />
-                  </svg>
-                </button>
-              </div>
+      {/* Top search/filter bar - only show for all jobs tab */}
+      {activeTab === 'all' && (
+        <div className='bg-gray-100 dark:bg-gray-800 px-3 sm:px-4 md:px-8 lg:px-16 py-3 sm:py-4 md:py-6 pb-4 sm:pb-6 md:pb-8 border-b border-gray-200 dark:border-gray-700'>
+          <div className='flex flex-col lg:flex-row gap-3 sm:gap-4 items-stretch lg:items-center shadow dark:shadow-gray-700/50 rounded-xl px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+            {/* Job title search */}
+            <div className='flex items-center gap-2 flex-1 border-b border-gray-200 dark:border-gray-600 lg:border-b-0 lg:border-r lg:border-gray-200 dark:lg:border-gray-600 pb-3 sm:pb-4 lg:pb-0 pr-0 lg:pr-4 w-full min-w-0'>
+              <svg
+                width='18'
+                height='18'
+                fill='none'
+                viewBox='0 0 24 24'
+                stroke='#2563eb'
+                className='mr-2 flex-shrink-0 sm:w-5 sm:h-5'
+              >
+                <circle cx='11' cy='11' r='7' strokeWidth='2' />
+                <path d='M21 21l-4.35-4.35' strokeWidth='2' />
+              </svg>
+              <input
+                data-tutorial='search-bar'
+                className='w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 text-sm sm:text-base min-w-0'
+                placeholder='Job title, Keyword...'
+                value={searchFilters.keyword}
+                onChange={(e) =>
+                  setSearchFilters((prev) => ({
+                    ...prev,
+                    keyword: e.target.value,
+                  }))
+                }
+                onKeyPress={handleKeyPress}
+              />
+            </div>
+            {/* Category */}
+            <div className='flex items-center gap-2 flex-1 border-b border-gray-200 dark:border-gray-600 lg:border-b-0 lg:border-r lg:border-gray-200 dark:lg:border-gray-600 pb-3 sm:pb-4 lg:pb-0 pr-0 lg:pr-4 min-w-0'>
+              <Briefcase className='w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400 mr-2 flex-shrink-0' />
+              <select
+                className='w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-300 text-sm sm:text-base min-w-0'
+                value={searchFilters.category}
+                onChange={(e) =>
+                  setSearchFilters((prev) => ({
+                    ...prev,
+                    category: e.target.value,
+                  }))
+                }
+              >
+                <option value=''>Select Category</option>
+                <option value='FullTime'>Full Time</option>
+                <option value='PartTime'>Part Time</option>
+                <option value='Contract'>Contract</option>
+                <option value='Internship'>Internship</option>
+              </select>
             </div>
 
-            {/* Card View */}
-            {viewMode === 'card' && (
-              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8'>
-                {jobs.map((job) => (
+            {/* Advanced Filter Button */}
+            <div className='flex items-center gap-2 pl-0 lg:pl-4 w-full lg:w-auto'>
+              <button
+                data-tutorial='filters'
+                onClick={() => setIsAdvancedFilterOpen(true)}
+                className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-md font-medium transition-colors text-sm sm:text-base border ${
+                  activeFiltersCount > 0
+                    ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300'
+                    : 'bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                }`}
+              >
+                <Filter className='w-4 h-4' />
+                <span className='hidden sm:inline'>Advanced Filters</span>
+                <span className='sm:hidden'>Filters</span>
+                {activeFiltersCount > 0 && (
+                  <span className='bg-blue-600 dark:bg-blue-500 text-white text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full'>
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Find Job Button */}
+              <button
+                className='bg-blue-600 dark:bg-blue-500 text-white px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-md font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition w-full lg:w-auto text-sm sm:text-base'
+                onClick={handleSearch}
+              >
+                Find Job
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className='flex flex-col lg:flex-row px-3 sm:px-4 md:px-8 lg:px-16 py-3 sm:py-4 md:py-8 gap-3 sm:gap-4 md:gap-6 lg:gap-8'>
+        {/* Main Content */}
+        <div className='flex-1'>
+          {/* View Mode Toggle */}
+          <div className='flex justify-between items-center mb-4 sm:mb-6'>
+            <div className='text-sm sm:text-base text-gray-600 dark:text-gray-400'>
+              {activeTab === 'saved'
+                ? `${Array.isArray(savedJobs) ? savedJobs.length : 0} saved jobs`
+                : `${pagination.total} jobs found`}
+            </div>
+            <div className='flex items-center gap-1 sm:gap-2'>
+              <button
+                onClick={() => setViewMode('card')}
+                className={`p-1.5 sm:p-2 rounded-lg transition-colors ${
+                  viewMode === 'card'
+                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                }`}
+              >
+                <svg
+                  width='18'
+                  height='18'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                  className='sm:w-5 sm:h-5'
+                >
+                  <rect x='3' y='3' width='7' height='7' strokeWidth='2' />
+                  <rect x='14' y='3' width='7' height='7' strokeWidth='2' />
+                  <rect x='3' y='14' width='7' height='7' strokeWidth='2' />
+                  <rect x='14' y='14' width='7' height='7' strokeWidth='2' />
+                </svg>
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-1.5 sm:p-2 rounded-lg transition-colors ${
+                  viewMode === 'list'
+                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                }`}
+              >
+                <svg
+                  width='18'
+                  height='18'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                  className='sm:w-5 sm:h-5'
+                >
+                  <line x1='8' y1='6' x2='21' y2='6' strokeWidth='2' />
+                  <line x1='8' y1='12' x2='21' y2='12' strokeWidth='2' />
+                  <line x1='8' y1='18' x2='21' y2='18' strokeWidth='2' />
+                  <line x1='3' y1='6' x2='3.01' y2='6' strokeWidth='2' />
+                  <line x1='3' y1='12' x2='3.01' y2='12' strokeWidth='2' />
+                  <line x1='3' y1='18' x2='3.01' y2='18' strokeWidth='2' />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Card View */}
+          {viewMode === 'card' && (
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8'>
+              {activeTab === 'saved' &&
+              (!Array.isArray(savedJobs) || savedJobs.length === 0) &&
+              !savedJobsLoading ? (
+                <div className='col-span-full text-center py-12'>
+                  <div className='text-gray-400 dark:text-gray-500 mb-4'>
+                    <Bookmark className='w-16 h-16 mx-auto' />
+                  </div>
+                  <h3 className='text-lg font-medium text-gray-900 dark:text-white mb-2'>
+                    No saved jobs yet
+                  </h3>
+                  <p className='text-gray-500 dark:text-gray-400 mb-4'>
+                    Save jobs you're interested in to view them here
+                  </p>
+                  <button
+                    onClick={() => setActiveTab('all')}
+                    className='text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium'
+                  >
+                    Browse all jobs
+                  </button>
+                </div>
+              ) : (
+                (activeTab === 'saved'
+                  ? Array.isArray(savedJobs)
+                    ? savedJobs
+                    : []
+                  : jobs
+                ).map((job) => (
                   <div
                     key={job.id}
                     data-tutorial='job-card'
-                    className='group relative z-0 hover:z-30 focus-within:z-30 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-xl dark:hover:shadow-gray-900/50 transition-all duration-300 hover:border-blue-300 dark:hover:border-blue-600 hover:-translate-y-1'
+                    className='group relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-2xl dark:hover:shadow-gray-900/50 transition-all duration-300 hover:border-blue-300 dark:hover:border-blue-600 hover:-translate-y-2 overflow-hidden'
                   >
-                    {/* Header with company info */}
-                    <div className='p-4 sm:p-6 pb-3 sm:pb-4'>
-                      <div className='flex items-start justify-between mb-3 sm:mb-4'>
-                        <div className='flex items-center gap-2 sm:gap-3 flex-1 min-w-0'>
-                          <div className='flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl flex items-center justify-center border border-blue-200 dark:border-blue-700 overflow-hidden'>
-                            {job.companyLogo ? (
-                              <img
-                                src={
-                                  job.companyLogo.path ||
-                                  '/images/default-company-logo.png'
-                                }
-                                alt={job.companyName}
-                                className='w-6 h-6 sm:w-8 sm:h-8 object-contain'
-                              />
-                            ) : (
-                              <Briefcase className='w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400' />
-                            )}
-                          </div>
-                          <div className='flex-1 min-w-0'>
-                            <h3 className='font-semibold text-gray-900 dark:text-white text-sm truncate'>
-                              {job.companyName}
-                            </h3>
-                            <div className='flex items-center gap-1 mt-1'>
-                              <MapPin className='w-3 h-3 text-gray-400 dark:text-gray-500' />
-                              <span className='text-xs text-gray-500 dark:text-gray-400 truncate'>
-                                {job.location}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+                    {/* Header with company info and status badges */}
+                    <div className='relative p-4 sm:p-5'>
+                      {/* Status badges - positioned absolutely */}
+                      <div className='absolute top-3 right-3 flex flex-col gap-1.5 z-10'>
+                        {job.isSaved && (
+                          <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 shadow-sm'>
+                            <Bookmark className='w-3 h-3 mr-1' />
+                            <span className='hidden sm:inline'>Saved</span>
+                          </span>
+                        )}
+                        {isJobExpired(job.deadline) && (
+                          <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 shadow-sm'>
+                            Expired
+                          </span>
+                        )}
+                        {job.positionNumbers > 1 && (
+                          <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 shadow-sm'>
+                            {job.positionNumbers} positions
+                          </span>
+                        )}
+                      </div>
 
-                        {/* Status badges */}
-                        <div className='flex flex-col gap-1'>
-                          {job.isSaved && (
-                            <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400'>
-                              <Bookmark className='w-3 h-3 mr-1' />
-                              Saved
-                            </span>
+                      {/* Company logo and info */}
+                      <div className='flex items-start gap-3 mb-4'>
+                        <div className='flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl flex items-center justify-center border border-blue-200 dark:border-blue-700 overflow-hidden shadow-sm'>
+                          {job.companyLogo ? (
+                            <img
+                              src={
+                                job.companyLogo.path ||
+                                '/images/default-company-logo.png'
+                              }
+                              alt={job.companyName}
+                              className='w-8 h-8 sm:w-10 sm:h-10 object-contain'
+                            />
+                          ) : (
+                            <Briefcase className='w-6 h-6 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-400' />
                           )}
-                          {isJobExpired(job.deadline) && (
-                            <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'>
-                              Expired
-                            </span>
+                        </div>
+                        <div className='flex-1 min-w-0 pr-16'>
+                          <h3 className='font-semibold text-gray-900 dark:text-white text-sm sm:text-base truncate mb-1'>
+                            {job.companyName}
+                          </h3>
+                          <div className='flex items-center gap-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400'>
+                            <MapPin className='w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0' />
+                            <span className='truncate'>{job.location}</span>
+                          </div>
+                          {job.industry && (
+                            <div className='flex items-center gap-1 mt-1 text-xs text-gray-400 dark:text-gray-500'>
+                              <Briefcase className='w-3 h-3 flex-shrink-0' />
+                              <span className='truncate'>{job.industry}</span>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -695,56 +811,82 @@ function FindJobContent() {
                       {/* Job title */}
                       <Link
                         href={`/find-job/${job.id}`}
-                        className='block group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors'
+                        className='block group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3'
                       >
-                        <h2 className='font-bold text-gray-900 dark:text-white text-base sm:text-lg leading-tight mb-2 sm:mb-3 line-clamp-2 hover:text-blue-600 dark:hover:text-blue-400'>
+                        <h2 className='font-bold text-gray-900 dark:text-white text-base sm:text-lg leading-tight line-clamp-2 hover:text-blue-600 dark:hover:text-blue-400'>
                           {job.title}
                         </h2>
                       </Link>
 
-                      {/* Job details */}
-                      <div className='space-y-2 sm:space-y-3'>
-                        <div className='flex items-center justify-between'>
-                          <div className='flex items-center gap-2'>
-                            <span className='inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'>
-                              {job.employmentType}
+                      {/* Job details grid */}
+                      <div className='grid grid-cols-1 gap-3 mb-4'>
+                        {/* Employment type and experience level */}
+                        <div className='flex items-center gap-2 flex-wrap'>
+                          <span className='inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'>
+                            {job.employmentType}
+                          </span>
+                          {job.experienceLevel && (
+                            <span className='inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'>
+                              {job.experienceLevel}
                             </span>
-                            {user && (
-                              <button
-                                className={`p-1 rounded-lg transition-all duration-200 ${
-                                  job.isSaved
-                                    ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
-                                    : 'text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-                                }`}
-                                onClick={() =>
-                                  job.isSaved
-                                    ? handleUnsaveJob(job.id)
-                                    : handleSaveJob(job.id)
-                                }
-                              >
-                                <Bookmark
-                                  className={`w-3 h-3 ${job.isSaved ? 'fill-current' : ''}`}
-                                />
-                              </button>
-                            )}
+                          )}
+                          {job.educationLevel && (
+                            <span className='inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'>
+                              {job.educationLevel}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Salary information */}
+                        <div className='flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg'>
+                          <div className='flex items-center gap-2'>
+                            <DollarSign className='w-4 h-4 text-green-600 dark:text-green-400' />
+                            <span className='text-xs text-gray-500 dark:text-gray-400'>
+                              Salary
+                            </span>
                           </div>
                           <div className='text-right'>
-                            <div className='text-xs sm:text-sm font-semibold text-gray-900 dark:text-white'>
-                              ${job.salaryRange?.min || 'N/A'} - $
-                              {job.salaryRange?.max || 'N/A'}
+                            <div className='text-sm font-semibold text-gray-900 dark:text-white'>
+                              $
+                              {job.salaryRange?.min
+                                ? parseInt(job.salaryRange.min).toLocaleString()
+                                : 'N/A'}{' '}
+                              - $
+                              {job.salaryRange?.max
+                                ? parseInt(job.salaryRange.max).toLocaleString()
+                                : 'N/A'}
                             </div>
                             <div className='text-xs text-gray-500 dark:text-gray-400'>
-                              per year
+                              {job.paymentType || 'per year'}
                             </div>
                           </div>
                         </div>
+
+                        {/* Skills preview */}
+                        {job.skill && job.skill.length > 0 && (
+                          <div className='flex flex-wrap gap-1.5'>
+                            {job.skill.slice(0, 3).map((skill, index) => (
+                              <span
+                                key={index}
+                                className='inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                              >
+                                {skill}
+                              </span>
+                            ))}
+                            {job.skill.length > 3 && (
+                              <span className='inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'>
+                                +{job.skill.length - 3} more
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
 
                     {/* Footer with dates and actions */}
-                    <div className='px-4 sm:px-6 pb-4 sm:pb-6'>
+                    <div className='px-4 sm:px-5 pb-4 sm:pb-5 border-t border-gray-100 dark:border-gray-700 pt-4'>
                       {/* Date info */}
-                      <div className='flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-3 sm:mb-4'>
+                      <div className='flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-4'>
                         <div className='flex items-center gap-1'>
                           <svg
                             className='w-3 h-3'
@@ -767,11 +909,17 @@ function FindJobContent() {
                               strokeWidth='2'
                             />
                           </svg>
-                          <span className='hidden sm:inline'>Posted </span>
-                          {new Date(job.postedDate).toLocaleDateString()}
+                          <span>
+                            Posted{' '}
+                            {new Date(job.postedDate).toLocaleDateString()}
+                          </span>
                         </div>
                         <div
-                          className={`flex items-center gap-1 ${isJobExpired(job.deadline) ? 'text-red-500 dark:text-red-400 font-medium' : ''}`}
+                          className={`flex items-center gap-1 ${
+                            isJobExpired(job.deadline)
+                              ? 'text-red-500 dark:text-red-400 font-medium'
+                              : ''
+                          }`}
                         >
                           <svg
                             className='w-3 h-3'
@@ -785,78 +933,116 @@ function FindJobContent() {
                               strokeWidth='2'
                             />
                           </svg>
-                          <span className='hidden sm:inline'>
+                          <span>
                             {isJobExpired(job.deadline)
                               ? 'Expired'
                               : 'Deadline'}{' '}
+                            {new Date(job.deadline).toLocaleDateString()}
                           </span>
-                          {new Date(job.deadline).toLocaleDateString()}
                         </div>
                       </div>
 
+                      {/* Application count */}
+                      {job.applicationCount > 0 && (
+                        <div className='flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mb-3'>
+                          <User className='w-3 h-3' />
+                          <span>{job.applicationCount} applications</span>
+                        </div>
+                      )}
+
                       {/* Action buttons */}
-                      <div className='flex items-center gap-2 sm:gap-3'>
+                      <div className='flex items-center gap-2'>
                         <button
                           data-tutorial='apply-button'
-                          className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
-                            isJobExpired(job.deadline)
+                          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 ${
+                            isJobExpired(job.deadline) || job.isApplied
                               ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                              : 'bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 hover:shadow-lg'
+                              : 'bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 hover:shadow-lg transform hover:scale-105'
                           }`}
                           onClick={() => handleApplyClick(job.id)}
-                          disabled={isJobExpired(job.deadline)}
+                          disabled={isJobExpired(job.deadline) || job.isApplied}
                         >
                           {isJobExpired(job.deadline) ? (
                             'Expired'
+                          ) : job.isApplied ? (
+                            'Applied'
                           ) : (
                             <>
-                              <span className='hidden sm:inline'>
-                                Apply Now
-                              </span>
-                              <span className='sm:hidden'>Apply</span>
+                              <span>Apply Now</span>
                               <ArrowRight className='w-4 h-4' />
                             </>
                           )}
                         </button>
 
-                        <div className='flex items-center gap-1 sm:gap-2'>
+                        <div className='flex items-center gap-1'>
                           {user && (
-                            <button
-                              className={`p-1.5 sm:p-2 rounded-lg transition-all duration-200 ${
+                            <Tooltip
+                              content={
                                 job.isSaved
-                                  ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
-                                  : 'text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-                              }`}
-                              onClick={() =>
-                                job.isSaved
-                                  ? handleUnsaveJob(job.id)
-                                  : handleSaveJob(job.id)
+                                  ? 'Remove from saved jobs'
+                                  : 'Save job'
                               }
+                              position='top'
                             >
-                              <Bookmark
-                                className={`w-4 h-4 ${job.isSaved ? 'fill-current' : ''}`}
-                              />
-                            </button>
+                              <button
+                                className={`p-2 rounded-lg transition-all duration-200 ${
+                                  job.isSaved
+                                    ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
+                                    : 'text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                }`}
+                                onClick={() =>
+                                  job.isSaved
+                                    ? handleUnsaveJob(job.id)
+                                    : handleSaveJob(job.id)
+                                }
+                              >
+                                <Bookmark
+                                  className={`w-4 h-4 ${job.isSaved ? 'fill-current' : ''}`}
+                                />
+                              </button>
+                            </Tooltip>
                           )}
 
-                          <div className='opacity-0 group-hover:opacity-100 transition-opacity duration-200 relative'>
+                          <div className='opacity-0 group-hover:opacity-100 transition-opacity duration-200'>
                             <ShareButton />
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Hover overlay effect */}
+                    {/* Hover gradient overlay */}
                     <div className='absolute inset-0 bg-gradient-to-t from-blue-50/0 via-blue-50/0 to-blue-50/0 group-hover:from-blue-50/5 group-hover:via-blue-50/3 group-hover:to-blue-50/10 dark:group-hover:from-blue-900/5 dark:group-hover:via-blue-900/3 dark:group-hover:to-blue-900/10 transition-all duration-300 pointer-events-none rounded-2xl' />
                   </div>
-                ))}
-              </div>
-            )}
+                ))
+              )}
+            </div>
+          )}
 
-            {/* List View */}
-            {viewMode === 'list' && (
-              <div className='flex flex-col gap-3 sm:gap-4'>
-                {jobs.map((job) => {
+          {/* List View */}
+          {viewMode === 'list' && (
+            <div className='flex flex-col gap-3 sm:gap-4'>
+              {activeTab === 'saved' &&
+              (!Array.isArray(savedJobs) || savedJobs.length === 0) &&
+              !savedJobsLoading ? (
+                <div className='text-center py-12'>
+                  <div className='text-gray-400 dark:text-gray-500 mb-4'>
+                    <Bookmark className='w-16 h-16 mx-auto' />
+                  </div>
+                  <h3 className='text-lg font-medium text-gray-900 dark:text-white mb-2'>
+                    No saved jobs yet
+                  </h3>
+                  <p className='text-gray-500 dark:text-gray-400 mb-4'>
+                    Save jobs you're interested in to view them here
+                  </p>
+                  <button
+                    onClick={() => setActiveTab('all')}
+                    className='text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium'
+                  >
+                    Browse all jobs
+                  </button>
+                </div>
+              ) : (
+                (activeTab === 'saved' ? savedJobs : jobs).map((job) => {
                   const isHovered = hoveredJobId === job.id;
                   return (
                     <div
@@ -904,22 +1090,31 @@ function FindJobContent() {
                                     {job.employmentType}
                                   </span>
                                   {user && (
-                                    <button
-                                      className={`p-0.5 rounded transition-all duration-200 ${
+                                    <Tooltip
+                                      content={
                                         job.isSaved
-                                          ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
-                                          : 'text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-                                      }`}
-                                      onClick={() =>
-                                        job.isSaved
-                                          ? handleUnsaveJob(job.id)
-                                          : handleSaveJob(job.id)
+                                          ? 'Remove from saved jobs'
+                                          : 'Save job'
                                       }
+                                      position='top'
                                     >
-                                      <Bookmark
-                                        className={`w-4 h-4 ${job.isSaved ? 'fill-current' : ''}`}
-                                      />
-                                    </button>
+                                      <button
+                                        className={`p-0.5 rounded transition-all duration-200 ${
+                                          job.isSaved
+                                            ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
+                                            : 'text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                        }`}
+                                        onClick={() =>
+                                          job.isSaved
+                                            ? handleUnsaveJob(job.id)
+                                            : handleSaveJob(job.id)
+                                        }
+                                      >
+                                        <Bookmark
+                                          className={`w-4 h-4 ${job.isSaved ? 'fill-current' : ''}`}
+                                        />
+                                      </button>
+                                    </Tooltip>
                                   )}
                                 </div>
                               )}
@@ -1007,6 +1202,12 @@ function FindJobContent() {
                                 : 'Deadline: '}
                               {new Date(job.deadline).toLocaleDateString()}
                             </span>
+                            {job.applicationCount > 0 && (
+                              <span className='flex items-center gap-1'>
+                                <User className='w-3 h-3 sm:w-4 sm:h-4' />
+                                {job.applicationCount} applications
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1020,15 +1221,17 @@ function FindJobContent() {
                         </div>
                         <button
                           className={`${
-                            isJobExpired(job.deadline)
+                            isJobExpired(job.deadline) || job.isApplied
                               ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed border border-gray-200 dark:border-gray-600'
                               : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white border border-blue-200 dark:border-blue-700'
                           } font-semibold px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 rounded-lg flex items-center gap-1 sm:gap-2 transition text-sm`}
                           onClick={() => handleApplyClick(job.id)}
-                          disabled={isJobExpired(job.deadline)}
+                          disabled={isJobExpired(job.deadline) || job.isApplied}
                         >
                           {isJobExpired(job.deadline) ? (
                             'Expired'
+                          ) : job.isApplied ? (
+                            'Applied'
                           ) : (
                             <>
                               <span className='hidden sm:inline'>
@@ -1037,201 +1240,203 @@ function FindJobContent() {
                               <span className='sm:hidden'>Apply</span>
                             </>
                           )}
-                          {!isJobExpired(job.deadline) && (
+                          {!isJobExpired(job.deadline) && !job.isApplied && (
                             <ArrowRight className='w-4 h-4' />
                           )}
                         </button>
                       </div>
                     </div>
                   );
-                })}
-              </div>
-            )}
+                })
+              )}
+            </div>
+          )}
 
-            {/* Empty State */}
-            {!loading && pagination.total === 0 && (
-              <div className='text-center py-8 sm:py-12'>
-                <div className='text-gray-400 dark:text-gray-500 text-3xl sm:text-4xl mb-3 sm:mb-4'>
-                  🔍
-                </div>
-                <h3 className='text-base sm:text-lg md:text-xl font-medium text-gray-900 dark:text-white mb-2'>
-                  No jobs found
+          {/* Empty State */}
+          {!loading && pagination.total === 0 && (
+            <div className='text-center py-8 sm:py-12'>
+              <div className='text-gray-400 dark:text-gray-500 text-3xl sm:text-4xl mb-3 sm:mb-4'>
+                🔍
+              </div>
+              <h3 className='text-base sm:text-lg md:text-xl font-medium text-gray-900 dark:text-white mb-2'>
+                No jobs found
+              </h3>
+              <p className='text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-4 sm:mb-6'>
+                Try adjusting your search criteria or check back later for new
+                opportunities
+              </p>
+              <button
+                onClick={handleClearAllFilters}
+                className='px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm sm:text-base'
+              >
+                Clear All Filters
+              </button>
+            </div>
+          )}
+
+          {/* Active Filters Display */}
+          {activeFiltersCount > 0 && (
+            <div className='mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700'>
+              <div className='flex items-center justify-between mb-2 sm:mb-3'>
+                <h3 className='font-medium text-blue-900 dark:text-blue-100 text-sm sm:text-base'>
+                  Active Filters ({activeFiltersCount})
                 </h3>
-                <p className='text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-4 sm:mb-6'>
-                  Try adjusting your search criteria or check back later for new
-                  opportunities
-                </p>
                 <button
                   onClick={handleClearAllFilters}
-                  className='px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm sm:text-base'
+                  className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 text-sm font-medium'
                 >
-                  Clear All Filters
+                  Clear All
                 </button>
               </div>
-            )}
-
-            {/* Active Filters Display */}
-            {activeFiltersCount > 0 && (
-              <div className='mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700'>
-                <div className='flex items-center justify-between mb-2 sm:mb-3'>
-                  <h3 className='font-medium text-blue-900 dark:text-blue-100 text-sm sm:text-base'>
-                    Active Filters ({activeFiltersCount})
-                  </h3>
-                  <button
-                    onClick={handleClearAllFilters}
-                    className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 text-sm font-medium'
-                  >
-                    Clear All
-                  </button>
-                </div>
-                <div className='flex flex-wrap gap-1.5 sm:gap-2'>
-                  {advancedFilters.experienceLevel && (
-                    <span className='inline-flex items-center gap-1 px-2 sm:px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-xs sm:text-sm'>
-                      <span className='hidden sm:inline'>Experience: </span>
-                      <span className='sm:hidden'>Exp: </span>
-                      {advancedFilters.experienceLevel}
-                      <button
-                        onClick={() =>
-                          setAdvancedFilters((prev) => ({
-                            ...prev,
-                            experienceLevel: '',
-                          }))
-                        }
-                        className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
-                      >
-                        <X className='w-3 h-3' />
-                      </button>
-                    </span>
-                  )}
-                  {(advancedFilters.salaryRange.min > 0 ||
-                    advancedFilters.salaryRange.max > 0) && (
-                    <span className='inline-flex items-center gap-1 px-2 sm:px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-xs sm:text-sm'>
-                      <span className='hidden sm:inline'>Salary: </span>
-                      <span className='sm:hidden'>$</span>
-                      {advancedFilters.salaryRange.min || 0} - $
-                      {advancedFilters.salaryRange.max || '∞'}
-                      <button
-                        onClick={() =>
-                          setAdvancedFilters((prev) => ({
-                            ...prev,
-                            salaryRange: { min: 0, max: 0 },
-                          }))
-                        }
-                        className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
-                      >
-                        <X className='w-3 h-3' />
-                      </button>
-                    </span>
-                  )}
-                  {advancedFilters.employmentType.length > 0 && (
-                    <span className='inline-flex items-center gap-1 px-2 sm:px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-xs sm:text-sm'>
-                      <span className='hidden sm:inline'>Type: </span>
-                      <span className='sm:hidden'>T: </span>
-                      {advancedFilters.employmentType.join(', ')}
-                      <button
-                        onClick={() =>
-                          setAdvancedFilters((prev) => ({
-                            ...prev,
-                            employmentType: [],
-                          }))
-                        }
-                        className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
-                      >
-                        <X className='w-3 h-3' />
-                      </button>
-                    </span>
-                  )}
-                  {advancedFilters.educationLevel && (
-                    <span className='inline-flex items-center gap-1 px-2 sm:px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-xs sm:text-sm'>
-                      <span className='hidden sm:inline'>Education: </span>
-                      <span className='sm:hidden'>Edu: </span>
-                      {advancedFilters.educationLevel}
-                      <button
-                        onClick={() =>
-                          setAdvancedFilters((prev) => ({
-                            ...prev,
-                            educationLevel: '',
-                          }))
-                        }
-                        className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
-                      >
-                        <X className='w-3 h-3' />
-                      </button>
-                    </span>
-                  )}
-                  {advancedFilters.industry && (
-                    <span className='inline-flex items-center gap-1 px-2 sm:px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-xs sm:text-sm'>
-                      <span className='hidden sm:inline'>Industry: </span>
-                      <span className='sm:hidden'>Ind: </span>
-                      {advancedFilters.industry}
-                      <button
-                        onClick={() =>
-                          setAdvancedFilters((prev) => ({
-                            ...prev,
-                            industry: '',
-                          }))
-                        }
-                        className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
-                      >
-                        <X className='w-3 h-3' />
-                      </button>
-                    </span>
-                  )}
-                  {advancedFilters.location && (
-                    <span className='inline-flex items-center gap-1 px-2 sm:px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-xs sm:text-sm'>
-                      <span className='hidden sm:inline'>Location: </span>
-                      <span className='sm:hidden'>Loc: </span>
-                      {advancedFilters.location}
-                      <button
-                        onClick={() =>
-                          setAdvancedFilters((prev) => ({
-                            ...prev,
-                            location: '',
-                          }))
-                        }
-                        className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
-                      >
-                        <X className='w-3 h-3' />
-                      </button>
-                    </span>
-                  )}
-                  {advancedFilters.skills.length > 0 && (
-                    <span className='inline-flex items-center gap-1 px-2 sm:px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-xs sm:text-sm'>
-                      <span className='hidden sm:inline'>Skills: </span>
-                      <span className='sm:hidden'>S: </span>
-                      {advancedFilters.skills.slice(0, 3).join(', ')}
-                      {advancedFilters.skills.length > 3 && '...'}
-                      <button
-                        onClick={() =>
-                          setAdvancedFilters((prev) => ({
-                            ...prev,
-                            skills: [],
-                          }))
-                        }
-                        className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
-                      >
-                        <X className='w-3 h-3' />
-                      </button>
-                    </span>
-                  )}
-                </div>
+              <div className='flex flex-wrap gap-1.5 sm:gap-2'>
+                {advancedFilters.experienceLevel && (
+                  <span className='inline-flex items-center gap-1 px-2 sm:px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-xs sm:text-sm'>
+                    <span className='hidden sm:inline'>Experience: </span>
+                    <span className='sm:hidden'>Exp: </span>
+                    {advancedFilters.experienceLevel}
+                    <button
+                      onClick={() =>
+                        setAdvancedFilters((prev) => ({
+                          ...prev,
+                          experienceLevel: '',
+                        }))
+                      }
+                      className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
+                    >
+                      <X className='w-3 h-3' />
+                    </button>
+                  </span>
+                )}
+                {(advancedFilters.salaryRange.min > 0 ||
+                  advancedFilters.salaryRange.max > 0) && (
+                  <span className='inline-flex items-center gap-1 px-2 sm:px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-xs sm:text-sm'>
+                    <span className='hidden sm:inline'>Salary: </span>
+                    <span className='sm:hidden'>$</span>
+                    {advancedFilters.salaryRange.min || 0} - $
+                    {advancedFilters.salaryRange.max || '∞'}
+                    <button
+                      onClick={() =>
+                        setAdvancedFilters((prev) => ({
+                          ...prev,
+                          salaryRange: { min: 0, max: 0 },
+                        }))
+                      }
+                      className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
+                    >
+                      <X className='w-3 h-3' />
+                    </button>
+                  </span>
+                )}
+                {advancedFilters.employmentType.length > 0 && (
+                  <span className='inline-flex items-center gap-1 px-2 sm:px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-xs sm:text-sm'>
+                    <span className='hidden sm:inline'>Type: </span>
+                    <span className='sm:hidden'>T: </span>
+                    {advancedFilters.employmentType.join(', ')}
+                    <button
+                      onClick={() =>
+                        setAdvancedFilters((prev) => ({
+                          ...prev,
+                          employmentType: [],
+                        }))
+                      }
+                      className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
+                    >
+                      <X className='w-3 h-3' />
+                    </button>
+                  </span>
+                )}
+                {advancedFilters.educationLevel && (
+                  <span className='inline-flex items-center gap-1 px-2 sm:px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-xs sm:text-sm'>
+                    <span className='hidden sm:inline'>Education: </span>
+                    <span className='sm:hidden'>Edu: </span>
+                    {advancedFilters.educationLevel}
+                    <button
+                      onClick={() =>
+                        setAdvancedFilters((prev) => ({
+                          ...prev,
+                          educationLevel: '',
+                        }))
+                      }
+                      className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
+                    >
+                      <X className='w-3 h-3' />
+                    </button>
+                  </span>
+                )}
+                {advancedFilters.industry && (
+                  <span className='inline-flex items-center gap-1 px-2 sm:px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-xs sm:text-sm'>
+                    <span className='hidden sm:inline'>Industry: </span>
+                    <span className='sm:hidden'>Ind: </span>
+                    {advancedFilters.industry}
+                    <button
+                      onClick={() =>
+                        setAdvancedFilters((prev) => ({
+                          ...prev,
+                          industry: '',
+                        }))
+                      }
+                      className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
+                    >
+                      <X className='w-3 h-3' />
+                    </button>
+                  </span>
+                )}
+                {advancedFilters.location && (
+                  <span className='inline-flex items-center gap-1 px-2 sm:px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-xs sm:text-sm'>
+                    <span className='hidden sm:inline'>Location: </span>
+                    <span className='sm:hidden'>Loc: </span>
+                    {advancedFilters.location}
+                    <button
+                      onClick={() =>
+                        setAdvancedFilters((prev) => ({
+                          ...prev,
+                          location: '',
+                        }))
+                      }
+                      className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
+                    >
+                      <X className='w-3 h-3' />
+                    </button>
+                  </span>
+                )}
+                {advancedFilters.skills.length > 0 && (
+                  <span className='inline-flex items-center gap-1 px-2 sm:px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full text-xs sm:text-sm'>
+                    <span className='hidden sm:inline'>Skills: </span>
+                    <span className='sm:hidden'>S: </span>
+                    {advancedFilters.skills.slice(0, 3).join(', ')}
+                    {advancedFilters.skills.length > 3 && '...'}
+                    <button
+                      onClick={() =>
+                        setAdvancedFilters((prev) => ({
+                          ...prev,
+                          skills: [],
+                        }))
+                      }
+                      className='ml-1 hover:text-blue-600 dark:hover:text-blue-300'
+                    >
+                      <X className='w-3 h-3' />
+                    </button>
+                  </span>
+                )}
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Pagination */}
-            {pagination.total > 0 && pagination.totalPages > 1 && (
+          {/* Pagination - only show for all jobs tab */}
+          {activeTab === 'all' &&
+            pagination.total > 0 &&
+            pagination.totalPages > 1 && (
               <Pagination
                 current={currentPage}
                 total={pagination.totalPages}
                 onChange={handlePageChange}
               />
             )}
-          </div>
+        </div>
 
-          {/* Right Sidebar */}
-          <div className='hidden lg:block lg:flex-shrink-0'>
-            <JobPageSidebar />
-          </div>
+        {/* Right Sidebar */}
+        <div className='hidden lg:block lg:flex-shrink-0 lg:ml-auto'>
+          <JobPageSidebar />
         </div>
       </div>
 

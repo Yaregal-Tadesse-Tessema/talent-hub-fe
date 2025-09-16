@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/Button';
 import { useRouter } from 'next/navigation';
 import EmployerSelection from '@/components/EmployerSelection';
 import { EmployerData } from '@/types/employer';
-import { API_BASE_URL } from '@/config/api';
 import { useToast } from '@/contexts/ToastContext';
+import { authService, LoginCredentials } from '@/services/authService';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -15,84 +15,40 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showEmployerSelection, setShowEmployerSelection] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isEmployerSelecting, setIsEmployerSelecting] = useState(false);
   const router = useRouter();
   const { showToast } = useToast();
+
+  // Form validation
+  const isFormValid = email.trim() && password.trim();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
     try {
-      // First try employer login
-      const employerResponse = await fetch(
-        `${API_BASE_URL}/auth/backOffice-login`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ userName: email, password }),
-        },
-      );
+      const credentials: LoginCredentials = {
+        userName: email,
+        password,
+      };
 
-      const employerData = await employerResponse.json();
-      if (employerResponse.ok) {
-        // Store employers data
-        localStorage.setItem('employers', JSON.stringify(employerData || []));
-        console.log('employerData', employerData);
-        // Show employer selection popup
-        setShowEmployerSelection(true);
-        setIsLoading(false);
-        return;
-      }
+      const result = await authService.login(credentials);
 
-      // If employer login fails, try employee login
-      const employeeResponse = await fetch(
-        `${API_BASE_URL}/auth/portal-login`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ userName: email, password }),
-        },
-      );
-
-      const employeeData = await employeeResponse.json();
-
-      if (employeeResponse.ok) {
-        const user = {
-          ...employeeData?.profile,
-          role: 'employee' as const,
-        };
-        localStorage.setItem('user', JSON.stringify(user));
-        localStorage.setItem('accessToken', employeeData.accessToken);
-        localStorage.setItem('refreshToken', employeeData.refreshToken);
-
-        // Check if there's a return URL stored
-        const returnToJob = localStorage.getItem('returnToJob');
-        const returnToCVBuilder = localStorage.getItem('returnToCVBuilder');
-
-        if (returnToJob) {
-          localStorage.removeItem('returnToJob'); // Clean up
-          router.push(`/find-job/${returnToJob}?apply=true`);
-        } else if (returnToCVBuilder) {
-          localStorage.removeItem('returnToCVBuilder'); // Clean up
-          router.push(returnToCVBuilder);
-        } else {
-          router.push('/find-job');
+      if (result.success) {
+        if (result.requiresEmployerSelection) {
+          setShowEmployerSelection(true);
+        } else if (result.redirectPath) {
+          router.push(result.redirectPath);
         }
-      } else {
-        // Show error message
-        showToast({
-          type: 'error',
-          message: 'Invalid credentials',
-        });
       }
     } catch (error) {
-      console.error('Login error:', error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'An error occurred during login. Please try again.';
       showToast({
         type: 'error',
-        message: 'An error occurred during login. Please try again.',
+        message: errorMessage,
       });
     } finally {
       setIsLoading(false);
@@ -100,50 +56,36 @@ export default function LoginPage() {
   };
 
   const handleEmployerSelect = async (employer: EmployerData) => {
+    setIsEmployerSelecting(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/backOffice-login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userName: email,
-          password: password,
-          orgId: employer.tenant.id,
-        }),
-      });
+      const credentials: LoginCredentials = {
+        userName: email,
+        password,
+      };
 
-      const data = await response.json();
+      const result = await authService.loginWithEmployer(credentials, employer);
 
-      if (response.ok) {
-        // Store user data with role as employer and selected employer
-        const userData = {
-          ...data.profile,
-          role: 'employer',
-          selectedEmployer: employer,
-        };
-        localStorage.setItem('user', JSON.stringify(userData));
-        // Store tokens
-        localStorage.setItem('accessToken', data.accessToken);
-        localStorage.setItem('refreshToken', data.refreshToken);
-        // Close the popup and redirect to dashboard
+      if (result.success && result.redirectPath) {
         setShowEmployerSelection(false);
-        router.push('/dashboard');
-      } else {
-        throw new Error(data.message || 'Failed to login');
+        router.push(result.redirectPath);
       }
     } catch (error) {
-      console.error('Error:', error);
-      throw error; // Re-throw to let the component handle the loading state
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Failed to login with selected employer';
+      showToast({
+        type: 'error',
+        message: errorMessage,
+      });
+    } finally {
+      setIsEmployerSelecting(false);
     }
   };
 
   const handleCloseEmployerSelection = () => {
     setShowEmployerSelection(false);
-    // Clear all auth-related data from localStorage
-    localStorage.removeItem('user');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    authService.logout();
   };
 
   return (
@@ -393,8 +335,8 @@ export default function LoginPage() {
 
               <Button
                 type='submit'
-                className='w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-[1.02] focus:ring-4 focus:ring-blue-200'
-                disabled={isLoading}
+                className='w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-[1.02] focus:ring-4 focus:ring-blue-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none'
+                disabled={isLoading || !isFormValid}
               >
                 {isLoading ? (
                   <div className='flex items-center justify-center gap-2'>
