@@ -39,6 +39,7 @@ import {
   SkillsAnalysisService,
   SkillsAnalysisResult,
 } from '@/services/skillsAnalysisService';
+import { ApplicationSkillsCard } from '@/components/employer/ApplicationSkillsCard';
 
 export type ApplicationDetail = {
   name: string;
@@ -387,6 +388,7 @@ export default function ApplicationDetailModal({
       const parsedUser = JSON.parse(storedUser);
       setEmployer(parsedUser);
       applicationService.getApplicationById(applicationId || '').then((res) => {
+        console.log('res', res);
         setApplicationData(res);
         setCurrentStatus((res.status as ApplicationStatus) || null);
 
@@ -1073,6 +1075,14 @@ export default function ApplicationDetailModal({
                   <div className='p-6'>
                     {activeRightTab === 'summary' && (
                       <div className='space-y-6'>
+                        {/* Skills Analysis Card */}
+                        <ApplicationSkillsCard
+                          applicationData={applicationData}
+                          onAnalysisComplete={(analysis) =>
+                            setSkillsAnalysis(analysis)
+                          }
+                          className='shadow-sm'
+                        />
                         {/* Quick Stats */}
                         <div className='bg-white rounded-xl p-4 shadow-sm border border-gray-200'>
                           <h4 className='font-semibold text-gray-900 mb-3'>
@@ -1222,33 +1232,14 @@ export default function ApplicationDetailModal({
 
                     {activeRightTab === 'analysis' && (
                       <div className='space-y-6'>
-                        {/* Skills Analysis Button */}
-                        <div className='bg-white rounded-xl p-4 shadow-sm border border-gray-200'>
-                          <h4 className='font-semibold text-gray-900 mb-3'>
-                            Job Fit Analysis
-                          </h4>
-                          <p className='text-sm text-gray-600 mb-4'>
-                            Analyze how well this candidate matches the job
-                            requirements.
-                          </p>
-                          <button
-                            onClick={performSkillsAnalysis}
-                            disabled={isAnalyzing || !applicationData?.jobPost}
-                            className='w-full flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200'
-                          >
-                            {isAnalyzing ? (
-                              <>
-                                <div className='animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent'></div>
-                                Analyzing...
-                              </>
-                            ) : (
-                              <>
-                                <ChartBarIcon className='w-4 h-4' />
-                                Analyze Skills Match
-                              </>
-                            )}
-                          </button>
-                        </div>
+                        {/* Skills Analysis Card */}
+                        <ApplicationSkillsCard
+                          applicationData={applicationData}
+                          onAnalysisComplete={(analysis) =>
+                            setSkillsAnalysis(analysis)
+                          }
+                          className='shadow-sm'
+                        />
 
                         {/* Skills Analysis Results */}
                         {skillsAnalysis && (

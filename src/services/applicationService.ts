@@ -405,7 +405,9 @@ class ApplicationService {
   }
 
   async getApplicationById(applicationId: string): Promise<Application> {
-    const response = await api.get(`/applications/${applicationId}`);
+    const response = await api.get(
+      `/applications/${applicationId}?q=i=JobPost`,
+    );
     return response.data;
   }
 }

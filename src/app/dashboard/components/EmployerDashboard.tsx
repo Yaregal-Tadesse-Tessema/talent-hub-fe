@@ -5,6 +5,7 @@ import OverviewTab from './employer/OverviewTab';
 import MyJobsTab from './employer/MyJobsTab';
 import SettingsTab from './employer/SettingsTab';
 import SavedCandidatesTab from './employer/SavedCandidatesTab';
+import PlansTab from './employer/PlansTab';
 import {
   FiHome,
   FiUser,
@@ -62,6 +63,8 @@ function EmployerDashboardContent() {
         return <MyJobsTab />;
       case 'saved':
         return <SavedCandidatesTab />;
+      case 'plans':
+        return <PlansTab />;
       case 'settings':
         return <SettingsTab />;
       // Add more cases for other tabs as needed
