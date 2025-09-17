@@ -22,6 +22,10 @@ import { Job } from '@/types/job';
 import { sanitizeHtml } from '@/utils/sanitize';
 import { useToast } from '@/contexts/ToastContext';
 import { ShareButton } from '@/components/ui/ShareButton';
+import { SkillsComparisonCard } from '@/components/SkillsComparisonCard';
+import { SkillsAnalysisModal } from '@/components/SkillsAnalysisModal';
+import { SkillsAnalysisResult } from '@/services/skillsAnalysisService';
+import { UserProfile } from '@/types/profile';
 
 // Helper function to check if a job is expired
 const isJobExpired = (deadline: string): boolean => {
@@ -39,6 +43,12 @@ interface UserData {
     path?: string;
     filename?: string;
   };
+  technicalSkills?: string[];
+  softSkills?: string[];
+  yearOfExperience?: number;
+  industry?: string[];
+  highestLevelOfEducation?: string;
+  professionalSummery?: string;
 }
 
 export default function JobDetailsPage({
@@ -55,6 +65,9 @@ export default function JobDetailsPage({
   const [isApplyOpen, setIsApplyOpen] = useState(false);
   const [userData, setUserData] = useState<UserData | undefined>(undefined);
   const [userDataLoaded, setUserDataLoaded] = useState(false);
+  const [skillsAnalysisOpen, setSkillsAnalysisOpen] = useState(false);
+  const [currentAnalysis, setCurrentAnalysis] =
+    useState<SkillsAnalysisResult | null>(null);
 
   useEffect(() => {
     // Scroll to top when component mounts
@@ -78,6 +91,12 @@ export default function JobDetailsPage({
           id: parsedUser.id,
           profile: parsedUser.profile,
           resume: parsedUser.resume,
+          technicalSkills: parsedUser.technicalSkills,
+          softSkills: parsedUser.softSkills,
+          yearOfExperience: parsedUser.yearOfExperience,
+          industry: parsedUser.industry,
+          highestLevelOfEducation: parsedUser.highestLevelOfEducation,
+          professionalSummery: parsedUser.professionalSummery,
         });
       } catch (error) {
         console.error('Error parsing user data:', error);
@@ -182,6 +201,11 @@ export default function JobDetailsPage({
       console.error('Error unfavoriting job:', error);
       showToast({ type: 'error', message: 'Failed to unfavorite job' });
     }
+  };
+
+  const handleViewSkillsAnalysis = (analysis: SkillsAnalysisResult) => {
+    setCurrentAnalysis(analysis);
+    setSkillsAnalysisOpen(true);
   };
 
   if (loading) {
@@ -428,6 +452,15 @@ export default function JobDetailsPage({
           </div>
           {/* Sidebar */}
           <div className='w-full lg:w-[350px] flex flex-col gap-6'>
+            {/* Skills Comparison Card - Only show if user is logged in */}
+            {userData && (
+              <SkillsComparisonCard
+                job={job}
+                userProfile={userData as UserProfile}
+                onViewDetails={handleViewSkillsAnalysis}
+              />
+            )}
+
             {/* Job Overview */}
             <Card className='p-6'>
               <div className='font-semibold text-lg mb-4'>Job Overview</div>
@@ -561,6 +594,17 @@ export default function JobDetailsPage({
         jobTitle={job.title}
         jobId={job.id}
         userData={userData}
+      />
+
+      {/* Skills Analysis Modal */}
+      <SkillsAnalysisModal
+        isOpen={skillsAnalysisOpen && currentAnalysis !== null}
+        onClose={() => {
+          setSkillsAnalysisOpen(false);
+          setCurrentAnalysis(null);
+        }}
+        analysis={currentAnalysis}
+        jobTitle={job.title}
       />
     </main>
   );

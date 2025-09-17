@@ -181,20 +181,18 @@ Mapping rules:
 
 Return only the JSON object:`;
 
-    const response = await cohere.generate({
-      prompt,
+    const response = await cohere.chat({
+      model: 'command-r-08-2024',
+      message: prompt,
       maxTokens: 2000,
       temperature: 0.1,
-      k: 0,
-      stopSequences: [],
-      returnLikelihoods: 'NONE',
     });
 
-    if (!response.generations || response.generations.length === 0) {
+    if (!response.text) {
       throw new Error('No response generated from AI mapping');
     }
 
-    const generatedText = response.generations[0].text.trim();
+    const generatedText = response.text.trim();
 
     // Clean up the response to extract just the JSON
     let jsonText = generatedText;

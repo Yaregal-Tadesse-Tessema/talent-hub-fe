@@ -25,11 +25,6 @@ export class JobDescriptionService {
   async generateJobDescription(
     request: JobDescriptionRequest,
   ): Promise<JobDescriptionResponse> {
-    console.log(
-      '🚀 Starting job description generation with request:',
-      request,
-    );
-
     try {
       // Validate required fields
       if (
@@ -38,7 +33,6 @@ export class JobDescriptionService {
         !request.industry ||
         !request.employmentType
       ) {
-        console.log('❌ Validation failed - missing required fields');
         return {
           description: '',
           success: false,
@@ -46,8 +40,6 @@ export class JobDescriptionService {
             'Missing required job information. Please fill in job title, position, industry, and employment type.',
         };
       }
-
-      console.log('✅ Validation passed, proceeding with AI generation');
 
       // Create a comprehensive prompt for job description generation
       const prompt = `You are an expert HR professional and job description writer. Generate a comprehensive, professional job description based on the following information:
@@ -57,41 +49,81 @@ Position: ${request.position}
 Industry: ${request.industry}
 Employment Type: ${request.employmentType}
 
-Please create a detailed job description that includes:
+IMPORTANT: Generate ONLY the job description content without any introductory text, titles, or headers. Do not include phrases like "Here is a job description" or the job title as a main heading.
 
-1. **Company Overview Section** - Brief introduction about the company and role
-2. **Job Summary** - Clear overview of the position and its importance
-3. **Key Responsibilities** - 5-7 main responsibilities in bullet points
-4. **Required Qualifications** - Essential skills, experience, and education
-5. **Preferred Qualifications** - Nice-to-have skills and experience
-6. **What We Offer** - Benefits and perks (mention competitive salary, benefits, growth opportunities)
-7. **Application Instructions** - How to apply
+Please create a detailed job description following this EXACT structure and format:
+
+<h2>About the Company</h2>
+<p>Brief introduction about the company, mission, values, and culture in the ${request.industry} industry. Mention what makes the company unique and why it's an attractive place to work.</p>
+
+<h2>Job Overview</h2>
+<p>3-4 sentences summarizing the ${request.title} role. Mention the team they'll work with, who they report to, and the main purpose of this position. Make it engaging and specific to the ${request.industry} industry.</p>
+
+<h2>Key Responsibilities</h2>
+<ul>
+<li>Start each responsibility with an action verb (Design, Lead, Implement, Collaborate, Manage, Develop, etc.)</li>
+<li>Create 6-8 specific, actionable responsibilities relevant to a ${request.title} in ${request.industry}</li>
+<li>Make responsibilities appropriate for the role level and industry</li>
+<li>Focus on day-to-day tasks and strategic objectives</li>
+<li>Include collaboration and communication aspects</li>
+<li>Mention specific tools, technologies, or methodologies when relevant</li>
+</ul>
+
+<h2>Requirements</h2>
+<h3>Must-have:</h3>
+<ul>
+<li>Education requirements (degree, certifications)</li>
+<li>Years of experience required</li>
+<li>Core technical skills for ${request.title}</li>
+<li>Industry-specific knowledge for ${request.industry}</li>
+<li>Essential soft skills</li>
+</ul>
+
+<h3>Nice-to-have:</h3>
+<ul>
+<li>Additional technical skills that give candidates an edge</li>
+<li>Bonus experience or certifications</li>
+<li>Leadership or mentoring experience (if senior role)</li>
+<li>Specific tools or platform experience</li>
+</ul>
+
+<h2>What We Offer</h2>
+<ul>
+<li>Competitive salary and comprehensive benefits package</li>
+<li>Health, dental, and vision insurance</li>
+<li>Professional development and learning opportunities</li>
+<li>Flexible work arrangements (mention remote/hybrid options for ${request.employmentType})</li>
+<li>Career growth and advancement opportunities</li>
+<li>Collaborative and inclusive work environment</li>
+<li>Industry-specific perks relevant to ${request.industry}</li>
+</ul>
+
+<h2>Location & Work Setup</h2>
+<p>Specify work arrangement based on ${request.employmentType} - whether it's remote, hybrid, or on-site. Mention any travel requirements if applicable.</p>
+
+<h2>Application Process</h2>
+<p>Professional instructions on how to apply, what documents to submit, and what candidates can expect in the hiring process. Keep it welcoming and encouraging.</p>
 
 Guidelines:
-- Use professional, engaging language
-- Make it attractive to potential candidates
-- Include specific, actionable responsibilities
-- Be clear about requirements vs. preferences
-- Keep it comprehensive but concise (aim for 400-600 words)
-- Use HTML formatting with proper tags for structure
-- Make it industry-specific and relevant
+- Use professional, engaging language that attracts top talent
+- Be specific to the ${request.industry} industry
+- Make responsibilities actionable and measurable where possible
+- Use HTML formatting with proper <h2>, <h3>, <ul>, <li>, and <p> tags
+- Keep content concise but comprehensive (400-600 words)
+- Avoid generic phrases - be specific to the role and industry
+- Use bullet points for lists (ul/li tags)
+- Make it sound like a real company posting
 
-Format the response as HTML with proper paragraph tags, bullet points, and headings.`;
+Generate the content now:`;
 
-      console.log('📝 Sending request to Cohere AI...');
-      const response = await cohere.generate({
-        prompt,
+      const response = await cohere.chat({
+        model: 'command-r-08-2024',
+        message: prompt,
         maxTokens: 800,
         temperature: 0.7,
-        k: 0,
-        stopSequences: [],
-        returnLikelihoods: 'NONE',
       });
 
-      console.log('🤖 Cohere AI response:', response);
-
-      if (!response.generations || response.generations.length === 0) {
-        console.log('❌ No generations in response');
+      if (!response.text) {
         return {
           description: '',
           success: false,
@@ -99,8 +131,7 @@ Format the response as HTML with proper paragraph tags, bullet points, and headi
         };
       }
 
-      const generatedDescription = response.generations[0].text.trim();
-      console.log('📄 Generated description:', generatedDescription);
+      const generatedDescription = response.text.trim();
 
       // Clean up the response and ensure it's properly formatted
       let cleanedDescription = generatedDescription;
@@ -116,7 +147,73 @@ Format the response as HTML with proper paragraph tags, bullet points, and headi
           .replace(/```\n?/, '');
       }
 
-      // Ensure proper HTML structure
+      // Remove full HTML document structure if present and extract body content
+      if (
+        cleanedDescription.includes('<!DOCTYPE html>') ||
+        cleanedDescription.includes('<html')
+      ) {
+        // Extract content between <body> tags or after introductory text
+        const bodyMatch = cleanedDescription.match(
+          /<body[^>]*>([\s\S]*?)<\/body>/i,
+        );
+        if (bodyMatch) {
+          cleanedDescription = bodyMatch[1].trim();
+        } else {
+          // If no body tags, try to extract content after the introductory sentence
+          const lines = cleanedDescription.split('\n');
+          const contentStart = lines.findIndex(
+            (line) =>
+              line.includes('<h1>') ||
+              line.includes('<h2>') ||
+              line.includes('<p>'),
+          );
+          if (contentStart > 0) {
+            cleanedDescription = lines.slice(contentStart).join('\n').trim();
+          }
+        }
+      }
+
+      // Remove any remaining HTML document elements
+      cleanedDescription = cleanedDescription
+        .replace(/<!DOCTYPE[^>]*>/gi, '')
+        .replace(/<html[^>]*>/gi, '')
+        .replace(/<\/html>/gi, '')
+        .replace(/<head[^>]*>[\s\S]*?<\/head>/gi, '')
+        .replace(/<body[^>]*>/gi, '')
+        .replace(/<\/body>/gi, '')
+        .replace(/<title[^>]*>[\s\S]*?<\/title>/gi, '')
+        .replace(/<meta[^>]*>/gi, '')
+        .trim();
+
+      // Remove introductory text if present
+      if (
+        cleanedDescription.startsWith('Certainly!') ||
+        cleanedDescription.startsWith('Here is') ||
+        cleanedDescription.startsWith("Here's a") ||
+        cleanedDescription.includes('job description for') ||
+        cleanedDescription.includes('professionally crafted')
+      ) {
+        const lines = cleanedDescription.split('\n');
+        const contentStart = lines.findIndex(
+          (line) =>
+            line.includes('<h2>About the Company</h2>') ||
+            line.includes('<h2>') ||
+            line.includes('<h1>') ||
+            line.includes('<p>'),
+        );
+        if (contentStart > 0) {
+          cleanedDescription = lines.slice(contentStart).join('\n').trim();
+        }
+      }
+
+      // Remove any remaining job title headers that might appear
+      cleanedDescription = cleanedDescription
+        .replace(/<h1[^>]*>.*?<\/h1>/gi, '')
+        .replace(/^#\s+.*$/gm, '') // Remove markdown headers
+        .replace(/^\*\*.*\*\*$/gm, '') // Remove bold markdown headers
+        .trim();
+
+      // Ensure proper HTML structure if no HTML tags present
       if (
         !cleanedDescription.includes('<p>') &&
         !cleanedDescription.includes('<h')
@@ -130,21 +227,13 @@ Format the response as HTML with proper paragraph tags, bullet points, and headi
           .join('\n');
       }
 
-      console.log('✅ Successfully generated and cleaned description');
       return {
         description: cleanedDescription,
         success: true,
       };
     } catch (error) {
-      console.error('❌ Error generating job description:', error);
-      console.error('Error details:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined,
-      });
-
       // Return a fallback description if AI fails
       const fallbackDescription = this.generateFallbackDescription(request);
-      console.log('🔄 Using fallback description');
 
       return {
         description: fallbackDescription,
@@ -160,39 +249,55 @@ Format the response as HTML with proper paragraph tags, bullet points, and headi
    */
   private generateFallbackDescription(request: JobDescriptionRequest): string {
     return `
-      <h3>About the Role</h3>
-      <p>We are seeking a talented <strong>${request.title}</strong> to join our team in the <strong>${request.industry}</strong> industry. This is a <strong>${request.employmentType}</strong> position that offers excellent growth opportunities.</p>
+      <h2>About the Company</h2>
+      <p>We are a dynamic and growing organization in the ${request.industry} industry, committed to innovation and excellence. Our team is passionate about delivering outstanding results while fostering a collaborative and supportive work environment.</p>
       
-      <h3>Job Summary</h3>
-      <p>As a ${request.title}, you will play a key role in our organization, contributing to our success through your expertise and dedication.</p>
+      <h2>Job Overview</h2>
+      <p>We are seeking a talented <strong>${request.title}</strong> to join our team. This ${request.employmentType.toLowerCase()} position offers an excellent opportunity to contribute to meaningful projects while advancing your career in the ${request.industry} field. You will work closely with our experienced team and play a key role in driving our continued success.</p>
       
-      <h3>Key Responsibilities</h3>
+      <h2>Key Responsibilities</h2>
       <ul>
-        <li>Execute core responsibilities related to ${request.position}</li>
-        <li>Collaborate with cross-functional teams</li>
-        <li>Contribute to project planning and execution</li>
-        <li>Maintain high standards of quality and performance</li>
-        <li>Participate in continuous improvement initiatives</li>
+        <li>Execute core responsibilities related to the ${request.position} role</li>
+        <li>Collaborate effectively with cross-functional teams and stakeholders</li>
+        <li>Contribute to project planning, execution, and delivery</li>
+        <li>Maintain high standards of quality and performance in all deliverables</li>
+        <li>Participate in continuous improvement initiatives and best practices</li>
+        <li>Support team objectives and organizational goals</li>
       </ul>
       
-      <h3>Required Qualifications</h3>
+      <h2>Requirements</h2>
+      <h3>Must-have:</h3>
       <ul>
-        <li>Relevant experience in ${request.industry}</li>
+        <li>Relevant degree or equivalent experience in ${request.industry}</li>
+        <li>Proven experience in ${request.position} or related field</li>
         <li>Strong problem-solving and analytical skills</li>
-        <li>Excellent communication and interpersonal skills</li>
+        <li>Excellent communication and interpersonal abilities</li>
         <li>Ability to work independently and as part of a team</li>
       </ul>
       
-      <h3>What We Offer</h3>
+      <h3>Nice-to-have:</h3>
       <ul>
-        <li>Competitive salary and benefits package</li>
-        <li>Professional development opportunities</li>
-        <li>Collaborative and inclusive work environment</li>
-        <li>Career growth and advancement opportunities</li>
+        <li>Additional certifications relevant to the role</li>
+        <li>Experience with industry-specific tools and technologies</li>
+        <li>Leadership or mentoring experience</li>
+        <li>Multilingual capabilities</li>
       </ul>
       
-      <h3>How to Apply</h3>
-      <p>If you are interested in this opportunity, please submit your application through our platform. We look forward to hearing from you!</p>
+      <h2>What We Offer</h2>
+      <ul>
+        <li>Competitive salary and comprehensive benefits package</li>
+        <li>Health, dental, and vision insurance</li>
+        <li>Professional development and learning opportunities</li>
+        <li>Flexible work arrangements and work-life balance</li>
+        <li>Career growth and advancement opportunities</li>
+        <li>Collaborative and inclusive work environment</li>
+      </ul>
+      
+      <h2>Location & Work Setup</h2>
+      <p>This is a ${request.employmentType.toLowerCase()} position. We offer flexible work arrangements to support work-life balance and productivity.</p>
+      
+      <h2>Application Process</h2>
+      <p>If you are interested in this exciting opportunity, please submit your resume and cover letter through our application portal. We review all applications carefully and will contact qualified candidates for the next steps in our hiring process. We look forward to hearing from you!</p>
     `;
   }
 

@@ -1,22 +1,14 @@
-// Optional Cohere AI integration
-let cohere: any = null;
+import { CohereClient } from 'cohere-ai';
+
+// Initialize Cohere client
+let cohere: CohereClient | null = null;
 
 try {
-  // Only import cohere if the package is available
-  if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_COHERE_API_KEY) {
-    // Dynamic import to avoid SSR issues
-    import('cohere-ai')
-      .then((cohereModule) => {
-        cohere = cohereModule.default;
-        if (cohere && process.env.NEXT_PUBLIC_COHERE_API_KEY) {
-          cohere.init({
-            token: process.env.NEXT_PUBLIC_COHERE_API_KEY,
-          });
-        }
-      })
-      .catch((error) => {
-        console.warn('Cohere AI package not available:', error);
-      });
+  // Only initialize cohere if the API key is available
+  if (process.env.NEXT_PUBLIC_COHERE_API_KEY) {
+    cohere = new CohereClient({
+      token: process.env.NEXT_PUBLIC_COHERE_API_KEY,
+    });
   }
 } catch (error) {
   console.warn('Cohere AI not available, using knowledge base fallback');
@@ -296,7 +288,7 @@ export class AISupportService {
   async generateResponse(userQuery: string): Promise<AISupportResponse> {
     try {
       // Try to use Cohere AI for more sophisticated responses
-      if (process.env.NEXT_PUBLIC_COHERE_API_KEY && cohere) {
+      if (cohere) {
         return await this.generateCohereResponse(userQuery);
       }
     } catch (error) {
@@ -329,17 +321,14 @@ Please provide a helpful, accurate response. If you're not sure about something 
 
 Response:`;
 
-    const response = await cohere.generate({
-      model: 'command',
-      prompt: prompt,
-      max_tokens: 300,
+    const response = await cohere.chat({
+      model: 'command-r-08-2024',
+      message: prompt,
+      maxTokens: 300,
       temperature: 0.7,
-      k: 0,
-      stop_sequences: [],
-      return_likelihoods: 'NONE',
     });
 
-    const answer = response.body.generations[0].text.trim();
+    const answer = response.text.trim();
 
     return {
       answer,

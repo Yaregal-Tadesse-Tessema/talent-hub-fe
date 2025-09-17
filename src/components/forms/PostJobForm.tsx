@@ -9,6 +9,11 @@ import {
   jobDescriptionService,
   JobDescriptionRequest,
 } from '@/services/jobDescriptionService';
+import {
+  skillSuggestionService,
+  SkillSuggestion,
+  ResponsibilitySuggestionResult,
+} from '@/services/skillSuggestionService';
 
 interface FormData {
   title: string;
@@ -49,54 +54,38 @@ interface PostJobFormProps {
 
 export default function PostJobForm({ jobId }: PostJobFormProps) {
   const [formData, setFormData] = useState<FormData>({
-    title: 'Senior Software Engineer',
-    description:
-      '<p>We are looking for a Senior Software Engineer to join our team. The ideal candidate will have experience in building scalable web applications and working with modern technologies.</p><ul><li>Design and implement new features</li><li>Collaborate with cross-functional teams</li><li>Mentor junior developers</li></ul>',
-    position: 'Software Engineer',
-    industry: 'InformationTechnology',
-    type: 'Full-time',
-    city: 'Addis Ababa',
-    location: 'Bole Road, Addis Ababa, Ethiopia',
-    employmentType: 'FullTime',
+    title: '',
+    description: '',
+    position: '',
+    industry: '',
+    type: '',
+    city: '',
+    location: '',
+    employmentType: '',
     salaryRange: {
-      min: '50000',
-      max: '80000',
+      min: '',
+      max: '',
     },
     deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
       .toISOString()
       .slice(0, 16),
-    requirementId: 'req123',
-    skill: ['React', 'TypeScript', 'Node.js', 'AWS'],
-    benefits: [
-      'Health Insurance',
-      'Flexible Working Hours',
-      'Remote Work Options',
-      'Professional Development Budget',
-    ],
-    responsibilities: [
-      'Lead technical design and implementation',
-      'Code review and mentoring',
-      'Performance optimization',
-      'Technical documentation',
-    ],
+    requirementId: '',
+    skill: [],
+    benefits: [],
+    responsibilities: [],
     status: 'Draft',
-    gender: 'Any',
-    minimumGPA: '3.0',
+    gender: '',
+    minimumGPA: '',
     postedDate: new Date().toISOString(),
-    applicationURL: 'https://company.com/careers',
-    experienceLevel: 'Senior',
-    fieldOfStudy: 'Computer Science',
-    educationLevel: 'Bachelor',
-    howToApply:
-      'Please submit your resume and cover letter through our application portal.',
+    applicationURL: '',
+    experienceLevel: '',
+    fieldOfStudy: '',
+    educationLevel: '',
+    howToApply: '',
     onHoldDate: '',
-    jobPostRequirement: [
-      '5+ years of experience',
-      'Strong problem-solving skills',
-      'Excellent communication abilities',
-    ],
-    positionNumbers: '2',
-    paymentType: 'Monthly',
+    jobPostRequirement: [],
+    positionNumbers: '',
+    paymentType: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -109,19 +98,16 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
   const [showPublishConfirmation, setShowPublishConfirmation] = useState(false);
   const [isLoadingJob, setIsLoadingJob] = useState(false);
   const [isDraftEditing, setIsDraftEditing] = useState(false);
+  const [isGeneratingSkills, setIsGeneratingSkills] = useState(false);
+  const [isGeneratingResponsibilities, setIsGeneratingResponsibilities] =
+    useState(false);
+  const [hasGeneratedAIContent, setHasGeneratedAIContent] = useState(false);
   const editorRef = useRef<RichTextEditorRef>(null);
   const { showToast } = useToast();
   const router = useRouter();
 
   // Generate AI job description
   const generateJobDescription = async () => {
-    console.log('🎯 Generate button clicked, current form data:', {
-      title: formData.title,
-      position: formData.position,
-      industry: formData.industry,
-      employmentType: formData.employmentType,
-    });
-
     // Validate that we have the required information from step 1
     if (
       !formData.title ||
@@ -129,7 +115,6 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
       !formData.industry ||
       !formData.employmentType
     ) {
-      console.log('❌ Validation failed in form');
       showToast({
         type: 'error',
         message:
@@ -138,7 +123,6 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
       return;
     }
 
-    console.log('✅ Form validation passed, starting generation...');
     setIsGeneratingDescription(true);
 
     try {
@@ -149,27 +133,21 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
         employmentType: formData.employmentType,
       };
 
-      console.log('📤 Sending request to jobDescriptionService:', request);
       const response =
         await jobDescriptionService.generateJobDescription(request);
 
-      console.log('📥 Received response from jobDescriptionService:', response);
-
       if (response.success) {
-        console.log('✅ Success! Updating form data with description');
-        console.log('📝 Description to be set:', response.description);
-        console.log('📝 Current form description:', formData.description);
+        // Set flag to prevent draft loading from overriding AI content
+        setHasGeneratedAIContent(true);
 
         // Update form data immediately
         setFormData((prev) => {
           const updated = { ...prev, description: response.description };
-          console.log('📝 Updated form data with AI content:', updated);
           return updated;
         });
 
         // Update editor content directly
         if (editorRef.current) {
-          console.log('🎯 Calling direct content update to editor');
           editorRef.current.updateContent(response.description);
         }
 
@@ -179,11 +157,11 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
             'Job description generated successfully! You can edit it as needed.',
         });
       } else {
-        console.log(
-          '⚠️ Generation failed, but might have fallback description',
-        );
         // Even if AI failed, we might have a fallback description
         if (response.description) {
+          // Set flag to prevent draft loading from overriding fallback content
+          setHasGeneratedAIContent(true);
+
           // Update form data
           setFormData((prev) => ({
             ...prev,
@@ -192,7 +170,6 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
 
           // Update editor content
           if (editorRef.current) {
-            console.log('🎯 Calling direct content update for fallback');
             editorRef.current.updateContent(response.description);
           }
 
@@ -212,7 +189,6 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
         }
       }
     } catch (error) {
-      console.error('Error generating job description:', error);
       showToast({
         type: 'error',
         message:
@@ -223,12 +199,179 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
     }
   };
 
+  // Generate AI skill suggestions
+  const generateSkillSuggestions = async () => {
+    // Validate that we have basic information
+    if (!formData.title && !formData.position && !formData.industry) {
+      showToast({
+        type: 'error',
+        message:
+          'Please fill in at least the job title, position, or industry to get skill suggestions.',
+      });
+      return;
+    }
+
+    setIsGeneratingSkills(true);
+
+    try {
+      const jobData = {
+        title: formData.title,
+        position: formData.position,
+        industry: formData.industry,
+        description: formData.description,
+        experienceLevel: formData.experienceLevel,
+        educationLevel: formData.educationLevel,
+        employmentType: formData.employmentType,
+        responsibilities: formData.responsibilities,
+        jobPostRequirement: formData.jobPostRequirement,
+      };
+
+      const response = await skillSuggestionService.suggestSkills(jobData);
+
+      if (response.success && response.suggestedSkills.length > 0) {
+        // Extract skill names and add them to existing skills (avoiding duplicates)
+        const newSkills = response.suggestedSkills.map((s) => s.skill);
+        const existingSkills = formData.skill;
+
+        // Filter out duplicates (case-insensitive)
+        const uniqueNewSkills = newSkills.filter(
+          (newSkill) =>
+            !existingSkills.some(
+              (existingSkill) =>
+                existingSkill.toLowerCase() === newSkill.toLowerCase(),
+            ),
+        );
+
+        if (uniqueNewSkills.length > 0) {
+          // Update form data with new skills
+          setFormData((prev) => ({
+            ...prev,
+            skill: [...prev.skill, ...uniqueNewSkills],
+          }));
+
+          showToast({
+            type: 'success',
+            message: `Added ${uniqueNewSkills.length} AI-suggested skills! Review and edit as needed.`,
+          });
+        } else {
+          showToast({
+            type: 'success',
+            message:
+              'All suggested skills are already in your list. Great job!',
+          });
+        }
+      } else {
+        showToast({
+          type: 'error',
+          message:
+            response.error ||
+            'Failed to generate skill suggestions. Please try again.',
+        });
+      }
+    } catch (error) {
+      showToast({
+        type: 'error',
+        message:
+          'Failed to generate skill suggestions. Please try again or add skills manually.',
+      });
+    } finally {
+      setIsGeneratingSkills(false);
+    }
+  };
+
+  // Generate AI responsibility suggestions
+  const generateResponsibilitySuggestions = async () => {
+    // Validate that we have basic information
+    if (!formData.title && !formData.position && !formData.industry) {
+      showToast({
+        type: 'error',
+        message:
+          'Please fill in at least the job title, position, or industry to get responsibility suggestions.',
+      });
+      return;
+    }
+
+    setIsGeneratingResponsibilities(true);
+
+    try {
+      const jobData = {
+        title: formData.title,
+        position: formData.position,
+        industry: formData.industry,
+        description: formData.description,
+        experienceLevel: formData.experienceLevel,
+        educationLevel: formData.educationLevel,
+        employmentType: formData.employmentType,
+        responsibilities: formData.responsibilities,
+        jobPostRequirement: formData.jobPostRequirement,
+      };
+
+      const response =
+        await skillSuggestionService.suggestResponsibilities(jobData);
+
+      if (response.success && response.suggestedResponsibilities.length > 0) {
+        // Filter out duplicates (case-insensitive)
+        const existingResponsibilities = formData.responsibilities;
+        const uniqueNewResponsibilities =
+          response.suggestedResponsibilities.filter(
+            (newResp) =>
+              !existingResponsibilities.some(
+                (existingResp) =>
+                  existingResp.toLowerCase() === newResp.toLowerCase(),
+              ),
+          );
+
+        if (uniqueNewResponsibilities.length > 0) {
+          // Update form data with new responsibilities
+          setFormData((prev) => ({
+            ...prev,
+            responsibilities: [
+              ...prev.responsibilities,
+              ...uniqueNewResponsibilities,
+            ],
+          }));
+
+          showToast({
+            type: 'success',
+            message: `Added ${uniqueNewResponsibilities.length} AI-suggested responsibilities! Review and edit as needed.`,
+          });
+        } else {
+          showToast({
+            type: 'success',
+            message:
+              'All suggested responsibilities are already in your list. Great job!',
+          });
+        }
+      } else {
+        showToast({
+          type: 'error',
+          message:
+            response.error ||
+            'Failed to generate responsibility suggestions. Please try again.',
+        });
+      }
+    } catch (error) {
+      showToast({
+        type: 'error',
+        message:
+          'Failed to generate responsibility suggestions. Please try again or add responsibilities manually.',
+      });
+    } finally {
+      setIsGeneratingResponsibilities(false);
+    }
+  };
+
   const totalSteps = 6;
 
   // Load existing job data if jobId is provided
   useEffect(() => {
     const loadExistingJob = async () => {
       if (!jobId) return;
+
+      // Don't load draft if we just generated AI content
+      if (hasGeneratedAIContent) {
+        return;
+      }
 
       try {
         setIsLoadingJob(true);
@@ -272,9 +415,7 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
 
         setDraftJobId(job.id);
         setIsDraftEditing(true); // Mark that we're editing a draft
-        console.log('📝 Draft job loaded, marking as draft editing mode');
       } catch (error) {
-        console.error('Error loading existing job:', error);
         showToast({
           type: 'error',
           message: 'Failed to load existing job data. Please try again.',
@@ -285,7 +426,7 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
     };
 
     loadExistingJob();
-  }, [jobId, showToast]);
+  }, [jobId, showToast, hasGeneratedAIContent]);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -453,7 +594,6 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
         message: 'Draft saved successfully!',
       });
     } catch (error) {
-      console.error('Error saving draft:', error);
       showToast({
         type: 'error',
         message:
@@ -511,7 +651,6 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
       setCurrentStep(currentStep + 1);
       setValidationErrors({});
     } catch (error) {
-      console.error('Error saving draft:', error);
       showToast({
         type: 'error',
         message:
@@ -598,7 +737,6 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
       // Redirect to jobs list or dashboard
       router.push('/dashboard');
     } catch (error) {
-      console.error('Error posting job:', error);
       showToast({
         type: 'error',
         message:
@@ -1121,13 +1259,64 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
           <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
             Required Skills <span className='text-red-500'>*</span>
           </label>
-          <button
-            type='button'
-            onClick={() => addArrayField('skill')}
-            className='inline-flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-all duration-200'
-          >
-            <span className='mr-1'>+</span> Add Skill
-          </button>
+          <div className='flex items-center gap-2'>
+            <button
+              type='button'
+              onClick={generateSkillSuggestions}
+              disabled={isGeneratingSkills}
+              className='inline-flex items-center px-3 py-1 text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
+            >
+              {isGeneratingSkills ? (
+                <>
+                  <svg
+                    className='animate-spin -ml-1 mr-2 h-4 w-4 text-purple-600'
+                    xmlns='http://www.w3.org/2000/svg'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                  >
+                    <circle
+                      className='opacity-25'
+                      cx='12'
+                      cy='12'
+                      r='10'
+                      stroke='currentColor'
+                      strokeWidth='4'
+                    ></circle>
+                    <path
+                      className='opacity-75'
+                      fill='currentColor'
+                      d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                    ></path>
+                  </svg>
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <svg
+                    className='mr-1 h-4 w-4'
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth='2'
+                      d='M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z'
+                    />
+                  </svg>
+                  AI Suggest
+                </>
+              )}
+            </button>
+            <button
+              type='button'
+              onClick={() => addArrayField('skill')}
+              className='inline-flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-all duration-200'
+            >
+              <span className='mr-1'>+</span> Add Skill
+            </button>
+          </div>
         </div>
 
         <div className='space-y-3'>
@@ -1222,13 +1411,64 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
             <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
               Key Responsibilities
             </label>
-            <button
-              type='button'
-              onClick={() => addArrayField('responsibilities')}
-              className='inline-flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-all duration-200'
-            >
-              <span className='mr-1'>+</span> Add Responsibility
-            </button>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={generateResponsibilitySuggestions}
+                disabled={isGeneratingResponsibilities}
+                className='inline-flex items-center px-3 py-1 text-sm text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
+              >
+                {isGeneratingResponsibilities ? (
+                  <>
+                    <svg
+                      className='animate-spin -ml-1 mr-2 h-4 w-4 text-green-600'
+                      xmlns='http://www.w3.org/2000/svg'
+                      fill='none'
+                      viewBox='0 0 24 24'
+                    >
+                      <circle
+                        className='opacity-25'
+                        cx='12'
+                        cy='12'
+                        r='10'
+                        stroke='currentColor'
+                        strokeWidth='4'
+                      ></circle>
+                      <path
+                        className='opacity-75'
+                        fill='currentColor'
+                        d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                      ></path>
+                    </svg>
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className='mr-1 h-4 w-4'
+                      fill='none'
+                      stroke='currentColor'
+                      viewBox='0 0 24 24'
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth='2'
+                        d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
+                      />
+                    </svg>
+                    AI Suggest
+                  </>
+                )}
+              </button>
+              <button
+                type='button'
+                onClick={() => addArrayField('responsibilities')}
+                className='inline-flex items-center px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-all duration-200'
+              >
+                <span className='mr-1'>+</span> Add Responsibility
+              </button>
+            </div>
           </div>
 
           <div className='space-y-3'>
