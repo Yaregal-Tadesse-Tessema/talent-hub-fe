@@ -119,6 +119,7 @@ export interface ApplicationFilters {
   questionaryScoreMax?: string;
   aiJobFitScoreMin?: string;
   aiJobFitScoreMax?: string;
+  tags?: string[];
 }
 
 class ApplicationService {
@@ -150,11 +151,9 @@ class ApplicationService {
 
       // Basic filters
       if (filters.name) {
+        // Use OR logic for name search across firstName and lastName
         conditions.push(
-          `userInfo.firstName:ILIKE:${filters.name.toLowerCase()}`,
-        );
-        conditions.push(
-          `userInfo.lastName:ILIKE:${filters.name.toLowerCase()}`,
+          `(userInfo.firstName:ILIKE:${filters.name.toLowerCase()},userInfo.lastName:ILIKE:${filters.name.toLowerCase()})`,
         );
       }
       if (filters.email) {
@@ -220,7 +219,7 @@ class ApplicationService {
         );
       }
 
-      // Skills
+      // Skills - using OR logic for multiple skills
       if (filters.technicalSkills && filters.technicalSkills.length > 0) {
         const skillConditions = filters.technicalSkills.map(
           (skill) => `userInfo.technicalSkills:ILIKE:${skill.toLowerCase()}`,
@@ -273,6 +272,16 @@ class ApplicationService {
           `userInfo.aiGeneratedJobFitScore:<=:${filters.aiJobFitScoreMax}`,
         );
       }
+
+      // Tags filter - temporarily disabled due to database schema issues
+      // The tags field exists in the response but cannot be queried directly
+      // TODO: Investigate proper database path for tags field
+      // if (filters.tags && filters.tags.length > 0) {
+      //   const tagConditions = filters.tags.map(
+      //     (tag) => `tags:ILIKE:${tag.toLowerCase()}`,
+      //   );
+      //   conditions.push(`(${tagConditions.join(',')})`);
+      // }
 
       // Build query string
       let queryParams = `q=i=JobPost%26%26w=${conditions.join(',')}`;

@@ -27,10 +27,18 @@ const FilterModal: React.FC<FilterModalProps> = ({
   onClearFilters,
 }) => {
   const [activeTab, setActiveTab] = useState<
-    'basic' | 'experience' | 'skills' | 'dates'
+    'basic' | 'experience' | 'skills' | 'dates' | 'tags'
   >('basic');
   const [tempFilters, setTempFilters] = useState(filters);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [availableTags, setAvailableTags] = useState<string[]>([
+    'Top Talent',
+    'Needs Review',
+    'Interviewed',
+    'Follow Up',
+    'Potential Fit',
+  ]);
+  const [newTag, setNewTag] = useState('');
 
   if (!filterOpen) return null;
 
@@ -39,7 +47,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
   };
 
   const handleArrayChange = (
-    field: 'technicalSkills' | 'softSkills',
+    field: 'technicalSkills' | 'softSkills' | 'tags',
     value: string,
     action: 'add' | 'remove',
   ) => {
@@ -52,13 +60,32 @@ const FilterModal: React.FC<FilterModalProps> = ({
     }));
   };
 
+  const handleAddTag = () => {
+    const tag = newTag.trim();
+    if (!tag) return;
+
+    // Add to available tags if not already there
+    if (!availableTags.includes(tag)) {
+      setAvailableTags([...availableTags, tag]);
+    }
+
+    // Add to selected tags if not already selected
+    if (!tempFilters.tags?.includes(tag)) {
+      handleArrayChange('tags', tag, 'add');
+    }
+
+    setNewTag('');
+  };
+
   const applyFilters = async () => {
     setIsProcessing(true);
     setFilters(tempFilters);
-    setFilterOpen(false);
+
     if (onApplyFilters) {
       await onApplyFilters(tempFilters);
     }
+
+    setFilterOpen(false);
     setIsProcessing(false);
   };
 
@@ -89,6 +116,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
       questionaryScoreMax: '',
       aiJobFitScoreMin: '',
       aiJobFitScoreMax: '',
+      tags: [],
     };
     setTempFilters(clearedFilters);
     setFilters(clearedFilters);
@@ -139,6 +167,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
               {/* Mobile: Horizontal scrollable tabs */}
               <div className='md:hidden flex space-x-2 overflow-x-auto pb-2'>
                 {[
+                  { id: 'tags', label: 'Tags', icon: '🏷️' },
                   { id: 'basic', label: 'Basic Info', icon: '👤' },
                   { id: 'experience', label: 'Experience', icon: '🎓' },
                   { id: 'skills', label: 'Skills', icon: '⚡' },
@@ -162,6 +191,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
               {/* Desktop: Vertical navigation */}
               <nav className='hidden md:block space-y-2'>
                 {[
+                  { id: 'tags', label: 'Tags', icon: '🏷️' },
                   { id: 'basic', label: 'Basic Info', icon: '👤' },
                   {
                     id: 'experience',
@@ -692,6 +722,107 @@ const FilterModal: React.FC<FilterModalProps> = ({
                             />
                           </div>
                         </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tags Tab */}
+              {activeTab === 'tags' && (
+                <div className='space-y-4 md:space-y-6'>
+                  <div>
+                    <h3 className='text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4'>
+                      Filter by Tags
+                    </h3>
+                    <p className='text-sm text-gray-600 mb-4'>
+                      Select tags to filter applications. You can choose from
+                      existing tags or create new ones.
+                    </p>
+
+                    {/* Selected Tags */}
+                    {tempFilters.tags && tempFilters.tags.length > 0 && (
+                      <div className='mb-6'>
+                        <h4 className='text-sm font-medium text-gray-700 mb-2'>
+                          Selected Tags ({tempFilters.tags.length})
+                        </h4>
+                        <div className='flex flex-wrap gap-2'>
+                          {tempFilters.tags.map((tag, index) => (
+                            <span
+                              key={index}
+                              className='inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium'
+                            >
+                              {tag}
+                              <button
+                                onClick={() =>
+                                  handleArrayChange('tags', tag, 'remove')
+                                }
+                                className='ml-1 text-blue-600 hover:text-blue-800'
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Available Tags */}
+                    <div className='mb-6'>
+                      <h4 className='text-sm font-medium text-gray-700 mb-3'>
+                        Available Tags
+                      </h4>
+                      <div className='flex flex-wrap gap-2'>
+                        {availableTags.map((tag) => (
+                          <button
+                            key={tag}
+                            onClick={() =>
+                              handleArrayChange(
+                                'tags',
+                                tag,
+                                tempFilters.tags?.includes(tag)
+                                  ? 'remove'
+                                  : 'add',
+                              )
+                            }
+                            className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors focus:outline-none ${
+                              tempFilters.tags?.includes(tag)
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'
+                            }`}
+                          >
+                            {tag}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Add New Tag */}
+                    <div>
+                      <h4 className='text-sm font-medium text-gray-700 mb-2'>
+                        Create New Tag
+                      </h4>
+                      <div className='flex gap-2'>
+                        <input
+                          type='text'
+                          value={newTag}
+                          onChange={(e) => setNewTag(e.target.value)}
+                          placeholder='Enter new tag name...'
+                          className='flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm'
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddTag();
+                            }
+                          }}
+                        />
+                        <button
+                          onClick={handleAddTag}
+                          disabled={!newTag.trim()}
+                          className='px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm'
+                        >
+                          Add Tag
+                        </button>
                       </div>
                     </div>
                   </div>

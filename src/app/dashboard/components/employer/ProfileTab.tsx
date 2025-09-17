@@ -311,108 +311,133 @@ export default function ProfileTab() {
   }
 
   return (
-    <div className=' w-full max-w-6xl '>
-      <div className='bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700'>
-        {/* Header with Logo and Basic Info */}
+    <div className='w-full max-w-7xl mx-auto'>
+      <div className='bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700/50'>
+        {/* Compact Header with Logo and Basic Info */}
         <div
-          className={`p-4 text-white relative overflow-hidden transition-all duration-500 ${companyData?.cover?.path ? 'min-h-[200px]' : ''}`}
+          className={`relative overflow-hidden transition-all duration-700 ${companyData?.cover?.path ? 'h-[130px]' : 'h-[120px]'}`}
           style={{
             backgroundImage: companyData?.cover?.path
-              ? `linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(37, 99, 235, 0.8) 50%, rgba(30, 64, 175, 0.9) 100%), url(${companyData.cover.path})`
-              : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1e40af 100%)',
-            backgroundColor: companyData?.cover?.path
-              ? 'transparent'
-              : undefined,
+              ? `linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(37, 99, 235, 0.4) 50%, rgba(30, 64, 175, 0.5) 100%), url(${companyData.cover.path})`
+              : 'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
           }}
         >
-          <div className='absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16'></div>
-          <div className='absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12'></div>
+          {/* Subtle background elements */}
+          <div className='absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12'></div>
+          <div className='absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full translate-y-10 -translate-x-10'></div>
 
-          <div className='flex items-center justify-between relative z-10 flex-col lg:flex-row gap-6 lg:gap-0'>
-            <div className='flex items-center gap-4 lg:gap-8 flex-col sm:flex-row text-center sm:text-left'>
-              <div className='relative group'>
-                <div className='w-24 h-24 lg:w-28 lg:h-28 bg-white rounded-xl overflow-hidden shadow-lg border-4 border-white/20'>
-                  <img
-                    src={companyData?.logo?.path}
-                    alt={companyData?.name}
-                    className='w-full h-full object-contain'
+          {/* Content container */}
+          <div className='relative z-10 p-4'>
+            <div className='flex items-center justify-between h-full'>
+              {/* Company info section */}
+              <div className='flex items-center gap-4'>
+                {/* Compact logo container */}
+                <div className='relative group'>
+                  <div className='w-20 h-20 bg-white rounded-xl overflow-hidden shadow-lg border-2 border-white/30 backdrop-blur-sm transform transition-all duration-300 group-hover:scale-105'>
+                    <img
+                      src={companyData?.logo?.path}
+                      alt={companyData?.name}
+                      className='w-full h-full object-contain p-1'
+                    />
+                  </div>
+                  {/* Upload overlay */}
+                  <div className='absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center'>
+                    <button
+                      onClick={triggerLogoFileInput}
+                      disabled={isUploadingLogo}
+                      className='text-white hover:text-blue-200 transition-all duration-300'
+                      title='Upload new logo'
+                    >
+                      {isUploadingLogo ? (
+                        <div className='animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent'></div>
+                      ) : (
+                        <FiCamera className='w-6 h-6' />
+                      )}
+                    </button>
+                  </div>
+                  {/* Hidden file input for logo */}
+                  <input
+                    ref={logoFileInputRef}
+                    type='file'
+                    accept='image/*'
+                    onChange={handleLogoUpload}
+                    className='hidden'
                   />
                 </div>
-                {/* Upload overlay */}
-                <div className='absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center'>
-                  <button
-                    onClick={triggerLogoFileInput}
-                    disabled={isUploadingLogo}
-                    className='text-white hover:text-blue-200 transition-colors'
-                    title='Upload new logo'
-                  >
-                    {isUploadingLogo ? (
-                      <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-white'></div>
-                    ) : (
-                      <FiCamera className='w-8 h-8' />
-                    )}
-                  </button>
-                </div>
-                {/* Hidden file input for logo */}
-                <input
-                  ref={logoFileInputRef}
-                  type='file'
-                  accept='image/*'
-                  onChange={handleLogoUpload}
-                  className='hidden'
-                />
-              </div>
-              <div>
-                <h1 className='text-2xl lg:text-3xl font-bold mb-2'>
-                  {companyData.tradeName}
-                </h1>
-                <div className='flex items-center gap-3 flex-wrap justify-center sm:justify-start'>
-                  <span className='px-4 py-2 bg-blue-500/80 backdrop-blur-sm rounded-full text-sm font-medium'>
-                    {companyData.status}
-                  </span>
-                  {companyData.isVerified && (
-                    <span className='px-4 py-2 bg-green-500/80 backdrop-blur-sm rounded-full text-sm font-medium flex items-center gap-2'>
-                      <FiAward className='w-4 h-4' />
-                      Verified
+
+                {/* Company details */}
+                <div className='space-y-2'>
+                  <div>
+                    <h1 className='text-xl lg:text-2xl font-bold text-white drop-shadow-lg'>
+                      {companyData.tradeName}
+                    </h1>
+                    {companyData.name !== companyData.tradeName &&
+                      companyData.name && (
+                        <p className='text-white/80 text-sm font-medium'>
+                          {companyData.name}
+                        </p>
+                      )}
+                  </div>
+
+                  {/* Compact status badges */}
+                  <div className='flex items-center gap-2 flex-wrap'>
+                    <span className='px-3 py-1 bg-gradient-to-r from-blue-500/90 to-blue-600/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white shadow-md border border-white/20'>
+                      {companyData.status}
                     </span>
-                  )}
+                    {companyData.isVerified && (
+                      <span className='px-3 py-1 bg-gradient-to-r from-emerald-500/90 to-emerald-600/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white flex items-center gap-1 shadow-md border border-white/20'>
+                        <FiAward className='w-3 h-3' />
+                        Verified
+                      </span>
+                    )}
+                    {companyData.subscriptionType && (
+                      <span className='px-3 py-1 bg-gradient-to-r from-purple-500/90 to-purple-600/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white shadow-md border border-white/20'>
+                        {companyData.subscriptionType}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className='flex gap-3 flex-col sm:flex-row'>
-              <button
-                onClick={triggerBannerFileInput}
-                disabled={isUploadingBanner}
-                className='px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2 transition-all duration-200 font-medium backdrop-blur-sm justify-center'
-                title={
-                  companyData?.cover?.path ? 'Change banner' : 'Upload banner'
-                }
-              >
-                {isUploadingBanner ? (
-                  <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
-                ) : companyData?.cover?.path ? (
-                  <FiCheck className='w-4 h-4' />
-                ) : (
-                  <FiUpload className='w-4 h-4' />
-                )}
-                {isUploadingBanner
-                  ? 'Uploading...'
-                  : companyData?.cover?.path
-                    ? 'Change Banner'
-                    : 'Upload Banner'}
-              </button>
-              <button
-                onClick={handleEdit}
-                className='px-6 py-3 bg-white/90 hover:bg-white text-blue-700 rounded-xl flex items-center gap-3 transition-all duration-200 font-medium shadow-lg hover:shadow-xl justify-center'
-              >
-                <FiEdit3 className='w-5 h-5' />
-                Edit Profile
-              </button>
+
+              {/* Compact action buttons */}
+              <div className='flex gap-2'>
+                <button
+                  onClick={triggerBannerFileInput}
+                  disabled={isUploadingBanner}
+                  className='px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2 transition-all duration-300 font-medium backdrop-blur-md border border-white/30 text-white text-sm'
+                  title={
+                    companyData?.cover?.path ? 'Change banner' : 'Upload banner'
+                  }
+                >
+                  {isUploadingBanner ? (
+                    <div className='animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent'></div>
+                  ) : companyData?.cover?.path ? (
+                    <FiCheck className='w-4 h-4' />
+                  ) : (
+                    <FiUpload className='w-4 h-4' />
+                  )}
+                  <span className='hidden sm:inline'>
+                    {isUploadingBanner
+                      ? 'Uploading...'
+                      : companyData?.cover?.path
+                        ? 'Change'
+                        : 'Upload'}
+                  </span>
+                </button>
+                <button
+                  onClick={handleEdit}
+                  className='px-4 py-2 bg-white hover:bg-gray-50 text-gray-800 rounded-lg flex items-center gap-2 transition-all duration-300 font-medium shadow-lg text-sm'
+                >
+                  <FiEdit3 className='w-4 h-4' />
+                  <span className='hidden sm:inline'>Edit</span>
+                </button>
+              </div>
             </div>
           </div>
+
           {/* Hidden file input for banner */}
           <input
             ref={bannerFileInputRef}
@@ -423,49 +448,154 @@ export default function ProfileTab() {
           />
         </div>
 
-        {/* Company Details */}
-        <div className='p-8'>
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
-            {/* Contact Information */}
+        {/* Enhanced Company Details Section */}
+        <div className='p-6 bg-gradient-to-br from-gray-50/50 to-white dark:from-gray-800 dark:to-gray-900'>
+          {/* Quick Stats Bar */}
+          <div className='mb-6 grid grid-cols-2 md:grid-cols-4 gap-4'>
+            {hasValue(companyData.companySize) && (
+              <div className='bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all duration-300'>
+                <div className='flex items-center gap-3'>
+                  <div className='w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center'>
+                    <FiUsers className='w-5 h-5 text-white' />
+                  </div>
+                  <div>
+                    <p className='text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
+                      Team Size
+                    </p>
+                    <p className='text-sm font-bold text-gray-900 dark:text-white'>
+                      {companyData.companySize}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            {hasValue(companyData.industry) && (
+              <div className='bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all duration-300'>
+                <div className='flex items-center gap-3'>
+                  <div className='w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center'>
+                    <FiBriefcase className='w-5 h-5 text-white' />
+                  </div>
+                  <div>
+                    <p className='text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
+                      Industry
+                    </p>
+                    <p className='text-sm font-bold text-gray-900 dark:text-white truncate'>
+                      {companyData.industry}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            {hasValue(companyData.type) && (
+              <div className='bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all duration-300'>
+                <div className='flex items-center gap-3'>
+                  <div className='w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center'>
+                    <FiGlobe className='w-5 h-5 text-white' />
+                  </div>
+                  <div>
+                    <p className='text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
+                      Type
+                    </p>
+                    <p className='text-sm font-bold text-gray-900 dark:text-white truncate'>
+                      {companyData.type}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            {companyData.isVerified && (
+              <div className='bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all duration-300'>
+                <div className='flex items-center gap-3'>
+                  <div className='w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center'>
+                    <FiAward className='w-5 h-5 text-white' />
+                  </div>
+                  <div>
+                    <p className='text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
+                      Status
+                    </p>
+                    <p className='text-sm font-bold text-green-600 dark:text-green-400'>
+                      Verified
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className='grid grid-cols-1 xl:grid-cols-3 gap-6'>
+            {/* Contact Information - Enhanced Card */}
             {(hasAddress(companyData.address) ||
               hasValue(companyData.phoneNumber) ||
               hasValue(companyData.email)) && (
-              <div className='bg-gray-50 dark:bg-gray-700 rounded-xl p-6'>
-                <h2 className='text-xl font-semibold text-gray-800 dark:text-white mb-6 flex items-center gap-3'>
-                  <div className='w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center'>
-                    <FiMail className='w-4 h-4 text-blue-600 dark:text-blue-400' />
+              <div className='bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1'>
+                <div className='flex items-center gap-4 mb-6'>
+                  <div className='w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
+                    <FiMail className='w-6 h-6 text-white' />
                   </div>
-                  Contact Information
-                </h2>
-                <div className='space-y-4'>
+                  <div>
+                    <h2 className='text-xl font-bold text-gray-800 dark:text-white'>
+                      Contact
+                    </h2>
+                    <p className='text-sm text-gray-500 dark:text-gray-400'>
+                      Get in touch with us
+                    </p>
+                  </div>
+                </div>
+                <div className='space-y-5'>
                   {hasAddress(companyData.address) && (
-                    <div className='flex items-start gap-4 text-gray-700 dark:text-gray-300'>
-                      <FiMapPin className='w-5 h-5 text-blue-600 dark:text-blue-400 mt-1 flex-shrink-0' />
-                      <div>
-                        <p className='font-medium dark:text-white'>Address</p>
-                        <p className='text-gray-600 dark:text-gray-400'>{`${companyData.address.city || ''}, ${companyData.address.country || ''}`}</p>
+                    <div className='group'>
+                      <div className='flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200'>
+                        <div className='w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors duration-200'>
+                          <FiMapPin className='w-4 h-4 text-blue-600 dark:text-blue-400' />
+                        </div>
+                        <div className='flex-1'>
+                          <p className='font-semibold text-gray-800 dark:text-white text-sm'>
+                            Address
+                          </p>
+                          <p className='text-gray-600 dark:text-gray-300 text-sm leading-relaxed'>
+                            {[
+                              companyData.address.street,
+                              companyData.address.city,
+                              companyData.address.country,
+                            ]
+                              .filter(Boolean)
+                              .join(', ')}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   )}
                   {hasValue(companyData.phoneNumber) && (
-                    <div className='flex items-center gap-4 text-gray-700 dark:text-gray-300'>
-                      <FiPhone className='w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0' />
-                      <div>
-                        <p className='font-medium dark:text-white'>Phone</p>
-                        <p className='text-gray-600 dark:text-gray-400'>
-                          {companyData.phoneNumber}
-                        </p>
+                    <div className='group'>
+                      <div className='flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200'>
+                        <div className='w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors duration-200'>
+                          <FiPhone className='w-4 h-4 text-blue-600 dark:text-blue-400' />
+                        </div>
+                        <div className='flex-1'>
+                          <p className='font-semibold text-gray-800 dark:text-white text-sm'>
+                            Phone
+                          </p>
+                          <p className='text-gray-600 dark:text-gray-300 text-sm'>
+                            {companyData.phoneNumber}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   )}
                   {hasValue(companyData.email) && (
-                    <div className='flex items-center gap-4 text-gray-700 dark:text-gray-300'>
-                      <FiMail className='w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0' />
-                      <div>
-                        <p className='font-medium dark:text-white'>Email</p>
-                        <p className='text-gray-600 dark:text-gray-400'>
-                          {companyData.email}
-                        </p>
+                    <div className='group'>
+                      <div className='flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200'>
+                        <div className='w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors duration-200'>
+                          <FiMail className='w-4 h-4 text-blue-600 dark:text-blue-400' />
+                        </div>
+                        <div className='flex-1'>
+                          <p className='font-semibold text-gray-800 dark:text-white text-sm'>
+                            Email
+                          </p>
+                          <p className='text-gray-600 dark:text-gray-300 text-sm'>
+                            {companyData.email}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -473,66 +603,129 @@ export default function ProfileTab() {
               </div>
             )}
 
-            {/* Company Information */}
-            {(hasValue(companyData.companySize) ||
-              hasValue(companyData.industry) ||
-              hasValue(companyData.organizationType) ||
-              hasValue(companyData.type)) && (
-              <div className='bg-gray-50 dark:bg-gray-700 rounded-xl p-6'>
-                <h2 className='text-xl font-semibold text-gray-800 dark:text-white mb-6 flex items-center gap-3'>
-                  <div className='w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center'>
-                    <FiBriefcase className='w-4 h-4 text-green-600 dark:text-green-400' />
+            {/* Company Information - Enhanced Card */}
+            {hasValue(companyData.organizationType) && (
+              <div className='bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1'>
+                <div className='flex items-center gap-4 mb-6'>
+                  <div className='w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg'>
+                    <FiBriefcase className='w-6 h-6 text-white' />
                   </div>
-                  Company Information
-                </h2>
-                <div className='space-y-4'>
-                  {hasValue(companyData.companySize) && (
-                    <div className='flex items-center gap-4 text-gray-700 dark:text-gray-300'>
-                      <FiUsers className='w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0' />
-                      <div>
-                        <p className='font-medium dark:text-white'>
-                          Company Size
-                        </p>
-                        <p className='text-gray-600 dark:text-gray-400'>
-                          {companyData.companySize}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  {hasValue(companyData.industry) && (
-                    <div className='flex items-center gap-4 text-gray-700 dark:text-gray-300'>
-                      <FiBriefcase className='w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0' />
-                      <div>
-                        <p className='font-medium dark:text-white'>Industry</p>
-                        <p className='text-gray-600 dark:text-gray-400'>
-                          {companyData.industry}
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                  <div>
+                    <h2 className='text-xl font-bold text-gray-800 dark:text-white'>
+                      Organization
+                    </h2>
+                    <p className='text-sm text-gray-500 dark:text-gray-400'>
+                      Company structure & type
+                    </p>
+                  </div>
+                </div>
+                <div className='space-y-5'>
                   {hasValue(companyData.organizationType) && (
-                    <div className='flex items-center gap-4 text-gray-700 dark:text-gray-300'>
-                      <FiHome className='w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0' />
-                      <div>
-                        <p className='font-medium dark:text-white'>
-                          Organization Type
-                        </p>
-                        <p className='text-gray-600 dark:text-gray-400'>
-                          {companyData.organizationType}
-                        </p>
+                    <div className='group'>
+                      <div className='flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200'>
+                        <div className='w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center group-hover:bg-emerald-200 dark:group-hover:bg-emerald-800/50 transition-colors duration-200'>
+                          <FiHome className='w-4 h-4 text-emerald-600 dark:text-emerald-400' />
+                        </div>
+                        <div className='flex-1'>
+                          <p className='font-semibold text-gray-800 dark:text-white text-sm'>
+                            Organization Type
+                          </p>
+                          <p className='text-gray-600 dark:text-gray-300 text-sm'>
+                            {companyData.organizationType}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   )}
-                  {hasValue(companyData.type) && (
-                    <div className='flex items-center gap-4 text-gray-700 dark:text-gray-300'>
-                      <FiGlobe className='w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0' />
-                      <div>
-                        <p className='font-medium dark:text-white'>
-                          Company Type
-                        </p>
-                        <p className='text-gray-600 dark:text-gray-400'>
-                          {companyData.type}
-                        </p>
+                </div>
+              </div>
+            )}
+
+            {/* Registration & Legal Info - New Consolidated Card */}
+            {(hasValue(companyData.tin) ||
+              hasValue(companyData.code) ||
+              hasValue(companyData.licenseNumber) ||
+              hasValue(companyData.registrationNumber)) && (
+              <div className='bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1'>
+                <div className='flex items-center gap-4 mb-6'>
+                  <div className='w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg'>
+                    <FiFileText className='w-6 h-6 text-white' />
+                  </div>
+                  <div>
+                    <h2 className='text-xl font-bold text-gray-800 dark:text-white'>
+                      Legal Info
+                    </h2>
+                    <p className='text-sm text-gray-500 dark:text-gray-400'>
+                      Registration & identification
+                    </p>
+                  </div>
+                </div>
+                <div className='space-y-5'>
+                  {hasValue(companyData.tin) && (
+                    <div className='group'>
+                      <div className='flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200'>
+                        <div className='w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors duration-200'>
+                          <FiHash className='w-4 h-4 text-purple-600 dark:text-purple-400' />
+                        </div>
+                        <div className='flex-1'>
+                          <p className='font-semibold text-gray-800 dark:text-white text-sm'>
+                            TIN Number
+                          </p>
+                          <p className='text-gray-600 dark:text-gray-300 text-sm font-mono'>
+                            {companyData.tin}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {hasValue(companyData.code) && (
+                    <div className='group'>
+                      <div className='flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200'>
+                        <div className='w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors duration-200'>
+                          <FiHash className='w-4 h-4 text-purple-600 dark:text-purple-400' />
+                        </div>
+                        <div className='flex-1'>
+                          <p className='font-semibold text-gray-800 dark:text-white text-sm'>
+                            Company Code
+                          </p>
+                          <p className='text-gray-600 dark:text-gray-300 text-sm font-mono'>
+                            {companyData.code}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {hasValue(companyData.licenseNumber) && (
+                    <div className='group'>
+                      <div className='flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200'>
+                        <div className='w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors duration-200'>
+                          <FiFileText className='w-4 h-4 text-purple-600 dark:text-purple-400' />
+                        </div>
+                        <div className='flex-1'>
+                          <p className='font-semibold text-gray-800 dark:text-white text-sm'>
+                            License Number
+                          </p>
+                          <p className='text-gray-600 dark:text-gray-300 text-sm font-mono'>
+                            {companyData.licenseNumber}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {hasValue(companyData.registrationNumber) && (
+                    <div className='group'>
+                      <div className='flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200'>
+                        <div className='w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors duration-200'>
+                          <FiFileText className='w-4 h-4 text-purple-600 dark:text-purple-400' />
+                        </div>
+                        <div className='flex-1'>
+                          <p className='font-semibold text-gray-800 dark:text-white text-sm'>
+                            Registration Number
+                          </p>
+                          <p className='text-gray-600 dark:text-gray-300 text-sm font-mono'>
+                            {companyData.registrationNumber}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -541,102 +734,59 @@ export default function ProfileTab() {
             )}
           </div>
 
-          {/* Additional Information */}
-          {(hasValue(companyData.tin) ||
-            hasValue(companyData.code) ||
-            hasValue(companyData.subscriptionType) ||
-            hasValue(companyData.licenseNumber) ||
-            hasValue(companyData.registrationNumber) ||
-            hasValue(companyData.selectedCalender)) && (
-            <div className='mt-8 bg-gray-50 dark:bg-gray-700 rounded-xl p-6'>
-              <h2 className='text-xl font-semibold text-gray-800 dark:text-white mb-6 flex items-center gap-3'>
-                <div className='w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center'>
-                  <FiFileText className='w-4 h-4 text-purple-600 dark:text-purple-400' />
+          {/* Company Timeline & Additional Info Footer */}
+          {hasValue(companyData.selectedCalender) && (
+            <div className='mt-8 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-600'>
+              <div className='flex items-center gap-4 mb-4'>
+                <div className='w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg'>
+                  <FiCalendar className='w-6 h-6 text-white' />
                 </div>
-                Additional Information
-              </h2>
-              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-                {hasValue(companyData.tin) && (
-                  <div className='flex items-center gap-3 text-gray-700 dark:text-gray-300'>
-                    <FiHash className='w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0' />
-                    <div>
-                      <p className='font-medium text-sm text-gray-500 dark:text-gray-400'>
-                        TIN Number
-                      </p>
-                      <p className='text-gray-800 dark:text-white'>
-                        {companyData.tin}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {hasValue(companyData.code) && (
-                  <div className='flex items-center gap-3 text-gray-700 dark:text-gray-300'>
-                    <FiHash className='w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0' />
-                    <div>
-                      <p className='font-medium text-sm text-gray-500 dark:text-gray-400'>
-                        Company Code
-                      </p>
-                      <p className='text-gray-800 dark:text-white'>
-                        {companyData.code}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {hasValue(companyData.subscriptionType) && (
-                  <div className='flex items-center gap-3 text-gray-700 dark:text-gray-300'>
-                    <FiAward className='w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0' />
-                    <div>
-                      <p className='font-medium text-sm text-gray-500 dark:text-gray-400'>
-                        Subscription Type
-                      </p>
-                      <p className='text-gray-800 dark:text-white'>
-                        {companyData.subscriptionType}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {hasValue(companyData.licenseNumber) && (
-                  <div className='flex items-center gap-3 text-gray-700 dark:text-gray-300'>
-                    <FiFileText className='w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0' />
-                    <div>
-                      <p className='font-medium text-sm text-gray-500 dark:text-gray-400'>
-                        License Number
-                      </p>
-                      <p className='text-gray-800 dark:text-white'>
-                        {companyData.licenseNumber}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {hasValue(companyData.registrationNumber) && (
-                  <div className='flex items-center gap-3 text-gray-700 dark:text-gray-300'>
-                    <FiFileText className='w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0' />
-                    <div>
-                      <p className='font-medium text-sm text-gray-500 dark:text-gray-400'>
-                        Registration Number
-                      </p>
-                      <p className='text-gray-800 dark:text-white'>
-                        {companyData.registrationNumber}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {hasValue(companyData.selectedCalender) && (
-                  <div className='flex items-center gap-3 text-gray-700 dark:text-gray-300'>
-                    <FiCalendar className='w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0' />
-                    <div>
-                      <p className='font-medium text-sm text-gray-500 dark:text-gray-400'>
-                        Calendar
-                      </p>
-                      <p className='text-gray-800 dark:text-white'>
-                        {companyData.selectedCalender}
-                      </p>
-                    </div>
-                  </div>
-                )}
+                <div>
+                  <h2 className='text-xl font-bold text-gray-800 dark:text-white'>
+                    Calendar Integration
+                  </h2>
+                  <p className='text-sm text-gray-500 dark:text-gray-400'>
+                    Connected scheduling system
+                  </p>
+                </div>
+              </div>
+              <div className='bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700'>
+                <p className='text-gray-600 dark:text-gray-300 font-medium'>
+                  {companyData.selectedCalender}
+                </p>
               </div>
             </div>
           )}
+
+          {/* Company Timeline Footer */}
+          <div className='mt-8 pt-6 border-t border-gray-200 dark:border-gray-700'>
+            <div className='flex items-center justify-between flex-col sm:flex-row gap-4 text-sm text-gray-500 dark:text-gray-400'>
+              <div className='flex items-center gap-6'>
+                {hasValue(companyData.createdAt) && (
+                  <div className='flex items-center gap-2'>
+                    <FiCalendar className='w-4 h-4' />
+                    <span>
+                      Founded:{' '}
+                      {new Date(companyData.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+                {hasValue(companyData.updatedAt) && (
+                  <div className='flex items-center gap-2'>
+                    <FiEdit3 className='w-4 h-4' />
+                    <span>
+                      Updated:{' '}
+                      {new Date(companyData.updatedAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className='flex items-center gap-2 text-xs px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full'>
+                <span className='w-2 h-2 bg-green-500 rounded-full animate-pulse'></span>
+                <span>Profile Active</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -67,6 +67,7 @@ export default function JobApplicationsBoard({
   const [applications, setApplications] = useState<Record<string, Application>>(
     {},
   );
+  const [totalApplicationsCount, setTotalApplicationsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<'board' | 'list'>('list');
@@ -208,33 +209,74 @@ export default function JobApplicationsBoard({
 
       let response;
 
-      // Check if the provided filters have any active values
-      const hasActiveFilterValues =
-        filters &&
-        Object.values(filters).some(
+      // Separate server-side filters from client-side filters (tags)
+      let serverSideFilters: ApplicationFilters | undefined;
+      if (filters) {
+        const { tags, ...otherFilters } = filters;
+        serverSideFilters = otherFilters;
+      }
+
+      // Check if the provided filters have any active server-side values
+      const hasActiveServerSideFilters =
+        serverSideFilters &&
+        Object.values(serverSideFilters).some(
           (value) =>
             value !== '' &&
             value !== null &&
             (Array.isArray(value) ? value.length > 0 : true),
         );
 
-      if (filters && hasActiveFilterValues) {
+      if (serverSideFilters && hasActiveServerSideFilters) {
         // Use searchApplications for filtered results
-        response = await applicationService.searchApplications(jobId, filters);
+        response = await applicationService.searchApplications(
+          jobId,
+          serverSideFilters,
+        );
       } else {
         // Use regular getApplicationsByJobId for unfiltered results
         response = await applicationService.getApplicationsByJobId(jobId);
       }
 
-      // Convert applications array to record
+      // Store the total count of applications for this job
+      // If we're applying server-side filters, we need to get the unfiltered count
+      if (serverSideFilters && hasActiveServerSideFilters) {
+        // For filtered queries, we need to fetch the total count separately
+        try {
+          const unfiltered =
+            await applicationService.getApplicationsByJobId(jobId);
+          setTotalApplicationsCount(unfiltered.items.length);
+        } catch (err) {
+          // Fallback to current count if we can't get the total
+          setTotalApplicationsCount(response.items.length);
+        }
+      } else {
+        // For unfiltered queries, the response count is the total
+        setTotalApplicationsCount(response.items.length);
+      }
+
+      // Convert applications array to record and apply client-side tag filtering
       const applicationsRecord: Record<string, Application> = {};
 
-      response.items.forEach((app) => {
+      let filteredItems = response.items;
+
+      // Apply client-side tag filtering if tags filter is active
+      if (filters?.tags && filters.tags.length > 0) {
+        filteredItems = response.items.filter((app) => {
+          if (!app.tags || app.tags.length === 0) return false;
+          // Check if any of the filter tags match any of the application tags
+          return filters.tags!.some((filterTag) =>
+            app.tags!.some((appTag) =>
+              appTag.toLowerCase().includes(filterTag.toLowerCase()),
+            ),
+          );
+        });
+      }
+
+      filteredItems.forEach((app) => {
         applicationsRecord[app.id] = app;
       });
 
       setApplications(applicationsRecord);
-      console.log('applicationsRecord', applicationsRecord);
 
       const job = await jobService.getJobById(jobId);
       setJob(job);
@@ -246,7 +288,7 @@ export default function JobApplicationsBoard({
       }));
 
       // Distribute applications to appropriate columns
-      response.items.forEach((app) => {
+      filteredItems.forEach((app) => {
         const status = app.status?.toUpperCase() || 'PENDING';
         // If status is not one of our defined columns, put it in PENDING
         const column =
@@ -423,9 +465,50 @@ export default function JobApplicationsBoard({
   }
 
   // Check if there are no applications at all (only after loading is complete)
-  if (allAppIds.length === 0) {
+  if (totalApplicationsCount === 0) {
     return (
       <div className='flex-1 p-6'>
+        {/* Header: Breadcrumb left, toggler/filter/sort right */}
+        <div className='flex items-center justify-between mb-2'>
+          <Breadcrumb job={job} onBack={onBack} />
+          <div className='flex items-center gap-2'>
+            <div className='flex bg-gray-100 rounded overflow-hidden border border-gray-200'>
+              <button
+                onClick={() => setView('board')}
+                title='Board View'
+                className={`flex items-center justify-center px-3 py-2 ${view === 'board' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-blue-50'}`}
+              >
+                <Squares2X2Icon className='w-5 h-5' />
+              </button>
+              <button
+                onClick={() => setView('list')}
+                title='List View'
+                className={`flex items-center justify-center px-3 py-2 ${view === 'list' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-blue-50'}`}
+              >
+                <ListBulletIcon className='w-5 h-5' />
+              </button>
+            </div>
+            <button
+              onClick={() => setFilterOpen(true)}
+              className='flex items-center gap-1 px-3 py-2 bg-white border border-gray-200 rounded font-medium text-gray-700 hover:bg-blue-50 relative'
+              title='Filter'
+            >
+              <FunnelIcon className='w-5 h-5' />
+              {hasActiveFilters && (
+                <span className='absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center'>
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setSortOpen(true)}
+              className='flex items-center gap-1 px-3 py-2 bg-white border border-gray-200 rounded font-medium text-gray-700 hover:bg-blue-50'
+              title='Sort'
+            >
+              <ChevronDownIcon className='w-5 h-5' />
+            </button>
+          </div>
+        </div>
         <div className='flex flex-col items-center justify-center h-64 text-center'>
           <div className='w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4'>
             <svg
@@ -450,14 +533,75 @@ export default function JobApplicationsBoard({
             will appear here once candidates start applying.
           </p>
         </div>
+        {/* Filter Modal */}
+        <FilterModal
+          filters={filters}
+          setFilters={setFilters}
+          filterOpen={filterOpen}
+          setFilterOpen={setFilterOpen}
+          onApplyFilters={handleApplyFilters}
+          onClearFilters={handleClearFilters}
+        />
+        {/* Sort Modal */}
+        <SortModal
+          sort={sort}
+          setSort={setSort}
+          sortOpen={sortOpen}
+          setSortOpen={setSortOpen}
+        />
       </div>
     );
   }
 
   // Check if there are applications but filters result in no matches
-  if (allAppIds.length > 0 && filteredAppIds.length === 0 && hasActiveFilters) {
+  if (
+    totalApplicationsCount > 0 &&
+    allAppIds.length === 0 &&
+    hasActiveFilters
+  ) {
     return (
       <div className='flex-1 p-6'>
+        {/* Header: Breadcrumb left, toggler/filter/sort right */}
+        <div className='flex items-center justify-between mb-2'>
+          <Breadcrumb job={job} onBack={onBack} />
+          <div className='flex items-center gap-2'>
+            <div className='flex bg-gray-100 rounded overflow-hidden border border-gray-200'>
+              <button
+                onClick={() => setView('board')}
+                title='Board View'
+                className={`flex items-center justify-center px-3 py-2 ${view === 'board' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-blue-50'}`}
+              >
+                <Squares2X2Icon className='w-5 h-5' />
+              </button>
+              <button
+                onClick={() => setView('list')}
+                title='List View'
+                className={`flex items-center justify-center px-3 py-2 ${view === 'list' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-blue-50'}`}
+              >
+                <ListBulletIcon className='w-5 h-5' />
+              </button>
+            </div>
+            <button
+              onClick={() => setFilterOpen(true)}
+              className='flex items-center gap-1 px-3 py-2 bg-white border border-gray-200 rounded font-medium text-gray-700 hover:bg-blue-50 relative'
+              title='Filter'
+            >
+              <FunnelIcon className='w-5 h-5' />
+              {hasActiveFilters && (
+                <span className='absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center'>
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setSortOpen(true)}
+              className='flex items-center gap-1 px-3 py-2 bg-white border border-gray-200 rounded font-medium text-gray-700 hover:bg-blue-50'
+              title='Sort'
+            >
+              <ChevronDownIcon className='w-5 h-5' />
+            </button>
+          </div>
+        </div>
         <div className='flex flex-col items-center justify-center h-64 text-center'>
           <div className='w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4'>
             <svg
@@ -482,39 +626,28 @@ export default function JobApplicationsBoard({
             search criteria or clear the filters to see all applications.
           </p>
           <button
-            onClick={() =>
-              setFilters({
-                name: '',
-                email: '',
-                phone: '',
-                status: '',
-                hasCV: null,
-                hasCoverLetter: null,
-                isViewed: null,
-                hasRemark: null,
-                experienceMin: '',
-                experienceMax: '',
-                education: '',
-                gpaMin: '',
-                gpaMax: '',
-                technicalSkills: [],
-                softSkills: [],
-                industry: '',
-                location: '',
-                salaryExpectations: '',
-                appliedFrom: '',
-                appliedTo: '',
-                questionaryScoreMin: '',
-                questionaryScoreMax: '',
-                aiJobFitScoreMin: '',
-                aiJobFitScoreMax: '',
-              })
-            }
+            onClick={handleClearFilters}
             className='mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors'
           >
             Clear Filters
           </button>
         </div>
+        {/* Filter Modal */}
+        <FilterModal
+          filters={filters}
+          setFilters={setFilters}
+          filterOpen={filterOpen}
+          setFilterOpen={setFilterOpen}
+          onApplyFilters={handleApplyFilters}
+          onClearFilters={handleClearFilters}
+        />
+        {/* Sort Modal */}
+        <SortModal
+          sort={sort}
+          setSort={setSort}
+          sortOpen={sortOpen}
+          setSortOpen={setSortOpen}
+        />
       </div>
     );
   }
@@ -536,7 +669,6 @@ export default function JobApplicationsBoard({
     action: 'move' | 'shortlist' | 'mail' | 'reject' | 'tag',
   ) {
     setBulkActionModal({ open: true, action });
-    console.log('openBulkModal', bulkActionModal);
     setOpenActionMenu(null);
   }
 
@@ -618,14 +750,12 @@ export default function JobApplicationsBoard({
   // Send bulk email (placeholder implementation)
   const sendBulkEmail = async (mailDraft: string) => {
     // TODO: Implement bulk email sending
-    console.log('Sending bulk email:', mailDraft);
     // This would typically call an email service
   };
 
   // Add bulk tags (placeholder implementation)
   const addBulkTags = async (tags: string[]) => {
     // TODO: Implement bulk tagging
-    console.log('Adding bulk tags:', tags);
     // This would typically update application metadata
   };
 
@@ -659,7 +789,6 @@ export default function JobApplicationsBoard({
   const handleTagSave = async (appId: string, tags: string[]) => {
     try {
       const application = applications[appId];
-      console.log('application', application);
       if (!application) {
         throw new Error('Application not found');
       }
@@ -821,6 +950,7 @@ export default function JobApplicationsBoard({
             ? mapApplicationToDetail(applications[selectedApplicationId])
             : mockApplicationDetail
         }
+        onApplicationUpdate={fetchApplications}
       />
       {/* Remark Modal */}
       {remarkModal.open && (

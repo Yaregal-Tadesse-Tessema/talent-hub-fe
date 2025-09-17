@@ -54,7 +54,7 @@ export default function SettingsTab() {
   };
 
   return (
-    <div className='w-full max-w-6xl'>
+    <div className='w-full'>
       <div className='bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700'>
         {/* Header */}
         <div className='p-6 border-b border-gray-200 dark:border-gray-700'>
