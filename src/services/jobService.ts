@@ -135,14 +135,33 @@ export const jobService = {
         throw new Error('Tenant ID not found in user data');
       }
 
-      console.log(userData);
-      const response = await api.post('/jobs/create-job-posting', {
+      // Clean the data to prevent database constraint errors
+      const cleanedJobData = {
         ...jobData,
+        // Ensure required numeric fields have valid string defaults
+        positionNumbers: jobData.positionNumbers || '1',
+        minimumGPA: jobData.minimumGPA || '0',
+        requirementId: jobData.requirementId || '',
+        // Ensure salary range has valid values
+        salaryRange: jobData.salaryRange
+          ? {
+              min: jobData.salaryRange.min || '0',
+              max: jobData.salaryRange.max || '0',
+            }
+          : { min: '0', max: '0' },
+      };
+
+      const response = await api.post('/jobs/create-job-posting', {
+        ...cleanedJobData,
         organizationId: userData.tenantId,
       });
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating job posting:', error);
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response data:', error.response.data);
+      }
       throw error;
     }
   },
@@ -160,12 +179,28 @@ export const jobService = {
         throw new Error('Tenant ID not found in user data');
       }
 
-      const response = await api.put(`/jobs/update-job-posting`, {
+      // Clean the data to prevent database constraint errors
+      const cleanedJobData = {
         ...jobData,
+        // Ensure required numeric fields have valid string defaults
+        positionNumbers: jobData.positionNumbers || '1',
+        minimumGPA: jobData.minimumGPA || '0',
+        requirementId: jobData.requirementId || '',
+        // Ensure salary range has valid values
+        salaryRange: jobData.salaryRange
+          ? {
+              min: jobData.salaryRange.min || '0',
+              max: jobData.salaryRange.max || '0',
+            }
+          : { min: '0', max: '0' },
+      };
+
+      const response = await api.put(`/jobs/update-job-posting`, {
+        ...cleanedJobData,
         organizationId: userData.tenantId,
       });
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating job posting:', error);
       throw error;
     }

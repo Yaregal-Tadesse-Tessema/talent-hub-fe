@@ -614,7 +614,7 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
     setIsSubmitting(true);
 
     try {
-      // Filter out empty array items and ensure proper date formatting
+      // Filter out empty array items and ensure proper data types
       const cleanedData = {
         ...formData,
         skill: formData.skill.filter(Boolean),
@@ -627,6 +627,15 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
           ? new Date(formData.onHoldDate).toISOString()
           : null,
         status: 'Draft',
+        // Convert numeric fields - use null for empty strings to avoid DB errors
+        minimumGPA: formData.minimumGPA || '0',
+        positionNumbers: formData.positionNumbers || '1', // Default to 1 position (required field)
+        requirementId: formData.requirementId || '',
+        // Ensure salary range has proper structure
+        salaryRange: {
+          min: formData.salaryRange?.min || '0',
+          max: formData.salaryRange?.max || '0',
+        },
       };
 
       let response;
@@ -702,7 +711,7 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
       newDeadline.setDate(newDeadline.getDate() + 30);
       const newDeadlineISO = newDeadline.toISOString();
 
-      // Filter out empty array items and ensure proper date formatting
+      // Filter out empty array items and ensure proper data types
       const cleanedData = {
         ...formData,
         skill: formData.skill.filter(Boolean),
@@ -715,6 +724,15 @@ export default function PostJobForm({ jobId }: PostJobFormProps) {
           ? new Date(formData.onHoldDate).toISOString()
           : null,
         status: 'Posted',
+        // Convert numeric fields - use null for empty strings to avoid DB errors
+        minimumGPA: formData.minimumGPA || '0',
+        positionNumbers: formData.positionNumbers || '1', // Default to 1 position (required field)
+        requirementId: formData.requirementId || '',
+        // Ensure salary range has proper structure
+        salaryRange: {
+          min: formData.salaryRange?.min || '0',
+          max: formData.salaryRange?.max || '0',
+        },
       };
 
       if (draftJobId) {
