@@ -330,10 +330,10 @@ export default function EmployerDetailPage() {
                 <div className='font-medium'>{company.code}</div>
               </div>
             )}
-            {company.registrationNumber && (
+            {company.tin && (
               <div className='mb-2'>
-                <div className='text-xs text-gray-400'>REGISTRATION NUMBER</div>
-                <div className='font-medium'>{company.registrationNumber}</div>
+                <div className='text-xs text-gray-400'>TIN</div>
+                <div className='font-medium'>{company.tin}</div>
               </div>
             )}
             {company.licenseNumber && (

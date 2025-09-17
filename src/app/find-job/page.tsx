@@ -334,6 +334,10 @@ function FindJobContent() {
           id: savedJob.id,
           jobPostId: savedJob.jobPostId,
           requirementId: savedJob.jobPosting.id, // Use job posting ID as requirement ID
+          // Convert string minimumGPA to number to match Job interface
+          minimumGPA: parseFloat(savedJob.jobPosting.minimumGPA) || 0,
+          // Ensure companyName is not null
+          companyName: savedJob.jobPosting.companyName || '',
           // Add properties that Job interface expects but SavedJobPosting might not have
           isSaved: true,
           isFavorited: false, // Default value since we don't have this info
@@ -350,7 +354,14 @@ function FindJobContent() {
                 size: 0,
                 bucketName: '',
               }
-            : null,
+            : {
+                filename: '',
+                path: '',
+                originalname: '',
+                mimetype: '',
+                size: 0,
+                bucketName: '',
+              },
           jobPostRequirement: savedJob.jobPosting.jobPostRequirement || [],
           experienceLevel: savedJob.jobPosting.experienceLevel || '',
           fieldOfStudy: savedJob.jobPosting.fieldOfStudy || '',
@@ -468,6 +479,11 @@ function FindJobContent() {
       }
 
       const apiJobId = activeTab === 'saved' ? jobToUnsave.jobPostId : jobId;
+      if (!apiJobId) {
+        showToast({ type: 'error', message: 'Invalid job data' });
+        return;
+      }
+
       await jobService.unsaveJob(apiJobId, user.id);
 
       setJobs(

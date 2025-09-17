@@ -44,6 +44,10 @@ export default function SavedJobsTab() {
           id: savedJob.id,
           jobPostId: savedJob.jobPostId,
           requirementId: savedJob.jobPosting.id, // Use job posting ID as requirement ID
+          // Convert string minimumGPA to number to match Job interface
+          minimumGPA: parseFloat(savedJob.jobPosting.minimumGPA) || 0,
+          // Ensure companyName is not null
+          companyName: savedJob.jobPosting.companyName || '',
           // Add properties that Job interface expects but SavedJobPosting might not have
           isSaved: true,
           isFavorited: false, // Default value since we don't have this info
@@ -60,7 +64,14 @@ export default function SavedJobsTab() {
                 size: 0,
                 bucketName: '',
               }
-            : null,
+            : {
+                filename: '',
+                path: '',
+                originalname: '',
+                mimetype: '',
+                size: 0,
+                bucketName: '',
+              },
           jobPostRequirement: savedJob.jobPosting.jobPostRequirement || [],
           experienceLevel: savedJob.jobPosting.experienceLevel || '',
           fieldOfStudy: savedJob.jobPosting.fieldOfStudy || '',
@@ -110,8 +121,11 @@ export default function SavedJobsTab() {
       // Find the job to get the jobPostId for the API call
       const jobToUnsave = savedJobs.find((job) => job.id === jobId);
 
-      if (!jobToUnsave) {
-        showToast({ type: 'error', message: 'Job not found' });
+      if (!jobToUnsave || !jobToUnsave.jobPostId) {
+        showToast({
+          type: 'error',
+          message: 'Job not found or invalid job data',
+        });
         return;
       }
 
@@ -134,8 +148,11 @@ export default function SavedJobsTab() {
       // Find the job to get the jobPostId for the API call
       const jobToFavorite = savedJobs.find((job) => job.id === jobId);
 
-      if (!jobToFavorite) {
-        showToast({ type: 'error', message: 'Job not found' });
+      if (!jobToFavorite || !jobToFavorite.jobPostId) {
+        showToast({
+          type: 'error',
+          message: 'Job not found or invalid job data',
+        });
         return;
       }
 

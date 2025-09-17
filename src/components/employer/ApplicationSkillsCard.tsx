@@ -338,10 +338,10 @@ export const ApplicationSkillsCard: React.FC<ApplicationSkillsCardProps> = ({
           </div>
 
           <Button
-            variant='ghost'
+            variant='outline'
             size='sm'
             onClick={() => onAnalysisComplete?.(analysis)}
-            className='text-xs text-purple-600 hover:text-purple-700 hover:bg-purple-50 p-1'
+            className='text-xs text-purple-600 hover:text-purple-700 hover:bg-purple-50 p-1 border-purple-200'
           >
             View Details
             <ChevronRight className='w-3 h-3 ml-1' />
