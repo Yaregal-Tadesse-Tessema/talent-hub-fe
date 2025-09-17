@@ -284,7 +284,6 @@ function FindJobContent() {
         const validCurrentPage = currentPage > totalPages ? 1 : currentPage;
 
         setJobs(response.items);
-        console.log(response.items);
 
         setPagination({
           total: response.total,
@@ -325,15 +324,46 @@ function FindJobContent() {
     setSavedJobsLoading(true);
     try {
       const response = await jobService.getSavedJobs();
-      console.log('Saved jobs response:', response); // Debug log
 
-      // Ensure we always have an array
-      if (Array.isArray(response)) {
-        setSavedJobs(response);
-      } else if (response && Array.isArray(response.data)) {
-        setSavedJobs(response.data);
-      } else if (response && Array.isArray(response.items)) {
-        setSavedJobs(response.items);
+      // The response now has the structure { total: number, items: SavedJob[] }
+      if (response && Array.isArray(response.items)) {
+        // Transform SavedJob[] to Job[] format by extracting jobPosting data
+        const transformedJobs: Job[] = response.items.map((savedJob) => ({
+          ...savedJob.jobPosting,
+          // Use the unique SavedJob ID to avoid duplicate keys
+          id: savedJob.id,
+          jobPostId: savedJob.jobPostId,
+          requirementId: savedJob.jobPosting.id, // Use job posting ID as requirement ID
+          // Add properties that Job interface expects but SavedJobPosting might not have
+          isSaved: true,
+          isFavorited: false, // Default value since we don't have this info
+          isApplied: false, // Default value since we don't have this info
+          applications: [],
+          savedUsers: [],
+          preScreeningQuestions: [],
+          companyLogo: savedJob.jobPosting.companyLogo
+            ? {
+                filename: '',
+                path: savedJob.jobPosting.companyLogo,
+                originalname: '',
+                mimetype: 'image/*',
+                size: 0,
+                bucketName: '',
+              }
+            : null,
+          jobPostRequirement: savedJob.jobPosting.jobPostRequirement || [],
+          experienceLevel: savedJob.jobPosting.experienceLevel || '',
+          fieldOfStudy: savedJob.jobPosting.fieldOfStudy || '',
+          educationLevel: savedJob.jobPosting.educationLevel || '',
+          howToApply: savedJob.jobPosting.howToApply || '',
+          onHoldDate: savedJob.jobPosting.onHoldDate || '',
+          applicationCount: savedJob.jobPosting.applicationCount || 0,
+          positionNumbers: savedJob.jobPosting.positionNumbers || 1,
+          paymentType: savedJob.jobPosting.paymentType || '',
+          createdAt: savedJob.jobPosting.createdAt,
+          updatedAt: savedJob.jobPosting.updatedAt,
+        }));
+        setSavedJobs(transformedJobs);
       } else {
         console.warn('Unexpected response format:', response);
         setSavedJobs([]);
@@ -426,7 +456,20 @@ function FindJobContent() {
     }
 
     try {
-      await jobService.unsaveJob(jobId, user.id);
+      // For saved jobs, we need to use jobPostId for the API call
+      const jobToUnsave =
+        activeTab === 'saved'
+          ? savedJobs.find((job) => job.id === jobId)
+          : jobs.find((job) => job.id === jobId);
+
+      if (!jobToUnsave) {
+        showToast({ type: 'error', message: 'Job not found' });
+        return;
+      }
+
+      const apiJobId = activeTab === 'saved' ? jobToUnsave.jobPostId : jobId;
+      await jobService.unsaveJob(apiJobId, user.id);
+
       setJobs(
         jobs.map((job) =>
           job.id === jobId ? { ...job, isSaved: false } : job,

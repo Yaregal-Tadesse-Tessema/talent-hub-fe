@@ -338,21 +338,7 @@ export default function EditCompanyForm({
               </div>
               Address Information
             </h2>
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Street Address
-                </label>
-                <input
-                  type='text'
-                  value={formData.address?.street || ''}
-                  onChange={(e) =>
-                    handleAddressChange('street', e.target.value)
-                  }
-                  className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all'
-                  placeholder='Enter street address'
-                />
-              </div>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
                   City
@@ -367,20 +353,6 @@ export default function EditCompanyForm({
               </div>
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Region/State
-                </label>
-                <input
-                  type='text'
-                  value={formData.address?.region || ''}
-                  onChange={(e) =>
-                    handleAddressChange('region', e.target.value)
-                  }
-                  className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all'
-                  placeholder='Enter region/state'
-                />
-              </div>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
                   Country
                 </label>
                 <input
@@ -391,20 +363,6 @@ export default function EditCompanyForm({
                   }
                   className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all'
                   placeholder='Enter country'
-                />
-              </div>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Postal Code
-                </label>
-                <input
-                  type='text'
-                  value={formData.address?.postalCode || ''}
-                  onChange={(e) =>
-                    handleAddressChange('postalCode', e.target.value)
-                  }
-                  className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all'
-                  placeholder='Enter postal code'
                 />
               </div>
             </div>

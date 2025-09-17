@@ -29,7 +29,6 @@ export interface Tenant {
   companySize: string;
   code: string;
   tin: string;
-  registrationNumber?: string | null;
   licenseNumber?: string | null;
   isActive: boolean;
   isVerified: boolean;

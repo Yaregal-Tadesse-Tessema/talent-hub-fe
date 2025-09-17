@@ -128,6 +128,28 @@ function FindEmployersPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // Fallback user state in case useAuth fails
+  const [fallbackUser, setFallbackUser] = useState<any | null>(null);
+
+  // Fallback mechanism to get user from localStorage if useAuth fails
+  useEffect(() => {
+    if (!authLoading && !user) {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          setFallbackUser(parsedUser);
+        } catch (error) {
+          console.error('Failed to parse user from localStorage:', error);
+        }
+      }
+    }
+  }, [authLoading, user]);
+
+  // Determine the current user (either from useAuth or fallback)
+  const currentUser = user || fallbackUser;
+
   const [page, setPage] = useState(1);
   const [employers, setEmployers] = useState<Employer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -141,9 +163,9 @@ function FindEmployersPage() {
     total: 0,
     totalPages: 0,
     currentPage: 1,
-    limit: 3,
+    limit: 6,
   });
-  const perPage = 3;
+  const perPage = 6;
 
   // Update searchFilters when searchParams change
   useEffect(() => {
@@ -162,6 +184,12 @@ function FindEmployersPage() {
 
   useEffect(() => {
     const fetchEmployers = async () => {
+      // Only fetch employers if user is authenticated
+      if (!currentUser || !currentUser.role) {
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         let response;
@@ -180,7 +208,7 @@ function FindEmployersPage() {
             perPage,
           );
         } else {
-          // Otherwise, use getEmployers
+          // Otherwise, use getEmployers without pagination (get all employers)
           response = await employerService.getEmployers();
         }
 
@@ -223,7 +251,7 @@ function FindEmployersPage() {
     };
 
     fetchEmployers();
-  }, [searchParams, page, perPage]);
+  }, [searchParams, perPage, currentUser]);
 
   const handleSearch = () => {
     const queryParams = new URLSearchParams();
@@ -256,7 +284,11 @@ function FindEmployersPage() {
   };
 
   const totalPages = pagination.totalPages;
-  const paginatedEmployers = employers;
+
+  // Client-side pagination logic
+  const startIndex = (pagination.currentPage - 1) * perPage;
+  const endIndex = startIndex + perPage;
+  const paginatedEmployers = employers.slice(startIndex, endIndex);
 
   // Show loading state while auth is being checked
   if (authLoading) {
@@ -272,8 +304,9 @@ function FindEmployersPage() {
     );
   }
 
-  // Show non-logged in user view only after auth loading is complete and user is null
-  if (!user) {
+  // Show non-logged in user view only after auth loading is complete and no user is found
+  // Also check if user exists but has no valid role (corrupted data)
+  if (!authLoading && (!currentUser || !currentUser.role)) {
     return (
       <div className='min-h-screen bg-gray-50 dark:bg-gray-900'>
         {/* Hero Section */}
@@ -783,11 +816,14 @@ function FindEmployersPage() {
             )}
 
             {/* Pagination */}
-            {pagination.total > 0 && (
+            {totalPages > 1 && (
               <Pagination
                 current={pagination.currentPage}
                 total={totalPages}
-                onChange={setPage}
+                onChange={(newPage) => {
+                  setPage(newPage);
+                  setPagination((prev) => ({ ...prev, currentPage: newPage }));
+                }}
               />
             )}
           </div>

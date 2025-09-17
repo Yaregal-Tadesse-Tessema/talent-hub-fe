@@ -1,4 +1,4 @@
-import { api } from '@/config/api';
+import { api, API_BASE_URL } from '@/config/api';
 
 export interface Employer {
   id: string;
@@ -91,7 +91,8 @@ export const employerService = {
           : `t=${limit}&sk=${skip}`;
       }
 
-      const response = await api.get(`/tenants?${queryParams}`);
+      const url = queryParams ? `/tenants?${queryParams}` : '/tenants';
+      const response = await api.get(url);
       return response.data;
     } catch (error) {
       console.error('Error searching employers:', error);

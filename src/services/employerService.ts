@@ -52,7 +52,6 @@ export interface ManualRegistrationPayload {
   phoneNumber: string;
   tin: string;
   licenseNumber: string;
-  registrationNumber: string;
   companySize: string;
   industry: string;
   organizationType: string;

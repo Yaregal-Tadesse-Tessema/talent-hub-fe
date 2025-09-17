@@ -100,18 +100,6 @@ export default function ContactTab({
           </h3>
 
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-            {/* Street Address */}
-            <div className='md:col-span-2'>
-              <label className='mb-2 text-sm font-medium text-gray-900 dark:text-white block'>
-                Street Address
-              </label>
-              <Input
-                value={userProfile.address?.street || ''}
-                onChange={(e) => handleAddressChange('street', e.target.value)}
-                placeholder='Enter street address'
-              />
-            </div>
-
             {/* City */}
             <div>
               <label className='mb-2 text-sm font-medium text-gray-900 dark:text-white block'>
@@ -121,18 +109,6 @@ export default function ContactTab({
                 value={userProfile.address?.city || ''}
                 onChange={(e) => handleAddressChange('city', e.target.value)}
                 placeholder='Enter city'
-              />
-            </div>
-
-            {/* State/Province */}
-            <div>
-              <label className='mb-2 text-sm font-medium text-gray-900 dark:text-white block'>
-                State/Province
-              </label>
-              <Input
-                value={userProfile.address?.state || ''}
-                onChange={(e) => handleAddressChange('state', e.target.value)}
-                placeholder='Enter state or province'
               />
             </div>
 
@@ -152,18 +128,6 @@ export default function ContactTab({
                   </option>
                 ))}
               </Select>
-            </div>
-
-            {/* ZIP/Postal Code */}
-            <div>
-              <label className='mb-2 text-sm font-medium text-gray-900 dark:text-white block'>
-                ZIP/Postal Code
-              </label>
-              <Input
-                value={userProfile.address?.zipCode || ''}
-                onChange={(e) => handleAddressChange('zipCode', e.target.value)}
-                placeholder='Enter ZIP or postal code'
-              />
             </div>
           </div>
         </div>

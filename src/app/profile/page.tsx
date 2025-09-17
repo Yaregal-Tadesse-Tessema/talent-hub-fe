@@ -12,6 +12,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { profileService } from '@/services/profileService';
 import Image from 'next/image';
 import { UserProfile, FileInfo, Education, Experience } from '@/types/profile';
+import { locations } from '@/constants/jobOptions';
 import {
   Edit3,
   Save,
@@ -74,6 +75,10 @@ export default function ProfilePage() {
     null,
   );
 
+  // City search state
+  const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
+  const [showCitySuggestions, setShowCitySuggestions] = useState(false);
+
   // Helper function to safely convert object to array
   const safeArray = (value: any): any[] => {
     if (Array.isArray(value)) return value;
@@ -123,7 +128,7 @@ export default function ProfilePage() {
             lastName: userData.lastName || '',
             gender: userData.gender || '',
             status: userData.status || 'Active',
-            address: userData.address || {},
+            address: { country: 'Ethiopia', ...userData.address },
             birthDate: userData.birthDate || '',
             linkedinUrl: userData.linkedinUrl || '',
             portfolioUrl: userData.portfolioUrl || '',
@@ -647,6 +652,42 @@ export default function ProfilePage() {
     }
   };
 
+  // City search handlers
+  const handleCityInputChange = (value: string) => {
+    if (!profile) return;
+
+    setProfile({
+      ...profile,
+      address: { ...profile.address, city: value },
+    });
+
+    if (value.length > 0) {
+      const filtered = locations.filter((location) =>
+        location.toLowerCase().includes(value.toLowerCase()),
+      );
+      setCitySuggestions(filtered.slice(0, 8)); // Show max 8 suggestions
+      setShowCitySuggestions(true);
+    } else {
+      setCitySuggestions([]);
+      setShowCitySuggestions(false);
+    }
+  };
+
+  const handleCitySelect = (city: string) => {
+    if (!profile) return;
+
+    setProfile({
+      ...profile,
+      address: { ...profile.address, city },
+    });
+    setShowCitySuggestions(false);
+  };
+
+  const handleCityBlur = () => {
+    // Delay hiding suggestions to allow for clicks
+    setTimeout(() => setShowCitySuggestions(false), 200);
+  };
+
   if (loading) {
     return (
       <div className='flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900'>
@@ -946,73 +987,10 @@ export default function ProfilePage() {
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               <div>
                 <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-                  Street Address
-                </label>
-                <Input
-                  value={profile.address?.street || ''}
-                  onChange={(e) =>
-                    setProfile({
-                      ...profile,
-                      address: { ...profile.address, street: e.target.value },
-                    })
-                  }
-                  className='w-full'
-                />
-              </div>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-                  City
-                </label>
-                <Input
-                  value={profile.address?.city || ''}
-                  onChange={(e) =>
-                    setProfile({
-                      ...profile,
-                      address: { ...profile.address, city: e.target.value },
-                    })
-                  }
-                  className='w-full'
-                />
-              </div>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-                  State/Province
-                </label>
-                <Input
-                  value={profile.address?.state || ''}
-                  onChange={(e) =>
-                    setProfile({
-                      ...profile,
-                      address: { ...profile.address, state: e.target.value },
-                    })
-                  }
-                  className='w-full'
-                />
-              </div>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-                  Postal Code
-                </label>
-                <Input
-                  value={profile.address?.postalCode || ''}
-                  onChange={(e) =>
-                    setProfile({
-                      ...profile,
-                      address: {
-                        ...profile.address,
-                        postalCode: e.target.value,
-                      },
-                    })
-                  }
-                  className='w-full'
-                />
-              </div>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                   Country
                 </label>
-                <Input
-                  value={profile.address?.country || ''}
+                <Select
+                  value={profile.address?.country || 'Ethiopia'}
                   onChange={(e) =>
                     setProfile({
                       ...profile,
@@ -1020,23 +998,58 @@ export default function ProfilePage() {
                     })
                   }
                   className='w-full'
+                >
+                  <option value='Ethiopia'>Ethiopia</option>
+                </Select>
+              </div>
+              <div className='relative'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  City
+                </label>
+                <Input
+                  value={profile.address?.city || ''}
+                  onChange={(e) => handleCityInputChange(e.target.value)}
+                  onBlur={handleCityBlur}
+                  onFocus={() => {
+                    if ((profile.address?.city || '').length > 0) {
+                      setShowCitySuggestions(true);
+                    }
+                  }}
+                  placeholder='Type to search cities in Ethiopia...'
+                  className='w-full'
                 />
+
+                {/* City Suggestions Dropdown */}
+                {showCitySuggestions && citySuggestions.length > 0 && (
+                  <div className='absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-48 overflow-y-auto'>
+                    {citySuggestions.map((city, index) => (
+                      <button
+                        key={index}
+                        type='button'
+                        className='w-full px-4 py-2 text-left text-sm text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none'
+                        onClick={() => handleCitySelect(city)}
+                      >
+                        {city}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ) : (
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-              {profile.address?.street && (
+              {profile.address?.country && (
                 <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
                   <div className='flex items-center gap-2 mb-2'>
-                    <Home size={16} className='text-gray-400' />
+                    <Globe size={16} className='text-gray-400' />
                     <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
-                      Street Address
+                      Country
                     </h3>
                   </div>
                   <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                    {typeof profile.address.street === 'object'
-                      ? JSON.stringify(profile.address.street)
-                      : profile.address.street}
+                    {typeof profile.address.country === 'object'
+                      ? JSON.stringify(profile.address.country)
+                      : profile.address.country}
                   </p>
                 </div>
               )}
@@ -1055,62 +1068,14 @@ export default function ProfilePage() {
                   </p>
                 </div>
               )}
-              {profile.address?.state && (
-                <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
-                  <div className='flex items-center gap-2 mb-2'>
-                    <MapPin size={16} className='text-gray-400' />
-                    <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
-                      State/Province
-                    </h3>
-                  </div>
-                  <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                    {typeof profile.address.state === 'object'
-                      ? JSON.stringify(profile.address.state)
-                      : profile.address.state}
+
+              {!profile.address?.city && !profile.address?.country && (
+                <div className='col-span-full text-center py-8'>
+                  <p className='text-gray-500 dark:text-gray-400'>
+                    No address information provided
                   </p>
                 </div>
               )}
-              {profile.address?.postalCode && (
-                <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
-                  <div className='flex items-center gap-2 mb-2'>
-                    <MapPin size={16} className='text-gray-400' />
-                    <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
-                      Postal Code
-                    </h3>
-                  </div>
-                  <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                    {typeof profile.address.postalCode === 'object'
-                      ? JSON.stringify(profile.address.postalCode)
-                      : profile.address.postalCode}
-                  </p>
-                </div>
-              )}
-              {profile.address?.country && (
-                <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600'>
-                  <div className='flex items-center gap-2 mb-2'>
-                    <Globe size={16} className='text-gray-400' />
-                    <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
-                      Country
-                    </h3>
-                  </div>
-                  <p className='text-lg font-semibold text-gray-900 dark:text-white'>
-                    {typeof profile.address.country === 'object'
-                      ? JSON.stringify(profile.address.country)
-                      : profile.address.country}
-                  </p>
-                </div>
-              )}
-              {!profile.address?.street &&
-                !profile.address?.city &&
-                !profile.address?.state &&
-                !profile.address?.postalCode &&
-                !profile.address?.country && (
-                  <div className='col-span-full text-center py-8'>
-                    <p className='text-gray-500 dark:text-gray-400'>
-                      No address information provided
-                    </p>
-                  </div>
-                )}
             </div>
           )}
         </section>

@@ -54,6 +54,12 @@ export default function JobDetailsPage({
   const [error, setError] = useState<string | null>(null);
   const [isApplyOpen, setIsApplyOpen] = useState(false);
   const [userData, setUserData] = useState<UserData | undefined>(undefined);
+  const [userDataLoaded, setUserDataLoaded] = useState(false);
+
+  useEffect(() => {
+    // Scroll to top when component mounts
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     // Check if apply parameter is present
@@ -63,25 +69,7 @@ export default function JobDetailsPage({
   }, [searchParams]);
 
   useEffect(() => {
-    const fetchJob = async () => {
-      try {
-        setLoading(true);
-        const response = await jobService.getJobById(resolvedParams.id);
-        console.log(response);
-        setJob(response);
-      } catch (err) {
-        console.error('Error fetching job:', err);
-        setError('Failed to fetch job details. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchJob();
-  }, [resolvedParams.id]);
-
-  useEffect(() => {
-    // Get user data from localStorage
+    // Get user data from localStorage first
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       try {
@@ -95,7 +83,35 @@ export default function JobDetailsPage({
         console.error('Error parsing user data:', error);
       }
     }
+    setUserDataLoaded(true);
   }, []);
+
+  useEffect(() => {
+    // Only fetch job after user data has been checked
+    if (!userDataLoaded) return;
+
+    const fetchJob = async () => {
+      try {
+        setLoading(true);
+        if (userData) {
+          const response = await jobService.getJobByIdForUser(
+            resolvedParams.id,
+          );
+          setJob(response);
+        } else {
+          const response = await jobService.getJobById(resolvedParams.id);
+          setJob(response);
+        }
+      } catch (err) {
+        console.error('Error fetching job:', err);
+        setError('Failed to fetch job details. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJob();
+  }, [resolvedParams.id, userData, userDataLoaded]);
 
   const handleSaveJob = async () => {
     if (!userData?.id) {

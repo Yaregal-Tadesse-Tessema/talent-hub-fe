@@ -1477,24 +1477,6 @@ export default function CVParser({ onSave, onCancel, userId }: CVParserProps) {
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
                 <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-                  Street Address
-                </label>
-                <Input
-                  value={editedData.address?.street || ''}
-                  onChange={(e) =>
-                    setEditedData({
-                      ...editedData,
-                      address: {
-                        ...editedData.address,
-                        street: e.target.value,
-                      },
-                    })
-                  }
-                  className='w-full'
-                />
-              </div>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                   City
                 </label>
                 <Input
@@ -1503,39 +1485,6 @@ export default function CVParser({ onSave, onCancel, userId }: CVParserProps) {
                     setEditedData({
                       ...editedData,
                       address: { ...editedData.address, city: e.target.value },
-                    })
-                  }
-                  className='w-full'
-                />
-              </div>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-                  State/Province
-                </label>
-                <Input
-                  value={editedData.address?.state || ''}
-                  onChange={(e) =>
-                    setEditedData({
-                      ...editedData,
-                      address: { ...editedData.address, state: e.target.value },
-                    })
-                  }
-                  className='w-full'
-                />
-              </div>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-                  Postal Code
-                </label>
-                <Input
-                  value={editedData.address?.postalCode || ''}
-                  onChange={(e) =>
-                    setEditedData({
-                      ...editedData,
-                      address: {
-                        ...editedData.address,
-                        postalCode: e.target.value,
-                      },
                     })
                   }
                   className='w-full'

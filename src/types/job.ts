@@ -135,3 +135,71 @@ export interface JobPostingData {
   numberOfPosition: number;
   requiredYearOfExperience: number;
 }
+
+export interface SavedJobPosting {
+  id: string;
+  title: string;
+  position: string;
+  positionNumbers: number;
+  description: string;
+  responsibilities: string[];
+  jobPostRequirement: string[];
+  benefits: string[];
+  skill: string[];
+  educationLevel: string;
+  experienceLevel: string;
+  fieldOfStudy: string;
+  gender: string;
+  minimumGPA: string;
+  employmentType: string;
+  type: string;
+  industry: string;
+  paymentType: string;
+  salaryRange: {
+    min: string;
+    max: string;
+  };
+  location: string;
+  city: string;
+  postedDate: string;
+  deadline: string;
+  applicationURL: string;
+  howToApply: string;
+  applicationCount: number;
+  isFeatured: boolean;
+  status: string;
+  companyName: string | null;
+  companyLogo: string | null;
+  organizationId: string;
+  tenantId: string;
+  hasAiFilter: boolean;
+  hasNormalFilter: boolean;
+  onHoldDate: string | null;
+  requiredYearOfExperience: number | null;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string | null;
+  updatedBy: string | null;
+  deletedAt: string | null;
+  deletedBy: string | null;
+}
+
+export interface SavedJob {
+  id: string;
+  jobPostId: string;
+  userId: string;
+  tenantId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string | null;
+  updatedBy: string | null;
+  deletedAt: string | null;
+  deletedBy: string | null;
+  jobPosting: SavedJobPosting;
+  user: User;
+}
+
+export interface SavedJobsResponse {
+  total: number;
+  items: SavedJob[];
+}

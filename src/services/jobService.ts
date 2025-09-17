@@ -1,4 +1,4 @@
-import { JobsResponse, Job } from '@/types/job';
+import { JobsResponse, Job, SavedJobsResponse } from '@/types/job';
 import { api, API_BASE_URL } from '@/config/api';
 
 export interface JobPosting {
@@ -72,9 +72,21 @@ export const jobService = {
     }
   },
 
+  // Public
   async getJobById(id: string): Promise<Job> {
     try {
       const response = await api.get(`/jobs/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching job:', error);
+      throw error;
+    }
+  },
+
+  // logged in
+  async getJobByIdForUser(id: string): Promise<Job> {
+    try {
+      const response = await api.get(`/jobs/get-one-by-id/${id}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching job:', error);
@@ -527,9 +539,9 @@ export const jobService = {
     }
   },
 
-  async getSavedJobs(): Promise<any> {
+  async getSavedJobs(): Promise<SavedJobsResponse> {
     try {
-      const response = await api.get('/save-jobs');
+      const response = await api.get('/saved-jobs?q=i=user,jobPosting');
       return response.data;
     } catch (error) {
       console.error('Error fetching saved jobs:', error);

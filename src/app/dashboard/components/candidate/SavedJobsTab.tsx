@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/Badge';
 import { jobService } from '@/services/jobService';
 import { useToast } from '@/contexts/ToastContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { SavedJobsResponse, Job } from '@/types/job';
 import {
   Bookmark,
   MapPin,
@@ -17,30 +18,8 @@ import {
 import Link from 'next/link';
 import Tooltip from '@/components/ui/Tooltip';
 
-interface SavedJob {
-  id: string;
-  jobPost: {
-    id: string;
-    title: string;
-    company: string;
-    location: string;
-    salaryRange?: {
-      min: string;
-      max: string;
-    };
-    employmentType: string;
-    deadline: string;
-    postedDate: string;
-    description: string;
-    requirements: string[];
-    benefits: string[];
-    isFavorited?: boolean;
-  };
-  savedAt: string;
-}
-
 export default function SavedJobsTab() {
-  const [savedJobs, setSavedJobs] = useState<SavedJob[]>([]);
+  const [savedJobs, setSavedJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedJobs, setExpandedJobs] = useState<Set<string>>(new Set());
   const { showToast } = useToast();
@@ -54,15 +33,47 @@ export default function SavedJobsTab() {
     try {
       setLoading(true);
       const response = await jobService.getSavedJobs();
-      console.log('Saved jobs response:', response); // Debug log
+      console.log('Saved jobs response:', response);
 
-      // Ensure we always have an array
-      if (Array.isArray(response)) {
-        setSavedJobs(response);
-      } else if (response && Array.isArray(response.data)) {
-        setSavedJobs(response.data);
-      } else if (response && Array.isArray(response.items)) {
-        setSavedJobs(response.items);
+      // The response now has the structure { total: number, items: SavedJob[] }
+      if (response && Array.isArray(response.items)) {
+        // Transform SavedJob[] to Job[] format by extracting jobPosting data
+        const transformedJobs: Job[] = response.items.map((savedJob) => ({
+          ...savedJob.jobPosting,
+          // Use the unique SavedJob ID to avoid duplicate keys
+          id: savedJob.id,
+          jobPostId: savedJob.jobPostId,
+          requirementId: savedJob.jobPosting.id, // Use job posting ID as requirement ID
+          // Add properties that Job interface expects but SavedJobPosting might not have
+          isSaved: true,
+          isFavorited: false, // Default value since we don't have this info
+          isApplied: false, // Default value since we don't have this info
+          applications: [],
+          savedUsers: [],
+          preScreeningQuestions: [],
+          companyLogo: savedJob.jobPosting.companyLogo
+            ? {
+                filename: '',
+                path: savedJob.jobPosting.companyLogo,
+                originalname: '',
+                mimetype: 'image/*',
+                size: 0,
+                bucketName: '',
+              }
+            : null,
+          jobPostRequirement: savedJob.jobPosting.jobPostRequirement || [],
+          experienceLevel: savedJob.jobPosting.experienceLevel || '',
+          fieldOfStudy: savedJob.jobPosting.fieldOfStudy || '',
+          educationLevel: savedJob.jobPosting.educationLevel || '',
+          howToApply: savedJob.jobPosting.howToApply || '',
+          onHoldDate: savedJob.jobPosting.onHoldDate || '',
+          applicationCount: savedJob.jobPosting.applicationCount || 0,
+          positionNumbers: savedJob.jobPosting.positionNumbers || 1,
+          paymentType: savedJob.jobPosting.paymentType || '',
+          createdAt: savedJob.jobPosting.createdAt,
+          updatedAt: savedJob.jobPosting.updatedAt,
+        }));
+        setSavedJobs(transformedJobs);
       } else {
         console.warn('Unexpected response format:', response);
         setSavedJobs([]);
@@ -89,15 +100,23 @@ export default function SavedJobsTab() {
     setExpandedJobs(newExpanded);
   };
 
-  const handleUnsaveJob = async (savedJob: SavedJob) => {
+  const handleUnsaveJob = async (jobId: string) => {
     if (!user) {
       showToast({ type: 'error', message: 'Please login to unsave jobs' });
       return;
     }
 
     try {
-      await jobService.unsaveJob(savedJob.jobPost.id, user.id);
-      setSavedJobs(savedJobs.filter((job) => job.id !== savedJob.id));
+      // Find the job to get the jobPostId for the API call
+      const jobToUnsave = savedJobs.find((job) => job.id === jobId);
+
+      if (!jobToUnsave) {
+        showToast({ type: 'error', message: 'Job not found' });
+        return;
+      }
+
+      await jobService.unsaveJob(jobToUnsave.jobPostId, user.id);
+      setSavedJobs(savedJobs.filter((job) => job.id !== jobId));
       showToast({ type: 'success', message: 'Job removed from saved' });
     } catch (error) {
       console.error('Error unsaving job:', error);
@@ -112,12 +131,18 @@ export default function SavedJobsTab() {
     }
 
     try {
-      await jobService.favoriteJob(jobId, user.id);
+      // Find the job to get the jobPostId for the API call
+      const jobToFavorite = savedJobs.find((job) => job.id === jobId);
+
+      if (!jobToFavorite) {
+        showToast({ type: 'error', message: 'Job not found' });
+        return;
+      }
+
+      await jobService.favoriteJob(jobToFavorite.jobPostId, user.id);
       setSavedJobs(
         savedJobs.map((job) =>
-          job.jobPost.id === jobId
-            ? { ...job, jobPost: { ...job.jobPost, isFavorited: true } }
-            : job,
+          job.id === jobId ? { ...job, isFavorited: true } : job,
         ),
       );
       showToast({ type: 'success', message: 'Job added to favorites' });
@@ -129,19 +154,21 @@ export default function SavedJobsTab() {
 
   const handleUnfavoriteJob = async (jobId: string) => {
     try {
-      // Find the favorite ID from the saved jobs data
-      const savedJob = savedJobs.find((job) => job.jobPost.id === jobId);
-      if (savedJob) {
-        await jobService.unfavoriteJob(savedJob.id); // Use the saved job ID as favorite ID
-        setSavedJobs(
-          savedJobs.map((job) =>
-            job.jobPost.id === jobId
-              ? { ...job, jobPost: { ...job.jobPost, isFavorited: false } }
-              : job,
-          ),
-        );
-        showToast({ type: 'success', message: 'Job removed from favorites' });
+      // Find the job to get the saved job ID for the unfavorite API call
+      const jobToUnfavorite = savedJobs.find((job) => job.id === jobId);
+
+      if (!jobToUnfavorite) {
+        showToast({ type: 'error', message: 'Job not found' });
+        return;
       }
+
+      await jobService.unfavoriteJob(jobToUnfavorite.id); // Use the saved job ID as favorite ID
+      setSavedJobs(
+        savedJobs.map((job) =>
+          job.id === jobId ? { ...job, isFavorited: false } : job,
+        ),
+      );
+      showToast({ type: 'success', message: 'Job removed from favorites' });
     } catch (error) {
       console.error('Error unfavoriting job:', error);
       showToast({
@@ -212,13 +239,12 @@ export default function SavedJobsTab() {
             </Link>
           </Card>
         ) : Array.isArray(savedJobs) ? (
-          savedJobs.map((savedJob) => {
-            const job = savedJob.jobPost;
-            const isExpanded = expandedJobs.has(savedJob.id);
+          savedJobs.map((job) => {
+            const isExpanded = expandedJobs.has(job.id);
             const isExpired = isJobExpired(job.deadline);
 
             return (
-              <Card key={savedJob.id} className='p-4 sm:p-6'>
+              <Card key={job.id} className='p-4 sm:p-6'>
                 <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
                   {/* Job Info */}
                   <div className='flex-1 min-w-0'>
@@ -229,7 +255,9 @@ export default function SavedJobsTab() {
                         </h3>
                         <div className='flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2'>
                           <Building className='w-4 h-4 flex-shrink-0' />
-                          <span>{job.company}</span>
+                          <span>
+                            {job.companyName || 'Company not specified'}
+                          </span>
                         </div>
                         <div className='flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400'>
                           <MapPin className='w-4 h-4 flex-shrink-0' />
@@ -267,7 +295,7 @@ export default function SavedJobsTab() {
                           position='top'
                         >
                           <button
-                            onClick={() => handleUnsaveJob(savedJob)}
+                            onClick={() => handleUnsaveJob(job.id)}
                             className='text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors p-2'
                           >
                             <Bookmark className='w-4 h-4 fill-current' />
@@ -301,13 +329,13 @@ export default function SavedJobsTab() {
                       {isExpired && (
                         <Badge variant='destructive'>Expired</Badge>
                       )}
-                      <Badge>Saved on {formatDate(savedJob.savedAt)}</Badge>
+                      <Badge>Saved on {formatDate(job.createdAt)}</Badge>
                     </div>
 
                     {/* Expandable Description */}
                     <div className='mb-4'>
                       <button
-                        onClick={() => toggleExpanded(savedJob.id)}
+                        onClick={() => toggleExpanded(job.id)}
                         className='text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium transition-colors'
                       >
                         {isExpanded ? 'Show Less' : 'Show Details'}
@@ -326,18 +354,19 @@ export default function SavedJobsTab() {
                           </p>
                         </div>
 
-                        {job.requirements && job.requirements.length > 0 && (
-                          <div>
-                            <h4 className='font-medium text-gray-900 dark:text-white mb-2'>
-                              Requirements
-                            </h4>
-                            <ul className='list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1'>
-                              {job.requirements.map((req, index) => (
-                                <li key={index}>{req}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
+                        {job.jobPostRequirement &&
+                          job.jobPostRequirement.length > 0 && (
+                            <div>
+                              <h4 className='font-medium text-gray-900 dark:text-white mb-2'>
+                                Requirements
+                              </h4>
+                              <ul className='list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1'>
+                                {job.jobPostRequirement.map((req, index) => (
+                                  <li key={index}>{req}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
 
                         {job.benefits && job.benefits.length > 0 && (
                           <div>
@@ -357,7 +386,7 @@ export default function SavedJobsTab() {
 
                   {/* Actions */}
                   <div className='flex flex-col sm:flex-row gap-2 sm:ml-4'>
-                    <Link href={`/find-job/${job.id}`}>
+                    <Link href={`/find-job/${job.jobPostId}`}>
                       <Button
                         variant='outline'
                         size='sm'
@@ -373,7 +402,7 @@ export default function SavedJobsTab() {
                         className='w-full sm:w-auto'
                         onClick={() => {
                           // Navigate to job application
-                          window.open(`/find-job/${job.id}`, '_blank');
+                          window.open(`/find-job/${job.jobPostId}`, '_blank');
                         }}
                       >
                         Apply Now

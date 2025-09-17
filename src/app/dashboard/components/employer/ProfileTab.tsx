@@ -443,17 +443,7 @@ export default function ProfileTab() {
                       <FiMapPin className='w-5 h-5 text-blue-600 dark:text-blue-400 mt-1 flex-shrink-0' />
                       <div>
                         <p className='font-medium dark:text-white'>Address</p>
-                        <p className='text-gray-600 dark:text-gray-400'>{`${companyData.address.street || ''}, ${companyData.address.city || ''}, ${companyData.address.country || ''}`}</p>
-                        {hasValue(companyData.address.region) && (
-                          <p className='text-gray-500 dark:text-gray-500 text-sm'>
-                            {companyData.address.region}
-                          </p>
-                        )}
-                        {hasValue(companyData.address.postalCode) && (
-                          <p className='text-gray-500 dark:text-gray-500 text-sm'>
-                            {companyData.address.postalCode}
-                          </p>
-                        )}
+                        <p className='text-gray-600 dark:text-gray-400'>{`${companyData.address.city || ''}, ${companyData.address.country || ''}`}</p>
                       </div>
                     </div>
                   )}
