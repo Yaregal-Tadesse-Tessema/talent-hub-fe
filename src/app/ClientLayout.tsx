@@ -12,6 +12,7 @@ import { TutorialProvider } from '@/contexts/TutorialContext';
 import TutorialOverlay from '@/components/ui/TutorialOverlay';
 import TutorialTrigger from '@/components/ui/TutorialTrigger';
 import { FloatingChatButton } from '@/components/support/FloatingChatButton';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 // Memoized component to prevent unnecessary re-renders
 const MemoizedNavbar = React.memo(Navbar);
@@ -47,24 +48,26 @@ export default function ClientLayout({
   }, [pathname]);
 
   return (
-    <ThemeProvider>
-      <ToastProvider>
-        <AuthProvider>
-          <TutorialProvider>
-            <NavigationProvider>
-              <TutorialOverlay>
-                {layoutConfig.shouldShowNavbar && (
-                  <MemoizedNavbar page='home' />
-                )}
-                {children}
-                {layoutConfig.isHomePage && <MemoizedFooter />}
-                {/* <TutorialTrigger /> */}
-                {layoutConfig.shouldShowNavbar && <FloatingChatButton />}
-              </TutorialOverlay>
-            </NavigationProvider>
-          </TutorialProvider>
-        </AuthProvider>
-      </ToastProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <TutorialProvider>
+              <NavigationProvider>
+                <TutorialOverlay>
+                  {layoutConfig.shouldShowNavbar && (
+                    <MemoizedNavbar page='home' />
+                  )}
+                  {children}
+                  {layoutConfig.isHomePage && <MemoizedFooter />}
+                  {/* <TutorialTrigger /> */}
+                  {layoutConfig.shouldShowNavbar && <FloatingChatButton />}
+                </TutorialOverlay>
+              </NavigationProvider>
+            </TutorialProvider>
+          </AuthProvider>
+        </ToastProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

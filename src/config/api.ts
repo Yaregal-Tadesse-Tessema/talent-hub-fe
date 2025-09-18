@@ -78,8 +78,6 @@ api.interceptors.response.use(
           throw new Error('No refresh token available');
         }
 
-        console.log(refreshToken);
-
         const response = await axios.post(
           `${API_BASE_URL}/auth/refresh`,
           {},
@@ -113,6 +111,28 @@ api.interceptors.response.use(
         isRefreshing = false;
       }
     }
+
+    // Handle network errors gracefully
+    if (!error.response) {
+      console.error('Network error:', error.message);
+      // Don't crash the app for network errors
+      return Promise.reject(
+        new Error(
+          'Network connection failed. Please check your internet connection.',
+        ),
+      );
+    }
+
+    // Handle server errors (5xx)
+    if (error.response?.status >= 500) {
+      console.error(
+        'Server error:',
+        error.response.status,
+        error.response.data,
+      );
+      return Promise.reject(new Error('Server error. Please try again later.'));
+    }
+
     return Promise.reject(error);
   },
 );

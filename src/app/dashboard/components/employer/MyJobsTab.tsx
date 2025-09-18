@@ -83,6 +83,7 @@ export default function MyJobsTab() {
       }
 
       // Add filter conditions
+
       if (filterType !== 'all') {
         if (filterType === 'active') {
           conditions.push('status:=:Posted');

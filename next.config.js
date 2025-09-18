@@ -34,7 +34,20 @@ const nextConfig = {
 
   // Optimize images
   images: {
-    domains: ['138.197.105.31'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: '138.197.105.31',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '138.197.105.31',
+        port: '',
+        pathname: '/**',
+      },
+    ],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
