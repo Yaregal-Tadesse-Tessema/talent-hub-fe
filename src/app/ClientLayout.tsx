@@ -9,6 +9,7 @@ import { ToastProvider } from '@/contexts/ToastContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { NavigationProvider } from '@/components/navigation/NavigationProvider';
 import { TutorialProvider } from '@/contexts/TutorialContext';
+import { PostHogProvider, usePageTracking } from '@/contexts/PostHogContext';
 import TutorialOverlay from '@/components/ui/TutorialOverlay';
 import TutorialTrigger from '@/components/ui/TutorialTrigger';
 import { FloatingChatButton } from '@/components/support/FloatingChatButton';
@@ -17,6 +18,12 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 // Memoized component to prevent unnecessary re-renders
 const MemoizedNavbar = React.memo(Navbar);
 const MemoizedFooter = React.memo(Footer);
+
+// Component to handle page tracking
+function PageTrackingWrapper({ children }: { children: React.ReactNode }) {
+  usePageTracking();
+  return <>{children}</>;
+}
 
 export default function ClientLayout({
   children,
@@ -52,19 +59,23 @@ export default function ClientLayout({
       <ThemeProvider>
         <ToastProvider>
           <AuthProvider>
-            <TutorialProvider>
-              <NavigationProvider>
-                <TutorialOverlay>
-                  {layoutConfig.shouldShowNavbar && (
-                    <MemoizedNavbar page='home' />
-                  )}
-                  {children}
-                  {layoutConfig.isHomePage && <MemoizedFooter />}
-                  {/* <TutorialTrigger /> */}
-                  {layoutConfig.shouldShowNavbar && <FloatingChatButton />}
-                </TutorialOverlay>
-              </NavigationProvider>
-            </TutorialProvider>
+            <PostHogProvider>
+              <TutorialProvider>
+                <NavigationProvider>
+                  <TutorialOverlay>
+                    <PageTrackingWrapper>
+                      {layoutConfig.shouldShowNavbar && (
+                        <MemoizedNavbar page='home' />
+                      )}
+                      {children}
+                      {layoutConfig.isHomePage && <MemoizedFooter />}
+                      {/* <TutorialTrigger /> */}
+                      {layoutConfig.shouldShowNavbar && <FloatingChatButton />}
+                    </PageTrackingWrapper>
+                  </TutorialOverlay>
+                </NavigationProvider>
+              </TutorialProvider>
+            </PostHogProvider>
           </AuthProvider>
         </ToastProvider>
       </ThemeProvider>

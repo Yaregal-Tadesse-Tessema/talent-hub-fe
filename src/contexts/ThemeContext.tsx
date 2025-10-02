@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { AnalyticsService } from '@/services/analyticsService';
 
 type Theme = 'light' | 'dark' | 'auto';
 
@@ -65,6 +66,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
     localStorage.setItem('theme', newTheme);
+
+    // Track theme change
+    AnalyticsService.trackDarkModeToggle(newTheme === 'dark');
   };
 
   return (

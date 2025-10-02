@@ -8,6 +8,7 @@ import { EmployerData } from '@/types/employer';
 import { useTheme } from './ThemeContext';
 import { clearAuthData } from '@/utils/auth';
 import { profileService } from '@/services/profileService';
+import { AnalyticsService } from '@/services/analyticsService';
 
 interface User {
   id: string;
@@ -103,6 +104,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           message: 'Login successful! Redirecting...',
         });
 
+        // Track successful login
+        AnalyticsService.trackLogin('employer', 'email');
+
         // Clear any previous tutorial state to ensure fresh tutorial on login
         const tutorialKeys = Object.keys(localStorage).filter(
           (key) =>
@@ -166,6 +170,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           message: 'Login successful!',
         });
 
+        // Track successful login
+        AnalyticsService.trackLogin('employee', 'email');
+
         // Clear any previous tutorial state to ensure fresh tutorial on login
         const tutorialKeys = Object.keys(localStorage).filter(
           (key) =>
@@ -195,6 +202,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         employeeData.message ||
         employerData.message ||
         'Invalid email or password. Please try again.';
+
+      // Track failed login
+      AnalyticsService.trackLoginFailed(email, errorMsg);
+
       showToast({ type: 'error', message: errorMsg });
       return {
         success: false,
@@ -215,6 +226,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
+    // Track logout before clearing user data
+    if (user) {
+      AnalyticsService.trackLogout(user.role);
+    }
+
     setUser(null);
     clearAuthData();
     setTheme('light');

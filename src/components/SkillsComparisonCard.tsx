@@ -20,6 +20,7 @@ import {
   skillsAnalysisService,
   SkillsAnalysisResult,
 } from '@/services/skillsAnalysisService';
+import { AnalyticsService } from '@/services/analyticsService';
 
 interface SkillsComparisonCardProps {
   job: Job;
@@ -53,6 +54,12 @@ export const SkillsComparisonCard: React.FC<SkillsComparisonCardProps> = ({
         job,
       );
       setAnalysis(result);
+
+      // Track skills analysis view
+      AnalyticsService.trackSkillsAnalysisView(
+        job.id,
+        result.overallMatchPercentage,
+      );
     } catch (err) {
       console.error('Error analyzing skills:', err);
       setError('Failed to analyze skills match');
@@ -137,7 +144,17 @@ export const SkillsComparisonCard: React.FC<SkillsComparisonCardProps> = ({
   return (
     <div
       className='p-6 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 border border-purple-200 rounded-lg hover:shadow-lg transition-all duration-300 cursor-pointer group relative overflow-hidden'
-      onClick={() => onViewDetails(analysis)}
+      onClick={() => {
+        if (analysis) {
+          // Track skills analysis details view
+          AnalyticsService.trackSkillsAnalysisDetails(
+            job.id,
+            analysis.missingSkills?.map((s) => s.skill) || [],
+            analysis.matchedSkills?.map((s) => s.skill) || [],
+          );
+          onViewDetails(analysis);
+        }
+      }}
     >
       {/* Background decoration */}
       <div className='absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-200 to-blue-200 rounded-full opacity-20 transform translate-x-8 -translate-y-8'></div>
