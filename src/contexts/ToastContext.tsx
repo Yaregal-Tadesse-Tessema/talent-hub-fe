@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import Toast from '@/components/ui/Toast';
+import SimpleToast from '@/components/ui/SimpleToast';
 
 interface ToastContextType {
   showToast: (options: { type: 'success' | 'error'; message: string }) => void;
@@ -38,7 +38,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={{ showToast }}>
       {children}
       {toast && toast.visible && (
-        <Toast
+        <SimpleToast
           type={toast.type}
           message={toast.message}
           onClose={handleClose}
