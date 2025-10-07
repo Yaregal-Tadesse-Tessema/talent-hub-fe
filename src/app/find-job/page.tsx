@@ -2,7 +2,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
-import { Select } from '@/components/ui/Select';
+import { Select } from '@/components/ui/select';
 import {
   Bookmark,
   ArrowRight,

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { ApplyJobModal } from '@/components/ui/ApplyJobModal';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/badge';
 import {
   Tooltip,
   TooltipContent,

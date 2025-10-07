@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select } from '@/components/ui/Select';
-import { Textarea } from '@/components/ui/Textarea';
+import { Select } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { SkillInput } from '@/components/ui/SkillInput';
 import { TagInput } from '@/components/ui/TagInput';
 import { useToast } from '@/contexts/ToastContext';
