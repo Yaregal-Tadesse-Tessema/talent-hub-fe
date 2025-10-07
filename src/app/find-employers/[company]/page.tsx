@@ -91,13 +91,13 @@ export default function EmployerDetailPage() {
 
     // If it's a relative path, prepend the API base URL
     if (path.startsWith('/')) {
-      const fullUrl = `http://138.197.105.31:3010${path}`;
+      const fullUrl = `http://157.230.227.83:3010${path}`;
       console.log('Relative path detected, prepending API base URL:', fullUrl);
       return fullUrl;
     }
 
     // If it doesn't start with /, prepend the API base URL with /
-    const fullUrl = `http://138.197.105.31:3010/${path}`;
+    const fullUrl = `http://157.230.227.83:3010/${path}`;
     console.log('Path without /, prepending API base URL with /:', fullUrl);
     return fullUrl;
   };

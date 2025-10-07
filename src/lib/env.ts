@@ -53,7 +53,7 @@ export const config = {
   env: env.NODE_ENV,
   publicEnv: env.NEXT_PUBLIC_ENV || env.NODE_ENV,
   api: {
-    url: env.NEXT_PUBLIC_API_URL || 'http://138.197.105.31:3010/api',
+    url: env.NEXT_PUBLIC_API_URL || 'http://157.230.227.83:3010/api',
     timeout: env.NEXT_PUBLIC_API_TIMEOUT || 10000,
   },
   features: {

@@ -28,7 +28,7 @@ export default function ForgotPasswordPage() {
       const origin =
         typeof window !== 'undefined'
           ? window.location.origin
-          : 'http://138.197.105.31:3000';
+          : 'http://157.230.227.83:3000';
 
       const response = await userService.sendPasswordResetEmail({
         email: email,

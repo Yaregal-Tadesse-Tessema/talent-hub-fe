@@ -45,7 +45,7 @@ export default function RootLayout({
           href='https://fonts.gstatic.com'
           crossOrigin='anonymous'
         />
-        <link rel='dns-prefetch' href='//138.197.105.31' />
+        <link rel='dns-prefetch' href='//157.230.227.83' />
       </head>
       <body
         suppressHydrationWarning

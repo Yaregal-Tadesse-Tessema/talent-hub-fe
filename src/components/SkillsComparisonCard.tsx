@@ -150,7 +150,7 @@ export const SkillsComparisonCard: React.FC<SkillsComparisonCardProps> = ({
           AnalyticsService.trackSkillsAnalysisDetails(
             job.id,
             analysis.missingSkills?.map((s) => s.skill) || [],
-            analysis.matchedSkills?.map((s) => s.skill) || [],
+            analysis.matchedSkills || [],
           );
           onViewDetails(analysis);
         }

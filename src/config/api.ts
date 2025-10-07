@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { handleLogout } from '@/utils/auth';
 
-export const API_BASE_URL = 'http://138.197.105.31:3010/api';
+export const API_BASE_URL = 'http://157.230.227.83:3010/api';
 
 // Create axios instance with default config
 export const api = axios.create({
