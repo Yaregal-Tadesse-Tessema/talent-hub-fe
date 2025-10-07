@@ -4,35 +4,38 @@ import { usePostHog } from '@/contexts/PostHogContext';
 export function useFeatureFlags() {
   const { posthog, isLoaded } = usePostHog();
   const [flags, setFlags] = useState<
-    Record<string, boolean | string | undefined>
+    Record<string, boolean | string | number | undefined>
   >({});
 
   useEffect(() => {
     if (isLoaded && posthog) {
-      // Get all feature flags
-      const allFlags = posthog.getAllFlags();
-      setFlags(allFlags);
-
-      // Listen for feature flag updates
+      // PostHog doesn't expose getAllFlags(), so we'll use getFeatureFlag for specific flags
+      // or rely on the bootstrap config
       const handleFlagUpdate = () => {
-        const updatedFlags = posthog.getAllFlags();
-        setFlags(updatedFlags);
+        // Trigger a re-render when flags update
+        setFlags((prev) => ({ ...prev, _updated: Date.now() }));
       };
 
-      posthog.onFeatureFlags(handleFlagUpdate);
+      posthog.onFeatureFlags?.(handleFlagUpdate);
 
       return () => {
-        posthog.off('featureflags', handleFlagUpdate);
+        // Cleanup if needed
       };
     }
   }, [isLoaded, posthog]);
 
   const isFeatureEnabled = (flagKey: string): boolean => {
-    return Boolean(flags[flagKey]);
+    if (posthog) {
+      return posthog.isFeatureEnabled(flagKey) || false;
+    }
+    return false;
   };
 
   const getFeatureFlag = (flagKey: string): boolean | string | undefined => {
-    return flags[flagKey];
+    if (posthog) {
+      return posthog.getFeatureFlag(flagKey);
+    }
+    return undefined;
   };
 
   return {

@@ -63,7 +63,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      // First try employer login
       const employerResponse = await fetch(
         `${API_BASE_URL}/auth/backOffice-login`,
         {

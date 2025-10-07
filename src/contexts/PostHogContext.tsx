@@ -45,7 +45,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
         isFirstTime: user.isFirstTime,
         ...(user.selectedEmployer && {
           employerId: user.selectedEmployer.id,
-          employerName: user.selectedEmployer.name,
+          employerName: user.selectedEmployer.tenantName,
         }),
       });
     } else if (!user && isLoaded) {
