@@ -162,19 +162,19 @@ export default function EmailComposerExample() {
       {/* Email Type Selector */}
       <div className='flex justify-center gap-4 mb-8'>
         <Button
-          variant={emailType === 'simple' ? 'primary' : 'outline'}
+          variant={emailType === 'simple' ? 'default' : 'outline'}
           onClick={() => setEmailType('simple')}
         >
           Simple Email
         </Button>
         <Button
-          variant={emailType === 'full' ? 'primary' : 'outline'}
+          variant={emailType === 'full' ? 'default' : 'outline'}
           onClick={() => setEmailType('full')}
         >
           Full Featured
         </Button>
         <Button
-          variant={emailType === 'template' ? 'primary' : 'outline'}
+          variant={emailType === 'template' ? 'default' : 'outline'}
           onClick={() => setEmailType('template')}
         >
           Template Based

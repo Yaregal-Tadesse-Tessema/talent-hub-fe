@@ -346,7 +346,7 @@ export default function CVParser({ onSave, onCancel, userId }: CVParserProps) {
         <Button
           onClick={handleParseCV}
           disabled={isParsing || !selectedFile}
-          variant='primary'
+          variant='default'
         >
           {isParsing ? (
             <>
@@ -674,7 +674,7 @@ export default function CVParser({ onSave, onCancel, userId }: CVParserProps) {
         <Button
           onClick={handleSaveToProfile}
           disabled={isSaving}
-          variant='primary'
+          variant='default'
         >
           {isSaving ? (
             <>
@@ -703,7 +703,7 @@ export default function CVParser({ onSave, onCancel, userId }: CVParserProps) {
             Review and modify the extracted information before saving
           </p>
         </div>
-        <Button onClick={handleSaveChanges} variant='primary'>
+        <Button onClick={handleSaveChanges} variant='default'>
           <Check size={16} className='mr-2' />
           Save Changes
         </Button>

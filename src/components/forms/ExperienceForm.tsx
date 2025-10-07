@@ -152,7 +152,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
         <Button type='button' variant='outline' onClick={onCancel}>
           Cancel
         </Button>
-        <Button type='submit' variant='primary'>
+        <Button type='submit' variant='default'>
           Save
         </Button>
       </div>

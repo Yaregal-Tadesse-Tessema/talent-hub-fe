@@ -19,12 +19,9 @@ export const initPostHog = () => {
       capture_pageleave: true,
       // Enable session recordings
       session_recording: {
-        enabled: true,
         recordCrossOriginIframes: true,
         maskAllInputs: false, // Set to true for privacy
-        maskInputOptions: {
-          password: true,
-        },
+        maskTextSelector: '[data-mask]',
       },
       // Enable feature flags
       bootstrap: {

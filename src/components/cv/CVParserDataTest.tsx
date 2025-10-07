@@ -133,7 +133,7 @@ export default function CVParserDataTest() {
             <Button
               onClick={handleTestSave}
               disabled={isLoading}
-              variant='primary'
+              variant='default'
               className='px-8 py-3'
             >
               {isLoading ? (

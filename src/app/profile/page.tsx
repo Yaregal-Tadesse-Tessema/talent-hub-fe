@@ -723,7 +723,7 @@ export default function ProfilePage() {
           </Button>
           <Button
             onClick={() => setIsEditing(!isEditing)}
-            variant={isEditing ? 'outline' : 'primary'}
+            variant={isEditing ? 'outline' : 'default'}
             className='flex items-center gap-2'
           >
             {isEditing ? (
@@ -1593,7 +1593,7 @@ export default function ProfilePage() {
               )}
               <div className='text-center'>
                 <Button
-                  variant='primary'
+                  variant='default'
                   onClick={() => {
                     setEduModalEditIndex(null);
                     setEduModalInitial(undefined);
@@ -1783,7 +1783,7 @@ export default function ProfilePage() {
               )}
               <div className='text-center'>
                 <Button
-                  variant='primary'
+                  variant='default'
                   onClick={() => {
                     setExpModalEditIndex(null);
                     setExpModalInitial(undefined);
@@ -2353,7 +2353,7 @@ export default function ProfilePage() {
             <Button
               onClick={handleSave}
               disabled={saving}
-              variant='primary'
+              variant='default'
               className='flex items-center gap-2'
             >
               <Save size={16} />
