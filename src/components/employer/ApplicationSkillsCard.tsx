@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/Badge';
 import {
   TrendingUp,
@@ -128,7 +128,7 @@ export const ApplicationSkillsCard: React.FC<ApplicationSkillsCardProps> = ({
               Analyzing Skills Match
             </h3>
             <p className='text-sm text-gray-600'>
-              AI is comparing candidate's profile with job requirements...
+              AI is comparing candidate&apos;s profile with job requirements...
             </p>
           </div>
         </div>

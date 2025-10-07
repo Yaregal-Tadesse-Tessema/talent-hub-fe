@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/Select';
 import {
   Bookmark,
@@ -24,7 +24,12 @@ import { useToast } from '@/contexts/ToastContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { ShareButton } from '@/components/ui/ShareButton';
 import JobPageSidebar from '@/components/ui/JobPageSidebar';
-import Tooltip from '@/components/ui/Tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 // Helper function to check if a job is expired
 const isJobExpired = (deadline: string): boolean => {
@@ -791,7 +796,7 @@ function FindJobContent() {
                     No saved jobs yet
                   </h3>
                   <p className='text-gray-500 dark:text-gray-400 mb-4'>
-                    Save jobs you're interested in to view them here
+                    Save jobs you&apos;re interested in to view them here
                   </p>
                   <button
                     onClick={() => setActiveTab('all')}
@@ -1091,7 +1096,7 @@ function FindJobContent() {
                     No saved jobs yet
                   </h3>
                   <p className='text-gray-500 dark:text-gray-400 mb-4'>
-                    Save jobs you're interested in to view them here
+                    Save jobs you&apos;re interested in to view them here
                   </p>
                   <button
                     onClick={() => setActiveTab('all')}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/Badge';
 import { jobService } from '@/services/jobService';
 import { useToast } from '@/contexts/ToastContext';
@@ -16,7 +16,12 @@ import {
   Heart,
 } from 'lucide-react';
 import Link from 'next/link';
-import Tooltip from '@/components/ui/Tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export default function SavedJobsTab() {
   const [savedJobs, setSavedJobs] = useState<Job[]>([]);
@@ -249,7 +254,7 @@ export default function SavedJobsTab() {
               No saved jobs yet
             </h3>
             <p className='text-gray-500 dark:text-gray-400 mb-4'>
-              Save jobs you're interested in to view them here
+              Save jobs you&apos;re interested in to view them here
             </p>
             <Link href='/find-job'>
               <Button>Browse Jobs</Button>

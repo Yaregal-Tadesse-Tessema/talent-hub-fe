@@ -20,9 +20,9 @@ import {
   PlayCircle,
   FileText,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/Badge';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 import {
   SkillsAnalysisResult,
   LearningResource,

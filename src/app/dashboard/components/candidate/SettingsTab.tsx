@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/Select';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import JobAlertsTab from './JobAlertsTab';
 import { profileService } from '@/services/profileService';
 import { userService } from '@/services/userService';

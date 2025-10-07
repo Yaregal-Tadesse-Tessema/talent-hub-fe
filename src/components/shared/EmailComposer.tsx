@@ -47,8 +47,8 @@ import TextStyle from '@tiptap/extension-text-style';
 import FontFamily from '@tiptap/extension-font-family';
 import { emailService, EmailRequest } from '@/services/emailService';
 import { useToast } from '@/contexts/ToastContext';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/Select';
 
 export interface EmailTemplate {

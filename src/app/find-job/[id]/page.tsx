@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { notFound, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import {
   Bookmark,
   Mail,
@@ -14,9 +14,14 @@ import {
   Heart,
 } from 'lucide-react';
 import { ApplyJobModal } from '@/components/ui/ApplyJobModal';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/Badge';
-import Tooltip from '@/components/ui/Tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { jobService } from '@/services/jobService';
 import { Job } from '@/types/job';
 import { sanitizeHtml } from '@/utils/sanitize';

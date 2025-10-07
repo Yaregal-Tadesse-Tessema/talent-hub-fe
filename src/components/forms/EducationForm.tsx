@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/Textarea';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Education } from '@/types/profile';
 
 interface EducationFormProps {

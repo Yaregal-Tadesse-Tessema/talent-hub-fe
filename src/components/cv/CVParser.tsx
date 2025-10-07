@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { SkillInput } from '@/components/ui/SkillInput';
@@ -285,7 +285,8 @@ export default function CVParser({ onSave, onCancel, userId }: CVParserProps) {
           Parse Your CV
         </h2>
         <p className='text-gray-600 dark:text-gray-400'>
-          Upload your CV PDF and we'll extract your information automatically
+          Upload your CV PDF and we&apos;ll extract your information
+          automatically
         </p>
       </div>
 
