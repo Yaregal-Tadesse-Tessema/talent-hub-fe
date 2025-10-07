@@ -40,8 +40,8 @@ import TextStyle from '@tiptap/extension-text-style';
 import FontFamily from '@tiptap/extension-font-family';
 import { emailService, EmailRequest } from '@/services/emailService';
 import { useToast } from '@/contexts/ToastContext';
-import { Input } from './Input';
-import { Button } from './Button';
+import { Input } from './input';
+import { Button } from './button';
 
 interface EmailDialogProps {
   open: boolean;

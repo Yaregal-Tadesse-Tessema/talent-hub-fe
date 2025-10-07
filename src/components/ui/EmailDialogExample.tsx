@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { EnvelopeIcon } from '@heroicons/react/24/outline';
 import EmailDialog from './EmailDialog';
-import { Button } from './Button';
+import { Button } from './button';
 
 export default function EmailDialogExample() {
   const [showEmailDialog, setShowEmailDialog] = useState(false);

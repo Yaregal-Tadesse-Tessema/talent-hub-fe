@@ -16,12 +16,6 @@ import {
   Heart,
 } from 'lucide-react';
 import Link from 'next/link';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 
 export default function SavedJobsTab() {
   const [savedJobs, setSavedJobs] = useState<Job[]>([]);
@@ -62,21 +56,21 @@ export default function SavedJobsTab() {
           preScreeningQuestions: [],
           companyLogo: savedJob.jobPosting.companyLogo
             ? {
-                filename: '',
-                path: savedJob.jobPosting.companyLogo,
-                originalname: '',
-                mimetype: 'image/*',
-                size: 0,
-                bucketName: '',
-              }
+              filename: '',
+              path: savedJob.jobPosting.companyLogo,
+              originalname: '',
+              mimetype: 'image/*',
+              size: 0,
+              bucketName: '',
+            }
             : {
-                filename: '',
-                path: '',
-                originalname: '',
-                mimetype: '',
-                size: 0,
-                bucketName: '',
-              },
+              filename: '',
+              path: '',
+              originalname: '',
+              mimetype: '',
+              size: 0,
+              bucketName: '',
+            },
           jobPostRequirement: savedJob.jobPosting.jobPostRequirement || [],
           experienceLevel: savedJob.jobPosting.experienceLevel || '',
           fieldOfStudy: savedJob.jobPosting.fieldOfStudy || '',
@@ -287,42 +281,33 @@ export default function SavedJobsTab() {
                         </div>
                       </div>
                       <div className='flex items-center gap-2 ml-4'>
-                        <Tooltip
-                          content={
+                        <button
+                          onClick={() =>
+                            job.isFavorited
+                              ? handleUnfavoriteJob(job.id)
+                              : handleFavoriteJob(job.id)
+                          }
+                          title={
                             job.isFavorited
                               ? 'Remove from favorites'
                               : 'Add to favorites'
                           }
-                          position='top'
-                        >
-                          <button
-                            onClick={() =>
-                              job.isFavorited
-                                ? handleUnfavoriteJob(job.id)
-                                : handleFavoriteJob(job.id)
-                            }
-                            className={`p-2 rounded-lg transition-colors ${
-                              job.isFavorited
-                                ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30'
-                                : 'text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                          className={`p-2 rounded-lg transition-colors ${job.isFavorited
+                              ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30'
+                              : 'text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                             }`}
-                          >
-                            <Heart
-                              className={`w-4 h-4 ${job.isFavorited ? 'fill-current' : ''}`}
-                            />
-                          </button>
-                        </Tooltip>
-                        <Tooltip
-                          content='Remove from saved jobs'
-                          position='top'
                         >
-                          <button
-                            onClick={() => handleUnsaveJob(job.id)}
-                            className='text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors p-2'
-                          >
-                            <Bookmark className='w-4 h-4 fill-current' />
-                          </button>
-                        </Tooltip>
+                          <Heart
+                            className={`w-4 h-4 ${job.isFavorited ? 'fill-current' : ''}`}
+                          />
+                        </button>
+                        <button
+                          title='Remove from saved jobs'
+                          onClick={() => handleUnsaveJob(job.id)}
+                          className='text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors p-2'
+                        >
+                          <Bookmark className='w-4 h-4 fill-current' />
+                        </button>
                       </div>
                     </div>
 

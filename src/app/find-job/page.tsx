@@ -24,12 +24,6 @@ import { useToast } from '@/contexts/ToastContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { ShareButton } from '@/components/ui/ShareButton';
 import JobPageSidebar from '@/components/ui/JobPageSidebar';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 
 // Helper function to check if a job is expired
 const isJobExpired = (deadline: string): boolean => {
@@ -1040,15 +1034,12 @@ function FindJobContent() {
 
                         <div className='flex items-center gap-1'>
                           {user && (
-                            <Tooltip
-                              content={
+                            <button
+                              title={
                                 job.isSaved
                                   ? 'Remove from saved jobs'
                                   : 'Save job'
                               }
-                              position='top'
-                            >
-                              <button
                                 className={`p-2 rounded-lg transition-all duration-200 ${
                                   job.isSaved
                                     ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
@@ -1064,7 +1055,6 @@ function FindJobContent() {
                                   className={`w-4 h-4 ${job.isSaved ? 'fill-current' : ''}`}
                                 />
                               </button>
-                            </Tooltip>
                           )}
 
                           <div className='opacity-0 group-hover:opacity-100 transition-opacity duration-200'>
@@ -1154,15 +1144,12 @@ function FindJobContent() {
                                     {job.employmentType}
                                   </span>
                                   {user && (
-                                    <Tooltip
-                                      content={
+                                    <button
+                                      title={
                                         job.isSaved
                                           ? 'Remove from saved jobs'
                                           : 'Save job'
                                       }
-                                      position='top'
-                                    >
-                                      <button
                                         className={`p-0.5 rounded transition-all duration-200 ${
                                           job.isSaved
                                             ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
@@ -1178,7 +1165,6 @@ function FindJobContent() {
                                           className={`w-4 h-4 ${job.isSaved ? 'fill-current' : ''}`}
                                         />
                                       </button>
-                                    </Tooltip>
                                   )}
                                 </div>
                               )}

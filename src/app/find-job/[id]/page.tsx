@@ -16,12 +16,6 @@ import {
 import { ApplyJobModal } from '@/components/ui/ApplyJobModal';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { jobService } from '@/services/jobService';
 import { Job } from '@/types/job';
 import { sanitizeHtml } from '@/utils/sanitize';
@@ -310,56 +304,48 @@ export default function JobDetailsPage({
                   <div className='flex items-center gap-2 w-full lg:justify-end'>
                     {userData && (
                       <>
-                        <Tooltip
-                          content={
+                        <Button
+                          variant='outline'
+                          size='sm'
+                          title={
                             job.isFavorited
                               ? 'Remove from favorites'
                               : 'Add to favorites'
                           }
-                          position='top'
+                          className={`h-10 px-3 border-gray-200 hover:border-red-300 transition-colors ${
+                            job.isFavorited
+                              ? 'text-red-600 bg-red-50 border-red-200'
+                              : 'text-gray-500 hover:text-red-600 hover:bg-red-50'
+                          }`}
+                          onClick={() =>
+                            job.isFavorited
+                              ? handleUnfavoriteJob()
+                              : handleFavoriteJob()
+                          }
                         >
-                          <Button
-                            variant='outline'
-                            size='sm'
-                            className={`h-10 px-3 border-gray-200 hover:border-red-300 transition-colors ${
-                              job.isFavorited
-                                ? 'text-red-600 bg-red-50 border-red-200'
-                                : 'text-gray-500 hover:text-red-600 hover:bg-red-50'
-                            }`}
-                            onClick={() =>
-                              job.isFavorited
-                                ? handleUnfavoriteJob()
-                                : handleFavoriteJob()
-                            }
-                          >
-                            <Heart
-                              className={`w-4 h-4 ${job.isFavorited ? 'fill-current' : ''}`}
-                            />
-                          </Button>
-                        </Tooltip>
-                        <Tooltip
-                          content={
+                          <Heart
+                            className={`w-4 h-4 ${job.isFavorited ? 'fill-current' : ''}`}
+                          />
+                        </Button>
+                        <Button
+                          variant='outline'
+                          size='sm'
+                          title={
                             job.isSaved ? 'Remove from saved jobs' : 'Save job'
                           }
-                          position='top'
+                          className={`h-10 px-3 border-gray-200 hover:border-blue-300 transition-colors ${
+                            job.isSaved
+                              ? 'text-blue-600 bg-blue-50 border-blue-200'
+                              : 'text-gray-500 hover:text-blue-600 hover:bg-blue-50'
+                          }`}
+                          onClick={() =>
+                            job.isSaved ? handleUnsaveJob() : handleSaveJob()
+                          }
                         >
-                          <Button
-                            variant='outline'
-                            size='sm'
-                            className={`h-10 px-3 border-gray-200 hover:border-blue-300 transition-colors ${
-                              job.isSaved
-                                ? 'text-blue-600 bg-blue-50 border-blue-200'
-                                : 'text-gray-500 hover:text-blue-600 hover:bg-blue-50'
-                            }`}
-                            onClick={() =>
-                              job.isSaved ? handleUnsaveJob() : handleSaveJob()
-                            }
-                          >
-                            <Bookmark
-                              className={`w-4 h-4 ${job.isSaved ? 'fill-current' : ''}`}
-                            />
-                          </Button>
-                        </Tooltip>
+                          <Bookmark
+                            className={`w-4 h-4 ${job.isSaved ? 'fill-current' : ''}`}
+                          />
+                        </Button>
                       </>
                     )}
 
