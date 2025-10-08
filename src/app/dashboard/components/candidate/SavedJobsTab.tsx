@@ -56,21 +56,21 @@ export default function SavedJobsTab() {
           preScreeningQuestions: [],
           companyLogo: savedJob.jobPosting.companyLogo
             ? {
-              filename: '',
-              path: savedJob.jobPosting.companyLogo,
-              originalname: '',
-              mimetype: 'image/*',
-              size: 0,
-              bucketName: '',
-            }
+                filename: '',
+                path: savedJob.jobPosting.companyLogo,
+                originalname: '',
+                mimetype: 'image/*',
+                size: 0,
+                bucketName: '',
+              }
             : {
-              filename: '',
-              path: '',
-              originalname: '',
-              mimetype: '',
-              size: 0,
-              bucketName: '',
-            },
+                filename: '',
+                path: '',
+                originalname: '',
+                mimetype: '',
+                size: 0,
+                bucketName: '',
+              },
           jobPostRequirement: savedJob.jobPosting.jobPostRequirement || [],
           experienceLevel: savedJob.jobPosting.experienceLevel || '',
           fieldOfStudy: savedJob.jobPosting.fieldOfStudy || '',
@@ -292,10 +292,11 @@ export default function SavedJobsTab() {
                               ? 'Remove from favorites'
                               : 'Add to favorites'
                           }
-                          className={`p-2 rounded-lg transition-colors ${job.isFavorited
+                          className={`p-2 rounded-lg transition-colors ${
+                            job.isFavorited
                               ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30'
                               : 'text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-                            }`}
+                          }`}
                         >
                           <Heart
                             className={`w-4 h-4 ${job.isFavorited ? 'fill-current' : ''}`}
