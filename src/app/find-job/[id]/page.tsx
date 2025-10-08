@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { notFound, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import {
   Bookmark,
   Mail,

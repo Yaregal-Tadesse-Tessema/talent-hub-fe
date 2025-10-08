@@ -41,7 +41,7 @@ import FontFamily from '@tiptap/extension-font-family';
 import { emailService, EmailRequest } from '@/services/emailService';
 import { useToast } from '@/contexts/ToastContext';
 import { Input } from './input';
-import { Button } from './button';
+import { Button } from './Button';
 
 interface EmailDialogProps {
   open: boolean;

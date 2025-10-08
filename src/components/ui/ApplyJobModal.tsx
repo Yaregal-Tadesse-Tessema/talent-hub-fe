@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from './button';
+import { Button } from './Button';
 import { X, Link as LinkIcon } from 'lucide-react';
 import { useToast } from '@/contexts/ToastContext';
 import { useRouter } from 'next/navigation';

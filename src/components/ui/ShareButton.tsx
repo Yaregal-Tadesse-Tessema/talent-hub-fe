@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Button } from './button';
+import { Button } from './Button';
 import {
   Share2,
   Linkedin,
